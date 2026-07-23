@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שיפוצים והנדימן פלג — תל אביב-יפו</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --dark: #1c2b26;
+    --accent: #b8843e;
+    --bg: #f7f4ef;
+    --white: #ffffff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    direction: rtl;
+    line-height: 1.6;
+  }
+  img{max-width:100%;display:block;}
+  .container{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Buttons */
+  .btn-row{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:16px 32px;
+    border-radius:8px;
+    font-size:18px;
+    font-weight:700;
+    text-decoration:none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn:hover{transform: translateY(-2px);}
+  .btn-primary{
+    background: var(--accent);
+    color: var(--white);
+    box-shadow: 0 8px 20px rgba(184,132,62,0.35);
+  }
+  .btn-outline-dark{
+    background: transparent;
+    border: 2px solid var(--dark);
+    color: var(--dark);
+  }
+  .btn-outline-light{
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.7);
+    color: var(--white);
+  }
+
+  /* Hero */
+  .hero{
+    background: linear-gradient(160deg, #1c2b26 0%, #2c4038 100%);
+    color: var(--white);
+    padding: 90px 0 80px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-60px;
+    right:-60px;
+    width:280px;
+    height:280px;
+    background: rgba(184,132,62,0.15);
+    border-radius:50%;
+  }
+  .hero .kicker{
+    color: var(--accent);
+    font-weight:700;
+    letter-spacing:1px;
+    font-size:16px;
+    margin-bottom:18px;
+    display:inline-block;
+    border:1px solid rgba(184,132,62,0.5);
+    padding:6px 18px;
+    border-radius:30px;
+  }
+  .hero h1{
+    font-size: 42px;
+    font-weight:900;
+    max-width:800px;
+    margin: 0 auto 22px;
+    line-height:1.3;
+  }
+  .hero .sub{
+    font-size:19px;
+    color:#e4e4e0;
+    max-width:640px;
+    margin: 0 auto 40px;
+  }
+  .hero .btn-row{justify-content:center;}
+
+  /* Trust bar */
+  .trust-bar{
+    background: var(--white);
+    padding: 26px 0;
+    border-bottom: 1px solid #e6e1d8;
+  }
+  .trust-bar .container{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+    text-align:center;
+  }
+  .stars{
+    color: var(--accent);
+    font-size:22px;
+    letter-spacing:2px;
+  }
+  .trust-bar .rating-text{
+    font-weight:700;
+    font-size:18px;
+  }
+  .trust-bar .rating-sub{
+    color:#6b6b63;
+    font-size:15px;
+  }
+
+  /* About/Services */
+  .section{
+    padding: 90px 0;
+  }
+  .section-title{
+    font-size:32px;
+    font-weight:900;
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .section-sub{
+    text-align:center;
+    max-width:640px;
+    margin: 0 auto 56px;
+    color:#4d4d47;
+    font-size:17px;
+  }
+  .about-grid{
+    display:grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items:center;
+  }
+  .about-text p{
+    font-size:17px;
+    margin-bottom:18px;
+    color:#33332e;
+  }
+  .about-text p strong{
+    color: var(--dark);
+  }
+  .services-list{
+    background: var(--white);
+    border-radius:14px;
+    padding: 36px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+  }
+  .services-list ul{
+    list-style:none;
+  }
+  .services-list li{
+    padding: 14px 0;
+    border-bottom: 1px solid #eee7da;
+    font-size:17px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .services-list li:last-child{border-bottom:none;}
+  .services-list li::before{
+    content:"✓";
+    background: var(--accent);
+    color:#fff;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    flex-shrink:0;
+  }
+
+  /* Reviews */
+  .reviews-section{
+    background: var(--dark);
+    color:#fff;
+    padding: 90px 0;
+  }
+  .reviews-section .section-title{color:#fff;}
+  .reviews-section .section-sub{color:#c9d0cb;}
+  .reviews-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .review-card{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius:14px;
+    padding: 28px;
+  }
+  .review-card .stars{
+    color: var(--accent);
+    font-size:18px;
+    margin-bottom:12px;
+  }
+  .review-card p{
+    font-size:16px;
+    margin-bottom:16px;
+    color:#eceee9;
+  }
+  .review-card .author{
+    font-weight:700;
+    font-size:15px;
+    color: var(--accent);
+  }
+
+  /* Contact */
+  .contact-section{
+    padding: 90px 0;
+    text-align:center;
+  }
+  .contact-details{
+    display:flex;
+    justify-content:center;
+    gap:48px;
+    flex-wrap:wrap;
+    margin: 40px 0 44px;
+  }
+  .contact-item{
+    text-align:center;
+  }
+  .contact-item .label{
+    font-size:14px;
+    color:#7a7a72;
+    margin-bottom:6px;
+    font-weight:500;
+  }
+  .contact-item .value{
+    font-size:20px;
+    font-weight:700;
+    color: var(--dark);
+  }
+  .contact-item a{
+    color: var(--dark);
+    text-decoration:none;
+  }
+  .contact-section .btn-row{justify-content:center;}
+
+  /* Footer */
+  footer{
+    background:#141f1b;
+    color:#a9b3ac;
+    text-align:center;
+    padding: 34px 0;
+    font-size:14px;
+  }
+  footer strong{color:#fff;}
+
+  @media (max-width: 800px){
+    .hero h1{font-size:30px;}
+    .about-grid{grid-template-columns:1fr;}
+    .reviews-grid{grid-template-columns:1fr;}
+    .contact-details{gap:26px;}
+    .section{padding:64px 0;}
+    .hero{padding:64px 0 56px;}
+    .btn{width:100%;}
+    .btn-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <span class="kicker">שיפוצים והנדימן פלג · תל אביב-יפו</span>
+      <h1>תקוע עם תיקון שדוחים כבר שבועיים? זה נגמר היום</h1>
+      <p class="sub">קרמיקה שנסדקה, ברז שדולף, דלת שנתקעת — כל בעיה קטנה שנשארת בלי טיפול הופכת לבעיה יקרה יותר. פלג מגיע, מאבחן בעין ומטפל באותו ביקור, בלי הבטחות סרק.</p>
+      <div class="btn-row">
+        <a href="tel:+972503113440" class="btn btn-primary">התקשרו עכשיו — עונים תוך דקות</a>
+        <a href="https://wa.me/972503113440" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <div class="container">
+      <span class="stars">★★★★★</span>
+      <span class="rating-text">5.0 מתוך 5</span>
+      <span class="rating-sub">— כל הביקורות בגוגל חמישה כוכבים</span>
+    </div>
+  </div>
+
+  <!-- ABOUT / SERVICES -->
+  <section class="section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <p><strong>לא כל תיקון צריך שבוע של תיאומים ואיש מקצוע שלא חוזר לטלפונים.</strong> פלג עובד בתל אביב-יפו ומטפל בעבודות הנדימן והשיפוצים שדוחים אותן כי אין זמן למצוא מישהו אמין — עד שהמצב מחמיר.</p>
+          <p>נצן בן נון כתב על ההדבקה החדשה של קרמיקה במקלחת שלו: <strong>"מדוייק מקצועי ואמין"</strong> — בדיוק ההבדל בין תיקון שנראה תיקון, לתיקון שאי אפשר לזהות שהיה שם בעיה.</p>
+          <p>גם כשמדובר בכמה תקלות קטנות בבת אחת — גלית לוקר תיארה את זה כ"אדיב, שרותי וזריז", ונעה סברלו ומשה מויאל ציינו את אותו הדבר: מחיר הוגן, בלי הפתעות בסוף.</p>
+        </div>
+        <div class="services-list">
+          <ul>
+            <li>ריצוף וחיפוי קרמיקה</li>
+            <li>תיקוני אינסטלציה קטנים</li>
+            <li>תיקון ותחזוקת דלתות וחלונות</li>
+            <li>עבודות גבס וצבע</li>
+            <li>הרכבת ארונות ורהיטים</li>
+            <li>שיפוצים כלליים בדירה</li>
+            <li>עבודות הנדימן שוטפות</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="reviews-section">
+    <div class="container">
+      <h2 class="section-title">מה אומרים עלינו</h2>
+      <p class="section-sub">ביקורות אמיתיות בגוגל, כולן 5 כוכבים</p>
+      <div class="reviews-grid">
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"הדבקת קרמיקה חדשה במקלחת על קרמיקה קיימת, מדוייק מקצועי ואמין."</p>
+          <div class="author">Nitzan Ben nun</div>
+        </div>
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"פלג היה אדיב, שרותי וזריז. פתר לי כמה תקלות קטנות בקלות ובזריזות. ממליצה בחום."</p>
+          <div class="author">galit locker</div>
+        </div>
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"שירות מעולה, בחור אמין והמחיר הוגן ממליצה בחום ❤️"</p>
+          <div class="author">נעה סברלו</div>
+        </div>
+        <div class="review-card">
+          <div class="stars">★★★★★</div>
+          <p>"שירות מעולה ומחירים הגיוניים תודה"</p>
+          <div class="author">משה מויאל</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section">
+    <div class="container">
+      <h2 class="section-title">בואו נסגור את זה עכשיו</h2>
+      <p class="section-sub">התקשרו או שלחו הודעה — פלג עונה תוך דקות ומתאם ביקור שמתאים לכם.</p>
+      <div class="contact-details">
+        <div class="contact-item">
+          <div class="label">טלפון</div>
+          <div class="value"><a href="tel:+972503113440">050-311-3440</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="label">כתובת</div>
+          <div class="value">ארבע ארצות 5, תל אביב-יפו</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <a href="tel:+972503113440" class="btn btn-primary">התקשרו עכשיו — עונים תוך דקות</a>
+        <a href="https://wa.me/972503113440" target="_blank" rel="noopener" class="btn btn-outline-dark">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>שיפוצים והנדימן פלג</strong> — קבלן בניין, ארבע ארצות 5, תל אביב-יפו</p>
+      <p>050-311-3440</p>
+    </div>
+  </footer>
+
+</body>
+</html>

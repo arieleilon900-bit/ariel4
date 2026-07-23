@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>גינון טבעי שירוק גננים | תל אביב-יפו</title>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green-dark: #2e4632;
+    --green-mid: #4c7a4f;
+    --sand: #f7f4ee;
+    --white: #ffffff;
+    --text: #2b2b28;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Assistant', sans-serif;
+    color: var(--text);
+    background: var(--sand);
+    line-height: 1.6;
+  }
+  h1, h2, h3 {
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+  img { max-width: 100%; display: block; }
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Buttons */
+  .cta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 32px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-2px); }
+
+  .btn-primary {
+    background: var(--green-mid);
+    color: var(--white);
+    box-shadow: 0 6px 18px rgba(76, 122, 79, 0.35);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 22px rgba(76, 122, 79, 0.45); }
+
+  .btn-outline-light {
+    background: transparent;
+    color: var(--white);
+    border: 2px solid var(--white);
+  }
+  .btn-outline-light:hover { background: rgba(255,255,255,0.12); }
+
+  .btn-outline-dark {
+    background: transparent;
+    color: var(--green-dark);
+    border: 2px solid var(--green-dark);
+  }
+  .btn-outline-dark:hover { background: rgba(46,70,50,0.08); }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(160deg, var(--green-dark) 0%, #3c5c40 55%, var(--green-mid) 100%);
+    color: var(--white);
+    padding: 110px 0 90px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -60px;
+    left: -60px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 20px;
+  }
+  .hero p.sub {
+    font-size: 1.2rem;
+    margin-bottom: 36px;
+    color: #eef2ea;
+    max-width: 600px;
+  }
+
+  /* Sections */
+  section {
+    padding: 90px 0;
+  }
+  .section-title {
+    font-size: clamp(1.7rem, 3.5vw, 2.4rem);
+    font-weight: 900;
+    color: var(--green-dark);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .section-sub {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 56px;
+    font-size: 1.1rem;
+    color: #52584f;
+  }
+
+  /* About */
+  .about {
+    background: var(--white);
+  }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+  }
+  .about-text p {
+    font-size: 1.08rem;
+    margin-bottom: 20px;
+    color: #3c3c38;
+  }
+  .about-visual {
+    background: linear-gradient(135deg, #dbe7d6, #f0f4ec);
+    border-radius: 18px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .feature-icon {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+  .feature-item h3 {
+    font-size: 1.1rem;
+    color: var(--green-dark);
+    margin-bottom: 4px;
+  }
+  .feature-item p {
+    font-size: 0.98rem;
+    color: #4a4f45;
+  }
+
+  /* Rating */
+  .rating-section {
+    background: var(--sand);
+    text-align: center;
+  }
+  .stars {
+    font-size: 2.4rem;
+    color: #e0a419;
+    letter-spacing: 6px;
+    margin-bottom: 16px;
+  }
+  .rating-big {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--green-dark);
+    font-family: 'Frank Ruhl Libre', serif;
+  }
+  .rating-text {
+    font-size: 1.2rem;
+    color: #4a4f45;
+    margin-top: 6px;
+  }
+
+  /* Testimonials */
+  .testimonials {
+    background: var(--white);
+  }
+  .testimonial-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .testimonial-card {
+    background: var(--sand);
+    border-radius: 16px;
+    padding: 36px;
+    position: relative;
+  }
+  .testimonial-card .stars-small {
+    color: #e0a419;
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+    letter-spacing: 3px;
+  }
+  .testimonial-card p.quote {
+    font-size: 1.12rem;
+    color: #2f332c;
+    margin-bottom: 18px;
+    font-style: italic;
+  }
+  .testimonial-card .author {
+    font-weight: 700;
+    color: var(--green-dark);
+  }
+
+  /* Contact */
+  .contact {
+    background: linear-gradient(160deg, var(--green-dark) 0%, #3c5c40 100%);
+    color: var(--white);
+    text-align: center;
+  }
+  .contact .section-title { color: var(--white); }
+  .contact-details {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    margin: 40px 0 44px;
+    font-size: 1.15rem;
+  }
+  .contact-details div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .contact-details a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .contact .cta-row {
+    justify-content: center;
+  }
+
+  /* Footer */
+  footer {
+    background: #1f2e21;
+    color: #cfd7c9;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 760px) {
+    .about-grid, .testimonial-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero { padding: 90px 0 70px; text-align: center; }
+    .hero-content { margin: 0 auto; }
+    .hero p.sub { margin-left: auto; margin-right: auto; }
+    .cta-row { justify-content: center; }
+    section { padding: 64px 0; }
+    .contact-details { gap: 20px; flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="container hero-content">
+      <span class="hero-badge">⭐ 5 מתוך 5 בגוגל</span>
+      <h1>הגינה שלכם נראית מוזנחת יותר בכל ביקור בחצר?</h1>
+      <p class="sub">כל יום שעובר עם עשבייה מתפרעת ודשא צהוב הוא יום שהחצר שלכם נראית פחות שלכם. גינון טבעי שירוק גננים מקימים ומתחזקים גינות בתל אביב-יפו, ולפי הלקוחות שכתבו לנו — עם שירות שגורם להם לחזור.</p>
+      <div class="cta-row">
+        <a href="tel:+972542308014" class="btn btn-primary">התקשרו עכשיו — עונים תוך דקות</a>
+        <a href="https://wa.me/972542308014" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ABOUT -->
+  <section class="about">
+    <div class="container">
+      <h2 class="section-title">גינה שמישהו שמבין בה מטפל בה</h2>
+      <p class="section-sub">מהקמת גינה מאפס ועד תחזוקה שוטפת — הכל בליווי אחד, בלי שתצטרכו לרדוף אחרי אף אחד.</p>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>גינה לא נראית טוב לבד. היא צריכה מישהו שמגיע בזמן, יודע מה לגזום ומתי, ולא משאיר אתכם עם שאלות אחרי שהוא עוזב. יובל שושן, אחד הלקוחות שלנו, כתב שהקמנו לו "גינה יפהפיה" — וזה בדיוק מה שאנחנו מכוונים אליו בכל פרויקט, לא רק בגינה אחת מוצלחת אחת.</p>
+          <p>אצלנו זה לא נגמר ביום שהגינה מוקמת. אלירן חיאט, לקוח נוסף, כתב שהעלות-תועלת אצלנו "מעולה לפרוייקטים ולתחזוקה שוטפת" — מה שאומר שגם אחרי שהגינה מוכנה, אנחנו ממשיכים לשמור עליה בשבילכם, לא נעלמים אחרי החשבונית.</p>
+        </div>
+        <div class="about-visual">
+          <div class="feature-item">
+            <div class="feature-icon">🌿</div>
+            <div>
+              <h3>הקמת גינות מאפס</h3>
+              <p>תכנון, נטיעה והקמה מלאה של גינה חדשה — מהאדמה החשופה ועד הגמר הירוק.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">✂️</div>
+            <div>
+              <h3>תחזוקה שוטפת</h3>
+              <p>גיזום, השקיה וטיפול קבוע שמונע מהגינה לחזור להיראות מוזנחת.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📍</div>
+            <div>
+              <h3>עובדים בתל אביב-יפו</h3>
+              <p>מגיעים אליכם עם הכלים והידע, ברחוב גונן 14 ובסביבה.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RATING -->
+  <section class="rating-section">
+    <div class="container">
+      <div class="stars">★★★★★</div>
+      <div class="rating-big">5.0</div>
+      <p class="rating-text">מתוך 5 בגוגל — כל הביקורות חמישה כוכבים</p>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="container">
+      <h2 class="section-title">מה אומרים מי שהזמינו אותנו</h2>
+      <p class="section-sub">בלי מילים שלנו על עצמנו — רק מה שכתבו הלקוחות עצמם.</p>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="stars-small">★★★★★</div>
+          <p class="quote">"הקימו לי גינה יפהפיה, השירות היה מעולה ומקצועי"</p>
+          <div class="author">יובל שושן</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="stars-small">★★★★★</div>
+          <p class="quote">"שירות איכותי, עלות תועלת מעולה לפרוייקטים ולתחזוקה שוטפת."</p>
+          <div class="author">Eliran Hayat</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact">
+    <div class="container">
+      <h2 class="section-title">רוצים גינה שתמשיך להיראות כמו ביום שהוקמה?</h2>
+      <p class="section-sub" style="color:#e4e9df;">התקשרו עכשיו או שלחו הודעה בוואטסאפ — נקבע ביקור בגינה ונגיד לכם בדיוק מה צריך.</p>
+      <div class="contact-details">
+        <div><a href="tel:+972542308014">054-230-8014</a></div>
+        <div>גונן 14, תל אביב-יפו</div>
+      </div>
+      <div class="cta-row">
+        <a href="tel:+972542308014" class="btn btn-primary">התקשרו עכשיו — עונים תוך דקות</a>
+        <a href="https://wa.me/972542308014" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>גינון טבעי שירוק גננים · גונן 14, תל אביב-יפו · 054-230-8014</p>
+    </div>
+  </footer>
+
+</body>
+</html>

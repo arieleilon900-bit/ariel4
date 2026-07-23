@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מכבסת המילניום — כביסה נקייה, בלי לבזבז את היום שלכם | אלנבי 26, תל אביב</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1d3557;
+    --teal:#2a9d8f;
+    --bg:#f7f9f9;
+    --white:#ffffff;
+    --text:#233142;
+    --muted:#5c6b73;
+    --space-1:8px;
+    --space-2:16px;
+    --space-3:24px;
+    --space-4:40px;
+    --space-5:64px;
+    --space-6:96px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Assistant', sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+  }
+  img{max-width:100%;display:block;}
+  a{text-decoration:none;}
+
+  .container{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 var(--space-3);
+  }
+
+  /* HERO */
+  .hero{
+    background:linear-gradient(160deg, var(--navy) 0%, #14273f 100%);
+    color:var(--white);
+    padding:var(--space-6) var(--space-3) var(--space-5);
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute;
+    bottom:-60px;
+    right:-60px;
+    width:260px;
+    height:260px;
+    background:radial-gradient(circle, rgba(42,157,143,0.25) 0%, transparent 70%);
+  }
+  .hero .brand{
+    font-size:1.1rem;
+    letter-spacing:1px;
+    color:#9fd8d0;
+    font-weight:600;
+    margin-bottom:var(--space-2);
+    text-transform:uppercase;
+  }
+  .hero h1{
+    font-size:2.5rem;
+    font-weight:800;
+    max-width:820px;
+    margin:0 auto var(--space-3);
+    line-height:1.35;
+  }
+  .hero p.sub{
+    font-size:1.2rem;
+    color:#dbe4ea;
+    max-width:640px;
+    margin:0 auto var(--space-4);
+    font-weight:500;
+  }
+  .cta-row{
+    display:flex;
+    gap:var(--space-2);
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .btn{
+    display:inline-block;
+    padding:16px 32px;
+    border-radius:10px;
+    font-size:1.1rem;
+    font-weight:700;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{
+    background:var(--teal);
+    color:var(--white);
+    box-shadow:0 8px 20px rgba(42,157,143,0.35);
+  }
+  .btn-outline-dark{
+    background:transparent;
+    color:var(--white);
+    border:2px solid var(--white);
+  }
+  .btn-outline-light{
+    background:transparent;
+    color:var(--navy);
+    border:2px solid var(--navy);
+  }
+  .btn-primary-onlight{
+    background:var(--teal);
+    color:var(--white);
+    box-shadow:0 8px 20px rgba(42,157,143,0.25);
+  }
+
+  /* SECTIONS GENERIC */
+  section{
+    padding:var(--space-6) 0;
+  }
+  .section-title{
+    font-size:2rem;
+    font-weight:800;
+    color:var(--navy);
+    text-align:center;
+    margin-bottom:var(--space-2);
+  }
+  .section-sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:1.1rem;
+    max-width:620px;
+    margin:0 auto var(--space-5);
+  }
+
+  /* ABOUT */
+  .about{
+    background:var(--white);
+  }
+  .about-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:var(--space-5);
+    align-items:center;
+  }
+  .about-text p{
+    font-size:1.1rem;
+    margin-bottom:var(--space-3);
+    color:var(--text);
+  }
+  .about-text p:last-child{margin-bottom:0;}
+  .feature-list{
+    list-style:none;
+    display:flex;
+    flex-direction:column;
+    gap:var(--space-2);
+  }
+  .feature-list li{
+    background:var(--bg);
+    border-radius:10px;
+    padding:var(--space-3);
+    font-weight:600;
+    font-size:1.05rem;
+    border-right:4px solid var(--teal);
+  }
+
+  /* RATING */
+  .rating{
+    background:var(--navy);
+    color:var(--white);
+    text-align:center;
+  }
+  .rating .stars{
+    font-size:2.8rem;
+    color:#ffc94d;
+    letter-spacing:6px;
+    margin-bottom:var(--space-2);
+  }
+  .rating .score{
+    font-size:2.2rem;
+    font-weight:800;
+    margin-bottom:var(--space-1);
+  }
+  .rating .count{
+    font-size:1.15rem;
+    color:#c9d6df;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials{
+    background:var(--bg);
+  }
+  .test-grid{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:var(--space-3);
+    max-width:800px;
+    margin:0 auto;
+  }
+  .test-card{
+    background:var(--white);
+    border-radius:14px;
+    padding:var(--space-4);
+    box-shadow:0 6px 24px rgba(0,0,0,0.06);
+  }
+  .test-card .stars{
+    color:#ffc94d;
+    font-size:1.3rem;
+    margin-bottom:var(--space-2);
+  }
+  .test-card p.quote{
+    font-size:1.15rem;
+    font-style:italic;
+    color:var(--text);
+    margin-bottom:var(--space-2);
+  }
+  .test-card .author{
+    font-weight:700;
+    color:var(--navy);
+  }
+
+  /* CONTACT */
+  .contact{
+    background:linear-gradient(160deg, var(--navy) 0%, #14273f 100%);
+    color:var(--white);
+    text-align:center;
+  }
+  .contact .section-title{color:var(--white);}
+  .contact-details{
+    display:flex;
+    flex-direction:column;
+    gap:var(--space-2);
+    align-items:center;
+    margin-bottom:var(--space-4);
+    font-size:1.15rem;
+  }
+  .contact-details a{
+    color:var(--white);
+    font-weight:700;
+  }
+  .contact-details .addr{color:#dbe4ea;}
+
+  /* FOOTER */
+  footer{
+    background:#0f1f33;
+    color:#9fb0bc;
+    text-align:center;
+    padding:var(--space-3);
+    font-size:0.95rem;
+  }
+  footer strong{color:#dbe4ea;}
+
+  @media (max-width:720px){
+    .hero h1{font-size:1.8rem;}
+    .hero p.sub{font-size:1.05rem;}
+    .about-grid{grid-template-columns:1fr;gap:var(--space-4);}
+    .test-grid{grid-template-columns:1fr;}
+    .section-title{font-size:1.6rem;}
+    .btn{width:100%;text-align:center;}
+    .cta-row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="brand">מכבסת המילניום · אלנבי 26, תל אביב-יפו</div>
+      <h1>ערימת כביסה שלא מפסיקה לגדול? תשאירו לנו לטפל בה</h1>
+      <p class="sub">שירות עצמי במחיר טוב, בלי לתאם תור ובלי להמתין בתור לתא כביסה תפוס — פשוט מגיעים, שמים, וזהו.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="tel:+972546040150">התקשרו עכשיו — עונים תוך דקות</a>
+        <a class="btn btn-outline-dark" href="https://wa.me/972546040150" target="_blank" rel="noopener">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about">
+    <div class="container about-grid">
+      <div class="about-text">
+        <h2 class="section-title" style="text-align:right;margin-bottom:var(--space-3);">כביסה זה לא אמור להיות עוד דבר בראש</h2>
+        <p>יש שבועות שבהם המכונה בבית מתקלקלת בדיוק כשצריך אותה, או שפשוט אין זמן לשבת ולחכות מחזור שלם בבית. אז נשארים עם שקיות כביסה מלאות שרק מצטברות.</p>
+        <p>אצלנו באלנבי 26 זה נפתר תוך שעה: שירות עצמי, מכונות פנויות, ומחיר שלא מרגיש כמו עוד הוצאה מיותרת על משהו שהיה אמור להיות פשוט.</p>
+        <ul class="feature-list">
+          <li>שירות עצמי — שולטים בזמן שלכם, בלי לתאם עם אף אחד</li>
+          <li>מחיר טוב — בדיוק מה שלקוחות אצלנו כותבים בביקורות</li>
+          <li>במרכז אלנבי, תל אביב — קליטה מכל אזור המרכז</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="feature-list" style="gap:var(--space-3);">
+          <li>פתוחים לשירות מהיר — נכנסים ויוצאים באותו ביקור</li>
+          <li>מכונות לכביסה ולייבוש במקום אחד</li>
+          <li>שאלה לפני שמגיעים? מענה טלפוני זמין</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- RATING -->
+  <section class="rating">
+    <div class="container">
+      <div class="stars">★★★★☆</div>
+      <div class="score">3.7 מתוך 5</div>
+      <div class="count">65 ביקורות בגוגל</div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="container">
+      <h2 class="section-title">מה אומרים מי שכבר היו כאן</h2>
+      <p class="section-sub">בלי ניסוחים מיותרים — ככה זה נשמע מלקוחות אמיתיים.</p>
+      <div class="test-grid">
+        <div class="test-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"תואם את הציפיות שירות עצמי מחיר טוב"</p>
+          <div class="author">dorian ben shalom</div>
+        </div>
+        <div class="test-card">
+          <div class="stars">★★★★★</div>
+          <p class="quote">"מומלץ"</p>
+          <div class="author">איציק אבקסיס</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact">
+    <div class="container">
+      <h2 class="section-title">בואו נסגור את זה עוד היום</h2>
+      <div class="contact-details">
+        <a href="tel:+972546040150">054-604-0150</a>
+        <span class="addr">אלנבי 26, תל אביב-יפו, 6332116</span>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary-onlight" href="tel:+972546040150">התקשרו עכשיו — עונים תוך דקות</a>
+        <a class="btn btn-outline-dark" href="https://wa.me/972546040150" target="_blank" rel="noopener">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <strong>מכבסת המילניום</strong> · אלנבי 26, תל אביב-יפו · 054-604-0150
+    </div>
+  </footer>
+
+</body>
+</html>

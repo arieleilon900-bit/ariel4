@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מכבסת פלורנטין תל אביב — פתוח 24/7, כביסה תוך 20 דקות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #1b3a4b;
+    --teal: #2aa9a0;
+    --cream: #f7f4ee;
+    --white: #ffffff;
+    --ink: #1c2b30;
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 40px;
+    --space-5: 64px;
+    --space-6: 96px;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    font-family: 'Rubik', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.6;
+  }
+
+  img, svg { display:block; }
+
+  a { text-decoration:none; }
+
+  .container{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 var(--space-3);
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    background: linear-gradient(160deg, var(--navy) 0%, #234f63 100%);
+    color: var(--white);
+    padding: var(--space-6) 0 var(--space-5);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before{
+    content: "";
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 260px;
+    height: 260px;
+    background: rgba(42,169,160,0.18);
+    border-radius: 50%;
+  }
+  .hero::after{
+    content: "";
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 320px;
+    height: 320px;
+    background: rgba(42,169,160,0.12);
+    border-radius: 50%;
+  }
+
+  .hero-badge{
+    display:inline-block;
+    background: rgba(42,169,160,0.2);
+    border: 1px solid var(--teal);
+    color: #cdf3ef;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 30px;
+    margin-bottom: var(--space-3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero h1{
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 800;
+    max-width: 780px;
+    margin: 0 auto var(--space-2);
+    position: relative;
+    z-index: 1;
+    line-height: 1.25;
+  }
+
+  .hero .sub{
+    font-size: clamp(16px, 2.4vw, 19px);
+    color: #dfeaee;
+    max-width: 620px;
+    margin: 0 auto var(--space-4);
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-row{
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 16px 30px;
+    border-radius: 12px;
+    transition: transform .15s ease, box-shadow .15s ease;
+    white-space: nowrap;
+  }
+
+  .btn:hover{ transform: translateY(-2px); }
+
+  .btn-primary{
+    background: var(--teal);
+    color: var(--navy);
+    box-shadow: 0 8px 24px rgba(42,169,160,0.35);
+  }
+
+  .btn-outline-dark{
+    border: 2px solid rgba(255,255,255,0.6);
+    color: var(--white);
+    background: transparent;
+  }
+
+  .btn-outline-light{
+    border: 2px solid var(--navy);
+    color: var(--navy);
+    background: transparent;
+  }
+
+  .btn-primary-onlight{
+    background: var(--navy);
+    color: var(--white);
+    box-shadow: 0 8px 24px rgba(27,58,75,0.25);
+  }
+
+  /* ===== SECTIONS ===== */
+  section{
+    padding: var(--space-6) 0;
+  }
+
+  .section-title{
+    font-size: clamp(24px, 3.6vw, 32px);
+    font-weight: 800;
+    color: var(--navy);
+    text-align: center;
+    margin-bottom: var(--space-2);
+  }
+
+  .section-sub{
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto var(--space-4);
+    color: #4c5c62;
+    font-size: 17px;
+  }
+
+  /* ABOUT */
+  .about{
+    background: var(--white);
+  }
+
+  .about-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .about-card{
+    background: var(--cream);
+    border-radius: 16px;
+    padding: var(--space-4) var(--space-3);
+    text-align: center;
+    border: 1px solid #e8e2d5;
+  }
+
+  .about-card .icon{
+    font-size: 34px;
+    margin-bottom: var(--space-2);
+  }
+
+  .about-card h3{
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .about-card p{
+    font-size: 15px;
+    color: #556166;
+  }
+
+  .about-lead{
+    max-width: 700px;
+    margin: 0 auto var(--space-5);
+    text-align: center;
+    font-size: 18px;
+    color: var(--ink);
+  }
+
+  /* RATING */
+  .rating{
+    background: var(--navy);
+    color: var(--white);
+    text-align: center;
+  }
+
+  .stars{
+    font-size: 34px;
+    color: #ffd15c;
+    margin-bottom: var(--space-2);
+    letter-spacing: 4px;
+  }
+
+  .rating-number{
+    font-size: clamp(38px, 6vw, 56px);
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .rating-count{
+    font-size: 17px;
+    color: #cfe0e6;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials{
+    background: var(--cream);
+  }
+
+  .t-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .t-card{
+    background: var(--white);
+    border-radius: 16px;
+    padding: var(--space-3);
+    border: 1px solid #eae4d8;
+    box-shadow: 0 4px 14px rgba(27,58,75,0.06);
+  }
+
+  .t-stars{
+    color: #ffb400;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .t-text{
+    font-size: 15.5px;
+    color: #333;
+    margin-bottom: var(--space-2);
+    line-height: 1.7;
+  }
+
+  .t-author{
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 15px;
+  }
+
+  /* CONTACT */
+  .contact{
+    background: linear-gradient(160deg, var(--navy) 0%, #234f63 100%);
+    color: var(--white);
+    text-align: center;
+  }
+
+  .contact .section-title{ color: var(--white); }
+
+  .contact-info{
+    margin-bottom: var(--space-4);
+    font-size: 18px;
+    color: #dfeaee;
+  }
+
+  .contact-info div{
+    margin-bottom: 8px;
+  }
+
+  .contact-info strong{
+    color: var(--white);
+  }
+
+  /* FOOTER */
+  footer{
+    background: #12262f;
+    color: #9fb4bb;
+    text-align: center;
+    padding: var(--space-3) 0;
+    font-size: 14px;
+  }
+
+  @media (max-width: 720px){
+    .about-grid{ grid-template-columns: 1fr; }
+    .t-grid{ grid-template-columns: 1fr; }
+    .btn{ width: 100%; }
+    .cta-row{ flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero-badge">פתוח 24 שעות, כל השבוע</span>
+      <h1>כביסה שנתקעה עליכם בשעה מוזרה? המכונות כאן דולקות גם ב-3 בלילה</h1>
+      <p class="sub">מכבסת פלורנטין, רחוב הקישון 49, תל אביב-יפו — מכונה מלאה (7 ק"ג) ב-20 ₪, מייבש בעוד 20 ₪, תשלום באשראי או במטבעות.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="tel:+972544614663">התקשרו עכשיו — 054-461-4663</a>
+        <a class="btn btn-outline-dark" href="https://wa.me/972544614663" target="_blank" rel="noopener">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about">
+    <div class="container">
+      <h2 class="section-title">מה עושים כשאין זמן לחכות לתור במכבסה?</h2>
+      <p class="about-lead">
+        ערימת כביסה שגדלה, נסיעה למכבסה שסוגרת בשמונה, ותור שלא זזה — זה בדיוק מה שאין כאן.
+        פלורנטין פתוחה 24/7, בלי תלות בשעות פתיחה של מישהו אחר, כמו שכתב ווליד תרתיר: הצילה אותו באמצע הלילה כשהיה חייב לכבס.
+      </p>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="icon">🕛</div>
+          <h3>פתוח 24/7</h3>
+          <p>בלי שעות סגירה, בלי לתאם מסביב לשגרה — נכנסים בשעה שנוחה לכם, ביום או בלילה.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon">🧺</div>
+          <h3>מכונה מלאה 7 ק"ג ב-20 ₪</h3>
+          <p>ומייבש בעוד 20 ₪ — תשלום באשראי או במטבעות של 1 ו-2 ש"ח, כמו שכתב בן דונר רוזנרוט.</p>
+        </div>
+        <div class="about-card">
+          <div class="icon">🥤</div>
+          <h3>מכונת שתייה נוסטלגית</h3>
+          <p>מיץ ענבים בזמן שהמכונה עובדת בשבילכם — פרט קטן ש-maxim poly טרח לציין בביקורת.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RATING -->
+  <section class="rating">
+    <div class="container">
+      <div class="stars">★★★★☆</div>
+      <div class="rating-number">4.3</div>
+      <div class="rating-count">מתוך 5 — 56 ביקורות בגוגל</div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials">
+    <div class="container">
+      <h2 class="section-title">מה אומרים מי שכיבסו כאן</h2>
+      <p class="section-sub">ביקורות אמיתיות מגוגל, בלי סינון.</p>
+      <div class="t-grid">
+        <div class="t-card">
+          <div class="t-stars">★★★★☆</div>
+          <p class="t-text">"פתוח 24/7 שירות מאוד נוח אבל היה נחמד אם הייתה מכונה לרכישת מרכך (ניתן לקנות אבקה תמורת 2 ש"ח). ניתן לעשות מכונה מלאה (7 קילו) ב- 20 ש"ח, ומייבש בעוד 20 ש"ח. ניתן לשלם באשראי על השירות (כביסה ומייבש) או במטבעות של 1 או…"</p>
+          <div class="t-author">בן דונר רוזנרוט</div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-text">"המכונה התקלקלה ומזל שבאתי למכבסת פלורנטין!! 20 שקל ו 30 דקות והכביסה מוכנה"</p>
+          <div class="t-author">שרון גולדשטיין</div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-text">"אחלה מכבסה הצילה אותי בלילה הייתי חייב לכבס בגדים מיקום מעולה יש מכונות מצויינות"</p>
+          <div class="t-author">ווליד תרתיר</div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-text">"אחלה מכבסה פתוח 24/7משלמים מזומן ובאשראי.ויש גם מכונת שתיה עם מיץ ענבים בקטע נוסטלגי"</p>
+          <div class="t-author">maxim poly</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact">
+    <div class="container">
+      <h2 class="section-title">בואו לכבס — פתוח ממש עכשיו</h2>
+      <div class="contact-info">
+        <div><strong>כתובת:</strong> רחוב הקישון 49, תל אביב-יפו</div>
+        <div><strong>טלפון:</strong> 054-461-4663</div>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="tel:+972544614663">התקשרו עכשיו — 054-461-4663</a>
+        <a class="btn btn-outline-dark" href="https://wa.me/972544614663" target="_blank" rel="noopener">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      מכבסת פלורנטין, תל אביב-יפו — רחוב הקישון 49 · פתוח 24/7
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מוסך רעים בע"מ - רועי כפיר | תל אביב-יפו</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: #f7f5f2;
+    color: #1c1c1c;
+    line-height: 1.65;
+  }
+
+  :root {
+    --navy: #14213d;
+    --orange: #e85d2c;
+    --cream: #f7f5f2;
+  }
+
+  a { text-decoration: none; }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(160deg, #14213d 0%, #1d2f52 60%, #14213d 100%);
+    color: #fff;
+    padding: 88px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 140%;
+    height: 120px;
+    background: var(--cream);
+    border-radius: 50%;
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .badge {
+    display: inline-block;
+    background: rgba(232,93,44,0.15);
+    border: 1px solid var(--orange);
+    color: #ffb894;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 18px;
+    border-radius: 30px;
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1.3;
+    max-width: 780px;
+    margin: 0 auto 22px;
+  }
+  .hero .sub {
+    font-size: 19px;
+    font-weight: 400;
+    color: #d7dcea;
+    max-width: 620px;
+    margin: 0 auto 40px;
+  }
+  .hero .sub strong { color: #fff; }
+
+  .cta-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 17px 34px;
+    border-radius: 10px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary {
+    background: var(--orange);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(232,93,44,0.35);
+  }
+  .btn-outline-dark {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+  }
+  .btn-outline-light {
+    background: transparent;
+    color: var(--navy);
+    border: 2px solid var(--navy);
+  }
+  .btn-primary-solid {
+    background: var(--navy);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(20,33,61,0.25);
+  }
+
+  /* SECTIONS */
+  section { padding: 80px 0; }
+  .section-title {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--navy);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    text-align: center;
+    font-size: 17px;
+    color: #55606f;
+    max-width: 600px;
+    margin: 0 auto 56px;
+  }
+
+  /* ABOUT */
+  .about {
+    background: #fff;
+  }
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 20px;
+  }
+  .about-card {
+    background: var(--cream);
+    border-radius: 16px;
+    padding: 34px 28px;
+    border-top: 4px solid var(--orange);
+  }
+  .about-card h3 {
+    font-size: 20px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .about-card p { color: #444; font-size: 15.5px; }
+
+  .about-lead {
+    max-width: 720px;
+    margin: 0 auto 50px;
+    font-size: 18px;
+    text-align: center;
+    color: #333;
+  }
+  .about-lead strong { color: var(--navy); }
+
+  /* RATING */
+  .rating-section {
+    background: var(--navy);
+    color: #fff;
+    text-align: center;
+    padding: 64px 0;
+  }
+  .stars {
+    font-size: 36px;
+    color: #ffb02e;
+    letter-spacing: 4px;
+    margin-bottom: 14px;
+  }
+  .rating-number {
+    font-size: 52px;
+    font-weight: 900;
+    margin-bottom: 6px;
+  }
+  .rating-sub {
+    font-size: 18px;
+    color: #cfd6e6;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials { background: var(--cream); }
+  .testi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 20px;
+  }
+  .testi-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(20,33,61,0.06);
+    border-right: 4px solid var(--orange);
+  }
+  .testi-stars {
+    color: #ffb02e;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  .testi-text {
+    font-size: 16px;
+    color: #2a2a2a;
+    margin-bottom: 16px;
+  }
+  .testi-name {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 15px;
+  }
+
+  /* CONTACT */
+  .contact {
+    background: linear-gradient(160deg, #14213d 0%, #1d2f52 100%);
+    color: #fff;
+    text-align: center;
+  }
+  .contact .section-title { color: #fff; }
+  .contact .section-sub { color: #cfd6e6; }
+  .contact-info {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+    margin-bottom: 44px;
+    font-size: 17px;
+  }
+  .contact-info div strong {
+    display: block;
+    color: #ffb894;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  footer {
+    background: #0e1729;
+    color: #8b93a7;
+    text-align: center;
+    padding: 30px 0;
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 64px 0 70px; }
+    .hero h1 { font-size: 30px; }
+    .hero .sub { font-size: 16px; }
+    .section-title { font-size: 26px; }
+    .about-grid { grid-template-columns: 1fr; }
+    .testi-grid { grid-template-columns: 1fr; }
+    .contact-info { gap: 24px; flex-direction: column; }
+    .btn { width: 100%; justify-content: center; }
+    .cta-row { flex-direction: column; align-items: stretch; padding: 0 12px; }
+    section { padding: 56px 0; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="container hero-content">
+    <span class="badge">⭐ 4.9 מתוך 5 — 84 ביקורות בגוגל</span>
+    <h1>רעש מוזר במנוע? תדעו בדיוק מה קורה — לפני שזה עולה לכם ביוקר</h1>
+    <p class="sub">
+      אבחון אמיתי לפני שמתחילים לתקן, לא ניחוש שגובה ממכם פעמיים. אצל רועי כפיר במרדכי אנילביץ' 40, תל אביב, 84 לקוחות כבר סיפרו איך זה נגמר — <strong>מדורגים 4.9 מתוך 5</strong>.
+    </p>
+    <div class="cta-row">
+      <a href="tel:+97236877160" class="btn btn-primary">התקשרו עכשיו — עונים תוך דקות</a>
+      <a href="https://wa.me/97236877160" target="_blank" rel="noopener" class="btn btn-outline-dark">שלחו הודעה בוואטסאפ</a>
+    </div>
+  </div>
+</section>
+
+<section class="about">
+  <div class="container">
+    <h2 class="section-title">כשהרכב לא מתנהג כרגיל, אתם רוצים תשובה — לא תירוץ</h2>
+    <p class="about-lead">
+      יום עבודה שנעצר בגלל אור מהבהב בלוח המחוונים, נסיעה שנדחית כי אף אחד לא ידע להגיד מה קרה עד שהמוסך הקודם "ניסה כמה דברים" — זה בדיוק מה שהלקוחות שלנו מספרים שהם ברחו ממנו. <strong>ג'ני ברחוק</strong> כתבה שביקרה "בהרבה מוסכים לצערי" לפני שהגיעה אלינו.
+    </p>
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>אבחון לפני תיקון</h3>
+        <p>מזהים את הבעיה האמיתית קודם, ורק אז מדברים על התיקון — כדי שלא תשלמו על ניחושים.</p>
+      </div>
+      <div class="about-card">
+        <h3>ליווי עד קבלת הרכב</h3>
+        <p>כמו שחיים מזרחי כתב: יחס וליווי "עד לקבלת הרכב חזרה" — לא נעלמים באמצע התהליך.</p>
+      </div>
+      <div class="about-card">
+        <h3>זריזים גם בתקופות לחוצות</h3>
+        <p>יניב גל שוחרר לפני סוף השבוע גם בתקופת הלחימה — כי אצלנו זריזות היא לא רק סיסמה.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="rating-section">
+  <div class="container">
+    <div class="stars">★★★★★</div>
+    <div class="rating-number">4.9 מתוך 5</div>
+    <div class="rating-sub">יותר מ-84 ביקורות אמיתיות בגוגל</div>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="container">
+    <h2 class="section-title">מה שהלקוחות אומרים — במילים שלהם</h2>
+    <p class="section-sub">לא ניסוחים שלנו. ציטוטים אמיתיים מגוגל, כמו שנכתבו.</p>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"אמין מקצועי מומלץ בחום יחס ליווי ומסירות מעולים עד לקבלת הרכב חזרה"</p>
+        <div class="testi-name">חיים מזרחי</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"רועי והצוות שלו מפגינים מקצוענות חסרת פשרות, ולא פחות חשוב שירות ברמה הגבוהה ביותר, גם בתקופת הלחימה עשו הכל והצליחו לשחרר אותי לפני סופ"ש בזריזות."</p>
+        <div class="testi-name">Yaniv Gal</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"מקצועניים מעל לכל! מוסך של אנשים שהם קודם כל בני אדם מדהימים- ישרים, נותני שירות ברמה הגבוהה ביותר, מקצועיות ברמה גבוהה, ביליתי בהרבה מוסכים לצערי, את רועי לא אחליף, ליווי צמוד, מענה בשעות לא שעות, כל בעיה נפתרת מיידית!…"</p>
+        <div class="testi-name">Jenny Barchuk</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"מוסך מעולה!!! בעלים מדהים באמת שירות מכל הלב🙏🏻🙏🏻"</p>
+        <div class="testi-name">StarCall</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="container">
+    <h2 class="section-title">בואו נבדוק מה קורה עם הרכב שלכם</h2>
+    <p class="section-sub">התקשרו או שלחו הודעה — נחזור אליכם מהר ונקבע זמן שמתאים לכם.</p>
+    <div class="contact-info">
+      <div>
+        <strong>טלפון</strong>
+        03-687-7160
+      </div>
+      <div>
+        <strong>כתובת</strong>
+        מרדכי אנילביץ' 40, תל אביב-יפו
+      </div>
+      <div>
+        <strong>דירוג בגוגל</strong>
+        4.9 ★ (84 ביקורות)
+      </div>
+    </div>
+    <div class="cta-row">
+      <a href="tel:+97236877160" class="btn btn-primary">התקשרו עכשיו — עונים תוך דקות</a>
+      <a href="https://wa.me/97236877160" target="_blank" rel="noopener" class="btn btn-outline-dark">שלחו הודעה בוואטסאפ</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    מוסך רעים בע"מ - רועי כפיר © כל הזכויות שמורות | מרדכי אנילביץ' 40, תל אביב-יפו
+  </div>
+</footer>
+
+</body>
+</html>

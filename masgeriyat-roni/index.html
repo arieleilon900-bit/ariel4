@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מסגריית רוני — שוקן 13, תל אביב-יפו</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --dark: #1c2024;
+    --steel: #2c3e50;
+    --accent: #d97b2e;
+    --bg: #f6f4f1;
+    --white: #ffffff;
+    --space-1: 12px;
+    --space-2: 24px;
+    --space-3: 48px;
+    --space-4: 80px;
+    --space-5: 120px;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+  body{
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    line-height: 1.6;
+  }
+  img{ max-width:100%; display:block; }
+
+  .container{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 var(--space-2);
+  }
+
+  /* HERO */
+  .hero{
+    background: linear-gradient(160deg, var(--dark) 0%, var(--steel) 100%);
+    color: var(--white);
+    padding: var(--space-5) var(--space-2) var(--space-4);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before{
+    content: "";
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    border: 3px solid rgba(217,123,46,0.25);
+    border-radius: 50%;
+  }
+  .hero::after{
+    content: "";
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 320px; height: 320px;
+    border: 3px solid rgba(217,123,46,0.15);
+    border-radius: 50%;
+  }
+  .hero-badge{
+    display:inline-block;
+    background: rgba(217,123,46,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 6px 18px;
+    border-radius: 30px;
+    margin-bottom: var(--space-2);
+  }
+  .hero h1{
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    font-weight: 900;
+    max-width: 780px;
+    margin: 0 auto var(--space-2);
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+  }
+  .hero p.sub{
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    color: #d7dbe0;
+    max-width: 620px;
+    margin: 0 auto var(--space-3);
+    position: relative;
+    z-index: 1;
+  }
+  .cta-row{
+    display:flex;
+    gap: var(--space-2);
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding: 16px 32px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration:none;
+    transition: transform .15s ease, box-shadow .15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover{ transform: translateY(-2px); }
+  .btn-primary{
+    background: var(--accent);
+    color: var(--white);
+    box-shadow: 0 8px 20px rgba(217,123,46,0.35);
+  }
+  .btn-outline-light{
+    background: transparent;
+    color: var(--white);
+    border: 2px solid rgba(255,255,255,0.6);
+  }
+  .btn-outline-dark{
+    background: transparent;
+    color: var(--dark);
+    border: 2px solid var(--dark);
+  }
+
+  /* SECTIONS */
+  section{
+    padding: var(--space-4) 0;
+  }
+  .section-title{
+    font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+    font-weight: 800;
+    text-align:center;
+    margin-bottom: var(--space-2);
+    color: var(--dark);
+  }
+  .section-lead{
+    text-align:center;
+    max-width: 680px;
+    margin: 0 auto var(--space-3);
+    color:#4a4f55;
+    font-size: 1.05rem;
+  }
+
+  /* ABOUT */
+  .about-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .about-card{
+    background: var(--white);
+    border-radius: 14px;
+    padding: var(--space-2);
+    text-align:center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border-top: 4px solid var(--accent);
+  }
+  .about-card .icon{
+    font-size: 2rem;
+    margin-bottom: var(--space-1);
+  }
+  .about-card h3{
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: var(--steel);
+  }
+  .about-card p{
+    color:#5a5f66;
+    font-size: 0.95rem;
+  }
+
+  /* RATING */
+  .rating-section{
+    background: var(--steel);
+    color: var(--white);
+    text-align:center;
+    padding: var(--space-4) 0;
+  }
+  .stars{
+    color: #ffb347;
+    font-size: 2.2rem;
+    letter-spacing: 4px;
+    margin-bottom: var(--space-1);
+  }
+  .rating-number{
+    font-size: 3rem;
+    font-weight: 900;
+  }
+  .rating-count{
+    font-size: 1.1rem;
+    color: #cfd6dc;
+    margin-top: 4px;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .testimonial{
+    background: var(--white);
+    border-radius: 14px;
+    padding: var(--space-2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .testimonial .stars{
+    font-size: 1.1rem;
+    color: #ffb347;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .testimonial p.quote{
+    color: #3a3f45;
+    font-size: 1rem;
+    margin-bottom: var(--space-1);
+    white-space: pre-line;
+  }
+  .testimonial .author{
+    font-weight: 700;
+    color: var(--dark);
+  }
+
+  /* CONTACT */
+  .contact-section{
+    background: linear-gradient(160deg, var(--dark) 0%, var(--steel) 100%);
+    color: var(--white);
+    text-align:center;
+  }
+  .contact-details{
+    margin: var(--space-2) 0 var(--space-3);
+    font-size: 1.15rem;
+    color: #e4e7ea;
+    line-height: 2;
+  }
+  .contact-details strong{ color: var(--accent); }
+
+  footer{
+    background: var(--dark);
+    color: #9aa0a6;
+    text-align:center;
+    padding: var(--space-2);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 700px){
+    .about-grid{ grid-template-columns: 1fr; }
+    .testimonials{ grid-template-columns: 1fr; }
+    .btn{ width: 100%; }
+    .cta-row{ flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="hero-badge">שוקן 13, תל אביב-יפו</span>
+    <h1>גדר, מעקה או שער שצריך לבנות נכון בפעם הראשונה?</h1>
+    <p class="sub">עבודת מסגרות זו לא משהו שרוצים לתקן פעמיים. רוני מגיע, סוגר הצעת מחיר בשיחה אחת, ומתחיל לעבוד — כמו שדין ונועה מספרים למטה.</p>
+    <div class="cta-row">
+      <a href="tel:+972502122020" class="btn btn-primary">התקשרו עכשיו</a>
+      <a href="https://wa.me/972502122020" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section>
+  <div class="container">
+    <h2 class="section-title">עבודת מסגרות שנשארת ישרה שנים</h2>
+    <p class="section-lead">גדר שמתעקמת אחרי חורף אחד, מעקה שרועד כשנשענים עליו — זה המחיר של עבודה חפוזה. אצל רוני מקבלים הצעת מחיר ברורה בשיחת טלפון אחת, ועבודה שנסגרת בזמן.</p>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="icon">🚪</div>
+        <h3>שערים ומעקות</h3>
+        <p>מדרגות, מרפסות ומשרדים — מעקה שיושב חזק ונראה טוב, כמו אצל דין.</p>
+      </div>
+      <div class="about-card">
+        <div class="icon">🔩</div>
+        <h3>גדרות מותאמות</h3>
+        <p>מדידה מדויקת בשטח והצעת מחיר לפני שמתחילים לעבוד — בלי הפתעות.</p>
+      </div>
+      <div class="about-card">
+        <div class="icon">⚙️</div>
+        <h3>מחיר הוגן, מוסבר</h3>
+        <p>"מחיר הוגן מאוד" — כך תיאר לקוח את העבודה. שקיפות מהשיחה הראשונה.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RATING -->
+<section class="rating-section">
+  <div class="container">
+    <div class="stars">★★★★★</div>
+    <div class="rating-number">5.0</div>
+    <div class="rating-count">מתוך 5 בגוגל</div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="container">
+    <h2 class="section-title">מה אומרים מי שכבר עבדו איתנו</h2>
+    <div class="testimonials">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"חיפשנו גדר ומעקה למדרגות במשרד, קיבלנו המלצה מחבר על רוני, דיברנו וגילינו אדם אדיב מאוד
+מיד סגרנו הצעת מחיר והוא התחיל לעבוד.
+עשה עבודה מעולה, מחיר הוגן מאוד.
+ממליץ"</p>
+        <div class="author">Dean Lalezar</div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="quote">"עזר לי מאוד, שירות מעולה במחיר מעולה, הגון ונחמד"</p>
+        <div class="author">Noa Kind-Lerer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section">
+  <div class="container">
+    <h2 class="section-title" style="color:#fff;">מוכנים להתחיל?</h2>
+    <p class="sub" style="color:#d7dbe0; max-width:520px; margin:0 auto var(--space-2);">התקשרו עכשיו וסגרו הצעת מחיר עוד היום — בדיוק כמו שדין עשה.</p>
+    <div class="contact-details">
+      <strong>כתובת:</strong> שוקן 13, תל אביב-יפו<br>
+      <strong>טלפון:</strong> 050-212-2020
+    </div>
+    <div class="cta-row">
+      <a href="tel:+972502122020" class="btn btn-primary">התקשרו עכשיו</a>
+      <a href="https://wa.me/972502122020" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    &copy; מסגריית רוני — שוקן 13, תל אביב-יפו | 050-212-2020
+  </div>
+</footer>
+
+</body>
+</html>
