@@ -184,6 +184,25 @@ header p{color:var(--text-dim);font-size:14px;}
 footer{color:var(--text-faint);font-size:12px;line-height:1.7;text-align:center;padding:0 8px;}
 footer b{color:var(--text-dim);font-weight:600;}
 
+/* ---------- מוצא אחרון: אם הדפדפן חוסם פתיחת קישורים ---------- */
+.rescue{
+  position:fixed;inset:auto 0 0 0;z-index:99;background:var(--surface-2);
+  border-top:1px solid var(--brick);padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+  display:none;flex-direction:column;gap:9px;
+}
+.rescue.show{display:flex;}
+.rescue p{font-size:13px;color:var(--text-dim);}
+.rescue .line{display:flex;gap:7px;}
+.rescue input{
+  flex:1;min-width:0;background:var(--ground);border:1px solid var(--line);color:var(--text);
+  border-radius:var(--r);padding:11px 10px;font-family:var(--mono);font-size:12px;direction:ltr;
+}
+.rescue button{
+  border:none;border-radius:var(--r);padding:11px 15px;font-family:var(--sans);
+  font-size:14px;font-weight:700;cursor:pointer;background:var(--hivis);color:#141a06;
+}
+.rescue .close{background:none;color:var(--text-faint);border:1px solid var(--line);}
+
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important;}
   .go:active{transform:none;}
@@ -306,6 +325,15 @@ footer b{color:var(--text-dim);font-weight:600;}
 
 </div>
 
+<div class="rescue" id="rescue" dir="rtl">
+  <p>הדפדפן הזה חוסם פתיחת קישורים. העתק והדבק בסרגל הכתובות:</p>
+  <div class="line">
+    <input type="text" id="rescue-url" readonly>
+    <button type="button" id="rescue-copy">העתק</button>
+    <button type="button" class="close" id="rescue-close">סגור</button>
+  </div>
+</div>
+
 <script>
 /* ============================================================
    המאגר. להוסיף פריט = להוסיף שורה כאן.
@@ -389,6 +417,77 @@ function search(q, sp){
   return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q) + (sp ? "&sp="+sp : "");
 }
 function isSaved(id){ for(var i=0;i<saved.length;i++){ if(saved[i].id===id) return true; } return false; }
+
+/* ============================================================
+   פתיחת קישורים.
+   כשהדף רץ בתוך מסגרת מבודדת (תצוגה מוטמעת, אפליקציה שמציגה
+   HTML), הדפדפן חוסם target="_blank" בלי להגיד מילה — הקישור
+   פשוט לא עושה כלום. לכן מנסים כאן ארבע דרכים לפי הסדר,
+   עד שאחת מהן עובדת.
+   ============================================================ */
+function openExternal(url){
+  var framed;
+  try{ framed = (window.top !== window.self); }catch(e){ framed = true; }
+
+  /* 1. הדרך הרגילה — חלון חדש. עובדת בכל דפדפן נורמלי. */
+  var w = null;
+  try{ w = window.open(url, "_blank"); }catch(e){ w = null; }
+  if(w){ try{ w.opener = null; }catch(e){} return true; }
+
+  /* 2. בתוך מסגרת: לנווט את החלון העליון. */
+  if(framed){
+    try{
+      window.top.location.href = url;
+      /* אם החסימה שקטה והדף עדיין כאן — נציע העתקה. */
+      setTimeout(function(){ rescue(url); }, 900);
+      return true;
+    }catch(e){}
+  }
+
+  /* 3. לא בתוך מסגרת: פשוט לנווט. (בתוך מסגרת אין טעם —
+        יוטיוב מסרב להיטען בתוך מסגרת ותקבל מסך ריק.) */
+  if(!framed){
+    try{ window.location.href = url; return true; }catch(e){}
+  }
+
+  return false;
+}
+
+function rescue(url){
+  var box = $("#rescue"), input = $("#rescue-url");
+  input.value = url;
+  box.classList.add("show");
+  try{ input.focus(); input.select(); }catch(e){}
+}
+
+$("#rescue-copy").addEventListener("click", function(){
+  var input = $("#rescue-url"), btn = this;
+  try{
+    input.select();
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(input.value);
+    else document.execCommand("copy");
+    btn.textContent = "הועתק";
+    setTimeout(function(){ btn.textContent = "העתק"; }, 1600);
+  }catch(e){}
+});
+$("#rescue-close").addEventListener("click", function(){ $("#rescue").classList.remove("show"); });
+
+/* כל קישור ליוטיוב בדף — כולל הרשימה המלאה ורשימות השמורים —
+   עובר דרך המנגנון שלמעלה, כדי שייפתח באפליקציית יוטיוב. */
+document.addEventListener("click", function(e){
+  var node = e.target, a = null;
+  while(node && node !== document){
+    if(node.tagName === "A" && node.getAttribute("href")){ a = node; break; }
+    node = node.parentNode;
+  }
+  if(!a) return;
+  var href = a.getAttribute("href");
+  if(!href || href.charAt(0) === "#") return;
+  if(href.indexOf("youtube.com") === -1) return;
+
+  e.preventDefault();
+  if(!openExternal(href)) rescue(href);
+});
 
 function pick(){
   var pool = LIB.filter(function(x){ return mood==="all" || x.mood===mood; });
