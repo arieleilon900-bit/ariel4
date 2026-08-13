@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0e1317">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="בוחר לך הרצאה או פודקאסט לריצה בלחיצה אחת. 40 הרצאות מתויגות של ג׳ים רון, טוני רובינס, אלכס הורמוזי ועוד.">
+<title>קו הזינוק</title>
+
+<!-- תצוגה מקדימה בוואטסאפ, טלגרם, פייסבוק ו-iMessage.
+     הכתובות חייבות להיות מלאות — קישור יחסי לא נקרא על ידי הסורקים. -->
+<link rel="canonical" href="https://arieleilon900-bit.github.io/ariel4/hashraa-lariza/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="קו הזינוק">
+<meta property="og:locale" content="he_IL">
+<meta property="og:url" content="https://arieleilon900-bit.github.io/ariel4/hashraa-lariza/">
+<meta property="og:title" content="נעליים בדלת. לחיצה אחת.">
+<meta property="og:description" content="הרצאה או פודקאסט לריצה, בלי לגלול ביוטיוב חמש דקות לפני שאתה יוצא.">
+<meta property="og:image" content="https://arieleilon900-bit.github.io/ariel4/hashraa-lariza/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="קו הזינוק — בוחר לך הרצאה לריצה בלחיצה אחת">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="נעליים בדלת. לחיצה אחת.">
+<meta name="twitter:description" content="הרצאה או פודקאסט לריצה, בלי לגלול ביוטיוב חמש דקות לפני שאתה יוצא.">
+<meta name="twitter:image" content="https://arieleilon900-bit.github.io/ariel4/hashraa-lariza/preview.png">
+
+<meta name="apple-mobile-web-app-title" content="קו הזינוק">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png" sizes="180x180">
+<style>
+/* ============================================================
+   קו הזינוק — עיצוב מחויב לחושך: הכלי הזה נפתח ב-5:40 בבוקר,
+   בחוץ, ביד אחת. מסך לבן בחושך זה עוינות, אז אין ערכת בהיר.
+   כל צבע נצבע כאן במפורש כדי שהדף יחזיק על כל רקע מארח.
+   ============================================================ */
+:root{
+  color-scheme: dark;
+
+  /* גוונים: שמיים לפני זריחה (קריר, נטוי לכחול) */
+  --ground:    #0e1317;
+  --surface:   #161d23;
+  --surface-2: #1e262d;
+  --line:      #29333b;
+  --line-soft: #1c242b;
+
+  --text:      #eaf0f4;
+  --text-dim:  #93a1ac;
+  --text-faint:#66727c;
+
+  /* שני מבטאים: משטח מסלול (לבנים) וּוסט זוהר (בטיחות) */
+  --brick:     #cf6144;
+  --brick-dim: #8a4231;
+  --hivis:     #cfe94f;
+  --hivis-dim: #a5bb35;
+
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Hebrew",
+          "Arial Hebrew", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --r: 6px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  font-family:var(--sans);
+  background:var(--ground);
+  color:var(--text);
+  direction:rtl;
+  line-height:1.55;
+  min-height:100vh;
+  padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 40px);
+}
+.wrap{max-width:520px;margin:0 auto;padding:0 16px;display:flex;flex-direction:column;gap:26px;}
+
+a{color:inherit;}
+:focus-visible{outline:2px solid var(--hivis);outline-offset:2px;}
+
+/* ---------- קו זינוק: שני קווים דקים, מוטיב חוזר ---------- */
+.startline{height:0;border-top:1px solid var(--line);
+  box-shadow:0 3px 0 -2px var(--line-soft);}
+
+/* ---------- כותרת ---------- */
+header{padding:26px 2px 0;display:flex;flex-direction:column;gap:5px;}
+.eyebrow{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.22em;
+  color:var(--brick);text-transform:uppercase;
+}
+header h1{font-size:clamp(23px,6.4vw,28px);font-weight:800;letter-spacing:-.02em;line-height:1.2;}
+header p{color:var(--text-dim);font-size:14px;}
+
+/* ---------- בורר ---------- */
+.label{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;
+  color:var(--text-faint);text-transform:uppercase;margin-bottom:10px;
+}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.chip{
+  background:var(--surface);border:1px solid var(--line);color:var(--text);
+  border-radius:var(--r);padding:11px 12px;font-family:var(--sans);font-size:15px;
+  font-weight:600;cursor:pointer;text-align:right;line-height:1.25;
+  display:flex;flex-direction:column;gap:2px;transition:background .12s,border-color .12s;
+}
+.chip .en{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--text-faint);}
+.chip:hover{border-color:var(--brick-dim);}
+.chip[aria-pressed="true"]{background:var(--brick);border-color:var(--brick);color:#1a0f0b;}
+.chip[aria-pressed="true"] .en{color:#5c2d1f;}
+.chip.wide{grid-column:1/-1;}
+
+/* ---------- הבמה ---------- */
+.stage{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  min-height:196px;display:flex;flex-direction:column;justify-content:center;padding:18px;
+}
+.stage.idle{align-items:center;text-align:center;color:var(--text-faint);gap:8px;}
+.stage.idle .big{font-family:var(--mono);font-size:34px;color:var(--line);letter-spacing:.1em;}
+.stage.idle p{font-size:14px;max-width:24ch;}
+
+.meta{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:9px;}
+.meta .who{font-size:13px;font-weight:700;color:var(--brick);}
+.meta .cat{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--text-faint);
+  text-transform:uppercase;
+}
+.stage h2{font-size:20px;font-weight:700;line-height:1.32;text-wrap:balance;}
+.stage .why{color:var(--text-dim);font-size:14px;margin-top:7px;}
+
+.actions{display:flex;gap:7px;margin-top:16px;}
+.act{
+  border:1px solid var(--line);background:var(--surface-2);color:var(--text);
+  border-radius:var(--r);padding:13px 12px;font-family:var(--sans);font-size:15px;font-weight:700;
+  cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;
+  transition:background .12s;
+}
+.act:hover{background:var(--line);}
+.act.play{flex:1;background:var(--hivis);border-color:var(--hivis);color:#141a06;}
+.act.play:hover{background:var(--hivis-dim);}
+.act.sq{flex:0 0 50px;font-size:17px;}
+.act.sq[aria-pressed="true"]{background:var(--brick);border-color:var(--brick);color:#1a0f0b;}
+.miss{
+  display:block;margin-top:11px;font-size:12px;color:var(--text-faint);
+  text-decoration:none;text-align:center;
+}
+.miss:hover{color:var(--brick);text-decoration:underline;}
+
+/* ---------- הפעולה הראשית ---------- */
+.go{
+  width:100%;background:var(--hivis);color:#141a06;border:none;border-radius:var(--r);
+  padding:20px;font-family:var(--sans);font-size:19px;font-weight:800;cursor:pointer;
+  letter-spacing:-.01em;box-shadow:0 3px 0 var(--hivis-dim);transition:transform .08s,box-shadow .08s;
+}
+.go:active{transform:translateY(3px);box-shadow:0 0 0 var(--hivis-dim);}
+
+/* ---------- לפי אורך ---------- */
+.note{color:var(--text-faint);font-size:12.5px;margin:-4px 0 11px;line-height:1.5;}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.pair a{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 10px;text-decoration:none;display:flex;flex-direction:column;gap:3px;
+  transition:border-color .12s;
+}
+.pair a:hover{border-color:var(--hivis-dim);}
+.pair strong{font-size:15px;font-weight:700;}
+.pair span{font-family:var(--mono);font-size:11px;color:var(--text-faint);
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;}
+
+/* ---------- רשימות ---------- */
+.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+.box + .box{margin-top:7px;}
+.box > summary{
+  padding:14px 16px;cursor:pointer;font-size:15px;font-weight:700;list-style:none;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+.box > summary::-webkit-details-marker{display:none;}
+.box > summary .n{
+  font-family:var(--mono);font-size:12px;color:var(--text-faint);
+  font-variant-numeric:tabular-nums;
+}
+.rows{padding:0 12px 10px;}
+.row{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line-soft);}
+.row a{flex:1;text-decoration:none;font-size:14.5px;padding:10px 4px;line-height:1.35;}
+.row a small{display:block;color:var(--text-faint);font-size:12px;}
+.row a:hover{color:var(--hivis);}
+.row button{
+  background:none;border:none;color:var(--text-faint);font-size:15px;cursor:pointer;
+  padding:6px 8px;font-family:var(--sans);
+}
+.row button:hover{color:var(--brick);}
+.none{color:var(--text-faint);font-size:13.5px;padding:12px 4px 6px;text-align:center;}
+
+/* ---------- הרשימה המלאה (עובדת גם בלי JS) ---------- */
+.all h3{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--brick);
+  text-transform:uppercase;margin:18px 0 6px;
+}
+.all h3:first-of-type{margin-top:4px;}
+.all ul{list-style:none;}
+.all li{border-top:1px solid var(--line-soft);}
+.all li a{display:block;padding:9px 2px;text-decoration:none;font-size:14.5px;line-height:1.35;}
+.all li a small{display:block;color:var(--text-faint);font-size:12px;}
+.all li a:hover{color:var(--hivis);}
+
+footer{color:var(--text-faint);font-size:12px;line-height:1.7;text-align:center;padding:0 8px;}
+footer b{color:var(--text-dim);font-weight:600;}
+
+/* ---------- מוצא אחרון: אם הדפדפן חוסם פתיחת קישורים ---------- */
+.rescue{
+  position:fixed;inset:auto 0 0 0;z-index:99;background:var(--surface-2);
+  border-top:1px solid var(--brick);padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+  display:none;flex-direction:column;gap:9px;
+}
+.rescue.show{display:flex;}
+.rescue p{font-size:13px;color:var(--text-dim);}
+.rescue .line{display:flex;gap:7px;}
+.rescue input{
+  flex:1;min-width:0;background:var(--ground);border:1px solid var(--line);color:var(--text);
+  border-radius:var(--r);padding:11px 10px;font-family:var(--mono);font-size:12px;direction:ltr;
+}
+.rescue button{
+  border:none;border-radius:var(--r);padding:11px 15px;font-family:var(--sans);
+  font-size:14px;font-weight:700;cursor:pointer;background:var(--hivis);color:#141a06;
+}
+.rescue .close{background:none;color:var(--text-faint);border:1px solid var(--line);}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;}
+  .go:active{transform:none;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">אימון · ריצה · הליכה</span>
+    <h1>נעליים בדלת. לחיצה אחת.</h1>
+    <p>בלי לגלול ביוטיוב חמש דקות לפני שאתה יוצא.</p>
+  </header>
+
+  <div class="startline"></div>
+
+  <section>
+    <p class="label">מה אתה צריך עכשיו</p>
+    <div class="chips" id="moods">
+      <button class="chip" data-mood="kick" aria-pressed="false">בעיטה בתחת<span class="en">KICK</span></button>
+      <button class="chip" data-mood="discipline" aria-pressed="false">משמעת ושגרה<span class="en">DISCIPLINE</span></button>
+      <button class="chip" data-mood="money" aria-pressed="false">כסף ועסקים<span class="en">MONEY</span></button>
+      <button class="chip" data-mood="mind" aria-pressed="false">ראש שקט<span class="en">MIND</span></button>
+      <button class="chip wide" data-mood="all" aria-pressed="true">הכל — תפתיע אותי<span class="en">SURPRISE ME</span></button>
+    </div>
+  </section>
+
+  <section>
+    <div class="stage idle" id="stage">
+      <span class="big">—</span>
+      <p>לחץ על הכפתור ותקבל משהו לשמוע. לא מתחבר לך? לחץ שוב.</p>
+    </div>
+    <button class="go" id="go" style="margin-top:12px;">תן לי משהו</button>
+  </section>
+
+  <div class="startline"></div>
+
+  <section>
+    <p class="label">לפי אורך האימון</p>
+    <p class="note">פותח חיפוש ביוטיוב עם פילטר האורך שלהם, בנושא שבחרת למעלה. האורך מדויק כי יוטיוב מסנן אותו.</p>
+    <div class="pair">
+      <a id="len-short" href="#" target="_blank" rel="noopener"><strong>ריצה קצרה</strong><span>עד 20 דקות</span></a>
+      <a id="len-long" href="#" target="_blank" rel="noopener"><strong>אימון ארוך</strong><span>מעל 20 דקות</span></a>
+    </div>
+  </section>
+
+  <section>
+    <details class="box" id="saved-box">
+      <summary>שמור להמשך <span class="n" id="saved-count">0</span></summary>
+      <div class="rows" id="saved-list"></div>
+    </details>
+    <details class="box" id="heard-box">
+      <summary>מה שמעתי לאחרונה <span class="n" id="heard-count">0</span></summary>
+      <div class="rows" id="heard-list"></div>
+    </details>
+  </section>
+
+  <div class="startline"></div>
+
+  <section class="all" id="all">
+    <p class="label">כל המאגר</p>
+    <h3>בעיטה בתחת</h3>
+    <ul>
+      <li><a href="https://www.youtube.com/watch?v=AxI39FCnuec" target="_blank" rel="noopener">15 הדקות שיהפכו אותך לבלתי שביר<small>דיוויד גוגינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=T7cvYUxnkZo" target="_blank" rel="noopener">איך בונים חוסן מנטלי — הרצאה חיה<small>דיוויד גוגינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=nDLb8_wgX50" target="_blank" rel="noopener">איך בונים כוח פנימי אמיתי<small>דיוויד גוגינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=QIz15aJR3Mw" target="_blank" rel="noopener">לבנות חוסן מנטלי<small>גוגינס × ג׳ו רוגן</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=_KBUUTMHcXo" target="_blank" rel="noopener">אתה לא עייף — אתה פשוט בנוח<small>דיוויד גוגינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=Wh3hOo5uQog" target="_blank" rel="noopener">יש בך גדולה<small>לס בראון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=onT71TZjRL0" target="_blank" rel="noopener">58 הדקות הטובות ביותר של מוטיבציה<small>לס בראון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=CE6joBeto6I" target="_blank" rel="noopener">זה לא נגמר עד שאתה מנצח<small>לס בראון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=NaK-mLNCNwg" target="_blank" rel="noopener">לראות גדולה דרך זמנים קשים<small>לס בראון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=ffnTFRSBDiY" target="_blank" rel="noopener">TIME TO RISE — נאום הפריצה<small>טוני רובינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=IXHoUYv9Krk" target="_blank" rel="noopener">אל תבזבז את החיים שלך<small>טוני רובינס</small></a></li>
+    </ul>
+    <h3>משמעת ושגרה</h3>
+    <ul>
+      <li><a href="https://www.youtube.com/watch?v=H7vRjyq7zJw" target="_blank" rel="noopener">לשלוט בחיים שלך דרך משמעת<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=nLQcXJC0fFI" target="_blank" rel="noopener">הכוח של המשמעת<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=KjSQIt48jhA" target="_blank" rel="noopener">משמעת מנצחת כישרון — כל פעם<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=1paoRdD1JuU" target="_blank" rel="noopener">משמעת מול חרטה<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=dPJGtmdaxYs" target="_blank" rel="noopener">משמעת של מחשבה<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=gPx5J4E3h9o" target="_blank" rel="noopener">משמעת = חופש<small>ג׳וקו וויליניק</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=sV91uo6pcQg" target="_blank" rel="noopener">ג׳וקו מסביר: משמעת שווה חופש<small>ג׳וקו וויליניק</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=PEzQu9JYBfQ" target="_blank" rel="noopener">Discipline Equals Freedom — עם ביט<small>ג׳וקו × Akira The Don</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=gR_f-iwUGY4" target="_blank" rel="noopener">שגרת הבוקר האופטימלית<small>אנדרו הוברמן</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=t-ezOLT2Kv0" target="_blank" rel="noopener">תעשה את זה ראשון בבוקר<small>אנדרו הוברמן</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=XPkhwcP-ogk" target="_blank" rel="noopener">שגרת בוקר מלאה לאופטימיזציה<small>אנדרו הוברמן</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=a0SsRsdBNy0" target="_blank" rel="noopener">ההרגלים היומיים שלו, מגובים במחקר<small>אנדרו הוברמן</small></a></li>
+    </ul>
+    <h3>כסף ועסקים</h3>
+    <ul>
+      <li><a href="https://www.youtube.com/watch?v=gEF67-G9MO0" target="_blank" rel="noopener">איך להרוויח כל כך הרבה שתשאל מה המשמעות<small>אלכס הורמוזי</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=68k355Fnse8" target="_blank" rel="noopener">הפלייבוק לבניית עסק של מיליארד<small>אלכס הורמוזי</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=zRYrlSzZfaY" target="_blank" rel="noopener">שאלות ותשובות: AI, עושר, ואמת בפנים<small>אלכס הורמוזי</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=sdd4BST87ks" target="_blank" rel="noopener">איך הוא בנה אימפריה של 150 מיליון<small>אלכס הורמוזי</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=B_rWF_W-WjA" target="_blank" rel="noopener">תהיה עשיר עד שהכסף יאבד משמעות<small>אלכס הורמוזי</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=lidFtb1Ga0o" target="_blank" rel="noopener">מרוויח 1.5 מיליון בשנה — ונשאר עם 1.3%<small>אלכס הורמוזי</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=thPVuEYMFos" target="_blank" rel="noopener">עושר מגיע דרך משמעת<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=0nhkU_DImhU" target="_blank" rel="noopener">איך להתעשר — הגרסה המעודכנת<small>נבאל רביקנט</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=6Mya4C3Yr7I" target="_blank" rel="noopener">להתעשר בלי מזל<small>נבאל רביקנט</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=5oNcoj4G0xc" target="_blank" rel="noopener">עקרונות יצירת העושר<small>נבאל × ג׳ו רוגן</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=UNcGCUJp1Q4" target="_blank" rel="noopener">המגה־פודקאסט על עושר<small>נבאל רביקנט</small></a></li>
+    </ul>
+    <h3>ראש שקט</h3>
+    <ul>
+      <li><a href="https://www.youtube.com/watch?v=vBuphe8XLtU" target="_blank" rel="noopener">המיינדסט שמקדים 99% מהאנשים<small>טוני רובינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=rBK9vtdwEbs" target="_blank" rel="noopener">תשנה את המיינדסט<small>טוני רובינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=_bOZtpcpDNc" target="_blank" rel="noopener">להיות בלתי שביר — בגוף, בראש ובכסף<small>טוני רובינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=CVP1CwEBz_Y" target="_blank" rel="noopener">אחרי זה תעשה הכל אחרת<small>טוני רובינס</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=WjYmz5aqutM" target="_blank" rel="noopener">תסמוך על עצמך<small>ג׳ים רון</small></a></li>
+      <li><a href="https://www.youtube.com/watch?v=tb5Cvbd9Wyo" target="_blank" rel="noopener">לאמן את המחשבה להצלחה<small>ג׳ים רון</small></a></li>
+    </ul>
+  </section>
+
+  <footer>
+    בטלפון: שיתוף ← <b>הוסף למסך הבית</b>. זה ייפתח כמו אפליקציה, בלי סרגל דפדפן.
+  </footer>
+
+</div>
+
+<div class="rescue" id="rescue" dir="rtl">
+  <p>הדפדפן הזה חוסם פתיחת קישורים. העתק והדבק בסרגל הכתובות:</p>
+  <div class="line">
+    <input type="text" id="rescue-url" readonly>
+    <button type="button" id="rescue-copy">העתק</button>
+    <button type="button" class="close" id="rescue-close">סגור</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   המאגר. להוסיף פריט = להוסיף שורה כאן.
+   id   — מזהה הסרטון ביוטיוב (מה שאחרי watch?v=)
+   q    — שאילתת גיבוי, אם הסרטון יורד מהאוויר
+   mood — kick | discipline | money | mind
+   ============================================================ */
+var LIB = [
+  /* ---------- בעיטה בתחת ---------- */
+  {id:"AxI39FCnuec", mood:"kick", speaker:"דיוויד גוגינס", title:"15 הדקות שיהפכו אותך לבלתי שביר", why:"ישיר, אכזרי, בלי ריפוד. מושלם לקילומטר הראשון.", q:"David Goggins The Only 15 Minutes You Need To Become Mentally Unbreakable"},
+  {id:"T7cvYUxnkZo", mood:"kick", speaker:"דיוויד גוגינס", title:"איך בונים חוסן מנטלי — הרצאה חיה", why:"הוא מדבר מול קהל. האנרגיה עוברת דרך האוזניות.", q:"How To Build Mental Toughness David Goggins live event"},
+  {id:"nDLb8_wgX50", mood:"kick", speaker:"דיוויד גוגינס", title:"איך בונים כוח פנימי אמיתי", why:"על מה שקורה בראש כשהגוף כבר רוצה לעצור.", q:"How to Build Immense Inner Strength David Goggins"},
+  {id:"QIz15aJR3Mw", mood:"kick", speaker:"גוגינס × ג׳ו רוגן", title:"לבנות חוסן מנטלי", why:"שיחה ארוכה וזורמת. טובה לריצה ארוכה.", q:"Joe Rogan David Goggins Building Mental Toughness"},
+  {id:"_KBUUTMHcXo", mood:"kick", speaker:"דיוויד גוגינס", title:"אתה לא עייף — אתה פשוט בנוח", why:"נבנה בדיוק בשביל הרגע שבו בא לך להאט.", q:"David Goggins Gym Running Motivation You're Not Tired"},
+  {id:"Wh3hOo5uQog", mood:"kick", speaker:"לס בראון", title:"יש בך גדולה", why:"הקלאסיקה שלו. קול שמרים אותך מהאספלט.", q:"You Have Greatness Within You Les Brown Motivation"},
+  {id:"onT71TZjRL0", mood:"kick", speaker:"לס בראון", title:"58 הדקות הטובות ביותר של מוטיבציה", why:"נאום שלם. מכסה אימון של שעה בלי לגעת בטלפון.", q:"Les Brown You have greatness within you best 58 minutes of motivation"},
+  {id:"CE6joBeto6I", mood:"kick", speaker:"לס בראון", title:"זה לא נגמר עד שאתה מנצח", why:"כשאתה באמצע תקופה קשה וצריך להיזכר למה יצאת.", q:"Les Brown It's Not Over Until You Win motivational speech"},
+  {id:"NaK-mLNCNwg", mood:"kick", speaker:"לס בראון", title:"לראות גדולה דרך זמנים קשים", why:"פחות צעקות, יותר עומק. עדיין מרים.", q:"See Greatness Through Hard Times Les Brown"},
+  {id:"ffnTFRSBDiY", mood:"kick", speaker:"טוני רובינס", title:"TIME TO RISE — נאום הפריצה", why:"רובינס באנרגיה של אולם מלא. קשה להישאר אדיש.", q:"Tony Robbins Time To Rise breakthrough speech"},
+  {id:"IXHoUYv9Krk", mood:"kick", speaker:"טוני רובינס", title:"אל תבזבז את החיים שלך", why:"תזכורת חדה למה אתה בכלל קם בבוקר.", q:"Tony Robbins Don't Waste Your Life motivational speech"},
+
+  /* ---------- משמעת ושגרה ---------- */
+  {id:"H7vRjyq7zJw", mood:"discipline", speaker:"ג׳ים רון", title:"לשלוט בחיים שלך דרך משמעת", why:"רון בשיא שלו. שקט, חכם, נכנס עמוק.", q:"Master Your Life with Discipline Jim Rohn"},
+  {id:"nLQcXJC0fFI", mood:"discipline", speaker:"ג׳ים רון", title:"הכוח של המשמעת", why:"למה פעולות קטנות שחוזרות מנצחות כישרון.", q:"The Power of Discipline Jim Rohn Motivation"},
+  {id:"KjSQIt48jhA", mood:"discipline", speaker:"ג׳ים רון", title:"משמעת מנצחת כישרון — כל פעם", why:"הרעיון שהכי שווה לשמוע פעמיים.", q:"Discipline Beats Talent Every Time Jim Rohn"},
+  {id:"1paoRdD1JuU", mood:"discipline", speaker:"ג׳ים רון", title:"משמעת מול חרטה", why:"כאב המשמעת שוקל גרמים. כאב החרטה שוקל טונות.", q:"Jim Rohn Discipline Vs Regret motivational speech"},
+  {id:"dPJGtmdaxYs", mood:"discipline", speaker:"ג׳ים רון", title:"משמעת של מחשבה", why:"על לשמור על הראש נקי לפני שמסדרים את היום.", q:"Discipline Your Thinking Jim Rohn Personal Development"},
+  {id:"gPx5J4E3h9o", mood:"discipline", speaker:"ג׳וקו וויליניק", title:"משמעת = חופש", why:"שיחה מלאה. הגישה הצבאית לשגרת בוקר.", q:"Jocko Willink Discipline Equals Freedom Danger Close Jack Carr"},
+  {id:"sV91uo6pcQg", mood:"discipline", speaker:"ג׳וקו וויליניק", title:"ג׳וקו מסביר: משמעת שווה חופש", why:"קצר ולעניין. הרעיון בגרסה הדחוסה.", q:"Jocko Willink Explains Discipline Equals Freedom"},
+  {id:"PEzQu9JYBfQ", mood:"discipline", speaker:"ג׳וקו × Akira The Don", title:"Discipline Equals Freedom — עם ביט", why:"הדברים שלו על מוזיקה. מסונכרן לקצב ריצה.", q:"Jocko Willink Discipline Equals Freedom Meaningwave Akira The Don"},
+  {id:"gR_f-iwUGY4", mood:"discipline", speaker:"אנדרו הוברמן", title:"שגרת הבוקר האופטימלית", why:"מדע, לא סיסמאות. אור, קפאין, תזמון.", q:"The Optimal Morning Routine Andrew Huberman"},
+  {id:"t-ezOLT2Kv0", mood:"discipline", speaker:"אנדרו הוברמן", title:"תעשה את זה ראשון בבוקר", why:"פרוטוקול אחד פשוט ששווה לנסות מחר.", q:"Do This First Thing In The Morning Andrew Huberman"},
+  {id:"XPkhwcP-ogk", mood:"discipline", speaker:"אנדרו הוברמן", title:"שגרת בוקר מלאה לאופטימיזציה", why:"הגרסה המפורטת. טובה לאימון ארוך.", q:"A Complete Morning Routine to OPTIMIZE Your Life Andrew Huberman"},
+  {id:"a0SsRsdBNy0", mood:"discipline", speaker:"אנדרו הוברמן", title:"ההרגלים היומיים שלו, מגובים במחקר", why:"מה הוא באמת עושה, שעה שעה.", q:"Andrew Huberman Daily Morning Routine for Success science backed habits"},
+
+  /* ---------- כסף ועסקים ---------- */
+  {id:"gEF67-G9MO0", mood:"money", speaker:"אלכס הורמוזי", title:"איך להרוויח כל כך הרבה שתשאל מה המשמעות", why:"שיחה ארוכה ומעשית. הכי טוב לריצה ארוכה.", q:"Alex Hormozi How To Make So Much Money You Question The Meaning Of It"},
+  {id:"68k355Fnse8", mood:"money", speaker:"אלכס הורמוזי", title:"הפלייבוק לבניית עסק של מיליארד", why:"איך לבחור את העסק הנכון, ואיפה נופלים.", q:"Alex Hormozi Playbook for Building Billion-Dollar Businesses"},
+  {id:"zRYrlSzZfaY", mood:"money", speaker:"אלכס הורמוזי", title:"שאלות ותשובות: AI, עושר, ואמת בפנים", why:"פורמט שאלות. כל דקה משהו חדש.", q:"Alex Hormozi Q&A AI Wealth Brutally Honest Business Advice"},
+  {id:"sdd4BST87ks", mood:"money", speaker:"אלכס הורמוזי", title:"איך הוא בנה אימפריה של 150 מיליון", why:"הסיפור מאחורי המספרים.", q:"Alex Hormozi How He Built A $150 Million Empire best business advice"},
+  {id:"B_rWF_W-WjA", mood:"money", speaker:"אלכס הורמוזי", title:"תהיה עשיר עד שהכסף יאבד משמעות", why:"על מה שקורה אחרי שמגיעים ליעד.", q:"Alex Hormozi Get So Rich That Money Becomes Meaningless"},
+  {id:"lidFtb1Ga0o", mood:"money", speaker:"אלכס הורמוזי", title:"מרוויח 1.5 מיליון בשנה — ונשאר עם 1.3%", why:"ניתוח חי של עסק אמיתי. לומדים המון.", q:"Alex Hormozi Answers Live He Makes 1.5M a Year Keeps 1.3%"},
+  {id:"thPVuEYMFos", mood:"money", speaker:"ג׳ים רון", title:"עושר מגיע דרך משמעת", why:"החיבור בין ההרגלים הקטנים לחשבון הבנק.", q:"Wealth Comes Through Discipline Jim Rohn"},
+  {id:"0nhkU_DImhU", mood:"money", speaker:"נבאל רביקנט", title:"איך להתעשר — הגרסה המעודכנת", why:"מה הוא היה משנה היום בשרשור המפורסם.", q:"How To Get Rich 2025 Update Naval Ravikant"},
+  {id:"6Mya4C3Yr7I", mood:"money", speaker:"נבאל רביקנט", title:"להתעשר בלי מזל", why:"עקרונות, לא טיפים. נשאר איתך אחרי הריצה.", q:"Naval Ravikant How To Get Rich Without Luck"},
+  {id:"5oNcoj4G0xc", mood:"money", speaker:"נבאל × ג׳ו רוגן", title:"עקרונות יצירת העושר", why:"שיחה פתוחה וארוכה על כסף ואושר.", q:"Naval Ravikant Joe Rogan How To Get Rich principles of wealth creation"},
+  {id:"UNcGCUJp1Q4", mood:"money", speaker:"נבאל רביקנט", title:"המגה־פודקאסט על עושר", why:"ארוך מאוד. מספיק לשלושה אימונים.", q:"How To Get Rich Mega Podcast Naval Ravikant"},
+
+  /* ---------- ראש שקט ---------- */
+  {id:"vBuphe8XLtU", mood:"mind", speaker:"טוני רובינס", title:"המיינדסט שמקדים 99% מהאנשים", why:"על איפה שמים את הפוקוס, ולמה זה קובע הכל.", q:"Tony Robbins The #1 Mindset To Get Ahead of 99% of People"},
+  {id:"rBK9vtdwEbs", mood:"mind", speaker:"טוני רובינס", title:"תשנה את המיינדסט", why:"יציאה מאזור הנוחות, בלי קלישאות.", q:"Change Your Mindset Tony Robbins motivational speech personal growth"},
+  {id:"_bOZtpcpDNc", mood:"mind", speaker:"טוני רובינס", title:"להיות בלתי שביר — בגוף, בראש ובכסף", why:"שלושת התחומים ביחד. תמונה רחבה.", q:"Tony Robbins Mindset How To Be Physically Spiritually Financially Unbreakable"},
+  {id:"CVP1CwEBz_Y", mood:"mind", speaker:"טוני רובינס", title:"אחרי זה תעשה הכל אחרת", why:"על לשנות את הדרך שאתה ניגש ליום.", q:"After This You'll Change How You Do Everything Tony Robbins"},
+  {id:"WjYmz5aqutM", mood:"mind", speaker:"ג׳ים רון", title:"תסמוך על עצמך", why:"שקט, בוגר, מיישב את הראש.", q:"Jim Rohn Personal Development Trust Yourself"},
+  {id:"tb5Cvbd9Wyo", mood:"mind", speaker:"ג׳ים רון", title:"לאמן את המחשבה להצלחה", why:"איך חושבים על היעדים בלי להילחץ מהם.", q:"Discipline Your Mind to Achieve Success Jim Rohn"}
+];
+
+var LEN_QUERY = {
+  all:        "motivational speech Jim Rohn Tony Robbins Alex Hormozi",
+  kick:       "David Goggins Les Brown motivational speech",
+  discipline: "Jim Rohn Jocko Willink discipline morning routine",
+  money:      "Alex Hormozi Naval Ravikant how to get rich business",
+  mind:       "Tony Robbins mindset Jim Rohn personal development"
+};
+var SP_MEDIUM = "EgIYAw%3D%3D";   /* 4–20 דקות, הפילטר של יוטיוב */
+var SP_LONG   = "EgIYAg%3D%3D";   /* מעל 20 דקות */
+var MOOD_NAME = {kick:"בעיטה בתחת", discipline:"משמעת ושגרה", money:"כסף ועסקים", mind:"ראש שקט"};
+
+var store = {
+  get:function(k,d){ try{ var v=localStorage.getItem("hl_"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set:function(k,v){ try{ localStorage.setItem("hl_"+k, JSON.stringify(v)); }catch(e){} }
+};
+var heard = store.get("heard", []);
+var saved = store.get("saved", []);
+var mood = "all";
+var current = null;
+
+function $(s){ return document.querySelector(s); }
+function watch(id){ return "https://www.youtube.com/watch?v=" + id; }
+function search(q, sp){
+  return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q) + (sp ? "&sp="+sp : "");
+}
+function isSaved(id){ for(var i=0;i<saved.length;i++){ if(saved[i].id===id) return true; } return false; }
+
+/* ============================================================
+   פתיחת קישורים.
+   כשהדף רץ בתוך מסגרת מבודדת (תצוגה מוטמעת, אפליקציה שמציגה
+   HTML), הדפדפן חוסם target="_blank" בלי להגיד מילה — הקישור
+   פשוט לא עושה כלום. לכן מנסים כאן ארבע דרכים לפי הסדר,
+   עד שאחת מהן עובדת.
+   ============================================================ */
+function openExternal(url){
+  var framed;
+  try{ framed = (window.top !== window.self); }catch(e){ framed = true; }
+
+  /* 1. הדרך הרגילה — חלון חדש. עובדת בכל דפדפן נורמלי. */
+  var w = null;
+  try{ w = window.open(url, "_blank"); }catch(e){ w = null; }
+  if(w){ try{ w.opener = null; }catch(e){} return true; }
+
+  /* 2. בתוך מסגרת: לנווט את החלון העליון. */
+  if(framed){
+    try{
+      window.top.location.href = url;
+      /* אם החסימה שקטה והדף עדיין כאן — נציע העתקה. */
+      setTimeout(function(){ rescue(url); }, 900);
+      return true;
+    }catch(e){}
+  }
+
+  /* 3. לא בתוך מסגרת: פשוט לנווט. (בתוך מסגרת אין טעם —
+        יוטיוב מסרב להיטען בתוך מסגרת ותקבל מסך ריק.) */
+  if(!framed){
+    try{ window.location.href = url; return true; }catch(e){}
+  }
+
+  return false;
+}
+
+function rescue(url){
+  var box = $("#rescue"), input = $("#rescue-url");
+  input.value = url;
+  box.classList.add("show");
+  try{ input.focus(); input.select(); }catch(e){}
+}
+
+$("#rescue-copy").addEventListener("click", function(){
+  var input = $("#rescue-url"), btn = this;
+  try{
+    input.select();
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(input.value);
+    else document.execCommand("copy");
+    btn.textContent = "הועתק";
+    setTimeout(function(){ btn.textContent = "העתק"; }, 1600);
+  }catch(e){}
+});
+$("#rescue-close").addEventListener("click", function(){ $("#rescue").classList.remove("show"); });
+
+/* כל קישור ליוטיוב בדף — כולל הרשימה המלאה ורשימות השמורים —
+   עובר דרך המנגנון שלמעלה, כדי שייפתח באפליקציית יוטיוב. */
+document.addEventListener("click", function(e){
+  var node = e.target, a = null;
+  while(node && node !== document){
+    if(node.tagName === "A" && node.getAttribute("href")){ a = node; break; }
+    node = node.parentNode;
+  }
+  if(!a) return;
+  var href = a.getAttribute("href");
+  if(!href || href.charAt(0) === "#") return;
+  if(href.indexOf("youtube.com") === -1) return;
+
+  e.preventDefault();
+  if(!openExternal(href)) rescue(href);
+});
+
+function pick(){
+  var pool = LIB.filter(function(x){ return mood==="all" || x.mood===mood; });
+  var recentIds = heard.slice(0, Math.min(12, pool.length-1)).map(function(h){ return h.id; });
+  var fresh = pool.filter(function(x){
+    return recentIds.indexOf(x.id)===-1 && (!current || x.id!==current.id);
+  });
+  if(!fresh.length) fresh = pool.filter(function(x){ return !current || x.id!==current.id; });
+  if(!fresh.length) fresh = pool;
+  return fresh[Math.floor(Math.random()*fresh.length)];
+}
+
+function el(tag, cls, text){
+  var n = document.createElement(tag);
+  if(cls) n.className = cls;
+  if(text != null) n.textContent = text;
+  return n;
+}
+
+function render(item){
+  current = item;
+  var s = $("#stage");
+  s.className = "stage";
+  s.textContent = "";
+
+  var meta = el("div","meta");
+  meta.appendChild(el("span","who",item.speaker));
+  meta.appendChild(el("span","cat",MOOD_NAME[item.mood]));
+  s.appendChild(meta);
+  s.appendChild(el("h2",null,item.title));
+  s.appendChild(el("p","why",item.why));
+
+  var acts = el("div","actions");
+
+  var play = el("a","act play","נגן ביוטיוב");
+  play.href = watch(item.id);
+  play.target = "_blank";
+  play.rel = "noopener";
+  play.addEventListener("click", markHeard);
+
+  var next = el("button","act","אחר");
+  next.type = "button";
+  next.addEventListener("click", function(){ render(pick()); });
+
+  var star = el("button","act sq", isSaved(item.id) ? "★" : "☆");
+  star.type = "button";
+  star.title = "שמור להמשך";
+  star.setAttribute("aria-label","שמור להמשך");
+  star.setAttribute("aria-pressed", String(isSaved(item.id)));
+  star.addEventListener("click", toggleSave);
+
+  acts.appendChild(play); acts.appendChild(next); acts.appendChild(star);
+  s.appendChild(acts);
+
+  var miss = el("a","miss","הסרטון לא עלה? חפש את ההרצאה הזאת ביוטיוב ←");
+  miss.href = search(item.q);
+  miss.target = "_blank";
+  miss.rel = "noopener";
+  s.appendChild(miss);
+}
+
+function markHeard(){
+  if(!current) return;
+  heard = heard.filter(function(h){ return h.id !== current.id; });
+  heard.unshift({id:current.id, title:current.title, speaker:current.speaker});
+  heard = heard.slice(0,25);
+  store.set("heard", heard);
+  drawLists();
+}
+
+function toggleSave(){
+  if(!current) return;
+  var was = isSaved(current.id);
+  if(was) saved = saved.filter(function(s){ return s.id !== current.id; });
+  else saved.unshift({id:current.id, title:current.title, speaker:current.speaker});
+  store.set("saved", saved);
+  this.textContent = was ? "☆" : "★";
+  this.setAttribute("aria-pressed", String(!was));
+  drawLists();
+}
+
+function rowFor(item, onRemove){
+  var r = el("div","row");
+  var a = el("a",null,item.title);
+  a.href = watch(item.id); a.target = "_blank"; a.rel = "noopener";
+  a.appendChild(el("small",null,item.speaker));
+  var b = el("button",null,"✕");
+  b.type = "button"; b.title = "הסר"; b.setAttribute("aria-label","הסר");
+  b.addEventListener("click", onRemove);
+  r.appendChild(a); r.appendChild(b);
+  return r;
+}
+
+function drawLists(){
+  var sl = $("#saved-list"), hl = $("#heard-list");
+  sl.textContent = ""; hl.textContent = "";
+
+  $("#saved-count").textContent = saved.length;
+  if(!saved.length) sl.appendChild(el("p","none","כלום עדיין. לחץ ☆ על משהו ששווה לשמור לפעם הבאה."));
+  else saved.forEach(function(item){
+    sl.appendChild(rowFor(item, function(){
+      saved = saved.filter(function(s){ return s.id !== item.id; });
+      store.set("saved", saved);
+      var star = $(".act.sq");
+      if(star && current && current.id === item.id){
+        star.textContent = "☆"; star.setAttribute("aria-pressed","false");
+      }
+      drawLists();
+    }));
+  });
+
+  $("#heard-count").textContent = heard.length;
+  if(!heard.length) hl.appendChild(el("p","none","מה שתנגן יופיע כאן, ולא יחזור אליך בקרוב."));
+  else heard.forEach(function(item){
+    hl.appendChild(rowFor(item, function(){
+      heard = heard.filter(function(h){ return h.id !== item.id; });
+      store.set("heard", heard);
+      drawLists();
+    }));
+  });
+}
+
+function updateLengthLinks(){
+  var q = LEN_QUERY[mood] || LEN_QUERY.all;
+  $("#len-short").href = search(q, SP_MEDIUM);
+  $("#len-long").href  = search(q, SP_LONG);
+}
+
+var chips = document.querySelectorAll("#moods .chip");
+for(var i=0;i<chips.length;i++){
+  chips[i].addEventListener("click", function(){
+    mood = this.dataset.mood;
+    for(var j=0;j<chips.length;j++) chips[j].setAttribute("aria-pressed", String(chips[j]===this));
+    updateLengthLinks();
+    if(current) render(pick());
+  });
+}
+
+$("#go").addEventListener("click", function(){ render(pick()); });
+
+/* כשה-JS רץ, המאגר המלא מתקפל לתוך אקורדיון.
+   אם ה-JS חסום, הוא פשוט נשאר פרוש — והדף עדיין שימושי. */
+(function collapseAll(){
+  var all = $("#all");
+  if(!all) return;
+  var d = el("details","box");
+  var sum = el("summary");
+  sum.appendChild(document.createTextNode("כל המאגר "));
+  sum.appendChild(el("span","n", String(LIB.length)));
+  d.appendChild(sum);
+  var body = el("div");
+  body.style.padding = "0 14px 12px";
+  while(all.children.length > 1) body.appendChild(all.children[1]);
+  d.appendChild(body);
+  all.querySelector(".label").remove();
+  all.appendChild(d);
+})();
+
+updateLengthLinks();
+drawLists();
+</script>
+</body>
+</html>
