@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אברהם המנעולן — מנעולן פרטי בכל הארץ</title>
+<meta name="description" content="פריצת דלתות, החלפת מנעולים, תיקון דלתות ופריצת רכבים ללא נזק. אברהם המנעולן, 10+ שנות ותק, זמין בכל הארץ. ייעוץ חינם בטלפון.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2312181f'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23c9a227' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23c9a227' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1c2128;
+    --muted: #5c5b52;
+    --bg: #f7f5f0;
+    --panel: #ffffff;
+    --panel-line: #e9e4d8;
+    --dark: #12181f;
+    --dark2: #1b232e;
+    --dark-line: rgba(255,255,255,0.09);
+    --gold: #c9a227;
+    --gold-soft: rgba(201,162,39,0.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    direction: rtl;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  img,svg{display:block;}
+  .container{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Buttons */
+  .btn-row{display:flex;gap:16px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:17px 34px;
+    border-radius:9px;
+    font-size:18px;
+    font-weight:700;
+    text-decoration:none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    cursor:pointer;
+    white-space:nowrap;
+    border: none;
+  }
+  .btn svg{width:20px;height:20px;flex-shrink:0;}
+  .btn:hover{transform: translateY(-2px);}
+  .btn-primary{
+    background: var(--gold);
+    color: var(--dark);
+    box-shadow: 0 10px 26px rgba(201,162,39,0.28);
+  }
+  .btn-primary:hover{background:#d9b53a;}
+  .btn-outline-light{
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    color: var(--panel);
+  }
+  .btn-outline-light:hover{border-color:#fff; background:rgba(255,255,255,0.06);}
+  .btn-outline-dark{
+    background: transparent;
+    border: 1.5px solid rgba(28,33,40,0.3);
+    color: var(--ink);
+  }
+  .btn-outline-dark:hover{border-color:var(--ink);}
+
+  /* Eyebrow / kicker */
+  .kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    color: var(--gold);
+    font-weight:700;
+    letter-spacing:0.4px;
+    font-size:14.5px;
+    border:1px solid rgba(201,162,39,0.45);
+    padding:7px 18px;
+    border-radius:30px;
+  }
+
+  /* HERO */
+  .hero{
+    background:
+      radial-gradient(700px 420px at 85% -10%, rgba(201,162,39,0.14), transparent 60%),
+      linear-gradient(165deg, #0f141a 0%, #1a232d 100%);
+    color: #fff;
+    padding: 108px 0 88px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-key{
+    position:absolute;
+    top:-40px;
+    left:-60px;
+    width:340px;
+    height:340px;
+    opacity:0.08;
+    pointer-events:none;
+  }
+  .hero .container{position:relative; z-index:1;}
+  .hero .kicker{margin-bottom:26px;}
+  .hero h1{
+    font-size: 45px;
+    font-weight:900;
+    max-width:800px;
+    margin: 0 auto 22px;
+    line-height:1.28;
+    letter-spacing:-0.3px;
+  }
+  .hero .sub{
+    font-size:19px;
+    color:#cfd3d8;
+    max-width:620px;
+    margin: 0 auto 42px;
+  }
+  .hero .btn-row{justify-content:center;}
+
+  /* TRUST STRIP */
+  .trust-strip{
+    background: var(--dark2);
+    border-top: 1px solid var(--dark-line);
+    padding: 30px 0;
+  }
+  .trust-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:20px;
+  }
+  .trust-item{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    text-align:right;
+    color:#e6e6e2;
+    font-size:15px;
+    font-weight:500;
+  }
+  .trust-item svg{width:22px;height:22px;flex-shrink:0;color:var(--gold);}
+
+  /* SECTIONS */
+  .section{padding: 96px 0;}
+  .section-title{
+    font-size:33px;
+    font-weight:900;
+    text-align:center;
+    margin-bottom:16px;
+    letter-spacing:-0.2px;
+  }
+  .section-sub{
+    text-align:center;
+    max-width:600px;
+    margin: 0 auto 56px;
+    color: var(--muted);
+    font-size:17px;
+  }
+  .divider{
+    width:56px;
+    height:3px;
+    background: var(--gold);
+    border-radius:3px;
+    margin: 0 auto 20px;
+  }
+
+  /* ABOUT / SERVICES */
+  .about-grid{
+    display:grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 52px;
+    align-items:start;
+  }
+  .about-text p{
+    font-size:17px;
+    margin-bottom:18px;
+    color:#33332e;
+  }
+  .about-text p strong{color: var(--ink);}
+  .services-card{
+    background: var(--panel);
+    border-radius:16px;
+    padding: 38px;
+    box-shadow: 0 16px 40px rgba(20,20,10,0.07);
+    border: 1px solid var(--panel-line);
+  }
+  .services-card h3{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color: var(--gold);
+    font-weight:800;
+    margin-bottom:20px;
+  }
+  .services-card ul{list-style:none;}
+  .services-card li{
+    padding: 15px 0;
+    border-bottom: 1px solid var(--panel-line);
+    font-size:16.5px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .services-card li:last-child{border-bottom:none;}
+  .services-card li svg{
+    width:30px;height:30px;flex-shrink:0;
+    background: var(--gold-soft);
+    color: var(--gold);
+    border-radius:50%;
+    padding:7px;
+  }
+
+  /* VALUE PROPS */
+  .values-section{background: var(--dark); color:#fff;}
+  .values-section .section-sub{color:#b7bcc3;}
+  .values-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+  }
+  .value-card{
+    background: var(--dark2);
+    border: 1px solid var(--dark-line);
+    border-radius:14px;
+    padding: 30px 26px;
+  }
+  .value-card .icon{
+    width:44px;height:44px;
+    border-radius:11px;
+    background: var(--gold-soft);
+    color: var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;
+  }
+  .value-card .icon svg{width:23px;height:23px;}
+  .value-card h3{font-size:18px;font-weight:800;margin-bottom:10px;}
+  .value-card p{font-size:15px;color:#c3c8cd;}
+
+  /* FAQ */
+  .faq-list{max-width:760px;margin:0 auto;}
+  details{
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius:12px;
+    padding: 6px 26px;
+    margin-bottom:14px;
+  }
+  details[open]{border-color: rgba(201,162,39,0.4);}
+  summary{
+    list-style:none;
+    cursor:pointer;
+    padding: 20px 0;
+    font-size:17.5px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary .plus{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border-radius:50%;
+    border:1.5px solid var(--gold);
+    color: var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;
+    font-weight:700;
+    transition: transform 0.2s ease;
+  }
+  details[open] summary .plus{transform:rotate(45deg);}
+  details p{
+    padding: 0 0 22px;
+    color: var(--muted);
+    font-size:16px;
+    max-width:640px;
+  }
+
+  /* SOCIAL */
+  .social-section{padding: 20px 0 96px;}
+  .social-grid{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .social-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background: var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:14px;
+    padding: 20px 28px;
+    text-decoration:none;
+    color: var(--ink);
+    min-width:230px;
+    box-shadow: 0 10px 26px rgba(20,20,10,0.05);
+    transition: transform 0.15s ease;
+  }
+  .social-card:hover{transform: translateY(-2px);}
+  .social-card .badge{
+    width:44px;height:44px;
+    border-radius:11px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .social-card .badge svg{width:24px;height:24px;}
+  .badge.fb{background:#1877f2;color:#fff;}
+  .badge.tiktok{background:#12181f;color:#fff;}
+  .social-card .txt strong{display:block;font-size:16px;}
+  .social-card .txt span{font-size:13.5px;color:var(--muted);}
+
+  /* CONTACT */
+  .contact-section{
+    padding: 96px 0 120px;
+    text-align:center;
+  }
+  .contact-details{
+    display:flex;
+    justify-content:center;
+    gap:56px;
+    flex-wrap:wrap;
+    margin: 40px 0 44px;
+  }
+  .contact-item{text-align:center;}
+  .contact-item .label{
+    font-size:13.5px;
+    color:#8a8a80;
+    margin-bottom:6px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    text-transform:uppercase;
+  }
+  .contact-item .value{
+    font-size:22px;
+    font-weight:800;
+    color: var(--ink);
+  }
+  .contact-item a{color: var(--ink); text-decoration:none;}
+  .contact-note{
+    max-width:480px;
+    margin: 0 auto 40px;
+    color: var(--muted);
+    font-size:15.5px;
+  }
+  .contact-section .btn-row{justify-content:center;}
+
+  /* FOOTER */
+  footer{
+    background:#0d1116;
+    color:#9aa0a6;
+    text-align:center;
+    padding: 40px 0 96px;
+    font-size:14px;
+  }
+  footer strong{color:#fff;font-size:16px;}
+  footer p{margin-top:6px;}
+
+  /* MOBILE STICKY CALL BAR */
+  .mobile-callbar{
+    display:none;
+    position: fixed;
+    bottom:0; right:0; left:0;
+    z-index: 50;
+    background: var(--dark);
+    border-top: 1px solid var(--dark-line);
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+  .mobile-callbar a{flex:1; padding:14px 10px; font-size:15.5px;}
+
+  @media (max-width: 860px){
+    .hero h1{font-size:32px;}
+    .about-grid{grid-template-columns:1fr;}
+    .trust-grid{grid-template-columns: repeat(2, 1fr);}
+    .trust-item{justify-content:flex-start;}
+    .values-grid{grid-template-columns: repeat(2, 1fr);}
+    .contact-details{gap:30px;}
+    .section{padding:64px 0;}
+    .hero{padding:64px 0 56px;}
+    .btn{width:100%;}
+    .btn-row{flex-direction:column;}
+    .hero-key{opacity:0.06;}
+    body{padding-bottom:76px;}
+    .mobile-callbar{display:flex;}
+    footer{padding-bottom:110px;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <svg class="hero-key" viewBox="0 0 200 200" fill="none">
+      <circle cx="70" cy="70" r="42" stroke="#c9a227" stroke-width="10"/>
+      <path d="M96 96 L175 175 M140 140 L120 160 M155 155 L135 175" stroke="#c9a227" stroke-width="10" stroke-linecap="round"/>
+    </svg>
+    <div class="container">
+      <span class="kicker">אברהם המנעולן · שירות בכל הארץ</span>
+      <h1>ננעלת בחוץ באמצע הלילה? אברהם עונה לטלפון</h1>
+      <p class="sub">פריצת דלתות, החלפת מנעולים, ורכב שנשארו בו המפתחות — בלי לחכות בחוץ ובלי הפתעות במחיר. שיחת טלפון קצרה, ותדעו בדיוק מה קורה.</p>
+      <div class="btn-row">
+        <a href="tel:+972522299868" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          התקשרו עכשיו
+        </a>
+        <a href="https://wa.me/972522299868" target="_blank" rel="noopener" class="btn btn-outline-light">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2m0 18.1h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 5.83 2.42 8.18 8.18 0 0 1 2.41 5.82c0 4.55-3.7 8.24-8.24 8.24m4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.24-.64.81-.78.97-.14.17-.29.19-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.43.06-.66.31-.22.24-.87.85-.87 2.08 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.25 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28"/></svg>
+          וואטסאפ
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip">
+    <div class="container">
+      <div class="trust-grid">
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 18 22l-6-3-6 3 2.5-8.5"/></svg>
+          10+ שנות ותק
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l8.42 8.42 8.42-8.42a5.4 5.4 0 0 0 0-7.65Z"/></svg>
+          זמין בכל הארץ
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          ייעוץ חינם בטלפון
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          שומר שבת · סגור בשישי־שבת
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT / SERVICES -->
+  <section class="section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <p><strong>אברהם עובד כמנעולן פרטי כבר למעלה מעשור</strong>, ומטפל בכל מה שקשור למנעולים ולדלתות — מבית שננעל בטעות ועד רכב שנשארו בו המפתחות. הוא לא יושב במשרד ולא מוגבל לעיר אחת: הוא פרילנסר שנע בכל הארץ, ומגיע גם כשהשעה לא נוחה לאף אחד אחר.</p>
+          <p>אין כאן מחירון קבוע, כי אין שתי עבודות זהות — דלת אחת שונה מהשנייה, ומנעול אחד שונה מהשני. במקום להעריך מרחוק ולפספס, אברהם מעדיף לדבר איתך בטלפון, להבין בדיוק מה קרה, ולתת מחיר אמיתי כבר בשיחה הראשונה. גם אם זה לוקח כמה דקות נוספות — עדיף להכיר לפני שסוגרים.</p>
+          <p>בשישי ובשבת הוא לא עונה לטלפון — שומר שבת, ולא עושה מזה חריגים. בשאר השבוע הוא זמין בכל שעה, כי מנעול שנתקע לא מחכה לשעות נוחות.</p>
+        </div>
+        <div class="services-card">
+          <h3>תחומי עבודה</h3>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 3 13l3 3 10-10z"/><path d="M11 5l4 4"/><path d="M8 8l3 3"/></svg>פריצת דלתות ומנעולים — בית, דירה ומשרד</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M12 12v8M9 17h6"/></svg>החלפת מנעולים בכל הסוגים</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1"/></svg>תיקון וכיוון דלתות</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2 4 12l6 6L20 8z"/><path d="M14 2l6 6"/></svg>החלפת פירזול לדלתות פנים וחוץ</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.5"/></svg>התקנת מנעולים חכמים</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 0 1-2-2v-2l2-5h14l2 5v2a2 2 0 0 1-2 2M5 17v2M19 17v2"/><circle cx="7.5" cy="14" r=".6" fill="currentColor"/><circle cx="16.5" cy="14" r=".6" fill="currentColor"/></svg>פריצת רכבים ללא נזק לרכב</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><path d="M9 12h6"/></svg>תיקון כל סוגי הדלתות</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUE PROPS -->
+  <section class="section values-section">
+    <div class="container">
+      <div class="divider"></div>
+      <h2 class="section-title">למה מתקשרים לאברהם</h2>
+      <p class="section-sub">לא הבטחות שיווקיות — ככה זה עובד בפועל.</p>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 18 22l-6-3-6 3 2.5-8.5"/></svg></div>
+          <h3>עשור בשטח</h3>
+          <p>לא סתם מישהו שלמד מסרטון. עשר שנים של דלתות, מנעולים ומצבים שלא כתובים באף מדריך.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 0 1-2-2v-2l2-5h14l2 5v2a2 2 0 0 1-2 2M5 17v2M19 17v2"/><circle cx="7.5" cy="14" r=".6" fill="currentColor"/><circle cx="16.5" cy="14" r=".6" fill="currentColor"/></svg></div>
+          <h3>בלי נזק לרכב</h3>
+          <p>פריצת רכב לא אמורה להיגמר בחלון שבור. אברהם פותח בזהירות — הרכב יוצא מזה בדיוק כמו שנכנס.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <h3>מחיר בטלפון, לא בהפתעה</h3>
+          <p>אין מחירון גנרי כי אין שתי עבודות זהות. מספרים מה קרה, מקבלים מחיר אמיתי, ורק אז סוגרים.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <h3>זמין כשצריך</h3>
+          <p>24 שעות ביממה, ימים א׳–ה׳. בשישי ושבת אברהם שומר שבת ולא עונה — בכל שאר הימים הוא כן.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="container">
+      <div class="divider"></div>
+      <h2 class="section-title">שאלות שכדאי לשאול לפני שמתקשרים</h2>
+      <p class="section-sub">ואם משהו לא ברור — הכי פשוט פשוט להתקשר ולשאול.</p>
+      <div class="faq-list">
+        <details>
+          <summary>למה אין מחירון באתר?<span class="plus">+</span></summary>
+          <p>כי מחיר שנקבע מרחוק בלי לראות את המנעול או הדלת הוא בעצם ניחוש. כל עבודה שונה — סוג המנעול, מצב הדלת, השעה ביום. שיחת טלפון של כמה דקות נותנת הערכה אמיתית, לא מספר סתמי שישתנה כשאברהם יגיע.</p>
+        </details>
+        <details>
+          <summary>באילו אזורים אתה עובד?<span class="plus">+</span></summary>
+          <p>בכל הארץ. אברהם לא יושב בעיר אחת — הוא פרילנסר נייד, ואם באזור מסוים הוא לא זמין באותו רגע, יש לו רשת מנעולנים שהוא עובד איתה ומפנה אליה עבודות, כך שתמיד יש מענה.</p>
+        </details>
+        <details>
+          <summary>מתי אפשר להתקשר?<span class="plus">+</span></summary>
+          <p>כל שעה, כל יום — חוץ משישי ושבת. אברהם שומר שבת, כך שבשני הימים האלה הטלפון לא ייענה. בשאר השבוע הוא זמין גם בלילה, כי מנעול שנתקע לא בוחר שעה נוחה.</p>
+        </details>
+        <details>
+          <summary>אתה פותח גם רכבים שננעלו?<span class="plus">+</span></summary>
+          <p>כן, וללא נזק לרכב — לא שוברים חלון ולא מקלקלים מנעול כדי לפתוח. אם המפתחות נשארו בפנים או שהשלט הפסיק לעבוד, זה בדיוק המקום להתקשר.</p>
+        </details>
+        <details>
+          <summary>מתקינים גם מנעולים חכמים?<span class="plus">+</span></summary>
+          <p>כן. גם שדרוג דלת קיימת למנעול חכם וגם התקנה מהתחלה — זה חלק מהעבודה הרגילה.</p>
+        </details>
+        <details>
+          <summary>כמה זמן לוקח שתגיע?<span class="plus">+</span></summary>
+          <p>תלוי איפה אתם ואיפה אברהם נמצא באותו רגע. בשיחת הטלפון תקבלו זמן הגעה משוער, בלי הבטחות סרק.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL -->
+  <section class="social-section">
+    <div class="container">
+      <div class="social-grid">
+        <a class="social-card" href="https://www.facebook.com/share/19DC8q36c1/" target="_blank" rel="noopener">
+          <span class="badge fb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12"/></svg></span>
+          <span class="txt"><strong>פייסבוק עסקי</strong><span>תמונות מעבודות אמיתיות</span></span>
+        </a>
+        <a class="social-card" href="https://www.tiktok.com/@avramoshayev" target="_blank" rel="noopener">
+          <span class="badge tiktok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.82c-.75-.82-1.16-1.89-1.16-3h-3.1v13.28a3.03 3.03 0 1 1-2.15-2.9V9.9a6.13 6.13 0 1 0 5.25 6.06V9.68a7.35 7.35 0 0 0 4.32 1.4V8.02c-1.1 0-2.13-.35-2.99-.98a4.4 4.4 0 0 1-.17-1.22"/></svg></span>
+          <span class="txt"><strong>טיקטוק</strong><span>@avramoshayev · סרטוני עבודה</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section">
+    <div class="container">
+      <div class="divider"></div>
+      <h2 class="section-title">מנעול שלא זז? רכב שנסגר?</h2>
+      <p class="contact-note">התקשרו או שלחו הודעה בוואטסאפ. שיחה קצרה, מחיר ברור, ואברהם בדרך.</p>
+      <div class="contact-details">
+        <div class="contact-item">
+          <div class="label">טלפון</div>
+          <div class="value"><a href="tel:+972522299868">052-229-9868</a></div>
+        </div>
+        <div class="contact-item">
+          <div class="label">אזור שירות</div>
+          <div class="value">כל הארץ</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <a href="tel:+972522299868" class="btn btn-primary">התקשרו עכשיו</a>
+        <a href="https://wa.me/972522299868" target="_blank" rel="noopener" class="btn btn-outline-dark">שלחו הודעה בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>אברהם המנעולן</strong> — מנעולן פרטי, פועל בכל הארץ</p>
+      <p>052-229-9868 · זמין 24 שעות, ימים א׳–ה׳ · שישי־שבת סגור</p>
+    </div>
+  </footer>
+
+  <!-- MOBILE STICKY CALL BAR -->
+  <div class="mobile-callbar">
+    <a href="tel:+972522299868" class="btn btn-primary">התקשרו</a>
+    <a href="https://wa.me/972522299868" target="_blank" rel="noopener" class="btn btn-outline-light">וואטסאפ</a>
+  </div>
+
+</body>
+</html>
