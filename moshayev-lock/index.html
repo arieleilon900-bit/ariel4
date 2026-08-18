@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>אברהם המנעולן — מנעולן פרטי בכל הארץ</title>
 <meta name="description" content="פריצת דלתות, החלפת מנעולים, תיקון דלתות ופריצת רכבים ללא נזק. אברהם המנעולן, 10+ שנות ותק, זמין בכל הארץ. ייעוץ חינם בטלפון.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2312181f'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23c9a227' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23c9a227' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2312181f'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23ee7d1a' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23ee7d1a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -18,8 +18,8 @@
     --dark: #12181f;
     --dark2: #1b232e;
     --dark-line: rgba(255,255,255,0.09);
-    --gold: #c9a227;
-    --gold-soft: rgba(201,162,39,0.14);
+    --gold: #ee7d1a;
+    --gold-soft: rgba(238,125,26,0.14);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -111,6 +111,11 @@
     pointer-events:none;
   }
   .hero .container{position:relative; z-index:1;}
+  .hero .logo{
+    height:76px;
+    width:auto;
+    margin: 0 auto 28px;
+  }
   .hero .kicker{margin-bottom:26px;}
   .hero h1{
     font-size: 45px;
@@ -384,6 +389,7 @@
   .mobile-callbar a{flex:1; padding:14px 10px; font-size:15.5px;}
 
   @media (max-width: 860px){
+    .hero .logo{height:56px; margin-bottom:22px;}
     .hero h1{font-size:32px;}
     .about-grid{grid-template-columns:1fr;}
     .trust-grid{grid-template-columns: repeat(2, 1fr);}
@@ -410,6 +416,7 @@
       <path d="M96 96 L175 175 M140 140 L120 160 M155 155 L135 175" stroke="#c9a227" stroke-width="10" stroke-linecap="round"/>
     </svg>
     <div class="container">
+      <img class="logo" src="logo.png" alt="אברהם המנעולן — פותח כל דלת">
       <span class="kicker">אברהם המנעולן · שירות בכל הארץ</span>
       <h1>ננעלת בחוץ באמצע הלילה? אברהם עונה לטלפון</h1>
       <p class="sub">פריצת דלתות, החלפת מנעולים, ורכב שנשארו בו המפתחות — בלי לחכות בחוץ ובלי הפתעות במחיר. שיחת טלפון קצרה, ותדעו בדיוק מה קורה.</p>
