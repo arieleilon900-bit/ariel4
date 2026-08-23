@@ -323,6 +323,43 @@
     .testi-card{flex-basis:80vw;}
   }
 
+  /* WORK HIGHLIGHTS CAROUSEL */
+  .work-carousel{position:relative;}
+  .work-track{
+    display:flex; gap:20px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    padding:4px 4px 10px; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .work-track::-webkit-scrollbar{display:none;}
+  .work-card{
+    flex:0 0 250px; scroll-snap-align:start; position:relative; overflow:hidden;
+    background:linear-gradient(155deg, var(--dark) 0%, var(--dark3) 100%);
+    border-radius:18px; padding:30px 26px; color:#fff; box-shadow:var(--shadow-sm);
+  }
+  .work-card::before{content:''; position:absolute; inset:0; background:radial-gradient(260px 200px at 100% 0%, rgba(238,125,26,0.16), transparent 60%);}
+  .work-card > *{position:relative;}
+  .work-card .ic{
+    width:48px; height:48px; border-radius:12px; background:rgba(238,125,26,0.16); color:var(--gold-light);
+    display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+  }
+  .work-card .ic svg{width:25px; height:25px;}
+  .work-card .stat{font-family:var(--font-display); font-size:32px; font-weight:700; margin-bottom:4px;}
+  .work-card h4{font-size:15px; font-weight:700; color:var(--gold-light); margin-bottom:10px;}
+  .work-card p{font-size:13.5px; color:#c6cbd2; line-height:1.6;}
+  .work-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; z-index:3;
+    background:var(--panel); border:1px solid var(--panel-line); box-shadow:var(--shadow-sm);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink);
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .work-arrow:hover{border-color:var(--gold); transform:translateY(-50%) scale(1.08);}
+  .work-arrow svg{width:20px; height:20px;}
+  .work-arrow.prev{right:-16px;}
+  .work-arrow.next{left:-16px;}
+  @media (max-width:760px){
+    .work-arrow{display:none;}
+    .work-card{flex-basis:64vw;}
+  }
+
   /* PRICING TRANSPARENCY */
   .pricing-card{
     background:linear-gradient(155deg, var(--dark) 0%, var(--dark3) 100%); color:#fff;
@@ -556,6 +593,56 @@
     </div>
   </section>
 
+  <!-- WORK HIGHLIGHTS -->
+  <section class="section">
+    <div class="container">
+      <div class="divider"></div>
+      <h2 class="section-title reveal">העבודה שלנו בקצרה</h2>
+      <p class="section-sub reveal">כל קריאה שונה, אבל התוצאה תמיד אותה תוצאה — פתרון נקי, בלי נזק.</p>
+      <div class="work-carousel">
+        <button type="button" class="work-arrow prev" id="workPrev" aria-label="הקודם">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <div class="work-track" id="workTrack">
+          <div class="work-card reveal">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 3 13l3 3 10-10z"/><path d="M11 5l4 4"/><path d="M8 8l3 3"/></svg></div>
+            <div class="stat">1,200+</div>
+            <h4>פריצת דלתות</h4>
+            <p>דלתות שנפתחו בהצלחה, בלי לשבור כלום ובלי לפגוע במנעול.</p>
+          </div>
+          <div class="work-card reveal">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 0 1-2-2v-2l2-5h14l2 5v2a2 2 0 0 1-2 2M5 17v2M19 17v2"/><circle cx="7.5" cy="14" r=".6" fill="currentColor"/><circle cx="16.5" cy="14" r=".6" fill="currentColor"/></svg></div>
+            <div class="stat">800+</div>
+            <h4>פריצת רכבים</h4>
+            <p>רכבים שנפתחו ללא שריטה אחת, בלי לגעת בגומיות או בצבע.</p>
+          </div>
+          <div class="work-card reveal">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.5"/></svg></div>
+            <div class="stat">300+</div>
+            <h4>מנעולים חכמים</h4>
+            <p>התקנות בבתים ובעסקים, כולל הדרכה מלאה על השימוש.</p>
+          </div>
+          <div class="work-card reveal">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="stat">24/7</div>
+            <h4>קריאות לילה</h4>
+            <p>זמינים גם בשלוש לפנות בוקר — מנעול תקוע לא בוחר שעה.</p>
+          </div>
+          <div class="work-card reveal">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5.25 3.75 9.75 9 11 5.25-1.25 9-5.75 9-11V6z"/></svg></div>
+            <div class="stat">100%</div>
+            <h4>אחריות בכתב</h4>
+            <p>על כל עבודה שיוצאת מתחת ידינו, בלי יוצא מן הכלל.</p>
+          </div>
+        </div>
+        <button type="button" class="work-arrow next" id="workNext" aria-label="הבא">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+      </div>
+      <div class="testi-dots" id="workDots"></div>
+    </div>
+  </section>
+
   <!-- VALUE PROPS -->
   <section class="section section-alt">
     <div class="container">
@@ -773,17 +860,18 @@
       });
     }
 
-    // testimonials carousel
-    var track = document.getElementById('testiTrack');
-    if (track) {
+    // generic carousel wiring (testimonials + work highlights)
+    function initCarousel(trackId, prevId, nextId, dotsId, dotLabel){
+      var track = document.getElementById(trackId);
+      if (!track) return;
       var cards = Array.prototype.slice.call(track.children);
-      var dotsWrap = document.getElementById('testiDots');
+      var dotsWrap = document.getElementById(dotsId);
       var rtl = getComputedStyle(track).direction === 'rtl';
       var dots = cards.map(function(_, i){
         var d = document.createElement('button');
         d.type = 'button';
         d.className = 'testi-dot' + (i === 0 ? ' active' : '');
-        d.setAttribute('aria-label', 'ביקורת ' + (i + 1));
+        d.setAttribute('aria-label', dotLabel + ' ' + (i + 1));
         d.addEventListener('click', function(){
           track.scrollTo({ left: (rtl ? -1 : 1) * i * step(), behavior: 'smooth' });
         });
@@ -792,16 +880,16 @@
       });
       function step(){
         var style = getComputedStyle(track);
-        return cards[0].getBoundingClientRect().width + parseFloat(style.columnGap || style.gap || 22);
+        return cards[0].getBoundingClientRect().width + parseFloat(style.columnGap || style.gap || 20);
       }
       function updateDots(){
         var idx = Math.max(0, Math.min(cards.length - 1, Math.round(Math.abs(track.scrollLeft) / step())));
         dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
       }
-      document.getElementById('testiNext').addEventListener('click', function(){
+      document.getElementById(nextId).addEventListener('click', function(){
         track.scrollBy({ left: (rtl ? -1 : 1) * step(), behavior: 'smooth' });
       });
-      document.getElementById('testiPrev').addEventListener('click', function(){
+      document.getElementById(prevId).addEventListener('click', function(){
         track.scrollBy({ left: (rtl ? 1 : -1) * step(), behavior: 'smooth' });
       });
       var scrollTimer;
@@ -810,6 +898,8 @@
         scrollTimer = setTimeout(updateDots, 80);
       });
     }
+    initCarousel('testiTrack', 'testiPrev', 'testiNext', 'testiDots', 'ביקורת');
+    initCarousel('workTrack', 'workPrev', 'workNext', 'workDots', 'קטגוריית עבודה');
   </script>
 
 </body>
