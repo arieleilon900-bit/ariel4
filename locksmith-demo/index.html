@@ -9,11 +9,11 @@
 <meta property="og:title" content="השם שלך — מנעולן מקצועי | זמין 24/7 בכל הארץ">
 <meta property="og:description" content="פריצת דלתות ורכבים ללא נזק, החלפת מנעולים והתקנת מנעולים חכמים. מחיר סופי בטלפון, בלי הפתעות. התקשרו עכשיו.">
 <meta property="og:image" content="images/locksmith-portrait.jpg">
-<meta name="theme-color" content="#0c0f14">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%230c0f14'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23c9a227' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23c9a227' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#12181f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2312181f'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23c9a227' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23c9a227' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@400;500;700;900&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -28,22 +28,24 @@
 </script>
 <style>
   :root{
-    --ink:#181c22;
-    --muted:#5c6169;
-    --muted-soft:#8a8f97;
-    --bg:#f9f7f2;
+    --ink:#1c2128;
+    --muted:#5c5b52;
+    --muted-soft:#8a8a80;
+    --bg:#f7f5f0;
     --panel:#ffffff;
-    --panel-line:#e9e3d4;
-    --dark:#0c0f14;
-    --dark2:#151a22;
-    --dark3:#1d2430;
-    --dark-line:rgba(255,255,255,0.08);
-    --gold:#c9a227;
-    --gold-light:#e0bc4a;
-    --gold-soft:rgba(201,162,39,0.14);
-    --gold-soft2:rgba(201,162,39,0.09);
-    --shadow-lg:0 24px 60px rgba(12,15,20,0.14);
-    --shadow-sm:0 10px 26px rgba(12,15,20,0.08);
+    --panel-line:#e9e4d8;
+    --dark:#12181f;
+    --dark2:#1b232e;
+    --dark3:#232e3c;
+    --dark-line:rgba(255,255,255,0.09);
+    --gold:#ee7d1a;
+    --gold-light:#f2a34e;
+    --brass:#c9a227;
+    --gold-soft:rgba(238,125,26,0.14);
+    --gold-soft2:rgba(201,162,39,0.10);
+    --font-display:'Frank Ruhl Libre', 'Heebo', serif;
+    --shadow-lg:0 24px 60px rgba(18,24,31,0.14);
+    --shadow-sm:0 10px 26px rgba(18,24,31,0.08);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -78,10 +80,10 @@
   .btn:hover{transform:translateY(-2px);}
   .btn-primary{
     background:linear-gradient(135deg, var(--gold-light), var(--gold) 65%);
-    color:#181205;
-    box-shadow:0 14px 30px rgba(201,162,39,0.32);
+    color:#1f1206;
+    box-shadow:0 14px 30px rgba(238,125,26,0.32);
   }
-  .btn-primary:hover{filter:brightness(1.06); box-shadow:0 18px 38px rgba(201,162,39,0.4);}
+  .btn-primary:hover{filter:brightness(1.06); box-shadow:0 18px 38px rgba(238,125,26,0.4);}
   .btn-outline-light{background:rgba(255,255,255,0.04); border:1.5px solid rgba(255,255,255,0.5); color:#fff; backdrop-filter:blur(6px);}
   .btn-outline-light:hover{border-color:#fff; background:rgba(255,255,255,0.09);}
   .btn-outline-dark{background:transparent; border:1.5px solid rgba(24,28,34,0.28); color:var(--ink);}
@@ -101,9 +103,11 @@
     text-align:center; color:var(--gold); font-weight:800; letter-spacing:1.5px;
     font-size:13px; text-transform:uppercase; margin-bottom:14px;
   }
-  .section-title{font-size:34px; font-weight:900; text-align:center; margin-bottom:16px; letter-spacing:-.3px;}
+  .section-title{font-family:var(--font-display); font-size:36px; font-weight:700; text-align:center; margin-bottom:16px; letter-spacing:-.2px; text-wrap:balance;}
   .section-sub{text-align:center; max-width:600px; margin:0 auto 54px; color:var(--muted); font-size:17px;}
-  .divider{width:56px; height:3px; background:linear-gradient(90deg,var(--gold),var(--gold-light)); border-radius:3px; margin:0 auto 18px;}
+  .divider{width:14px; height:24px; margin:0 auto 20px; position:relative;}
+  .divider::before{content:''; position:absolute; top:0; right:50%; transform:translateX(50%); width:11px; height:11px; border-radius:50%; border:2px solid var(--brass); background:transparent;}
+  .divider::after{content:''; position:absolute; bottom:0; right:50%; transform:translateX(50%); width:3px; height:11px; background:var(--brass); clip-path:polygon(50% 100%, 100% 0, 0 0);}
 
   /* NAV */
   .nav{
@@ -136,7 +140,7 @@
   .hero .container{position:relative; z-index:1;}
   .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:64px; align-items:center;}
   .hero-copy .kicker{margin-bottom:24px;}
-  .hero h1{font-size:47px; font-weight:900; line-height:1.24; letter-spacing:-.5px; margin-bottom:22px;}
+  .hero h1{font-family:var(--font-display); font-size:48px; font-weight:700; line-height:1.24; letter-spacing:-.3px; margin-bottom:22px; text-wrap:balance;}
   .hero h1 em{font-style:normal; color:var(--gold-light);}
   .hero .sub{font-size:18.5px; color:#c6cbd2; max-width:520px; margin-bottom:34px;}
   .hero-microtrust{display:flex; gap:22px; flex-wrap:wrap; margin-top:32px;}
@@ -227,6 +231,9 @@
   .service-card .ic svg{width:24px; height:24px;}
   .service-card h4{font-size:16.5px; font-weight:800; margin-bottom:7px;}
   .service-card p{font-size:14px; color:var(--muted);}
+  .svc-extra{display:none;}
+  .svc-extra.show{display:block;}
+  .svc-toggle-row{text-align:center; margin-top:20px;}
   @media (max-width:940px){ .about-grid{grid-template-columns:1fr;} }
   @media (max-width:560px){ .services-grid{grid-template-columns:1fr;} }
 
@@ -238,21 +245,20 @@
   }
   .process-section .container{position:relative;}
   .process-section .section-sub{color:#aeb4bc;}
-  .process-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px; position:relative;}
+  .process-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; position:relative; max-width:760px; margin:0 auto;}
   .process-grid::before{
-    content:''; position:absolute; top:29px; right:12.5%; left:12.5%; height:1px;
+    content:''; position:absolute; top:29px; right:16.5%; left:16.5%; height:1px;
     background:linear-gradient(90deg, transparent, rgba(201,162,39,0.4), transparent);
   }
   .process-step{position:relative; text-align:center; padding:0 8px;}
   .process-num{
     width:58px; height:58px; border-radius:50%; background:var(--dark2); border:1.5px solid var(--gold);
     color:var(--gold-light); font-size:21px; font-weight:900; display:flex; align-items:center; justify-content:center;
-    margin:0 auto 20px; position:relative; z-index:1;
+    margin:0 auto 18px; position:relative; z-index:1;
   }
-  .process-step h4{font-size:16.5px; font-weight:800; margin-bottom:9px;}
-  .process-step p{font-size:14px; color:#aeb4bc;}
+  .process-step h4{font-size:16.5px; font-weight:700; line-height:1.4;}
   @media (max-width:860px){
-    .process-grid{grid-template-columns:1fr; gap:34px;}
+    .process-grid{grid-template-columns:1fr; gap:30px;}
     .process-grid::before{display:none;}
   }
 
@@ -275,13 +281,19 @@
   /* TESTIMONIALS */
   .testi-head{display:flex; flex-direction:column; align-items:center; margin-bottom:52px;}
   .testi-score{display:flex; align-items:center; gap:14px; margin-top:6px;}
-  .testi-score .num{font-size:42px; font-weight:900; letter-spacing:-1px;}
+  .testi-score .num{font-family:var(--font-display); font-size:44px; font-weight:700; letter-spacing:-.5px;}
   .testi-score .stars{color:var(--gold); font-size:19px; letter-spacing:3px;}
   .testi-score .count{font-size:13.5px; color:var(--muted); font-weight:600;}
-  .testi-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+  .testi-carousel{position:relative;}
+  .testi-track{
+    display:flex; gap:22px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+    padding:4px 4px 10px; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .testi-track::-webkit-scrollbar{display:none;}
   .testi-card{
     background:var(--panel); border:1px solid var(--panel-line); border-radius:18px;
     padding:30px 28px; box-shadow:var(--shadow-sm); position:relative;
+    flex:0 0 320px; scroll-snap-align:start;
   }
   .testi-card .stars{color:var(--gold); font-size:15px; letter-spacing:2px; margin-bottom:16px;}
   .testi-card p{font-size:15.5px; color:#3a3a34; margin-bottom:22px; min-height:96px;}
@@ -293,7 +305,23 @@
   }
   .testi-person strong{display:block; font-size:14.5px; font-weight:800;}
   .testi-person span{font-size:12.5px; color:var(--muted-soft);}
-  @media (max-width:940px){ .testi-grid{grid-template-columns:1fr;} }
+  .testi-arrow{
+    position:absolute; top:78px; width:46px; height:46px; border-radius:50%; z-index:3;
+    background:var(--panel); border:1px solid var(--panel-line); box-shadow:var(--shadow-sm);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink);
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .testi-arrow:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .testi-arrow svg{width:20px; height:20px;}
+  .testi-arrow.prev{right:-16px;}
+  .testi-arrow.next{left:-16px;}
+  .testi-dots{display:flex; justify-content:center; gap:8px; margin-top:22px;}
+  .testi-dot{width:7px; height:7px; border-radius:50%; background:var(--panel-line); border:none; padding:0; cursor:pointer; transition:background .2s ease, transform .2s ease;}
+  .testi-dot.active{background:var(--gold); transform:scale(1.35);}
+  @media (max-width:760px){
+    .testi-arrow{display:none;}
+    .testi-card{flex-basis:80vw;}
+  }
 
   /* PRICING TRANSPARENCY */
   .pricing-card{
@@ -306,7 +334,7 @@
     background:radial-gradient(500px 320px at 100% 0%, rgba(201,162,39,0.14), transparent 60%);
   }
   .pricing-card > *{position:relative;}
-  .pricing-card h3{font-size:27px; font-weight:900; margin-bottom:16px; line-height:1.35;}
+  .pricing-card h3{font-family:var(--font-display); font-size:29px; font-weight:700; margin-bottom:16px; line-height:1.35; text-wrap:balance;}
   .pricing-card p.lead{color:#c6cbd2; font-size:15.5px; margin-bottom:0;}
   .pricing-list{list-style:none;}
   .pricing-list li{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--dark-line); font-size:15px; font-weight:500;}
@@ -333,7 +361,7 @@
       linear-gradient(165deg, #0a0d12 0%, #171f29 100%);
     color:#fff; text-align:center; padding:104px 0 110px; position:relative; overflow:hidden;
   }
-  .final-cta h2{font-size:37px; font-weight:900; max-width:680px; margin:0 auto 18px; line-height:1.3;}
+  .final-cta h2{font-family:var(--font-display); font-size:39px; font-weight:700; max-width:680px; margin:0 auto 18px; line-height:1.3; text-wrap:balance;}
   .final-cta p{color:#c6cbd2; font-size:17.5px; max-width:520px; margin:0 auto 40px;}
   .final-cta .btn-row{justify-content:center;}
   .final-cta .kicker{margin-bottom:26px;}
@@ -429,7 +457,7 @@
         </div>
         <div class="hero-photo-wrap">
           <div class="hero-badge-top">
-            <span class="pulse-dot"></span> טכנאי זמין כרגע באזורכם
+            <span class="pulse-dot"></span> מנעולן זמין כרגע באזורכם
           </div>
           <div class="hero-photo">
             <img src="images/locksmith-portrait.jpg" alt="מנעולן מקצועי בעבודה" loading="eager">
@@ -469,7 +497,7 @@
           <p>אין מחירון גנרי, כי אין שתי עבודות זהות. במקום להעריך מרחוק ולפספס, אנחנו מעדיפים לשמוע בדיוק מה קרה ולתת מחיר סופי כבר בשיחה הראשונה — כדי שתדעו בדיוק למה לצפות, לפני שמתחילים.</p>
           <div class="about-badges">
             <div class="about-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5.25 3.75 9.75 9 11 5.25-1.25 9-5.75 9-11V6z"/></svg>מבוטחים במלואם</div>
-            <div class="about-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 18 22l-6-3-6 3 2.5-8.5"/></svg>טכנאים מוסמכים</div>
+            <div class="about-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 18 22l-6-3-6 3 2.5-8.5"/></svg>מנעולנים מוסמכים</div>
             <div class="about-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>אחריות בכתב</div>
           </div>
         </div>
@@ -491,21 +519,24 @@
               <h4>מנעולים חכמים</h4>
               <p>התקנה ושדרוג לדלת קיימת, כולל הדרכה על השימוש.</p>
             </div>
-            <div class="service-card">
+            <div class="service-card svc-extra">
               <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17a2 2 0 0 1-2-2v-2l2-5h14l2 5v2a2 2 0 0 1-2 2M5 17v2M19 17v2"/><circle cx="7.5" cy="14" r=".6" fill="currentColor"/><circle cx="16.5" cy="14" r=".6" fill="currentColor"/></svg></div>
               <h4>פריצת רכבים</h4>
               <p>ללא נזק לרכב — לא שוברים חלון ולא מקלקלים מנעול.</p>
             </div>
-            <div class="service-card">
+            <div class="service-card svc-extra">
               <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1"/></svg></div>
               <h4>תיקון וכיוון דלתות</h4>
               <p>דלתות פנים, דלתות פלדה ופירזול בכל הסוגים.</p>
             </div>
-            <div class="service-card">
+            <div class="service-card svc-extra">
               <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 4v16M4 9h5"/></svg></div>
               <h4>כספות ומפתחות רכב</h4>
               <p>פתיחת כספות ושכפול מפתחות רכב, כולל שלטים.</p>
             </div>
+          </div>
+          <div class="svc-toggle-row">
+            <button type="button" id="svcToggle" class="btn btn-outline-dark btn-sm">הצג עוד שירותים</button>
           </div>
         </div>
       </div>
@@ -516,13 +547,11 @@
   <section class="section process-section">
     <div class="container">
       <div class="divider"></div>
-      <h2 class="section-title reveal">איך זה עובד — מהשיחה הראשונה ועד לפתרון</h2>
-      <p class="section-sub reveal">תהליך פשוט וברור, בלי בירוקרטיה ובלי הפתעות בדרך.</p>
+      <h2 class="section-title reveal">איך זה עובד</h2>
       <div class="process-grid">
-        <div class="process-step reveal"><div class="process-num">1</div><h4>מתקשרים ומספרים</h4><p>שיחה קצרה בה מבינים בדיוק מה קרה ואיפה אתם.</p></div>
-        <div class="process-step reveal"><div class="process-num">2</div><h4>מקבלים מחיר סופי</h4><p>הצעת מחיר ברורה כבר בטלפון — בלי לחכות להפתעות.</p></div>
-        <div class="process-step reveal"><div class="process-num">3</div><h4>הטכנאי בדרך</h4><p>הגעה מהירה, בממוצע תוך דקות מרגע האישור.</p></div>
-        <div class="process-step reveal"><div class="process-num">4</div><h4>הבעיה נפתרת</h4><p>עבודה מקצועית, בלי נזק, עם אחריות בכתב.</p></div>
+        <div class="process-step reveal"><div class="process-num">1</div><h4>מתקשרים ומספרים מה קרה</h4></div>
+        <div class="process-step reveal"><div class="process-num">2</div><h4>מקבלים מחיר סופי בטלפון</h4></div>
+        <div class="process-step reveal"><div class="process-num">3</div><h4>המנעולן מגיע ופותר</h4></div>
       </div>
     </div>
   </section>
@@ -572,23 +601,42 @@
           </div>
         </div>
       </div>
-      <div class="testi-grid">
-        <div class="testi-card reveal">
-          <div class="stars">★★★★★</div>
-          <p>"הגעתם תוך רבע שעה בלילה, ופתחתם את הדלת בלי לשבור כלום. שירות אמין ומקצועי, ממליצה בחום."</p>
-          <div class="testi-person"><div class="testi-avatar">ר.ל</div><div><strong>רונית ל.</strong><span>פריצת דלת בבית</span></div></div>
+      <div class="testi-carousel">
+        <button type="button" class="testi-arrow prev" id="testiPrev" aria-label="הביקורת הקודמת">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <div class="testi-track" id="testiTrack">
+          <div class="testi-card reveal">
+            <div class="stars">★★★★★</div>
+            <p>"הגעתם תוך רבע שעה בלילה, ופתחתם את הדלת בלי לשבור כלום. שירות אמין ומקצועי, ממליצה בחום."</p>
+            <div class="testi-person"><div class="testi-avatar">ר.ל</div><div><strong>רונית ל.</strong><span>פריצת דלת בבית</span></div></div>
+          </div>
+          <div class="testi-card reveal">
+            <div class="stars">★★★★★</div>
+            <p>"המחיר שקיבלתי בטלפון היה בדיוק מה ששילמתי בסוף. בלי הפתעות, בלי תוספות מוזרות. בדיוק מה שרציתי."</p>
+            <div class="testi-person"><div class="testi-avatar">י.כ</div><div><strong>יוסי כ.</strong><span>נעילת מפתחות ברכב</span></div></div>
+          </div>
+          <div class="testi-card reveal">
+            <div class="stars">★★★★★</div>
+            <p>"התקינו לי מנעול חכם בבית תוך חצי שעה, והסבירו בסבלנות איך להשתמש בו. שירות ברמה גבוהה מאוד."</p>
+            <div class="testi-person"><div class="testi-avatar">מ.ש</div><div><strong>מירב ש.</strong><span>התקנת מנעול חכם</span></div></div>
+          </div>
+          <div class="testi-card reveal">
+            <div class="stars">★★★★★</div>
+            <p>"פרצתם לי את הרכב תוך עשר דקות, בלי לגעת בצבע או בגומיות. מקצוענים אמיתיים, בול בזמן."</p>
+            <div class="testi-person"><div class="testi-avatar">ע.פ</div><div><strong>עידו פ.</strong><span>פריצת רכב</span></div></div>
+          </div>
+          <div class="testi-card reveal">
+            <div class="stars">★★★★★</div>
+            <p>"התקשרתי בשתיים בלילה בלי תקווה שמישהו יענה, ותוך שעה כבר הייתם כאן. שירות שלא שוכחים."</p>
+            <div class="testi-person"><div class="testi-avatar">ש.א</div><div><strong>שירה א.</strong><span>פריצת דלת בלילה</span></div></div>
+          </div>
         </div>
-        <div class="testi-card reveal">
-          <div class="stars">★★★★★</div>
-          <p>"המחיר שקיבלתי בטלפון היה בדיוק מה ששילמתי בסוף. בלי הפתעות, בלי תוספות מוזרות. בדיוק מה שרציתי."</p>
-          <div class="testi-person"><div class="testi-avatar">י.כ</div><div><strong>יוסי כ.</strong><span>נעילת מפתחות ברכב</span></div></div>
-        </div>
-        <div class="testi-card reveal">
-          <div class="stars">★★★★★</div>
-          <p>"התקינו לי מנעול חכם בבית תוך חצי שעה, והסבירו בסבלנות איך להשתמש בו. שירות ברמה גבוהה מאוד."</p>
-          <div class="testi-person"><div class="testi-avatar">מ.ש</div><div><strong>מירב ש.</strong><span>התקנת מנעול חכם</span></div></div>
-        </div>
+        <button type="button" class="testi-arrow next" id="testiNext" aria-label="הביקורת הבאה">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
       </div>
+      <div class="testi-dots" id="testiDots"></div>
     </div>
   </section>
 
@@ -639,7 +687,7 @@
         </details>
         <details>
           <summary>כמה זמן לוקח שתגיעו?<span class="plus">+</span></summary>
-          <p>תלוי היכן אתם ואיפה הטכנאי הקרוב נמצא באותו רגע. בשיחת הטלפון תקבלו זמן הגעה משוער, בלי הבטחות סרק.</p>
+          <p>תלוי היכן אתם ואיפה המנעולן הקרוב נמצא באותו רגע. בשיחת הטלפון תקבלו זמן הגעה משוער, בלי הבטחות סרק.</p>
         </details>
       </div>
     </div>
@@ -653,7 +701,7 @@
         זמינים כרגע
       </span>
       <h2>ננעלתם? אל תישארו בחוץ.</h2>
-      <p>שיחה קצרה, מחיר ברור, וטכנאי בדרך אליכם. פתרון מקצועי — בלי נזק ובלי הפתעות.</p>
+      <p>שיחה קצרה, מחיר ברור, ומנעולן בדרך אליכם. פתרון מקצועי — בלי נזק ובלי הפתעות.</p>
       <div class="btn-row">
         <a href="tel:+972500000000" class="btn btn-primary">התקשרו עכשיו — 050-000-0000</a>
         <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
@@ -712,6 +760,55 @@
       document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
     } else {
       document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+    }
+
+    // services show-more toggle
+    var svcBtn = document.getElementById('svcToggle');
+    if (svcBtn) {
+      svcBtn.addEventListener('click', function(){
+        var extras = document.querySelectorAll('.svc-extra');
+        var willShow = !extras[0].classList.contains('show');
+        extras.forEach(function(el){ el.classList.toggle('show', willShow); });
+        svcBtn.textContent = willShow ? 'הצג פחות' : 'הצג עוד שירותים';
+      });
+    }
+
+    // testimonials carousel
+    var track = document.getElementById('testiTrack');
+    if (track) {
+      var cards = Array.prototype.slice.call(track.children);
+      var dotsWrap = document.getElementById('testiDots');
+      var rtl = getComputedStyle(track).direction === 'rtl';
+      var dots = cards.map(function(_, i){
+        var d = document.createElement('button');
+        d.type = 'button';
+        d.className = 'testi-dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', 'ביקורת ' + (i + 1));
+        d.addEventListener('click', function(){
+          track.scrollTo({ left: (rtl ? -1 : 1) * i * step(), behavior: 'smooth' });
+        });
+        dotsWrap.appendChild(d);
+        return d;
+      });
+      function step(){
+        var style = getComputedStyle(track);
+        return cards[0].getBoundingClientRect().width + parseFloat(style.columnGap || style.gap || 22);
+      }
+      function updateDots(){
+        var idx = Math.max(0, Math.min(cards.length - 1, Math.round(Math.abs(track.scrollLeft) / step())));
+        dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
+      }
+      document.getElementById('testiNext').addEventListener('click', function(){
+        track.scrollBy({ left: (rtl ? -1 : 1) * step(), behavior: 'smooth' });
+      });
+      document.getElementById('testiPrev').addEventListener('click', function(){
+        track.scrollBy({ left: (rtl ? 1 : -1) * step(), behavior: 'smooth' });
+      });
+      var scrollTimer;
+      track.addEventListener('scroll', function(){
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(updateDots, 80);
+      });
     }
   </script>
 
