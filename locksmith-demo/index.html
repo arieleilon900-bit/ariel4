@@ -218,26 +218,6 @@
   @media (max-width:940px){ .about-grid{grid-template-columns:1fr;} }
   @media (max-width:560px){ .services-grid{grid-template-columns:1fr;} }
 
-  /* PROCESS */
-  .process-section{background:var(--dark); color:#fff;}
-  .process-section .section-sub{color:#aeb4bc;}
-  .process-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; position:relative; max-width:760px; margin:0 auto;}
-  .process-grid::before{
-    content:''; position:absolute; top:29px; right:16.5%; left:16.5%; height:1px;
-    background:linear-gradient(90deg, transparent, rgba(201,162,39,0.4), transparent);
-  }
-  .process-step{position:relative; text-align:center; padding:0 8px;}
-  .process-num{
-    width:58px; height:58px; border-radius:50%; background:var(--dark2); border:1.5px solid var(--gold);
-    color:var(--gold); font-size:21px; font-weight:900; display:flex; align-items:center; justify-content:center;
-    margin:0 auto 18px; position:relative; z-index:1;
-  }
-  .process-step h4{font-size:16.5px; font-weight:700; line-height:1.4;}
-  @media (max-width:860px){
-    .process-grid{grid-template-columns:1fr; gap:30px;}
-    .process-grid::before{display:none;}
-  }
-
   /* VALUE PROPS */
   .values-section{background:var(--dark); color:#fff;}
   .values-section .section-sub{color:#b7bcc3;}
@@ -550,19 +530,6 @@
             <button type="button" id="svcToggle" class="btn btn-outline-dark btn-sm">הצג עוד שירותים</button>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PROCESS -->
-  <section class="section process-section">
-    <div class="container">
-      <div class="divider"></div>
-      <h2 class="section-title reveal">איך זה עובד</h2>
-      <div class="process-grid">
-        <div class="process-step reveal"><div class="process-num">1</div><h4>מתקשרים ומספרים מה קרה</h4></div>
-        <div class="process-step reveal"><div class="process-num">2</div><h4>מקבלים מחיר סופי בטלפון</h4></div>
-        <div class="process-step reveal"><div class="process-num">3</div><h4>המנעולן מגיע ופותר</h4></div>
       </div>
     </div>
   </section>
