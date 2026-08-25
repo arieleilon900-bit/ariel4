@@ -9,8 +9,8 @@
 <meta property="og:title" content="השם שלך — מנעולן מקצועי | זמין 24/7 בכל הארץ">
 <meta property="og:description" content="פריצת דלתות ורכבים ללא נזק, החלפת מנעולים והתקנת מנעולים חכמים. מחיר סופי בטלפון, בלי הפתעות. התקשרו עכשיו.">
 <meta property="og:image" content="images/locksmith-portrait.jpg">
-<meta name="theme-color" content="#ee7d1a">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ee7d1a'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#12795f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2312795f'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -36,10 +36,10 @@
     --panel:#ffffff;
     --panel-line:#f0e1c9;
     --line-on-gold:rgba(255,255,255,0.28);
-    --gold:#ee7d1a;
-    --gold-deep:#c8590f;
-    --brass:#c9a227;
-    --gold-soft:rgba(238,125,26,0.12);
+    --gold:#12795f;
+    --gold-deep:#0c5c47;
+    --brass:#3f9c7d;
+    --gold-soft:rgba(18,121,95,0.12);
     --font-display:'Frank Ruhl Libre', 'Heebo', serif;
     --shadow-sm:0 10px 26px rgba(20,20,10,0.06);
     --shadow-md:0 16px 40px rgba(20,20,10,0.09);
@@ -78,7 +78,7 @@
   .btn-primary{
     background:var(--gold);
     color:#fff;
-    box-shadow:0 10px 26px rgba(201,162,39,0.3);
+    box-shadow:0 10px 26px rgba(12,92,71,0.3);
   }
   .btn-primary:hover{background:var(--gold-deep);}
   .btn-white{background:#fff; color:var(--gold-deep); box-shadow:0 10px 26px rgba(0,0,0,0.14);}
@@ -92,7 +92,7 @@
   .kicker{
     display:inline-flex; align-items:center; gap:8px; color:var(--gold);
     font-weight:700; letter-spacing:.4px; font-size:14.5px;
-    border:1px solid rgba(201,162,39,0.45); background:transparent;
+    border:1px solid rgba(12,92,71,0.4); background:transparent;
     padding:7px 18px; border-radius:30px;
   }
   .kicker svg{width:15px; height:15px;}
@@ -117,7 +117,7 @@
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
   .wordmark .key-badge svg{width:20px; height:20px; color:var(--gold);}
-  .wordmark span.slot{color:var(--gold); border-bottom:1.5px dashed rgba(238,125,26,0.55); padding-bottom:1px;}
+  .wordmark span.slot{color:var(--gold); border-bottom:1.5px dashed rgba(18,121,95,0.5); padding-bottom:1px;}
   .nav-right{display:flex; align-items:center; gap:22px;}
   .nav-phone{display:flex; align-items:center; gap:9px; color:var(--ink); font-weight:700; font-size:15.5px; text-decoration:none;}
   .nav-phone svg{width:18px; height:18px; color:var(--gold);}
@@ -126,7 +126,7 @@
   /* HERO */
   .hero{
     background:
-      radial-gradient(900px 520px at 85% -15%, rgba(238,125,26,0.10), transparent 60%),
+      radial-gradient(900px 520px at 85% -15%, rgba(18,121,95,0.09), transparent 60%),
       var(--bg);
     color:var(--ink); padding:108px 0 88px; text-align:center; position:relative; overflow:hidden;
   }
@@ -138,7 +138,7 @@
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
   }
   .hero-logo .key-badge svg{width:21px; height:21px; color:var(--gold);}
-  .hero-logo .slot{color:var(--gold); border-bottom:1.5px dashed rgba(238,125,26,0.55); padding-bottom:1px;}
+  .hero-logo .slot{color:var(--gold); border-bottom:1.5px dashed rgba(18,121,95,0.5); padding-bottom:1px;}
   .hero .kicker{margin-bottom:26px;}
   .hero h1{font-family:var(--font-display); font-size:45px; font-weight:700; max-width:800px; margin:0 auto 22px; line-height:1.28; letter-spacing:-.3px; text-wrap:balance;}
   .hero h1 em{font-style:normal; color:var(--gold);}
@@ -334,7 +334,7 @@
   /* FAQ */
   .faq-list{max-width:780px; margin:0 auto;}
   details{background:var(--panel); border:1px solid var(--panel-line); border-radius:13px; padding:6px 26px; margin-bottom:14px; transition:border-color .2s ease;}
-  details[open]{border-color:rgba(201,162,39,0.45);}
+  details[open]{border-color:rgba(12,92,71,0.4);}
   summary{list-style:none; cursor:pointer; padding:21px 0; font-size:17px; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:16px;}
   summary::-webkit-details-marker{display:none;}
   summary .plus{flex-shrink:0; width:27px; height:27px; border-radius:50%; border:1.5px solid var(--gold); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; transition:transform .2s ease;}
@@ -413,8 +413,8 @@
   <!-- HERO -->
   <section class="hero" id="top">
     <svg class="hero-key" viewBox="0 0 200 200" fill="none">
-      <circle cx="70" cy="70" r="42" stroke="#c9a227" stroke-width="10"/>
-      <path d="M96 96 L175 175 M140 140 L120 160 M155 155 L135 175" stroke="#c9a227" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="70" cy="70" r="42" stroke="#3f9c7d" stroke-width="10"/>
+      <path d="M96 96 L175 175 M140 140 L120 160 M155 155 L135 175" stroke="#3f9c7d" stroke-width="10" stroke-linecap="round"/>
     </svg>
     <div class="container">
       <a href="#top" class="hero-logo">
