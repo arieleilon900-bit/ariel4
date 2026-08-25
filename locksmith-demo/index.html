@@ -9,8 +9,8 @@
 <meta property="og:title" content="השם שלך — מנעולן מקצועי | זמין 24/7 בכל הארץ">
 <meta property="og:description" content="פריצת דלתות ורכבים ללא נזק, החלפת מנעולים והתקנת מנעולים חכמים. מחיר סופי בטלפון, בלי הפתעות. התקשרו עכשיו.">
 <meta property="og:image" content="images/locksmith-portrait.jpg">
-<meta name="theme-color" content="#12181f">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%2312181f'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23c9a227' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23c9a227' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#ee7d1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23ee7d1a'/%3E%3Ccircle cx='26' cy='24' r='9' fill='none' stroke='%23ffffff' stroke-width='4'/%3E%3Cpath d='M31 30 L48 47 M41 37 L36 42 M46 42 L41 47' stroke='%23ffffff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Frank+Ruhl+Libre:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -31,18 +31,18 @@
     --ink:#1c2128;
     --muted:#5c5b52;
     --muted-soft:#8a8a80;
-    --bg:#f7f5f0;
+    --bg:#ffffff;
+    --alt-bg:#fff4e7;
     --panel:#ffffff;
-    --panel-line:#e9e4d8;
-    --dark:#12181f;
-    --dark2:#1b232e;
-    --dark-line:rgba(255,255,255,0.09);
+    --panel-line:#f0e1c9;
+    --line-on-gold:rgba(255,255,255,0.28);
     --gold:#ee7d1a;
+    --gold-deep:#c8590f;
     --brass:#c9a227;
-    --gold-soft:rgba(238,125,26,0.14);
+    --gold-soft:rgba(238,125,26,0.12);
     --font-display:'Frank Ruhl Libre', 'Heebo', serif;
-    --shadow-sm:0 10px 26px rgba(20,20,10,0.05);
-    --shadow-md:0 16px 40px rgba(20,20,10,0.07);
+    --shadow-sm:0 10px 26px rgba(20,20,10,0.06);
+    --shadow-md:0 16px 40px rgba(20,20,10,0.09);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -77,13 +77,15 @@
   .btn:hover{transform:translateY(-2px);}
   .btn-primary{
     background:var(--gold);
-    color:var(--dark);
-    box-shadow:0 10px 26px rgba(201,162,39,0.28);
+    color:#fff;
+    box-shadow:0 10px 26px rgba(201,162,39,0.3);
   }
-  .btn-primary:hover{background:#d9b53a;}
-  .btn-outline-light{background:transparent; border:1.5px solid rgba(255,255,255,0.55); color:var(--panel);}
-  .btn-outline-light:hover{border-color:#fff; background:rgba(255,255,255,0.06);}
-  .btn-outline-dark{background:transparent; border:1.5px solid rgba(28,33,40,0.3); color:var(--ink);}
+  .btn-primary:hover{background:var(--gold-deep);}
+  .btn-white{background:#fff; color:var(--gold-deep); box-shadow:0 10px 26px rgba(0,0,0,0.14);}
+  .btn-white:hover{background:#fff4e7;}
+  .btn-outline-light{background:transparent; border:1.5px solid rgba(255,255,255,0.6); color:#fff;}
+  .btn-outline-light:hover{border-color:#fff; background:rgba(255,255,255,0.12);}
+  .btn-outline-dark{background:transparent; border:1.5px solid rgba(28,33,40,0.25); color:var(--ink);}
   .btn-outline-dark:hover{border-color:var(--ink);}
   .btn-sm{padding:12px 22px; font-size:15px; border-radius:8px;}
 
@@ -106,10 +108,10 @@
   /* NAV */
   .nav{
     position:sticky; top:0; z-index:60;
-    background:var(--dark); border-bottom:1px solid var(--dark-line);
+    background:#fff; border-bottom:1px solid var(--panel-line);
   }
   .nav .container{display:flex; align-items:center; justify-content:space-between; height:76px;}
-  .wordmark{display:flex; align-items:center; gap:10px; color:#fff; font-weight:800; font-size:19px; text-decoration:none;}
+  .wordmark{display:flex; align-items:center; gap:10px; color:var(--ink); font-weight:800; font-size:19px; text-decoration:none;}
   .wordmark .key-badge{
     width:38px; height:38px; border-radius:10px; background:var(--gold-soft);
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -117,20 +119,20 @@
   .wordmark .key-badge svg{width:20px; height:20px; color:var(--gold);}
   .wordmark span.slot{color:var(--gold); border-bottom:1.5px dashed rgba(238,125,26,0.55); padding-bottom:1px;}
   .nav-right{display:flex; align-items:center; gap:22px;}
-  .nav-phone{display:flex; align-items:center; gap:9px; color:#e7e8ea; font-weight:700; font-size:15.5px; text-decoration:none;}
+  .nav-phone{display:flex; align-items:center; gap:9px; color:var(--ink); font-weight:700; font-size:15.5px; text-decoration:none;}
   .nav-phone svg{width:18px; height:18px; color:var(--gold);}
   @media (max-width:680px){ .nav-phone span{display:none;} }
 
   /* HERO */
   .hero{
     background:
-      radial-gradient(700px 420px at 85% -10%, rgba(201,162,39,0.14), transparent 60%),
-      linear-gradient(165deg, #0f141a 0%, #1a232d 100%);
-    color:#fff; padding:108px 0 88px; text-align:center; position:relative; overflow:hidden;
+      radial-gradient(900px 520px at 85% -15%, rgba(238,125,26,0.10), transparent 60%),
+      var(--bg);
+    color:var(--ink); padding:108px 0 88px; text-align:center; position:relative; overflow:hidden;
   }
-  .hero-key{position:absolute; top:-40px; left:-60px; width:340px; height:340px; opacity:.08; pointer-events:none;}
+  .hero-key{position:absolute; top:-40px; left:-60px; width:340px; height:340px; opacity:.1; pointer-events:none;}
   .hero .container{position:relative; z-index:1;}
-  .hero-logo{display:inline-flex; align-items:center; gap:10px; color:#fff; font-weight:800; font-size:20px; text-decoration:none; margin:0 auto 28px;}
+  .hero-logo{display:inline-flex; align-items:center; gap:10px; color:var(--ink); font-weight:800; font-size:20px; text-decoration:none; margin:0 auto 28px;}
   .hero-logo .key-badge{
     width:40px; height:40px; border-radius:10px; background:var(--gold-soft);
     display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -140,7 +142,7 @@
   .hero .kicker{margin-bottom:26px;}
   .hero h1{font-family:var(--font-display); font-size:45px; font-weight:700; max-width:800px; margin:0 auto 22px; line-height:1.28; letter-spacing:-.3px; text-wrap:balance;}
   .hero h1 em{font-style:normal; color:var(--gold);}
-  .hero .sub{font-size:19px; color:#cfd3d8; max-width:620px; margin:0 auto 42px;}
+  .hero .sub{font-size:19px; color:var(--muted); max-width:620px; margin:0 auto 42px;}
   .hero .btn-row{justify-content:center;}
 
   @media (max-width:860px){
@@ -169,23 +171,23 @@
   }
 
   /* TRUST STRIP */
-  .trust-strip{background:var(--dark2); border-top:1px solid var(--dark-line); border-bottom:1px solid var(--dark-line); padding:0;}
+  .trust-strip{background:var(--gold-deep); padding:0;}
   .trust-grid{display:grid; grid-template-columns:repeat(4,1fr);}
   .trust-item{
-    text-align:center; padding:34px 20px; border-inline-start:1px solid var(--dark-line);
+    text-align:center; padding:34px 20px; border-inline-start:1px solid var(--line-on-gold);
   }
   .trust-item:first-child{border-inline-start:none;}
   .trust-item strong{display:block; font-size:30px; font-weight:900; color:#fff; letter-spacing:-.5px;}
-  .trust-item strong .gold{color:var(--gold);}
-  .trust-item span{display:block; font-size:13.5px; color:#a6acb5; margin-top:6px; font-weight:500;}
+  .trust-item strong .gold{color:#fff;}
+  .trust-item span{display:block; font-size:13.5px; color:rgba(255,255,255,0.8); margin-top:6px; font-weight:500;}
   @media (max-width:760px){
     .trust-grid{grid-template-columns:repeat(2,1fr);}
-    .trust-item{border-inline-start:none; border-bottom:1px solid var(--dark-line); padding:26px 14px;}
+    .trust-item{border-inline-start:none; border-bottom:1px solid var(--line-on-gold); padding:26px 14px;}
   }
 
   /* SECTIONS */
   .section{padding:104px 0;}
-  .section-alt{background:var(--panel);}
+  .section-alt{background:var(--alt-bg);}
 
   /* ABOUT / SERVICES */
   .about-grid{display:grid; grid-template-columns:.92fr 1.08fr; gap:60px; align-items:start;}
@@ -219,20 +221,19 @@
   @media (max-width:560px){ .services-grid{grid-template-columns:1fr;} }
 
   /* VALUE PROPS */
-  .values-section{background:var(--dark); color:#fff;}
-  .values-section .section-sub{color:#b7bcc3;}
+  .values-section{background:var(--alt-bg);}
   .values-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
   .value-card{
-    background:var(--dark2); border:1px solid var(--dark-line); border-radius:14px;
-    padding:30px 26px;
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:14px;
+    padding:30px 26px; box-shadow:var(--shadow-sm);
   }
   .value-card .icon{
     width:44px; height:44px; border-radius:11px; background:var(--gold-soft); color:var(--gold);
     display:flex; align-items:center; justify-content:center; margin-bottom:18px;
   }
   .value-card .icon svg{width:23px; height:23px;}
-  .value-card h3{font-size:18px; font-weight:800; margin-bottom:10px;}
-  .value-card p{font-size:15px; color:#c3c8cd;}
+  .value-card h3{font-size:18px; font-weight:800; margin-bottom:10px; color:var(--ink);}
+  .value-card p{font-size:15px; color:var(--muted);}
   @media (max-width:940px){ .values-grid{grid-template-columns:repeat(2,1fr);} }
 
   /* TESTIMONIALS */
@@ -256,8 +257,8 @@
   .testi-card p{font-size:15.5px; color:#3a3a34; margin-bottom:22px; min-height:96px;}
   .testi-person{display:flex; align-items:center; gap:12px;}
   .testi-avatar{
-    width:42px; height:42px; border-radius:50%; background:var(--dark);
-    color:var(--gold); display:flex; align-items:center; justify-content:center;
+    width:42px; height:42px; border-radius:50%; background:var(--gold);
+    color:#fff; display:flex; align-items:center; justify-content:center;
     font-weight:800; font-size:15px; flex-shrink:0;
   }
   .testi-person strong{display:block; font-size:14.5px; font-weight:800;}
@@ -289,17 +290,17 @@
   .work-track::-webkit-scrollbar{display:none;}
   .work-card{
     flex:0 0 250px; scroll-snap-align:start;
-    background:var(--dark2); border:1px solid var(--dark-line);
-    border-radius:14px; padding:30px 26px; color:#fff;
+    background:var(--panel); border:1px solid var(--panel-line);
+    border-radius:14px; padding:30px 26px; color:var(--ink); box-shadow:var(--shadow-sm);
   }
   .work-card .ic{
     width:44px; height:44px; border-radius:11px; background:var(--gold-soft); color:var(--gold);
     display:flex; align-items:center; justify-content:center; margin-bottom:22px;
   }
   .work-card .ic svg{width:25px; height:25px;}
-  .work-card .stat{font-family:var(--font-display); font-size:32px; font-weight:700; margin-bottom:4px;}
-  .work-card h4{font-size:15px; font-weight:700; color:var(--gold); margin-bottom:10px;}
-  .work-card p{font-size:13.5px; color:#c3c8cd; line-height:1.6;}
+  .work-card .stat{font-family:var(--font-display); font-size:32px; font-weight:700; margin-bottom:4px; color:var(--ink);}
+  .work-card h4{font-size:15px; font-weight:700; color:var(--gold-deep); margin-bottom:10px;}
+  .work-card p{font-size:13.5px; color:var(--muted); line-height:1.6;}
   .work-arrow{
     position:absolute; top:50%; transform:translateY(-50%); width:46px; height:46px; border-radius:50%; z-index:3;
     background:var(--panel); border:1px solid var(--panel-line); box-shadow:var(--shadow-sm);
@@ -317,15 +318,15 @@
 
   /* PRICING TRANSPARENCY */
   .pricing-card{
-    background:var(--dark); color:#fff;
+    background:var(--gold-deep); color:#fff;
     border-radius:18px; padding:56px 60px; display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;
   }
   .pricing-card h3{font-family:var(--font-display); font-size:29px; font-weight:700; margin-bottom:16px; line-height:1.35; text-wrap:balance;}
-  .pricing-card p.lead{color:#c3c8cd; font-size:15.5px; margin-bottom:0;}
+  .pricing-card p.lead{color:rgba(255,255,255,0.85); font-size:15.5px; margin-bottom:0;}
   .pricing-list{list-style:none;}
-  .pricing-list li{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--dark-line); font-size:15px; font-weight:500;}
+  .pricing-list li{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-on-gold); font-size:15px; font-weight:500;}
   .pricing-list li:last-child{border-bottom:none;}
-  .pricing-list svg{width:20px; height:20px; color:var(--gold); flex-shrink:0; margin-top:1px;}
+  .pricing-list svg{width:20px; height:20px; color:#fff; flex-shrink:0; margin-top:1px;}
   @media (max-width:860px){
     .pricing-card{grid-template-columns:1fr; padding:40px 28px; gap:30px;}
   }
@@ -342,25 +343,23 @@
 
   /* FINAL CTA */
   .final-cta{
-    background:
-      radial-gradient(700px 420px at 85% -10%, rgba(201,162,39,0.14), transparent 60%),
-      linear-gradient(165deg, #0f141a 0%, #1a232d 100%);
+    background:var(--gold-deep);
     color:#fff; text-align:center; padding:104px 0 110px;
   }
   .final-cta h2{font-family:var(--font-display); font-size:39px; font-weight:700; max-width:680px; margin:0 auto 18px; line-height:1.3; text-wrap:balance;}
-  .final-cta p{color:#cfd3d8; font-size:17.5px; max-width:520px; margin:0 auto 40px;}
+  .final-cta p{color:rgba(255,255,255,0.85); font-size:17.5px; max-width:520px; margin:0 auto 40px;}
   .final-cta .btn-row{justify-content:center;}
-  .final-cta .kicker{margin-bottom:26px;}
+  .final-cta .kicker{margin-bottom:26px; color:#fff; border-color:var(--line-on-gold);}
 
   /* FOOTER */
-  footer{background:#0d1116; color:#9aa0a6; padding:56px 0 40px; font-size:14px;}
-  .footer-grid{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:32px; padding-bottom:34px; border-bottom:1px solid var(--dark-line); margin-bottom:26px;}
-  .footer-brand .wordmark{margin-bottom:12px;}
-  .footer-brand p{max-width:320px; color:#7d828a; font-size:13.5px;}
-  .footer-col h5{color:#e7e8ea; font-size:13.5px; font-weight:800; margin-bottom:14px; letter-spacing:.3px;}
-  .footer-col a{display:block; color:#8a8f97; text-decoration:none; font-size:14px; margin-bottom:10px; transition:color .15s ease;}
-  .footer-col a:hover{color:var(--gold);}
-  .footer-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12.5px; color:#63676e;}
+  footer{background:var(--alt-bg); color:var(--muted); padding:56px 0 40px; font-size:14px;}
+  .footer-grid{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:32px; padding-bottom:34px; border-bottom:1px solid var(--panel-line); margin-bottom:26px;}
+  .footer-brand .wordmark{margin-bottom:12px; color:var(--ink);}
+  .footer-brand p{max-width:320px; color:var(--muted); font-size:13.5px;}
+  .footer-col h5{color:var(--ink); font-size:13.5px; font-weight:800; margin-bottom:14px; letter-spacing:.3px;}
+  .footer-col a{display:block; color:var(--muted); text-decoration:none; font-size:14px; margin-bottom:10px; transition:color .15s ease;}
+  .footer-col a:hover{color:var(--gold-deep);}
+  .footer-bottom{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:12.5px; color:var(--muted-soft);}
 
   /* WHATSAPP FLOAT */
   .wa-float{
@@ -374,8 +373,9 @@
 
   /* MOBILE STICKY CALL BAR */
   .mobile-callbar{
-    display:none; position:fixed; bottom:0; right:0; left:0; z-index:60; background:var(--dark);
-    border-top:1px solid var(--dark-line); padding:10px 14px calc(10px + env(safe-area-inset-bottom)); gap:10px;
+    display:none; position:fixed; bottom:0; right:0; left:0; z-index:60; background:#fff;
+    border-top:1px solid var(--panel-line); padding:10px 14px calc(10px + env(safe-area-inset-bottom)); gap:10px;
+    box-shadow:0 -8px 24px rgba(20,20,10,0.08);
   }
   .mobile-callbar a{flex:1; padding:14px 10px; font-size:15px;}
 
@@ -434,7 +434,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           התקשרו עכשיו
         </a>
-        <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn btn-outline-light">
+        <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn btn-outline-dark">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2m0 18.1h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.25-8.23a8.2 8.2 0 0 1 5.83 2.42 8.18 8.18 0 0 1 2.41 5.82c0 4.55-3.7 8.24-8.24 8.24m4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.24-.64.81-.78.97-.14.17-.29.19-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.43.06-.66.31-.22.24-.87.85-.87 2.08 0 1.22.89 2.4 1.02 2.57.12.16 1.75 2.67 4.25 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28"/></svg>
           וואטסאפ מיידי
         </a>
@@ -535,7 +535,7 @@
   </section>
 
   <!-- WORK HIGHLIGHTS -->
-  <section class="section">
+  <section class="section section-alt">
     <div class="container">
       <div class="divider"></div>
       <h2 class="section-title reveal">העבודה שלנו בקצרה</h2>
@@ -731,7 +731,7 @@
       <h2>ננעלתם? אל תישארו בחוץ.</h2>
       <p>שיחה קצרה, מחיר ברור, ומנעולן בדרך אליכם. פתרון מקצועי — בלי נזק ובלי הפתעות.</p>
       <div class="btn-row">
-        <a href="tel:+972500000000" class="btn btn-primary">התקשרו עכשיו — 050-000-0000</a>
+        <a href="tel:+972500000000" class="btn btn-white">התקשרו עכשיו — 050-000-0000</a>
         <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn btn-outline-light">שלחו הודעה בוואטסאפ</a>
       </div>
     </div>
@@ -776,7 +776,7 @@
   <!-- MOBILE STICKY CALL BAR -->
   <div class="mobile-callbar">
     <a href="tel:+972500000000" class="btn btn-primary">התקשרו</a>
-    <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn btn-outline-light">וואטסאפ</a>
+    <a href="https://wa.me/972500000000" target="_blank" rel="noopener" class="btn btn-outline-dark">וואטסאפ</a>
   </div>
 
   <script>
