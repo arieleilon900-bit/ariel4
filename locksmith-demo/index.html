@@ -316,21 +316,6 @@
     .work-card{flex-basis:64vw;}
   }
 
-  /* PRICING TRANSPARENCY */
-  .pricing-card{
-    background:var(--gold-deep); color:#fff;
-    border-radius:18px; padding:56px 60px; display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center;
-  }
-  .pricing-card h3{font-family:var(--font-display); font-size:29px; font-weight:700; margin-bottom:16px; line-height:1.35; text-wrap:balance;}
-  .pricing-card p.lead{color:rgba(255,255,255,0.85); font-size:15.5px; margin-bottom:0;}
-  .pricing-list{list-style:none;}
-  .pricing-list li{display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-on-gold); font-size:15px; font-weight:500;}
-  .pricing-list li:last-child{border-bottom:none;}
-  .pricing-list svg{width:20px; height:20px; color:#fff; flex-shrink:0; margin-top:1px;}
-  @media (max-width:860px){
-    .pricing-card{grid-template-columns:1fr; padding:40px 28px; gap:30px;}
-  }
-
   /* FAQ */
   .faq-list{max-width:780px; margin:0 auto;}
   details{background:var(--panel); border:1px solid var(--panel-line); border-radius:13px; padding:6px 26px; margin-bottom:14px; transition:border-color .2s ease;}
@@ -382,7 +367,6 @@
   @media (max-width:860px){
     .section{padding:70px 0;}
     .section-title{font-size:27px;}
-    .pricing-card{border-radius:18px;}
     body{padding-bottom:78px;}
     .mobile-callbar{display:flex;}
     footer{padding-bottom:20px;}
@@ -535,7 +519,7 @@
   </section>
 
   <!-- WORK HIGHLIGHTS -->
-  <section class="section section-alt">
+  <section class="section">
     <div class="container">
       <div class="divider"></div>
       <h2 class="section-title reveal">העבודה שלנו בקצרה</h2>
@@ -668,26 +652,8 @@
     </div>
   </section>
 
-  <!-- PRICING TRANSPARENCY -->
-  <section class="section section-alt">
-    <div class="container">
-      <div class="pricing-card reveal">
-        <div>
-          <h3>שקיפות מלאה במחיר — בלי אותיות קטנות</h3>
-          <p class="lead">אנחנו יודעים שהחשש הכי גדול הוא "כמה זה יעלה בסוף". לכן קבענו לעצמנו כללים ברורים ולא זזים מהם.</p>
-        </div>
-        <ul class="pricing-list">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>מחיר סופי נמסר בטלפון, לפני ההגעה</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>אין דמי נסיעה נסתרים או תוספות בהפתעה</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>תשלום רק על עבודה שבוצעה בפועל</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>אשראי, ביט או מזומן — כרצונכם</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
   <!-- FAQ -->
-  <section class="section">
+  <section class="section section-alt">
     <div class="container">
       <div class="divider"></div>
       <h2 class="section-title reveal">שאלות שכדאי לשאול לפני שמתקשרים</h2>
