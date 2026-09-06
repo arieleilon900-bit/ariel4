@@ -163,40 +163,55 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
   .mobile-panel a{padding:var(--sp-12) 0; font-size:var(--fs-lg); font-weight:var(--fw-medium); color:var(--text-primary); border-block-end:1px solid var(--border-default);}
 }
 
-/* ---------- hero (full-bleed) ---------- */
-.hero{position:relative; padding-block:var(--sp-96) var(--sp-80); overflow:clip;}
-.hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:var(--sp-48); align-items:center;}
-.hero-copy .eyebrow{margin-block-end:var(--sp-20);}
-.hero-copy h1{margin-block-end:var(--sp-24);}
-.hero-copy h1 em{font-style:normal; color:var(--accent-text);}
-.hero-copy .lead{margin-block-end:var(--sp-32);}
-.hero-cta{display:flex; flex-wrap:wrap; gap:var(--sp-16); margin-block-end:var(--sp-40);}
-.hero-trust{display:flex; flex-wrap:wrap; gap:var(--sp-24); color:var(--text-tertiary); font-size:var(--fs-sm);}
-.hero-trust li{display:flex; align-items:center; gap:var(--sp-8);}
-.hero-trust svg{inline-size:16px; block-size:16px; color:var(--accent-text); flex-shrink:0;}
-.hero-visual{position:relative; aspect-ratio:1/1; border-radius:var(--radius-xl); display:flex; align-items:center; justify-content:center; perspective:1200px;}
-.hero-glow{position:absolute; inset-block-start:-20%; inset-inline-end:-10%; inline-size:60%; block-size:60%;
-  background:radial-gradient(circle, rgba(245,158,11,.16), transparent 70%); pointer-events:none;}
+/* ---------- lock intro: pinned, scroll-scrubbed opening sequence ---------- */
+.lock-intro{position:relative; block-size:230vh;}
+.lock-stage{
+  position:sticky; top:0; inset-inline:0; block-size:100vh; overflow:clip;
+  display:flex; align-items:center; justify-content:center; background:var(--surface-page);
+}
+.hero-glow{position:absolute; inset-block-start:-10%; inset-inline-end:-6%; inline-size:60%; block-size:60%;
+  background:radial-gradient(circle, rgba(245,158,11,.14), transparent 70%); pointer-events:none;}
 
-/* self-contained CSS 3D medallion -- no external script, always renders */
-.coin3d{position:relative; inline-size:52%; aspect-ratio:1/1; transform-style:preserve-3d; animation:coin-spin 9s linear infinite;}
-.coin3d:hover{animation-play-state:paused;}
-.coin-face{
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  border-radius:var(--radius-lg); backface-visibility:hidden;
-  background:linear-gradient(160deg, var(--surface-raised), var(--surface-card));
-  border:2px solid var(--accent); box-shadow:var(--shadow-lg);
+.lock-illustration{position:relative; z-index:2; inline-size:min(30vh, 220px); aspect-ratio:200/220;
+  color:var(--accent); filter:drop-shadow(0 24px 48px rgba(245,158,11,.28));}
+.lock-svg{inline-size:100%; block-size:100%; overflow:visible;}
+.lock-shackle{transform-box:fill-box; transform-origin:76% 100%;}
+.lock-body{fill:var(--accent);}
+.lock-keyhole,.lock-keyhole-stem{fill:var(--gray-950);}
+
+.lock-copy{position:absolute; top:50%; max-inline-size:380px; z-index:2; opacity:0;}
+.lock-copy--start{inset-inline-start:max(4vw, 20px);}
+.lock-copy--end{inset-inline-start:auto; inset-inline-end:max(4vw, 20px);}
+.lock-copy h1{font-size:clamp(var(--fs-4xl), 4.4vw + 1rem, var(--fs-6xl)); margin-block:var(--sp-20) var(--sp-24);}
+.lock-copy h1 em{font-style:normal; color:var(--accent-text);}
+.lock-copy .lead{margin-block-end:var(--sp-32);}
+.hero-cta{display:flex; flex-wrap:wrap; gap:var(--sp-16);}
+.hero-trust{display:flex; flex-direction:column; gap:var(--sp-20); color:var(--text-tertiary); font-size:var(--fs-sm);}
+.hero-trust li{display:flex; align-items:center; gap:var(--sp-10);}
+.hero-trust svg{inline-size:18px; block-size:18px; color:var(--accent-text); flex-shrink:0;}
+
+.scroll-cue{
+  position:absolute; z-index:2; inset-block-end:var(--sp-32); inset-inline:0; display:flex; flex-direction:column;
+  align-items:center; gap:var(--sp-8); color:var(--text-tertiary); font-size:var(--fs-xs);
+  animation:cue-bob 1.8s var(--ease-in-out) infinite;
 }
-.coin-front{transform:translateZ(1px);}
-.coin-back{transform:rotateY(180deg) translateZ(1px);}
-.coin-front svg{inline-size:48%; block-size:48%; color:var(--accent);}
-.coin-back span{font-weight:var(--fw-black); font-size:var(--fs-2xl); color:var(--accent-text); letter-spacing:.06em;}
-@keyframes coin-spin{ from{transform:rotateY(0deg);} to{transform:rotateY(360deg);} }
-@media (prefers-reduced-motion: reduce){ .coin3d{animation:none; transform:rotateY(-22deg);} }
+.scroll-cue svg{inline-size:18px; block-size:18px;}
+@keyframes cue-bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
+
 @media (max-width:900px){
-  .hero-grid{grid-template-columns:1fr;}
-  .hero-visual{max-inline-size:340px; margin-inline:auto; order:-1;}
+  .lock-intro{block-size:auto;}
+  .lock-stage{
+    position:static; block-size:auto; flex-direction:column; gap:var(--sp-40);
+    padding-block:var(--sp-64) var(--sp-48); text-align:center;
+  }
+  .lock-illustration{inline-size:140px;}
+  .lock-illustration .lock-shackle{transform:rotate(-52deg);}
+  .lock-copy{position:static; opacity:1; max-inline-size:420px; margin-inline:auto;}
+  .lock-copy .hero-cta{justify-content:center;}
+  .hero-trust{align-items:center;}
+  .scroll-cue{display:none;}
 }
+@media (prefers-reduced-motion: reduce){ .scroll-cue{animation:none;} }
 
 /* ---------- stat band (full-width, breaks rhythm) ---------- */
 .stat-band{background:var(--surface-sunken); border-block:1px solid var(--border-default); padding-block:var(--sp-48);}
@@ -379,11 +394,23 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
 
 <main id="main">
 
-  <!-- HERO -->
-  <section class="hero" id="top" aria-labelledby="hero-title">
-    <div class="hero-glow" aria-hidden="true"></div>
-    <div class="container hero-grid">
-      <div class="hero-copy">
+  <!-- LOCK INTRO: pinned, scroll-scrubbed opening -->
+  <section class="lock-intro" id="lockIntro" aria-labelledby="hero-title">
+    <div class="lock-stage" id="lockStage">
+      <div class="hero-glow" aria-hidden="true"></div>
+
+      <div class="lock-illustration" id="lockIllustration" aria-hidden="true">
+        <svg class="lock-svg" viewBox="0 0 200 220">
+          <g class="lock-shackle" id="lockShackle">
+            <path d="M60 92 V56 a40 40 0 0 1 80 0 V92" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round"/>
+          </g>
+          <rect class="lock-body" x="32" y="86" width="136" height="106" rx="18"/>
+          <circle class="lock-keyhole" cx="100" cy="130" r="14"/>
+          <rect class="lock-keyhole-stem" x="92" y="139" width="16" height="32" rx="6"/>
+        </svg>
+      </div>
+
+      <div class="lock-copy lock-copy--start" id="lockCopyStart">
         <span class="eyebrow">זמינות 24 שעות, כל ימות השנה</span>
         <h1 id="hero-title" class="h-display">השומר <em>שלא נרדם</em></h1>
         <p class="lead">פריצת דלתות, החלפת צילינדרים ומערכות אבטחה חכמות. צוות מוסמך מגיע תוך דקות, בלי לשבור את הדלת ובלי הפתעות במחיר.</p>
@@ -397,6 +424,9 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           </a>
         </div>
+      </div>
+
+      <div class="lock-copy lock-copy--end" id="lockCopyEnd">
         <ul class="hero-trust">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3Z"/><path d="M9 12l2 2 4-4"/></svg> טכנאים מוסמכים ומבוטחים</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> הגעה ממוצעת: 9-14 דקות</li>
@@ -404,17 +434,9 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
         </ul>
       </div>
 
-      <div class="hero-visual" aria-hidden="true">
-        <div class="coin3d">
-          <div class="coin-face coin-front">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-              <rect x="4" y="11" width="16" height="10" rx="2"/>
-              <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
-              <circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/>
-            </svg>
-          </div>
-          <div class="coin-face coin-back"><span>ARGOS</span></div>
-        </div>
+      <div class="scroll-cue" id="scrollCue">
+        <span>גללו למטה</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </div>
     </div>
   </section>
@@ -728,6 +750,83 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
 document.addEventListener('DOMContentLoaded', function () {
   'use strict';
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- lock intro: scroll-scrubbed opening ---------- */
+  (function () {
+    var intro = document.getElementById('lockIntro');
+    var shackle = document.getElementById('lockShackle');
+    var illo = document.getElementById('lockIllustration');
+    var copyStart = document.getElementById('lockCopyStart');
+    var copyEnd = document.getElementById('lockCopyEnd');
+    var cue = document.getElementById('scrollCue');
+    if (!intro || !shackle) return;
+
+    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+    function smoothstep(v) { return v * v * (3 - 2 * v); }
+
+    // Desktop only: drives the pinned scroll sequence (shackle, side copy, cue).
+    // Mobile relies entirely on the stacked, always-visible CSS layout below --
+    // no inline styles are applied there, so nothing can fight the CSS.
+    function applyProgress(p) {
+      var shacklePhase = clamp01(p / 0.42);
+      shackle.style.transform = 'rotate(' + (shacklePhase * -58) + 'deg)';
+
+      var settlePhase = clamp01((p - 0.32) / 0.28);
+      illo.style.transform = 'scale(' + (1 - settlePhase * 0.3) + ')';
+
+      var copyPhase = smoothstep(clamp01((p - 0.28) / 0.5));
+      copyStart.style.opacity = String(copyPhase);
+      copyStart.style.transform = 'translate(' + (-36 + copyPhase * 36) + 'px, -50%)';
+      copyEnd.style.opacity = String(copyPhase);
+      copyEnd.style.transform = 'translate(' + (36 - copyPhase * 36) + 'px, -50%)';
+
+      if (cue) cue.style.opacity = String(clamp01(1 - p / 0.06));
+    }
+
+    function clearInlineStyles() {
+      [shackle, illo, copyStart, copyEnd].forEach(function (el) {
+        el.style.transform = '';
+      });
+      copyStart.style.opacity = '';
+      copyEnd.style.opacity = '';
+      if (cue) cue.style.opacity = '';
+    }
+
+    var isDesktop = window.matchMedia('(min-width: 901px)').matches;
+    var ticking = false;
+
+    function measureAndApply() {
+      ticking = false;
+      if (!isDesktop) return;
+      var total = intro.offsetHeight - window.innerHeight;
+      var scrolled = -intro.getBoundingClientRect().top;
+      applyProgress(total > 0 ? clamp01(scrolled / total) : 1);
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(measureAndApply);
+    }
+
+    if (!isDesktop) {
+      clearInlineStyles();
+    } else if (reduceMotion) {
+      applyProgress(1);
+    } else {
+      window.addEventListener('scroll', onScroll, { passive: true });
+      measureAndApply();
+    }
+
+    window.addEventListener('resize', function () {
+      var nowDesktop = window.matchMedia('(min-width: 901px)').matches;
+      if (nowDesktop === isDesktop) return;
+      isDesktop = nowDesktop;
+      if (!isDesktop) { clearInlineStyles(); }
+      else if (reduceMotion) { applyProgress(1); }
+      else { measureAndApply(); }
+    });
+  })();
 
   /* ---------- mobile nav ---------- */
   var navToggle = document.getElementById('navToggle');
