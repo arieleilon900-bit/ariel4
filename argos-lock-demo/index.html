@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARGOS | מנעולנות פרימיום</title>
+<meta name="description" content="ARGOS - פריצת דלתות חירום, החלפת צילינדרים, כספות ומערכות בקרת כניסה חכמות. צוות מוסמך זמין 24/7. אתר הדגמה בלבד.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ARGOS demo -- token layer (adapted from tokens/*.json:
+   dark neutrals from colors.json "dark", amber primitive as the
+   single brand accent in place of the default blue, spacing/type
+   scale unchanged, motion durations unchanged). Vanilla CSS, no
+   build step, per frameworks/adapters/vanilla-css.md.
+   ============================================================ */
+:root{
+  color-scheme: dark;
+
+  /* color -- primitives used */
+  --gray-50:#f9fafb;  --gray-300:#d1d5db; --gray-400:#9ca3af; --gray-500:#6b7280;
+  --gray-700:#374151; --gray-800:#1f2937; --gray-900:#111827; --gray-950:#030712;
+  --amber-400:#fbbf24; --amber-500:#f59e0b; --amber-600:#d97706; --amber-700:#b45309;
+  --red-400:#f87171; --red-500:#ef4444;
+
+  /* semantic (dark theme, amber brand accent) */
+  --surface-page:var(--gray-950);
+  --surface-sunken:#000000;
+  --surface-card:var(--gray-900);
+  --surface-raised:var(--gray-800);
+  --border-default:var(--gray-800);   /* decorative, sub-3:1 by design */
+  --border-strong:var(--gray-500);    /* essential boundary, ~4.2:1 on page */
+  --text-primary:var(--gray-50);
+  --text-secondary:var(--gray-400);
+  --text-tertiary:var(--gray-500);
+  --accent:var(--amber-500);
+  --accent-hover:var(--amber-600);
+  --accent-active:var(--amber-700);
+  --accent-text:var(--amber-400);     /* accent used as text on dark, ~12:1 */
+  --on-accent:var(--gray-950);        /* text on solid accent bg, ~9.4:1 */
+  --danger:var(--red-500);
+  --danger-text:var(--red-400);
+  --focus-ring:0 0 0 2px var(--surface-page), 0 0 0 4px var(--accent);
+
+  /* typography -- Major Third scale, unchanged from tokens/typography.json */
+  --font-sans:'Rubik','Assistant','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --fs-xs:.75rem; --fs-sm:.875rem; --fs-base:1rem; --fs-lg:1.125rem; --fs-xl:1.25rem;
+  --fs-2xl:1.5rem; --fs-3xl:1.875rem; --fs-4xl:2.25rem; --fs-5xl:3rem;
+  --fs-6xl:3.75rem; --fs-7xl:4.5rem;
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700; --fw-black:800;
+  --lh-none:1; --lh-tight:1.15; --lh-snug:1.375; --lh-normal:1.5; --lh-relaxed:1.625;
+
+  /* spacing -- 4px base unit scale, unchanged */
+  --sp-2:2px; --sp-4:4px; --sp-6:6px; --sp-8:8px; --sp-10:10px; --sp-12:12px;
+  --sp-14:14px; --sp-16:16px; --sp-20:20px; --sp-24:24px; --sp-28:28px; --sp-32:32px;
+  --sp-40:40px; --sp-48:48px; --sp-56:56px; --sp-64:64px; --sp-80:80px; --sp-96:96px;
+
+  /* radius -- one soft language, applied consistently */
+  --radius-sm:8px; --radius-md:12px; --radius-lg:20px; --radius-xl:28px; --radius-pill:999px;
+
+  /* motion -- tokens/motion.json, never above 500ms */
+  --dur-fast:100ms; --dur-base:200ms; --dur-moderate:300ms; --dur-slow:500ms;
+  --ease-out:cubic-bezier(0,0,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+  --ease-in-out:cubic-bezier(.4,0,.2,1); --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  --t-micro:var(--dur-fast) var(--ease-out); --t-default:var(--dur-base) var(--ease-out);
+  --t-enter:var(--dur-moderate) var(--ease-out);
+
+  /* shadow -- tokens/shadows.json elevation, restrained use */
+  --shadow-md:0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-lg:0 4px 6px -1px rgba(0,0,0,.45), 0 2px 4px -2px rgba(0,0,0,.35);
+  --shadow-accent:0 4px 20px -2px rgba(245,158,11,.28);
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+body{
+  margin:0; background:var(--surface-page); color:var(--text-primary);
+  font-family:var(--font-sans); font-size:var(--fs-base); line-height:var(--lh-normal);
+  font-weight:var(--fw-regular); -webkit-font-smoothing:antialiased;
+}
+img,canvas,svg{display:block; max-width:100%;}
+a{color:inherit;}
+h1,h2,h3,h4,p,ul,figure{margin:0;}
+ul{padding:0; list-style:none;}
+button{font:inherit; color:inherit; background:none; border:0; cursor:pointer;}
+
+.container{width:100%; max-width:1180px; margin-inline:auto; padding-inline:var(--sp-24);}
+@media (max-width:640px){ .container{padding-inline:var(--sp-16);} }
+
+.skip-link{
+  position:absolute; inset-inline-start:var(--sp-16); top:-100px;
+  background:var(--accent); color:var(--on-accent); padding:var(--sp-12) var(--sp-16);
+  border-radius:var(--radius-sm); font-weight:var(--fw-semibold); z-index:200;
+  transition:top var(--t-default);
+}
+.skip-link:focus{top:var(--sp-16);}
+
+:focus{outline:none;}
+:focus-visible{box-shadow:var(--focus-ring); border-radius:var(--radius-sm);}
+
+/* ---------- type helpers ---------- */
+.eyebrow{
+  display:inline-flex; align-items:center; gap:var(--sp-8);
+  font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--accent-text);
+}
+.eyebrow::before{content:""; inline-size:20px; block-size:2px; background:var(--accent);}
+h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing:0;}
+.h-display{font-size:clamp(var(--fs-5xl), 6vw + 1rem, var(--fs-7xl)); line-height:1.06; font-weight:var(--fw-black);}
+.h-section{font-size:clamp(var(--fs-3xl), 3.2vw + 1rem, var(--fs-4xl));}
+.h-card{font-size:var(--fs-2xl); font-weight:var(--fw-semibold);}
+.lead{font-size:var(--fs-lg); line-height:var(--lh-relaxed); color:var(--text-secondary); max-width:42em;}
+.body-copy{font-size:var(--fs-base); line-height:var(--lh-normal); color:var(--text-secondary); max-width:42em;}
+.mono-num{font-variant-numeric:tabular-nums;}
+
+/* ---------- buttons (states: default/hover/focus/active/disabled) ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-10);
+  min-block-size:52px; padding-inline:var(--sp-24); border-radius:var(--radius-pill);
+  font-size:var(--fs-base); font-weight:var(--fw-semibold); white-space:nowrap;
+  transition:background var(--t-micro), color var(--t-micro), box-shadow var(--t-micro), transform var(--t-micro);
+}
+.btn--primary{background:var(--accent); color:var(--on-accent);}
+.btn--primary:hover{background:var(--accent-hover); box-shadow:var(--shadow-accent); transform:translateY(-1px);}
+.btn--primary:active{background:var(--accent-active); transform:translateY(0);}
+.btn--secondary{background:transparent; color:var(--text-primary); border:1px solid var(--border-strong);}
+.btn--secondary:hover{background:var(--surface-raised); border-color:var(--text-secondary);}
+.btn--secondary:active{background:var(--gray-700);}
+.btn[disabled]{opacity:.5; pointer-events:none;}
+.btn svg{inline-size:18px; block-size:18px; flex-shrink:0;}
+
+/* ---------- header ---------- */
+.site-header{
+  position:sticky; top:0; z-index:100; backdrop-filter:blur(10px);
+  background:rgba(3,7,18,.82); border-block-end:1px solid var(--border-default);
+}
+.header-row{display:flex; align-items:center; justify-content:space-between; block-size:76px;}
+.brand{display:flex; align-items:center; gap:var(--sp-10); font-weight:var(--fw-bold); font-size:var(--fs-xl); letter-spacing:.02em;}
+.brand-mark{inline-size:36px; block-size:36px; color:var(--accent);}
+.brand small{display:block; font-size:var(--fs-xs); font-weight:var(--fw-medium); color:var(--text-secondary); letter-spacing:0;}
+.nav-links{display:flex; align-items:center; gap:var(--sp-32);}
+.nav-links a{font-size:var(--fs-sm); font-weight:var(--fw-medium); color:var(--text-secondary); transition:color var(--t-micro);}
+.nav-links a:hover{color:var(--text-primary);}
+.header-actions{display:flex; align-items:center; gap:var(--sp-16);}
+.phone-chip{display:flex; align-items:center; gap:var(--sp-8); font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--text-primary);}
+.phone-chip svg{inline-size:18px; block-size:18px; color:var(--accent);}
+.nav-toggle{display:none; padding:var(--sp-8); border-radius:var(--radius-sm);}
+.nav-toggle svg{inline-size:24px; block-size:24px;}
+.mobile-panel{display:none;}
+
+@media (max-width:900px){
+  .nav-links{display:none;}
+  .nav-toggle{display:inline-flex;}
+  .header-actions .phone-chip span{display:none;}
+  .mobile-panel[data-open="true"]{
+    display:flex; flex-direction:column; gap:var(--sp-4);
+    padding:var(--sp-16) var(--sp-24) var(--sp-24); border-block-end:1px solid var(--border-default);
+    background:var(--surface-page);
+  }
+  .mobile-panel a{padding:var(--sp-12) 0; font-size:var(--fs-lg); font-weight:var(--fw-medium); color:var(--text-primary); border-block-end:1px solid var(--border-default);}
+}
+
+/* ---------- hero (full-bleed) ---------- */
+.hero{position:relative; padding-block:var(--sp-96) var(--sp-80); overflow:clip;}
+.hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:var(--sp-48); align-items:center;}
+.hero-copy .eyebrow{margin-block-end:var(--sp-20);}
+.hero-copy h1{margin-block-end:var(--sp-24);}
+.hero-copy h1 em{font-style:normal; color:var(--accent-text);}
+.hero-copy .lead{margin-block-end:var(--sp-32);}
+.hero-cta{display:flex; flex-wrap:wrap; gap:var(--sp-16); margin-block-end:var(--sp-40);}
+.hero-trust{display:flex; flex-wrap:wrap; gap:var(--sp-24); color:var(--text-tertiary); font-size:var(--fs-sm);}
+.hero-trust li{display:flex; align-items:center; gap:var(--sp-8);}
+.hero-trust svg{inline-size:16px; block-size:16px; color:var(--accent-text); flex-shrink:0;}
+.hero-visual{position:relative; aspect-ratio:1/1; border-radius:var(--radius-xl);}
+.hero-visual canvas{position:absolute; inset:0; inline-size:100%; block-size:100%;}
+.hero-visual .fallback-icon{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;}
+.hero-visual .fallback-icon svg{inline-size:46%; block-size:46%; color:var(--accent); opacity:.9;}
+.hero-glow{position:absolute; inset-block-start:-20%; inset-inline-end:-10%; inline-size:60%; block-size:60%;
+  background:radial-gradient(circle, rgba(245,158,11,.16), transparent 70%); pointer-events:none;}
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr;}
+  .hero-visual{max-inline-size:340px; margin-inline:auto; order:-1;}
+}
+
+/* ---------- stat band (full-width, breaks rhythm) ---------- */
+.stat-band{background:var(--surface-sunken); border-block:1px solid var(--border-default); padding-block:var(--sp-48);}
+.stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-32);}
+.stat{text-align:center;}
+.stat-num{font-size:clamp(var(--fs-3xl), 3vw + 1rem, var(--fs-5xl)); font-weight:var(--fw-black); color:var(--accent-text);}
+.stat-label{margin-block-start:var(--sp-8); font-size:var(--fs-sm); color:var(--text-secondary);}
+@media (max-width:760px){ .stat-grid{grid-template-columns:repeat(2,1fr); gap:var(--sp-32) var(--sp-16);} }
+
+/* ---------- section shell ---------- */
+.section{padding-block:var(--sp-96);}
+.section-head{max-inline-size:640px; margin-block-end:var(--sp-48);}
+.section-head h2{margin-block-start:var(--sp-16);}
+.section-head .body-copy{margin-block-start:var(--sp-16);}
+
+/* ---------- services bento ---------- */
+.bento{display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:200px; gap:var(--sp-16);}
+.svc-card{
+  grid-column:span 2; background:var(--surface-card); border:1px solid var(--border-default);
+  border-radius:var(--radius-lg); padding:var(--sp-32); display:flex; flex-direction:column;
+  justify-content:flex-end; position:relative; overflow:hidden; transition:border-color var(--t-default), transform var(--t-default);
+}
+.svc-card:hover{border-color:var(--border-strong); transform:translateY(-3px);}
+.svc-card--lead{grid-column:span 2; grid-row:span 2; background:linear-gradient(160deg, var(--surface-raised), var(--surface-card));}
+.svc-icon{inline-size:48px; block-size:48px; border-radius:var(--radius-sm); background:rgba(245,158,11,.12);
+  display:flex; align-items:center; justify-content:center; margin-block-end:var(--sp-20); color:var(--accent-text);}
+.svc-icon svg{inline-size:24px; block-size:24px;}
+.svc-card h3{font-size:var(--fs-xl); font-weight:var(--fw-semibold); margin-block-end:var(--sp-8);}
+.svc-card--lead h3{font-size:var(--fs-3xl);}
+.svc-card p{font-size:var(--fs-sm); color:var(--text-secondary); line-height:var(--lh-normal);}
+@media (max-width:820px){
+  .bento{grid-template-columns:1fr 1fr; grid-auto-rows:180px;}
+  .svc-card{grid-column:span 1;}
+  .svc-card--lead{grid-column:span 2; grid-row:span 1;}
+}
+@media (max-width:520px){
+  .bento{grid-template-columns:1fr; grid-auto-rows:auto;}
+  .svc-card,.svc-card--lead{grid-column:span 1; grid-row:span 1; min-block-size:180px;}
+}
+
+/* ---------- process (index / numbered list, asymmetric) ---------- */
+.process{display:grid; grid-template-columns:.8fr 1.2fr; gap:var(--sp-64); align-items:start;}
+.process-list{border-inline-start:1px solid var(--border-default);}
+.process-step{display:grid; grid-template-columns:64px 1fr; gap:var(--sp-24); padding-block:var(--sp-32); position:relative;}
+.process-step + .process-step{border-block-start:1px solid var(--border-default);}
+.process-num{font-size:var(--fs-2xl); font-weight:var(--fw-black); color:var(--accent-text); font-variant-numeric:tabular-nums;}
+.process-step h3{font-size:var(--fs-xl); font-weight:var(--fw-semibold); margin-block-end:var(--sp-8);}
+.process-step p{color:var(--text-secondary); font-size:var(--fs-base); max-inline-size:34em;}
+@media (max-width:800px){ .process{grid-template-columns:1fr;} }
+
+/* ---------- 3D tilt showcase (offset/overlap) ---------- */
+.showcase{position:relative;}
+.showcase-inner{display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-64); align-items:center;}
+.tilt-stage{perspective:1000px;}
+.tilt-card{
+  position:relative; transform-style:preserve-3d; transition:transform var(--dur-fast) var(--ease-out);
+  aspect-ratio:4/3; border-radius:var(--radius-xl); background:var(--surface-card);
+  border:1px solid var(--border-default); overflow:hidden;
+}
+.tilt-layer{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;}
+.tilt-layer svg{inline-size:52%; block-size:52%;}
+.tilt-layer--back{transform:translateZ(-40px); opacity:.35;}
+.tilt-layer--mid{transform:translateZ(0px);}
+.tilt-layer--front{transform:translateZ(50px); inline-size:70%; block-size:70%; margin:auto;}
+.spec-list{border-inline-start:1px solid var(--border-default); padding-inline-start:var(--sp-32);}
+.spec-row{display:flex; align-items:flex-start; gap:var(--sp-16); padding-block:var(--sp-20);}
+.spec-row + .spec-row{border-block-start:1px solid var(--border-default);}
+.spec-row svg{inline-size:20px; block-size:20px; color:var(--accent-text); flex-shrink:0; margin-block-start:2px;}
+.spec-row p{color:var(--text-secondary); font-size:var(--fs-base);}
+.spec-row strong{color:var(--text-primary); font-weight:var(--fw-semibold);}
+@media (max-width:820px){ .showcase-inner{grid-template-columns:1fr;} .spec-list{border-inline-start:0; padding-inline-start:0; border-block-start:1px solid var(--border-default); padding-block-start:var(--sp-32);} }
+@media (prefers-reduced-motion: reduce){ .tilt-card{transition:none;} }
+
+/* ---------- testimonials (editorial stack, horizontal scroll) ---------- */
+.quote-row{display:flex; gap:var(--sp-24); overflow-x:auto; padding-block-end:var(--sp-16); scroll-snap-type:x proximity;}
+.quote-row::-webkit-scrollbar{block-size:6px;}
+.quote-row::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:var(--radius-pill);}
+.quote-card{
+  scroll-snap-align:start; flex:0 0 min(420px, 82vw); background:var(--surface-card);
+  border:1px solid var(--border-default); border-radius:var(--radius-lg); padding:var(--sp-32);
+}
+.quote-mark{inline-size:32px; block-size:32px; color:var(--accent); margin-block-end:var(--sp-16);}
+.quote-card p{font-size:var(--fs-lg); line-height:var(--lh-relaxed); color:var(--text-primary); margin-block-end:var(--sp-24);}
+.quote-who{display:flex; align-items:center; gap:var(--sp-12); font-size:var(--fs-sm); color:var(--text-secondary);}
+.quote-avatar{inline-size:40px; block-size:40px; border-radius:50%; background:var(--surface-raised);
+  display:flex; align-items:center; justify-content:center; font-weight:var(--fw-semibold); color:var(--accent-text);}
+.stars{display:flex; gap:var(--sp-4); margin-block-end:var(--sp-12);}
+.stars svg{inline-size:16px; block-size:16px; color:var(--accent);}
+
+/* ---------- coverage band ---------- */
+.coverage{background:var(--surface-sunken); border-block:1px solid var(--border-default); padding-block:var(--sp-64);}
+.city-list{display:flex; flex-wrap:wrap; gap:var(--sp-12); justify-content:center;}
+.city-chip{padding:var(--sp-10) var(--sp-20); border:1px solid var(--border-default); border-radius:var(--radius-pill);
+  font-size:var(--fs-sm); color:var(--text-secondary);}
+
+/* ---------- FAQ ---------- */
+.faq-list{max-inline-size:760px;}
+.faq-item{border-block-end:1px solid var(--border-default);}
+.faq-item summary{
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-16);
+  padding-block:var(--sp-24); font-size:var(--fs-lg); font-weight:var(--fw-medium); cursor:pointer; list-style:none;
+}
+.faq-item summary::-webkit-details-marker{display:none;}
+.faq-item summary svg{inline-size:20px; block-size:20px; color:var(--text-tertiary); flex-shrink:0; transition:transform var(--t-default);}
+.faq-item[open] summary svg{transform:rotate(180deg); color:var(--accent-text);}
+.faq-item p{color:var(--text-secondary); padding-block-end:var(--sp-24); max-inline-size:60em;}
+
+/* ---------- closing CTA ---------- */
+.cta-band{
+  margin-inline:var(--sp-24); border-radius:var(--radius-xl); padding:var(--sp-64) var(--sp-32); text-align:center;
+  background:linear-gradient(155deg, var(--gray-900), var(--surface-sunken)); border:1px solid var(--border-default);
+}
+.cta-band h2{margin-block-end:var(--sp-16);}
+.cta-band .lead{margin-inline:auto; margin-block-end:var(--sp-32);}
+.cta-actions{display:flex; justify-content:center; flex-wrap:wrap; gap:var(--sp-16);}
+
+/* ---------- footer ---------- */
+.site-footer{padding-block:var(--sp-64) var(--sp-32); border-block-start:1px solid var(--border-default); margin-block-start:var(--sp-96);}
+.footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:var(--sp-48); margin-block-end:var(--sp-48);}
+.footer-brand p{color:var(--text-secondary); font-size:var(--fs-sm); margin-block:var(--sp-16); max-inline-size:32em;}
+.footer-col h4{font-size:var(--fs-sm); font-weight:var(--fw-semibold); color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.06em; margin-block-end:var(--sp-16);}
+.footer-col li{margin-block-end:var(--sp-12);}
+.footer-col a{font-size:var(--fs-sm); color:var(--text-secondary); transition:color var(--t-micro);}
+.footer-col a:hover{color:var(--text-primary);}
+.footer-contact{display:flex; align-items:flex-start; gap:var(--sp-10); font-size:var(--fs-sm); color:var(--text-secondary);}
+.footer-contact svg{inline-size:16px; block-size:16px; flex-shrink:0; margin-block-start:2px; color:var(--accent-text);}
+.footer-bottom{display:flex; flex-wrap:wrap; justify-content:space-between; gap:var(--sp-16); padding-block-start:var(--sp-32); border-block-start:1px solid var(--border-default);}
+.demo-notice{font-size:var(--fs-xs); color:var(--text-tertiary); line-height:var(--lh-relaxed); max-inline-size:70ch;}
+@media (max-width:820px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+@media (max-width:520px){ .footer-grid{grid-template-columns:1fr;} }
+
+/* ---------- reveal-on-scroll ---------- */
+[data-reveal]{opacity:0; transform:translateY(14px); transition:opacity var(--dur-moderate) var(--ease-out), transform var(--dur-moderate) var(--ease-out);}
+[data-reveal].is-visible{opacity:1; transform:translateY(0);}
+@media (prefers-reduced-motion: reduce){
+  [data-reveal]{transition:opacity var(--dur-fast) linear; transform:none;}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">דלגו לתוכן הראשי</a>
+
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand" href="#top" aria-label="ARGOS, דף הבית">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <rect x="4" y="11" width="16" height="10" rx="2"/>
+        <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+        <circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>ARGOS<small>מנעולנות פרימיום</small></span>
+    </a>
+
+    <nav class="nav-links" aria-label="ניווט ראשי">
+      <a href="#services">שירותים</a>
+      <a href="#process">איך זה עובד</a>
+      <a href="#security">אבטחה</a>
+      <a href="#testimonials">לקוחות</a>
+      <a href="#faq">שאלות נפוצות</a>
+    </nav>
+
+    <div class="header-actions">
+      <a class="phone-chip" href="tel:+97250000000">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z"/></svg>
+        <span>050-000-0000</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobilePanel" aria-label="פתיחת תפריט">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="mobile-panel" id="mobilePanel" aria-label="ניווט מובייל">
+    <a href="#services">שירותים</a>
+    <a href="#process">איך זה עובד</a>
+    <a href="#security">אבטחה</a>
+    <a href="#testimonials">לקוחות</a>
+    <a href="#faq">שאלות נפוצות</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">זמינות 24 שעות, כל ימות השנה</span>
+        <h1 id="hero-title" class="h-display">השומר <em>שלא נרדם</em></h1>
+        <p class="lead">פריצת דלתות, החלפת צילינדרים ומערכות אבטחה חכמות. צוות מוסמך מגיע תוך דקות, בלי לשבור את הדלת ובלי הפתעות במחיר.</p>
+        <div class="hero-cta">
+          <a class="btn btn--primary" href="tel:+97217000000">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z"/></svg>
+            התקשרו עכשיו: 1700-000-000
+          </a>
+          <a class="btn btn--secondary" href="#services">
+            לכל השירותים
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </a>
+        </div>
+        <ul class="hero-trust">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3Z"/><path d="M9 12l2 2 4-4"/></svg> טכנאים מוסמכים ומבוטחים</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> הגעה ממוצעת: 9-14 דקות</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3Z"/></svg> 24 חודשי אחריות על כל עבודה</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual" id="heroVisual" aria-hidden="true">
+        <div class="fallback-icon" id="heroFallback">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="4" y="11" width="16" height="10" rx="2"/>
+            <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
+            <circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT BAND -->
+  <section class="stat-band" aria-label="נתונים">
+    <div class="container stat-grid">
+      <div class="stat" data-reveal>
+        <div class="stat-num mono-num" data-count="6" data-suffix=" דק'">0</div>
+        <div class="stat-label">זמן הגעה ממוצע, מרכז הארץ</div>
+      </div>
+      <div class="stat" data-reveal>
+        <div class="stat-num mono-num" data-count="14200" data-suffix="+">0</div>
+        <div class="stat-label">דלתות נפתחו מאז 2016</div>
+      </div>
+      <div class="stat" data-reveal>
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">זמינות בלי הפסקה</div>
+      </div>
+      <div class="stat" data-reveal>
+        <div class="stat-num mono-num" data-count="4.9" data-decimal="1" data-suffix="/5">0</div>
+        <div class="stat-label">דירוג ממוצע, 1,340 לקוחות</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES BENTO -->
+  <section class="section" id="services" aria-labelledby="services-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">שירותים</span>
+        <h2 id="services-title" class="h-section">כל מה שקשור למנעול, במקום אחד</h2>
+        <p class="body-copy">משיחת טלפון אחת ועד סגירת התיק. בלי קבלני משנה, בלי הפתעות.</p>
+      </div>
+
+      <div class="bento">
+        <article class="svc-card svc-card--lead" data-reveal>
+          <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/></svg></div>
+          <h3>פריצת דלתות חירום</h3>
+          <p>ננעלתם בחוץ? הצוות פותח כל סוג מנעול תוך דקות, בלי לשבור את הדלת ובלי לפגוע במסגרת.</p>
+        </article>
+
+        <article class="svc-card" data-reveal>
+          <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div>
+          <h3>החלפת צילינדרים</h3>
+          <p>שדרוג לצילינדר עמיד ניפוח ותקיפת bump, ברמת אבטחה 3 כוכבים.</p>
+        </article>
+
+        <article class="svc-card" data-reveal>
+          <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12l2-6h14l2 6"/><rect x="3" y="12" width="18" height="6" rx="1"/><circle cx="7.5" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="16.5" cy="18" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <h3>מנעולי רכב</h3>
+          <p>פתיחת רכב ושכפול שלטים לרוב הדגמים, בלי לשרוט ובלי להזמין גרר.</p>
+        </article>
+
+        <article class="svc-card" data-reveal>
+          <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5v.01"/></svg></div>
+          <h3>כספות ועמידות אש</h3>
+          <p>התקנה, פתיחה ותיקון כספות ביתיות ועסקיות, כולל כספות תקועות.</p>
+        </article>
+
+        <article class="svc-card" data-reveal>
+          <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="10" width="18" height="9" rx="2"/><path d="M12 10V7a3 3 0 0 1 6 0"/><circle cx="8" cy="14.5" r="1.4" fill="currentColor" stroke="none"/></svg></div>
+          <h3>בקרת כניסה חכמה</h3>
+          <p>קוד, טביעת אצבע ואפליקציה לבניינים ומשרדים, עם לוג כניסות מלא.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="section" id="process" aria-labelledby="process-title" style="background:var(--surface-sunken); border-block:1px solid var(--border-default);">
+    <div class="container process">
+      <div class="section-head" data-reveal style="margin-block-end:0;">
+        <span class="eyebrow">איך זה עובד</span>
+        <h2 id="process-title" class="h-section">משיחה לפתרון, בלי בלגן</h2>
+        <p class="body-copy">שלושה שלבים, בלי המתנה ובלי ניחושים על מחיר.</p>
+      </div>
+
+      <ol class="process-list">
+        <li class="process-step" data-reveal>
+          <span class="process-num">01</span>
+          <div><h3>מתקשרים</h3><p>שיחה נענית תוך פחות מ-20 שניות, אבחון ראשוני ותיאום מחיר בטלפון.</p></div>
+        </li>
+        <li class="process-step" data-reveal>
+          <span class="process-num">02</span>
+          <div><h3>מגיעים</h3><p>טכנאי מוסמך בדרך אליכם, עם עדכון זמן הגעה מדויק ב-SMS.</p></div>
+        </li>
+        <li class="process-step" data-reveal>
+          <span class="process-num">03</span>
+          <div><h3>פותרים</h3><p>הבעיה נפתרת באתר. קבלה וחשבונית דיגיטלית מיד בסיום.</p></div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 3D TILT SHOWCASE -->
+  <section class="section" id="security" aria-labelledby="security-title">
+    <div class="container showcase-inner showcase">
+      <div class="tilt-stage">
+        <div class="tilt-card" id="tiltCard" data-reveal>
+          <div class="tilt-layer tilt-layer--back">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true" style="color:var(--border-strong);">
+              <circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="30"/>
+            </svg>
+          </div>
+          <div class="tilt-layer tilt-layer--front">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-text)" stroke-width="1.4" aria-hidden="true">
+              <rect x="4" y="3" width="16" height="18" rx="2"/>
+              <circle cx="12" cy="10" r="3.2"/>
+              <path d="M12 13.2V16"/>
+              <path d="M8 7h.01M16 7h.01"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-head" data-reveal style="margin-block-end:var(--sp-24);">
+          <span class="eyebrow">רמת אבטחה</span>
+          <h2 id="security-title" class="h-section">לא רק פותחים, גם מגנים</h2>
+        </div>
+        <div class="spec-list">
+          <div class="spec-row" data-reveal>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <p><strong>עמידות בפני ניפוח ו-bump.</strong> כל צילינדר שאנחנו מתקינים עומד בתקן 3 כוכבים לפחות.</p>
+          </div>
+          <div class="spec-row" data-reveal>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <p><strong>עד 60 דקות עמידות אש.</strong> בכספות שמתאימות לתיוק מסמכים קריטיים.</p>
+          </div>
+          <div class="spec-row" data-reveal>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <p><strong>לוג כניסות מלא.</strong> במערכות בקרה, כולל התראה בזמן אמת לניסיון גישה חריג.</p>
+          </div>
+          <div class="spec-row" data-reveal>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            <p><strong>24 חודשי אחריות.</strong> על כל עבודה, חלקים ועבודה כאחד.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section" id="testimonials" aria-labelledby="testi-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">לקוחות</span>
+        <h2 id="testi-title" class="h-section">מה אומרים עלינו</h2>
+      </div>
+
+      <div class="quote-row">
+        <article class="quote-card" data-reveal>
+          <div class="stars" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+          </div>
+          <p>התקשרתי בשתיים בלילה כי ננעלתי בחוץ עם הילדים ברכב. הטכנאי הגיע תוך תשע דקות, בלי לצעוק עלי על השעה.</p>
+          <div class="quote-who"><span class="quote-avatar">מ.א</span> מיכל א., רמת גן</div>
+        </article>
+
+        <article class="quote-card" data-reveal>
+          <div class="stars" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+          </div>
+          <p>שדרגנו את כל הבניין למערכת בקרת כניסה חכמה. אין יותר מפתחות שהולכים לאיבוד לפני ישיבות ועד בית.</p>
+          <div class="quote-who"><span class="quote-avatar">ו.ב</span> ועד בית, גבעתיים</div>
+        </article>
+
+        <article class="quote-card" data-reveal>
+          <div class="stars" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .9-5 5 1.3 7-6.3-3.5L5.7 21.4 7 14.4l-5-5 7-.9L12 2Z"/></svg>
+          </div>
+          <p>הכספת של המשרד נתקעה יום לפני ביקורת. פתחו אותה בלי לשרוט, תוך חצי שעה מהשיחה הראשונה.</p>
+          <div class="quote-who"><span class="quote-avatar">א.ל</span> אבינועם ל., בעל עסק</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- COVERAGE -->
+  <section class="coverage" aria-labelledby="coverage-title">
+    <div class="container">
+      <div class="section-head" data-reveal style="margin-inline:auto; text-align:center; margin-block-end:var(--sp-32);">
+        <span class="eyebrow" style="justify-content:center;">אזורי שירות</span>
+        <h2 id="coverage-title" class="h-section">מכסים את המרכז מקצה לקצה</h2>
+      </div>
+      <ul class="city-list" data-reveal>
+        <li class="city-chip">תל אביב</li>
+        <li class="city-chip">רמת גן</li>
+        <li class="city-chip">גבעתיים</li>
+        <li class="city-chip">חולון</li>
+        <li class="city-chip">בת ים</li>
+        <li class="city-chip">הרצליה</li>
+        <li class="city-chip">רעננה</li>
+        <li class="city-chip">פתח תקווה</li>
+        <li class="city-chip">ראשון לציון</li>
+        <li class="city-chip">רמת השרון</li>
+        <li class="city-chip">כפר סבא</li>
+        <li class="city-chip">נתניה</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <div class="container">
+      <div class="section-head" data-reveal>
+        <span class="eyebrow">שאלות נפוצות</span>
+        <h2 id="faq-title" class="h-section">לפני שאתם מתקשרים</h2>
+      </div>
+
+      <div class="faq-list" data-reveal>
+        <details class="faq-item">
+          <summary>כמה זמן לוקח להגיע אליי?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+          <p>זמן ההגעה הממוצע במרכז הארץ הוא 9 עד 14 דקות. בשיחה נמסר לכם זמן הגעה מדויק, ומתעדכן ב-SMS ברגע שהטכנאי יוצא לדרך.</p>
+        </details>
+        <details class="faq-item">
+          <summary>האם אתם עובדים גם בלילה ובשבתות?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+          <p>כן. השירות זמין 24 שעות ביממה, כולל שישי-שבת וחגים, ללא תוספת מחיר מיוחדת לשעות הלילה.</p>
+        </details>
+        <details class="faq-item">
+          <summary>האם אפשר לפתוח דלת בלי לשבור אותה?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+          <p>ברוב המקרים כן. הטכנאי בוחן את סוג המנעול בטלפון ומגיע עם הכלים המתאימים לפתיחה נקייה. שבירה היא מוצא אחרון בלבד, ורק באישורכם.</p>
+        </details>
+        <details class="faq-item">
+          <summary>כמה עולה פריצת דלת?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+          <p>המחיר נקבע לפי סוג המנעול והשעה, ונמסר במלואו בטלפון לפני יציאת הטכנאי. אין חיוב נוסף שלא סוכם מראש.</p>
+        </details>
+        <details class="faq-item">
+          <summary>אילו אזורים אתם מכסים?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+          <p>מרכז הארץ, מהרצליה בצפון ועד ראשון לציון בדרום. הרשימה המלאה מופיעה למעלה באתר.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING CTA -->
+  <div class="container">
+    <section class="cta-band" data-reveal aria-labelledby="cta-title">
+      <h2 id="cta-title" class="h-section">ננעלתם? אנחנו בדרך.</h2>
+      <p class="lead">שיחה אחת, וטכנאי מוסמך כבר בדרך אליכם.</p>
+      <div class="cta-actions">
+        <a class="btn btn--primary" href="tel:+97217000000">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z"/></svg>
+          1700-000-000
+        </a>
+        <a class="btn btn--secondary" href="mailto:info@argos-lock.example">שלחו הודעה</a>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top" aria-label="ARGOS, דף הבית">
+          <svg class="brand-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor" stroke="none"/></svg>
+          <span>ARGOS</span>
+        </a>
+        <p>מנעולנות פרימיום למרכז הארץ. פריצת דלתות, מנעולי רכב, כספות ומערכות בקרת כניסה חכמות, זמינות מלאה 24/7.</p>
+        <div class="footer-contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg><span>רחוב המנעול 5, תל אביב</span></div>
+        <div class="footer-contact" style="margin-block-start:var(--sp-8);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z"/></svg><span>1700-000-000</span></div>
+      </div>
+
+      <div class="footer-col">
+        <h4>שירותים</h4>
+        <ul>
+          <li><a href="#services">פריצת דלתות חירום</a></li>
+          <li><a href="#services">החלפת צילינדרים</a></li>
+          <li><a href="#services">מנעולי רכב</a></li>
+          <li><a href="#services">כספות ועמידות אש</a></li>
+          <li><a href="#services">בקרת כניסה חכמה</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>החברה</h4>
+        <ul>
+          <li><a href="#process">איך זה עובד</a></li>
+          <li><a href="#security">רמת אבטחה</a></li>
+          <li><a href="#testimonials">לקוחות</a></li>
+          <li><a href="#faq">שאלות נפוצות</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="demo-notice">
+        אתר זה הוא דוגמת עיצוב (Demo) בלבד. שם החברה, הפרטים, הנתונים והלקוחות המוצגים בדיוניים ואינם מתארים עסק אמיתי.
+      </p>
+      <p class="demo-notice">ARGOS &middot; דוגמת עיצוב</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+<script defer>
+document.addEventListener('DOMContentLoaded', function () {
+  'use strict';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- mobile nav ---------- */
+  var navToggle = document.getElementById('navToggle');
+  var mobilePanel = document.getElementById('mobilePanel');
+  navToggle.addEventListener('click', function () {
+    var open = navToggle.getAttribute('aria-expanded') === 'true';
+    navToggle.setAttribute('aria-expanded', String(!open));
+    mobilePanel.setAttribute('data-open', String(!open));
+  });
+  mobilePanel.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') {
+      navToggle.setAttribute('aria-expanded', 'false');
+      mobilePanel.setAttribute('data-open', 'false');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && navToggle.getAttribute('aria-expanded') === 'true') {
+      navToggle.setAttribute('aria-expanded', 'false');
+      mobilePanel.setAttribute('data-open', 'false');
+      navToggle.focus();
+    }
+  });
+
+  /* ---------- scroll reveal ---------- */
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- animated stat counters ---------- */
+  var statEls = document.querySelectorAll('[data-count]');
+  function animateCount(el) {
+    var target = parseFloat(el.getAttribute('data-count'));
+    var decimals = parseInt(el.getAttribute('data-decimal') || '0', 10);
+    var suffix = el.getAttribute('data-suffix') || '';
+    if (reduceMotion) {
+      el.textContent = target.toFixed(decimals) + suffix;
+      return;
+    }
+    var start = null;
+    var duration = 1200;
+    function step(ts) {
+      if (!start) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var value = target * eased;
+      el.textContent = value.toFixed(decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if (statEls.length && 'IntersectionObserver' in window) {
+    var statIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animateCount(entry.target);
+          statIo.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    statEls.forEach(function (el) { statIo.observe(el); });
+  } else {
+    statEls.forEach(animateCount);
+  }
+
+  /* ---------- FAQ: close siblings when one opens ---------- */
+  document.querySelectorAll('.faq-item').forEach(function (item) {
+    item.addEventListener('toggle', function () {
+      if (item.open) {
+        document.querySelectorAll('.faq-item[open]').forEach(function (other) {
+          if (other !== item) other.removeAttribute('open');
+        });
+      }
+    });
+  });
+
+  /* ---------- 3D tilt showcase (pointer-driven, CSS 3D transform) ---------- */
+  var tiltCard = document.getElementById('tiltCard');
+  if (tiltCard && !reduceMotion && window.matchMedia('(pointer: fine)').matches) {
+    tiltCard.addEventListener('pointermove', function (e) {
+      var rect = tiltCard.getBoundingClientRect();
+      var px = (e.clientX - rect.left) / rect.width - 0.5;
+      var py = (e.clientY - rect.top) / rect.height - 0.5;
+      tiltCard.style.transform = 'rotateX(' + (py * -8) + 'deg) rotateY(' + (px * 10) + 'deg)';
+    });
+    tiltCard.addEventListener('pointerleave', function () {
+      tiltCard.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+  }
+
+  /* ---------- hero 3D padlock (Three.js, progressive enhancement) ---------- */
+  var visual = document.getElementById('heroVisual');
+  var fallback = document.getElementById('heroFallback');
+  if (!visual || typeof THREE === 'undefined') return;
+
+  try {
+    var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    visual.appendChild(renderer.domElement);
+    fallback.style.display = 'none';
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+    camera.position.set(0, 0.3, 5.4);
+
+    var group = new THREE.Group();
+    scene.add(group);
+
+    var bodyMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.75, roughness: 0.32, emissive: 0x2a1400, emissiveIntensity: 0.25 });
+    var shackleMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, metalness: 0.9, roughness: 0.22 });
+
+    var body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.2, 0.9), bodyMat);
+    body.position.y = -0.35;
+    group.add(body);
+
+    var keyhole = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.15, 16), new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.2, roughness: 0.6 }));
+    keyhole.rotation.x = Math.PI / 2;
+    keyhole.position.set(0, -0.3, 0.48);
+    group.add(keyhole);
+
+    var shackle = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.13, 20, 60, Math.PI), shackleMat);
+    shackle.position.y = 0.28;
+    group.add(shackle);
+
+    var legGeo = new THREE.CylinderGeometry(0.13, 0.13, 0.5, 20);
+    var legL = new THREE.Mesh(legGeo, shackleMat); legL.position.set(-0.62, 0.02, 0); group.add(legL);
+    var legR = new THREE.Mesh(legGeo, shackleMat); legR.position.set(0.62, 0.02, 0); group.add(legR);
+
+    group.rotation.x = -0.15;
+    group.rotation.y = 0.5;
+
+    scene.add(new THREE.AmbientLight(0x203040, 0.7));
+    var key1 = new THREE.DirectionalLight(0xfff4e0, 1.3); key1.position.set(3, 4, 5); scene.add(key1);
+    var rim = new THREE.PointLight(0xf59e0b, 0.9, 12); rim.position.set(-3, -1, -3); scene.add(rim);
+
+    function resize() {
+      var w = visual.clientWidth, h = visual.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var running = true;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        running = entries[0].isIntersecting;
+      }, { threshold: 0.1 }).observe(visual);
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) running = false;
+    });
+
+    var clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!running) return;
+      var t = clock.getElapsedTime();
+      if (!reduceMotion) {
+        group.rotation.y += 0.0032;
+        group.position.y = Math.sin(t * 0.6) * 0.06;
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+  } catch (err) {
+    fallback.style.display = 'flex';
+  }
+});
+</script>
+</body>
+</html>
