@@ -164,21 +164,26 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
 }
 
 /* ---------- lock intro: pinned, scroll-scrubbed opening sequence ---------- */
-.lock-intro{position:relative; block-size:230vh;}
+/* Runs on every screen size, including mobile. block-size uses vh then dvh:
+   an unsupported dvh value is dropped by the parser, so vh stays as the
+   fallback and dvh wins where supported (avoids the mobile address-bar jump). */
+.lock-intro{position:relative; block-size:220vh;}
 .lock-stage{
-  position:sticky; top:0; inset-inline:0; block-size:100vh; overflow:clip;
+  position:sticky; top:0; inset-inline:0; overflow:clip;
+  block-size:100vh; block-size:100dvh;
   display:flex; align-items:center; justify-content:center; background:var(--surface-page);
 }
 .hero-glow{position:absolute; inset-block-start:-10%; inset-inline-end:-6%; inline-size:60%; block-size:60%;
   background:radial-gradient(circle, rgba(245,158,11,.14), transparent 70%); pointer-events:none;}
 
-.lock-illustration{position:relative; z-index:2; inline-size:min(30vh, 220px); aspect-ratio:200/220;
+.lock-illustration{position:relative; z-index:2; inline-size:min(28vh, 220px); aspect-ratio:200/220;
   color:var(--accent); filter:drop-shadow(0 24px 48px rgba(245,158,11,.28));}
 .lock-svg{inline-size:100%; block-size:100%; overflow:visible;}
 .lock-shackle{transform-box:fill-box; transform-origin:76% 100%;}
 .lock-body{fill:var(--accent);}
 .lock-keyhole,.lock-keyhole-stem{fill:var(--gray-950);}
 
+/* Desktop: headline/trust fly in beside the lock inside the pinned stage. */
 .lock-copy{position:absolute; top:50%; max-inline-size:380px; z-index:2; opacity:0;}
 .lock-copy--start{inset-inline-start:max(4vw, 20px);}
 .lock-copy--end{inset-inline-start:auto; inset-inline-end:max(4vw, 20px);}
@@ -198,18 +203,23 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
 .scroll-cue svg{inline-size:18px; block-size:18px;}
 @keyframes cue-bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
 
+/* Mobile-only headline block: sits in normal flow right after the pinned
+   lock releases, so nothing has to be squeezed beside the icon on a narrow
+   screen. Fades up the same way every other section on this page does. */
+.mobile-hero-copy{display:none;}
+
 @media (max-width:900px){
-  .lock-intro{block-size:auto;}
-  .lock-stage{
-    position:static; block-size:auto; flex-direction:column; gap:var(--sp-40);
-    padding-block:var(--sp-64) var(--sp-48); text-align:center;
-  }
-  .lock-illustration{inline-size:140px;}
-  .lock-illustration .lock-shackle{transform:rotate(-52deg);}
-  .lock-copy{position:static; opacity:1; max-inline-size:420px; margin-inline:auto;}
-  .lock-copy .hero-cta{justify-content:center;}
-  .hero-trust{align-items:center;}
-  .scroll-cue{display:none;}
+  .lock-intro{block-size:160vh;}
+  .lock-illustration{inline-size:150px;}
+  .lock-copy{display:none;}
+
+  .mobile-hero-copy{display:block; padding-block:var(--sp-64) var(--sp-48); text-align:center;}
+  .mobile-hero-copy .eyebrow{justify-content:center; margin-block-end:var(--sp-20);}
+  .mobile-hero-copy h1{margin-block-end:var(--sp-24);}
+  .mobile-hero-copy h1 em{font-style:normal; color:var(--accent-text);}
+  .mobile-hero-copy .lead{margin-inline:auto; margin-block-end:var(--sp-32);}
+  .mobile-hero-copy .hero-cta{justify-content:center; margin-block-end:var(--sp-40);}
+  .mobile-hero-copy .hero-trust{align-items:center;}
 }
 @media (prefers-reduced-motion: reduce){ .scroll-cue{animation:none;} }
 
@@ -438,6 +448,30 @@ h1,h2,h3{font-weight:var(--fw-bold); line-height:var(--lh-tight); letter-spacing
         <span>גללו למטה</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </div>
+    </div>
+  </section>
+
+  <!-- Mobile only: same headline, released from the pinned lock into normal flow -->
+  <section class="mobile-hero-copy" data-reveal>
+    <div class="container">
+      <span class="eyebrow">זמינות 24 שעות, כל ימות השנה</span>
+      <h1 class="h-display">השומר <em>שלא נרדם</em></h1>
+      <p class="lead">פריצת דלתות, החלפת צילינדרים ומערכות אבטחה חכמות. צוות מוסמך מגיע תוך דקות, בלי לשבור את הדלת ובלי הפתעות במחיר.</p>
+      <div class="hero-cta">
+        <a class="btn btn--primary" href="tel:+97217000000">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z"/></svg>
+          התקשרו עכשיו: 1700-000-000
+        </a>
+        <a class="btn btn--secondary" href="#services">
+          לכל השירותים
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </a>
+      </div>
+      <ul class="hero-trust">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3Z"/><path d="M9 12l2 2 4-4"/></svg> טכנאים מוסמכים ומבוטחים</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> הגעה ממוצעת: 9-14 דקות</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 7.7-8 9-4.8-1.3-8-4.5-8-9V6l8-3Z"/></svg> 24 חודשי אחריות על כל עבודה</li>
+      </ul>
     </div>
   </section>
 
@@ -764,9 +798,10 @@ document.addEventListener('DOMContentLoaded', function () {
     function clamp01(v) { return Math.max(0, Math.min(1, v)); }
     function smoothstep(v) { return v * v * (3 - 2 * v); }
 
-    // Desktop only: drives the pinned scroll sequence (shackle, side copy, cue).
-    // Mobile relies entirely on the stacked, always-visible CSS layout below --
-    // no inline styles are applied there, so nothing can fight the CSS.
+    // Runs on every screen size: shackle + lock scale always animate.
+    // copyStart/copyEnd are display:none on mobile (real headline lives in
+    // .mobile-hero-copy below instead), so writing their inline style there
+    // is inert -- no branch needed.
     function applyProgress(p) {
       var shacklePhase = clamp01(p / 0.42);
       shackle.style.transform = 'rotate(' + (shacklePhase * -58) + 'deg)';
@@ -783,21 +818,10 @@ document.addEventListener('DOMContentLoaded', function () {
       if (cue) cue.style.opacity = String(clamp01(1 - p / 0.06));
     }
 
-    function clearInlineStyles() {
-      [shackle, illo, copyStart, copyEnd].forEach(function (el) {
-        el.style.transform = '';
-      });
-      copyStart.style.opacity = '';
-      copyEnd.style.opacity = '';
-      if (cue) cue.style.opacity = '';
-    }
-
-    var isDesktop = window.matchMedia('(min-width: 901px)').matches;
     var ticking = false;
 
     function measureAndApply() {
       ticking = false;
-      if (!isDesktop) return;
       var total = intro.offsetHeight - window.innerHeight;
       var scrolled = -intro.getBoundingClientRect().top;
       applyProgress(total > 0 ? clamp01(scrolled / total) : 1);
@@ -809,23 +833,13 @@ document.addEventListener('DOMContentLoaded', function () {
       requestAnimationFrame(measureAndApply);
     }
 
-    if (!isDesktop) {
-      clearInlineStyles();
-    } else if (reduceMotion) {
+    if (reduceMotion) {
       applyProgress(1);
     } else {
       window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll);
       measureAndApply();
     }
-
-    window.addEventListener('resize', function () {
-      var nowDesktop = window.matchMedia('(min-width: 901px)').matches;
-      if (nowDesktop === isDesktop) return;
-      isDesktop = nowDesktop;
-      if (!isDesktop) { clearInlineStyles(); }
-      else if (reduceMotion) { applyProgress(1); }
-      else { measureAndApply(); }
-    });
   })();
 
   /* ---------- mobile nav ---------- */
