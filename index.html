@@ -67,6 +67,12 @@
     .work-card:hover{transform:none;}
   }
   .work-tag{align-self:flex-start;background:rgba(28,43,42,.06);color:var(--dark);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;}
+  .work-card.featured{grid-column:span 3;background:var(--dark);border-color:var(--dark);}
+  .work-card.featured .work-tag{background:rgba(201,162,39,.2);color:var(--accent);}
+  .work-card.featured h3,.work-card.featured p{color:var(--white);}
+  .work-card.featured .work-link{color:var(--accent);}
+  @media (max-width:820px){.work-card.featured{grid-column:span 2;}}
+  @media (max-width:600px){.work-card.featured{grid-column:span 1;}}
   .work-card h3{font-size:18px;font-weight:700;}
   .work-card p{color:var(--text-faint);font-size:14px;flex:1;}
   .work-link{font-size:14px;font-weight:700;color:#93761c;display:inline-flex;align-items:center;gap:4px;}
@@ -142,8 +148,15 @@
 <section id="work">
   <div class="container">
     <h2 class="section-title">תיק עבודות</h2>
-    <p class="section-sub">אתרים חיים שנבנו לעסקים אמיתיים — לחצו לצפייה</p>
+    <p class="section-sub">אתרים חיים לעסקים אמיתיים, ודוגמת עיצוב פרימיום — לחצו לצפייה</p>
     <div class="work-grid">
+
+      <a class="work-card featured" href="website-builder/clients/noa-sagi-architects/index.html">
+        <span class="work-tag">קונספט · אדריכלות פרימיום</span>
+        <h3>נועה שגיא אדריכלים</h3>
+        <p>דוגמת עיצוב ברמה גבוהה יותר: אפקט תלת-ממד, אנימציות גלילה, טיפוגרפיה ייחודית — בשביל לקוחות שהעיצוב עצמו הוא חלק מהמכירה.</p>
+        <span class="work-link">צפו בדוגמה ←</span>
+      </a>
 
       <a class="work-card" href="website-builder/clients/moshayev-lock/index.html">
         <span class="work-tag">מנעולן</span>
