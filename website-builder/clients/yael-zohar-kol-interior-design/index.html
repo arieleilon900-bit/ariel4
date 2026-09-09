@@ -2,9 +2,9 @@
 <!--
   אתר דוגמה שנבנה כפנייה יזומה עבור יעל זוהר קול, מעצבת פנים אמיתית
   (פרטי קשר ושירותים מבוססים על פרופיל ה-Google Business הציבורי שלה).
-  התמונות בעמוד הן איורי קו מקוריים, לא צילומים אמיתיים של עבודותיה —
-  אין בעמוד תיאורי פרויקטים ספציפיים בדויים. יש להחליף באיורים
-  בתמונות אמיתיות מתיק העבודות שלה לפני שימוש מסחרי בפועל.
+  תמונת ה-Hero היא צילום אמיתי מתיק העבודות הציבורי שלה
+  (yaelzoharkol.com), מקושרת ישירות מהאתר שלה (לא הועתקה לריפו).
+  אין בעמוד תיאורי פרויקטים ספציפיים בדויים מעבר לכך.
 -->
 <html dir="rtl" lang="he">
 <head>
@@ -52,19 +52,20 @@
 
   /* ===== scroll-zoom hero ===== */
   .zoom-hero{position:relative;height:320vh;}
-  .zoom-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#f9f5ec,#efe6d5);}
-  .zoom-visual{width:min(78vw,720px);will-change:transform;transform-origin:63% 58%;}
+  .zoom-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#1b1712;}
+  .zoom-visual{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform;transform-origin:64% 66%;}
+  .zoom-scrim{position:absolute;inset:0;background:linear-gradient(180deg, rgba(19,16,12,.55) 0%, rgba(19,16,12,.08) 22%, rgba(19,16,12,.05) 62%, rgba(19,16,12,.6) 100%);pointer-events:none;}
   .zoom-caption{position:absolute;left:0;right:0;text-align:center;pointer-events:none;transition:opacity .1s linear;}
   .zoom-caption .container{display:flex;flex-direction:column;align-items:center;}
   .cap-1{top:9%;}
-  .cap-1 .kicker{font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted);margin-bottom:16px;}
-  .cap-1 h1{font-size:clamp(30px,5vw,58px);max-width:760px;line-height:1.15;}
+  .cap-1 .kicker{font-size:13px;font-weight:700;letter-spacing:.5px;color:#e8e2d4;margin-bottom:16px;}
+  .cap-1 h1{font-size:clamp(30px,5vw,58px);max-width:760px;line-height:1.15;color:#faf7f0;text-shadow:0 2px 20px rgba(0,0,0,.35);}
   .cap-2{bottom:11%;opacity:0;}
-  .cap-2 h2{font-size:clamp(22px,3.4vw,36px);max-width:600px;margin:0 auto 8px;}
-  .cap-2 p{color:var(--muted);font-size:15px;}
-  .zoom-progress{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:180px;height:2px;background:rgba(35,31,26,.12);border-radius:2px;overflow:hidden;}
+  .cap-2 h2{font-size:clamp(22px,3.4vw,36px);max-width:600px;margin:0 auto 8px;color:#faf7f0;text-shadow:0 2px 20px rgba(0,0,0,.35);}
+  .cap-2 p{color:#e8e2d4;font-size:15px;}
+  .zoom-progress{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:180px;height:2px;background:rgba(255,255,255,.22);border-radius:2px;overflow:hidden;}
   .zoom-progress i{display:block;height:100%;width:0%;background:var(--sage);}
-  @media (max-width:700px){.zoom-hero{height:260vh;} .zoom-visual{width:88vw;}}
+  @media (max-width:700px){.zoom-hero{height:260vh;} .zoom-visual{transform-origin:58% 66%;}}
 
   .stat-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-warm);}
   .stat-strip .container{display:grid;grid-template-columns:repeat(4,1fr);}
@@ -142,35 +143,21 @@
 
 <section class="zoom-hero" id="zoomHero">
   <div class="zoom-sticky">
+    <img
+      class="zoom-visual"
+      id="zoomVisual"
+      src="https://static.wixstatic.com/media/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg/v1/fill/w_1920,h_1280,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg"
+      alt="סלון מעוצב מתוך תיק העבודות של יעל זוהר קול — קיר טלוויזיה מפוספס בעץ, קמין גז, כורסת פריזאית ופסנתר כנף"
+      loading="eager"
+    >
+    <div class="zoom-scrim"></div>
+
     <div class="zoom-caption cap-1">
       <div class="container">
         <span class="kicker">מעצבת פנים · ירושלים, השרון והמרכז</span>
         <h1>מהתמונה הרחבה של הבית,<br>ועד לפרט הכי קטן בו</h1>
       </div>
     </div>
-
-    <svg class="zoom-visual" id="zoomVisual" viewBox="0 0 800 600" fill="none">
-      <rect x="0" y="0" width="800" height="600" fill="#f9f5ec"/>
-      <path d="M40 560 L40 200 L400 60 L760 200 L760 560 Z" fill="none" stroke="#6f8055" stroke-width="3"/>
-      <line x1="40" y1="560" x2="760" y2="560" stroke="#6f8055" stroke-width="3"/>
-      <rect x="330" y="120" width="140" height="120" fill="none" stroke="#6f8055" stroke-width="2.5"/>
-      <line x1="400" y1="120" x2="400" y2="240" stroke="#6f8055" stroke-width="1.5"/>
-      <line x1="330" y1="180" x2="470" y2="180" stroke="#6f8055" stroke-width="1.5"/>
-      <path d="M330 120 L330 60 M470 120 L470 60" stroke="#c9c2ac" stroke-width="1"/>
-      <rect x="150" y="380" width="220" height="90" rx="16" fill="none" stroke="#231f1a" stroke-width="2.5"/>
-      <rect x="150" y="380" width="220" height="26" rx="13" fill="none" stroke="#231f1a" stroke-width="1.5"/>
-      <line x1="160" y1="470" x2="160" y2="490" stroke="#231f1a" stroke-width="2.5"/>
-      <line x1="360" y1="470" x2="360" y2="490" stroke="#231f1a" stroke-width="2.5"/>
-      <rect x="420" y="410" width="90" height="42" rx="6" fill="none" stroke="#231f1a" stroke-width="2"/>
-      <line x1="465" y1="410" x2="465" y2="330" stroke="#6f8055" stroke-width="2"/>
-      <ellipse cx="465" cy="322" rx="34" ry="16" fill="none" stroke="#6f8055" stroke-width="2"/>
-      <ellipse cx="240" cy="500" rx="150" ry="14" fill="none" stroke="#c9c2ac" stroke-width="1.5"/>
-      <path d="M600 500 C600 460 640 440 650 400 C660 440 700 460 700 500 Z" fill="none" stroke="#6f8055" stroke-width="2"/>
-      <rect x="635" y="500" width="30" height="20" fill="none" stroke="#6f8055" stroke-width="2"/>
-      <rect x="560" y="260" width="70" height="90" fill="none" stroke="#231f1a" stroke-width="2"/>
-      <line x1="575" y1="278" x2="615" y2="278" stroke="#6f8055" stroke-width="1.5"/>
-      <line x1="575" y1="298" x2="615" y2="298" stroke="#6f8055" stroke-width="1.5"/>
-    </svg>
 
     <div class="zoom-caption cap-2" id="cap2">
       <div class="container">
