@@ -2,9 +2,9 @@
 <!--
   אתר דוגמה שנבנה כפנייה יזומה עבור יעל זוהר קול, מעצבת פנים אמיתית
   (פרטי קשר ושירותים מבוססים על פרופיל ה-Google Business הציבורי שלה).
-  תמונת ה-Hero היא צילום אמיתי מתיק העבודות הציבורי שלה
-  (yaelzoharkol.com), מקושרת ישירות מהאתר שלה (לא הועתקה לריפו).
-  אין בעמוד תיאורי פרויקטים ספציפיים בדויים מעבר לכך.
+  כל התמונות (Hero, קרוסלת עבודות) הן צילומים אמיתיים מתיק העבודות
+  הציבורי שלה (yaelzoharkol.com), מקושרות ישירות מהאתר שלה (לא הועתקו
+  לריפו). אין בעמוד תיאורי פרויקטים ספציפיים בדויים.
 -->
 <html dir="rtl" lang="he">
 <head>
@@ -50,33 +50,14 @@
   .nav-cta{background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;}
   @media (max-width:840px){.nav-links{display:none;}}
 
-  /* ===== scroll-zoom hero: exterior -> door opens -> real interior photo ===== */
-  .zoom-hero{position:relative;height:380vh;padding:0;}
-  .zoom-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#0c0f14;}
-  .zoom-layer{position:absolute;inset:0;width:100%;height:100%;will-change:transform,opacity;transform-origin:50% 46%;}
-  .zoom-layer.exterior{background:linear-gradient(180deg,#0b0e14 0%,#141b26 55%,#1c2432 100%);}
-  .zoom-layer.exterior svg{width:100%;height:100%;}
-  .zoom-layer.interior{opacity:0;}
-  .zoom-layer.interior img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:64% 66%;filter:brightness(.94);}
-  .door-glow{transition:opacity .1s linear;}
-  .zoom-scrim{position:absolute;inset:0;background:linear-gradient(180deg, rgba(4,6,10,.62) 0%, rgba(4,6,10,.1) 26%, rgba(4,6,10,.08) 58%, rgba(4,6,10,.72) 100%);pointer-events:none;}
-  .zoom-caption{position:absolute;left:0;right:0;text-align:center;pointer-events:none;transition:opacity .1s linear;}
-  .zoom-caption .container{display:flex;flex-direction:column;align-items:center;}
-  .cap-1{top:9%;}
-  .cap-1 .kicker{font-size:13px;font-weight:700;letter-spacing:2px;color:#c9b98a;text-transform:uppercase;margin-bottom:18px;}
-  .cap-1 h1{font-family:'David Libre',serif;font-weight:700;font-size:clamp(34px,6vw,68px);max-width:820px;line-height:1.12;color:#f8f5ee;text-shadow:0 4px 30px rgba(0,0,0,.55);}
-  .cap-2{bottom:14%;opacity:0;}
-  .cap-2 h2{font-size:clamp(22px,3.4vw,36px);max-width:600px;margin:0 auto 8px;color:#faf7f0;text-shadow:0 2px 20px rgba(0,0,0,.5);}
-  .cap-2 p{color:#c9c2ac;font-size:15px;}
-
-  .chapter-tag{position:absolute;bottom:34px;left:36px;text-align:left;pointer-events:none;}
-  .chapter-tag .num{display:block;font-family:'David Libre',serif;font-weight:700;font-size:44px;color:#f8f5ee;line-height:1;text-shadow:0 2px 16px rgba(0,0,0,.5);transition:opacity .25s ease;}
-  .chapter-tag .label{display:block;font-size:11px;font-weight:700;letter-spacing:2px;color:#c9b98a;text-transform:uppercase;margin-top:8px;transition:opacity .25s ease;}
-  .chapter-tag .bar{width:36px;height:2px;background:#c9b98a;margin-top:12px;}
-
-  .zoom-progress{position:absolute;bottom:38px;right:36px;width:120px;height:2px;background:rgba(255,255,255,.16);border-radius:2px;overflow:hidden;}
-  .zoom-progress i{display:block;height:100%;width:0%;background:#c9b98a;}
-  @media (max-width:700px){.zoom-hero{height:300vh;} .zoom-layer{transform-origin:50% 42%;} .zoom-layer.interior img{object-position:58% 66%;} .chapter-tag{left:22px;bottom:26px;} .chapter-tag .num{font-size:34px;} .zoom-progress{right:22px;bottom:32px;width:80px;}}
+  /* ===== hero: single real photo, no animation ===== */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:flex-end;overflow:hidden;padding:0;}
+  .hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;}
+  .hero-scrim{position:absolute;inset:0;background:linear-gradient(180deg, rgba(10,8,6,.1) 0%, rgba(10,8,6,.05) 40%, rgba(10,8,6,.78) 100%);}
+  .hero-content{position:relative;z-index:1;width:100%;text-align:center;padding-bottom:96px;}
+  .hero-content .kicker{display:block;font-size:13px;font-weight:700;letter-spacing:2px;color:#e3dcc7;text-transform:uppercase;margin-bottom:18px;}
+  .hero-content h1{font-family:'David Libre',serif;font-weight:700;font-size:clamp(32px,5.5vw,60px);max-width:820px;line-height:1.15;color:#faf7f0;text-shadow:0 4px 30px rgba(0,0,0,.5);margin:0 auto;}
+  @media (max-width:700px){.hero-content{padding-bottom:56px;}}
 
   .stat-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-warm);}
   .stat-strip .container{display:grid;grid-template-columns:repeat(4,1fr);}
@@ -185,113 +166,17 @@
   </div>
 </nav>
 
-<section class="zoom-hero" id="zoomHero">
-  <div class="zoom-sticky">
-
-    <div class="zoom-layer exterior" id="exteriorLayer">
-      <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <radialGradient id="doorGlowGrad" cx="50%" cy="55%" r="65%">
-            <stop offset="0%" stop-color="#ffd88a" stop-opacity="0.98"/>
-            <stop offset="100%" stop-color="#ffd88a" stop-opacity="0"/>
-          </radialGradient>
-          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#0a0d13"/>
-            <stop offset="70%" stop-color="#141b26"/>
-            <stop offset="100%" stop-color="#1f2836"/>
-          </linearGradient>
-          <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#2b3140"/>
-            <stop offset="100%" stop-color="#1b202b"/>
-          </linearGradient>
-        </defs>
-
-        <rect x="0" y="0" width="1600" height="1000" fill="url(#skyGrad)"/>
-        <circle cx="1300" cy="150" r="46" fill="#e9e4d3" opacity=".85"/>
-        <g fill="#e9e4d3" opacity=".5">
-          <circle cx="180" cy="120" r="1.6"/><circle cx="260" cy="180" r="1.2"/><circle cx="120" cy="220" r="1.8"/>
-          <circle cx="420" cy="90" r="1.3"/><circle cx="700" cy="140" r="1.5"/><circle cx="980" cy="80" r="1.2"/>
-          <circle cx="1500" cy="200" r="1.4"/><circle cx="60" cy="330" r="1.3"/>
-        </g>
-        <rect x="0" y="760" width="1600" height="240" fill="#0f1319"/>
-        <rect x="0" y="760" width="1600" height="60" fill="#171d26" opacity=".7"/>
-
-        <rect x="240" y="300" width="1120" height="480" fill="url(#wallGrad)" stroke="#3a4152" stroke-width="2"/>
-        <rect x="220" y="280" width="1160" height="26" fill="#0e1116"/>
-        <rect x="220" y="278" width="1160" height="3" fill="#c9b98a" opacity=".55"/>
-
-        <g stroke="#454d5f" stroke-width="3">
-          <line x1="270" y1="300" x2="270" y2="780"/>
-          <line x1="300" y1="300" x2="300" y2="780"/>
-          <line x1="330" y1="300" x2="330" y2="780"/>
-          <line x1="360" y1="300" x2="360" y2="780"/>
-          <line x1="390" y1="300" x2="390" y2="780"/>
-          <line x1="420" y1="300" x2="420" y2="780"/>
-        </g>
-
-        <g fill="#ffd88a" opacity=".85">
-          <rect x="500" y="350" width="90" height="70"/>
-          <rect x="610" y="350" width="90" height="70"/>
-          <rect x="900" y="350" width="90" height="70"/>
-          <rect x="1010" y="350" width="90" height="70"/>
-          <rect x="1120" y="350" width="90" height="70"/>
-        </g>
-        <g fill="none" stroke="#1b202b" stroke-width="3">
-          <rect x="500" y="350" width="90" height="70"/>
-          <rect x="610" y="350" width="90" height="70"/>
-          <rect x="900" y="350" width="90" height="70"/>
-          <rect x="1010" y="350" width="90" height="70"/>
-          <rect x="1120" y="350" width="90" height="70"/>
-        </g>
-
-        <rect x="700" y="480" width="200" height="300" fill="#0e1116"/>
-
-        <rect id="doorGlow" class="door-glow" x="700" y="480" width="200" height="300" fill="url(#doorGlowGrad)" opacity="0"/>
-
-        <g id="doorLeft" style="transform-origin:700px 630px;">
-          <rect x="700" y="480" width="98" height="300" fill="#332619" stroke="#0e1116" stroke-width="2"/>
-          <circle cx="778" cy="640" r="5" fill="#c9b98a"/>
-        </g>
-        <g id="doorRight" style="transform-origin:900px 630px;">
-          <rect x="802" y="480" width="98" height="300" fill="#3c2c1c" stroke="#0e1116" stroke-width="2"/>
-          <circle cx="822" cy="640" r="5" fill="#c9b98a"/>
-        </g>
-
-        <rect x="240" y="770" width="1120" height="10" fill="#c9b98a" opacity=".22"/>
-      </svg>
-    </div>
-
-    <div class="zoom-layer interior" id="interiorLayer">
-      <img
-        src="https://static.wixstatic.com/media/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg/v1/fill/w_1920,h_1280,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg"
-        alt="סלון מעוצב מתוך תיק העבודות של יעל זוהר קול — קיר טלוויזיה מפוספס בעץ, קמין גז, כורסת פריזאית ופסנתר כנף"
-        loading="eager"
-      >
-    </div>
-
-    <div class="zoom-scrim"></div>
-
-    <div class="zoom-caption cap-1">
-      <div class="container">
-        <span class="kicker">מעצבת פנים · ירושלים, השרון והמרכז</span>
-        <h1>מהדלת הראשית,<br>ועד לפרט הכי קטן בבית</h1>
-      </div>
-    </div>
-
-    <div class="zoom-caption cap-2" id="cap2">
-      <div class="container">
-        <h2>ומכאן, כל תחום העבודה שלה</h2>
-        <p>המשיכו לגלול כדי לראות</p>
-      </div>
-    </div>
-
-    <div class="chapter-tag">
-      <span class="num" id="chapterNum">01</span>
-      <span class="label" id="chapterLabel">חזית הבית</span>
-      <span class="bar"></span>
-    </div>
-
-    <div class="zoom-progress"><i id="zoomFill"></i></div>
+<section class="hero">
+  <img
+    class="hero-bg"
+    src="https://static.wixstatic.com/media/16fd02_bf96795bfa074dc9a4c83740450892c6~mv2.jpg/v1/fill/w_1920,h_1280,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/16fd02_bf96795bfa074dc9a4c83740450892c6~mv2.jpg"
+    alt="סלון מעוצב מתוך תיק העבודות של יעל זוהר קול — ספת בד רכה, חלון קשתי ועץ זית"
+    loading="eager"
+  >
+  <div class="hero-scrim"></div>
+  <div class="hero-content container">
+    <span class="kicker">מעצבת פנים · ירושלים, השרון והמרכז</span>
+    <h1>מהקונספט הראשון,<br>ועד לפרט הכי קטן בבית</h1>
   </div>
 </section>
 
@@ -548,76 +433,6 @@
     reveals.forEach(function(el){ el.classList.add('in'); });
   }
 
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var zoomHero = document.getElementById('zoomHero');
-  var exteriorLayer = document.getElementById('exteriorLayer');
-  var interiorLayer = document.getElementById('interiorLayer');
-  var doorLeft = document.getElementById('doorLeft');
-  var doorRight = document.getElementById('doorRight');
-  var doorGlow = document.getElementById('doorGlow');
-  var cap1 = document.querySelector('.cap-1');
-  var cap2 = document.getElementById('cap2');
-  var fill = document.getElementById('zoomFill');
-  var chapterNum = document.getElementById('chapterNum');
-  var chapterLabel = document.getElementById('chapterLabel');
-
-  function remap(p, start, end){
-    if(end === start) return p >= end ? 1 : 0;
-    return Math.max(0, Math.min(1, (p - start) / (end - start)));
-  }
-
-  if(reduceMotion){
-    cap2.style.opacity = 0;
-    exteriorLayer.style.opacity = 0;
-    interiorLayer.style.opacity = 1;
-    chapterNum.textContent = '02';
-    chapterLabel.textContent = 'הסלון של יעל';
-  } else {
-    var ticking = false;
-    var chapterSwitched = false;
-    function update(){
-      ticking = false;
-      var rect = zoomHero.getBoundingClientRect();
-      var total = zoomHero.offsetHeight - window.innerHeight;
-      var progress = total > 0 ? (-rect.top) / total : 0;
-      progress = Math.max(0, Math.min(1, progress));
-
-      var scale = 1 + progress * 0.9;
-      var scaleStr = 'scale(' + scale.toFixed(3) + ')';
-      exteriorLayer.style.transform = scaleStr;
-      interiorLayer.style.transform = scaleStr;
-
-      var doorT = remap(progress, 0.30, 0.52);
-      var doorScaleX = 1 - doorT * 0.94;
-      doorLeft.style.transform = 'scaleX(' + doorScaleX.toFixed(3) + ')';
-      doorRight.style.transform = 'scaleX(' + doorScaleX.toFixed(3) + ')';
-      doorGlow.setAttribute('opacity', doorT.toFixed(3));
-
-      var crossT = remap(progress, 0.48, 0.68);
-      exteriorLayer.style.opacity = String(1 - crossT);
-      interiorLayer.style.opacity = String(crossT);
-
-      if(crossT >= 0.5 && !chapterSwitched){
-        chapterSwitched = true;
-        chapterNum.textContent = '02';
-        chapterLabel.textContent = 'הסלון של יעל';
-      } else if(crossT < 0.5 && chapterSwitched){
-        chapterSwitched = false;
-        chapterNum.textContent = '01';
-        chapterLabel.textContent = 'חזית הבית';
-      }
-
-      cap1.style.opacity = String(1 - remap(progress, 0, 0.26));
-      cap2.style.opacity = String(remap(progress, 0.64, 0.9));
-
-      fill.style.width = (progress * 100).toFixed(1) + '%';
-    }
-    window.addEventListener('scroll', function(){
-      if(!ticking){ requestAnimationFrame(update); ticking = true; }
-    }, {passive:true});
-    window.addEventListener('resize', update);
-    update();
-  }
 })();
 </script>
 </body>
