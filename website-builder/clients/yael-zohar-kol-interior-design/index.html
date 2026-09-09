@@ -50,22 +50,27 @@
   .nav-cta{background:var(--ink);color:var(--paper);border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;}
   @media (max-width:840px){.nav-links{display:none;}}
 
-  /* ===== scroll-zoom hero ===== */
-  .zoom-hero{position:relative;height:320vh;}
-  .zoom-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#1b1712;}
-  .zoom-visual{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform;transform-origin:64% 66%;}
-  .zoom-scrim{position:absolute;inset:0;background:linear-gradient(180deg, rgba(19,16,12,.55) 0%, rgba(19,16,12,.08) 22%, rgba(19,16,12,.05) 62%, rgba(19,16,12,.6) 100%);pointer-events:none;}
+  /* ===== scroll-zoom hero: exterior -> door opens -> real interior photo ===== */
+  .zoom-hero{position:relative;height:380vh;}
+  .zoom-sticky{position:sticky;top:0;height:100vh;overflow:hidden;background:#e9e3d4;}
+  .zoom-layer{position:absolute;inset:0;width:100%;height:100%;will-change:transform,opacity;transform-origin:50% 46%;}
+  .zoom-layer.exterior{background:linear-gradient(180deg,#eef0e4,#dfdecf);}
+  .zoom-layer.exterior svg{width:100%;height:100%;}
+  .zoom-layer.interior{opacity:0;}
+  .zoom-layer.interior img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:64% 66%;}
+  .door-glow{transition:opacity .1s linear;}
+  .zoom-scrim{position:absolute;inset:0;background:linear-gradient(180deg, rgba(19,16,12,.45) 0%, rgba(19,16,12,.06) 22%, rgba(19,16,12,.04) 62%, rgba(19,16,12,.55) 100%);pointer-events:none;}
   .zoom-caption{position:absolute;left:0;right:0;text-align:center;pointer-events:none;transition:opacity .1s linear;}
   .zoom-caption .container{display:flex;flex-direction:column;align-items:center;}
   .cap-1{top:9%;}
-  .cap-1 .kicker{font-size:13px;font-weight:700;letter-spacing:.5px;color:#e8e2d4;margin-bottom:16px;}
-  .cap-1 h1{font-size:clamp(30px,5vw,58px);max-width:760px;line-height:1.15;color:#faf7f0;text-shadow:0 2px 20px rgba(0,0,0,.35);}
+  .cap-1 .kicker{font-size:13px;font-weight:700;letter-spacing:.5px;color:#4a4436;margin-bottom:16px;}
+  .cap-1 h1{font-size:clamp(30px,5vw,58px);max-width:760px;line-height:1.15;color:#231f1a;text-shadow:0 2px 20px rgba(255,255,255,.25);}
   .cap-2{bottom:11%;opacity:0;}
   .cap-2 h2{font-size:clamp(22px,3.4vw,36px);max-width:600px;margin:0 auto 8px;color:#faf7f0;text-shadow:0 2px 20px rgba(0,0,0,.35);}
   .cap-2 p{color:#e8e2d4;font-size:15px;}
-  .zoom-progress{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:180px;height:2px;background:rgba(255,255,255,.22);border-radius:2px;overflow:hidden;}
+  .zoom-progress{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);width:180px;height:2px;background:rgba(35,31,26,.18);border-radius:2px;overflow:hidden;}
   .zoom-progress i{display:block;height:100%;width:0%;background:var(--sage);}
-  @media (max-width:700px){.zoom-hero{height:260vh;} .zoom-visual{transform-origin:58% 66%;}}
+  @media (max-width:700px){.zoom-hero{height:300vh;} .zoom-layer{transform-origin:50% 42%;} .zoom-layer.interior img{object-position:58% 66%;}}
 
   .stat-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--paper-warm);}
   .stat-strip .container{display:grid;grid-template-columns:repeat(4,1fr);}
@@ -143,19 +148,69 @@
 
 <section class="zoom-hero" id="zoomHero">
   <div class="zoom-sticky">
-    <img
-      class="zoom-visual"
-      id="zoomVisual"
-      src="https://static.wixstatic.com/media/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg/v1/fill/w_1920,h_1280,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg"
-      alt="סלון מעוצב מתוך תיק העבודות של יעל זוהר קול — קיר טלוויזיה מפוספס בעץ, קמין גז, כורסת פריזאית ופסנתר כנף"
-      loading="eager"
-    >
+
+    <div class="zoom-layer exterior" id="exteriorLayer">
+      <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+        <rect x="0" y="0" width="1600" height="1000" fill="#e7e2d1"/>
+        <rect x="0" y="760" width="1600" height="240" fill="#d9d4bf"/>
+
+        <rect x="240" y="300" width="1120" height="480" fill="#f2eee1" stroke="#57633f" stroke-width="3"/>
+        <rect x="220" y="280" width="1160" height="26" fill="#3a3527"/>
+
+        <g stroke="#8a9270" stroke-width="3">
+          <line x1="270" y1="300" x2="270" y2="780"/>
+          <line x1="300" y1="300" x2="300" y2="780"/>
+          <line x1="330" y1="300" x2="330" y2="780"/>
+          <line x1="360" y1="300" x2="360" y2="780"/>
+          <line x1="390" y1="300" x2="390" y2="780"/>
+          <line x1="420" y1="300" x2="420" y2="780"/>
+        </g>
+
+        <g fill="#e9e4d3" stroke="#57633f" stroke-width="2.5">
+          <rect x="500" y="350" width="90" height="70"/>
+          <rect x="610" y="350" width="90" height="70"/>
+          <rect x="900" y="350" width="90" height="70"/>
+          <rect x="1010" y="350" width="90" height="70"/>
+          <rect x="1120" y="350" width="90" height="70"/>
+        </g>
+
+        <rect x="700" y="480" width="200" height="300" fill="#3a3527"/>
+
+        <defs>
+          <radialGradient id="doorGlowGrad" cx="50%" cy="55%" r="65%">
+            <stop offset="0%" stop-color="#ffe9bf" stop-opacity="0.95"/>
+            <stop offset="100%" stop-color="#ffe9bf" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect id="doorGlow" class="door-glow" x="700" y="480" width="200" height="300" fill="url(#doorGlowGrad)" opacity="0"/>
+
+        <g id="doorLeft" style="transform-origin:700px 630px;">
+          <rect x="700" y="480" width="98" height="300" fill="#5b4530" stroke="#231f1a" stroke-width="2"/>
+          <circle cx="778" cy="640" r="5" fill="#c9a227"/>
+        </g>
+        <g id="doorRight" style="transform-origin:900px 630px;">
+          <rect x="802" y="480" width="98" height="300" fill="#6b5238" stroke="#231f1a" stroke-width="2"/>
+          <circle cx="822" cy="640" r="5" fill="#c9a227"/>
+        </g>
+
+        <rect x="240" y="770" width="1120" height="12" fill="#57633f" opacity=".4"/>
+      </svg>
+    </div>
+
+    <div class="zoom-layer interior" id="interiorLayer">
+      <img
+        src="https://static.wixstatic.com/media/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg/v1/fill/w_1920,h_1280,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/16fd02_51a61793a40e4473a0243bf9b8b0bdb8~mv2.jpg"
+        alt="סלון מעוצב מתוך תיק העבודות של יעל זוהר קול — קיר טלוויזיה מפוספס בעץ, קמין גז, כורסת פריזאית ופסנתר כנף"
+        loading="eager"
+      >
+    </div>
+
     <div class="zoom-scrim"></div>
 
     <div class="zoom-caption cap-1">
       <div class="container">
         <span class="kicker">מעצבת פנים · ירושלים, השרון והמרכז</span>
-        <h1>מהתמונה הרחבה של הבית,<br>ועד לפרט הכי קטן בו</h1>
+        <h1>מהדלת הראשית,<br>ועד לפרט הכי קטן בבית</h1>
       </div>
     </div>
 
@@ -297,13 +352,24 @@
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var zoomHero = document.getElementById('zoomHero');
-  var zoomVisual = document.getElementById('zoomVisual');
+  var exteriorLayer = document.getElementById('exteriorLayer');
+  var interiorLayer = document.getElementById('interiorLayer');
+  var doorLeft = document.getElementById('doorLeft');
+  var doorRight = document.getElementById('doorRight');
+  var doorGlow = document.getElementById('doorGlow');
   var cap1 = document.querySelector('.cap-1');
   var cap2 = document.getElementById('cap2');
   var fill = document.getElementById('zoomFill');
 
+  function remap(p, start, end){
+    if(end === start) return p >= end ? 1 : 0;
+    return Math.max(0, Math.min(1, (p - start) / (end - start)));
+  }
+
   if(reduceMotion){
     cap2.style.opacity = 0;
+    exteriorLayer.style.opacity = 0;
+    interiorLayer.style.opacity = 1;
   } else {
     var ticking = false;
     function update(){
@@ -313,12 +379,23 @@
       var progress = total > 0 ? (-rect.top) / total : 0;
       progress = Math.max(0, Math.min(1, progress));
 
-      var scale = 1 + progress * 1.7;
-      zoomVisual.style.transform = 'scale(' + scale.toFixed(3) + ')';
+      var scale = 1 + progress * 0.9;
+      var scaleStr = 'scale(' + scale.toFixed(3) + ')';
+      exteriorLayer.style.transform = scaleStr;
+      interiorLayer.style.transform = scaleStr;
 
-      cap1.style.opacity = String(1 - Math.min(1, progress / 0.32));
-      var cap2p = Math.max(0, (progress - 0.58) / 0.32);
-      cap2.style.opacity = String(Math.min(1, cap2p));
+      var doorT = remap(progress, 0.30, 0.52);
+      var doorScaleX = 1 - doorT * 0.94;
+      doorLeft.style.transform = 'scaleX(' + doorScaleX.toFixed(3) + ')';
+      doorRight.style.transform = 'scaleX(' + doorScaleX.toFixed(3) + ')';
+      doorGlow.setAttribute('opacity', doorT.toFixed(3));
+
+      var crossT = remap(progress, 0.48, 0.68);
+      exteriorLayer.style.opacity = String(1 - crossT);
+      interiorLayer.style.opacity = String(crossT);
+
+      cap1.style.opacity = String(1 - remap(progress, 0, 0.26));
+      cap2.style.opacity = String(remap(progress, 0.64, 0.9));
 
       fill.style.width = (progress * 100).toFixed(1) + '%';
     }
