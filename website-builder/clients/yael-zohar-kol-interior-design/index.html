@@ -92,6 +92,39 @@
   .quote-wrap blockquote{font-family:'David Libre',serif;font-size:clamp(21px,2.8vw,30px);line-height:1.6;margin-bottom:22px;}
   .quote-src{font-size:13px;color:#b9b2a2;}
 
+  /* ===== carousels (works + reviews) ===== */
+  .carousel-wrap{position:relative;}
+  .carousel-track{
+    display:flex;gap:20px;overflow-x:auto;scroll-snap-type:x mandatory;
+    scrollbar-width:none;-ms-overflow-style:none;padding-bottom:6px;scroll-behavior:smooth;
+  }
+  .carousel-track::-webkit-scrollbar{display:none;}
+  .carousel-track > *{scroll-snap-align:start;flex:0 0 auto;}
+  .carousel-nav{display:flex;gap:10px;margin-top:24px;}
+  .carousel-btn{
+    width:46px;height:46px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s ease,color .2s ease;
+    color:var(--ink);
+  }
+  .carousel-btn:hover{background:var(--ink);color:var(--paper);}
+  .carousel-btn svg{width:18px;height:18px;}
+
+  .work-card{width:340px;border-radius:18px;overflow:hidden;background:var(--paper-warm);border:1px solid var(--line);}
+  .work-card img{width:100%;height:250px;object-fit:cover;display:block;}
+  .work-card .work-cap{padding:16px 18px;}
+  .work-card .work-cap span{font-size:13px;color:var(--muted);}
+
+  .review-card{
+    width:360px;background:var(--paper-warm);border:1px solid var(--line);border-radius:18px;padding:28px;
+    display:flex;flex-direction:column;
+  }
+  .review-stars{color:#d9a441;letter-spacing:2px;margin-bottom:14px;font-size:15px;}
+  .review-text{font-size:14.5px;line-height:1.7;color:#3a3527;flex:1;margin-bottom:18px;}
+  .review-author{display:flex;align-items:center;justify-content:space-between;font-size:13px;border-top:1px solid var(--line);padding-top:14px;}
+  .review-author b{font-family:'David Libre',serif;font-size:15px;font-weight:700;}
+  .review-author span{color:var(--muted);}
+  @media (max-width:600px){.work-card{width:270px;}.work-card img{height:190px;}.review-card{width:290px;padding:22px;}}
+
   .services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
   .service-card{background:var(--paper-warm);border:1px solid var(--line);border-radius:20px;padding:32px;transition:transform .2s ease, box-shadow .2s ease;}
   .service-card:hover{transform:translateY(-4px);box-shadow:0 16px 30px rgba(35,31,26,.08);}
@@ -242,6 +275,62 @@
   </div>
 </section>
 
+<section id="work">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="section-kicker">תיק עבודות</span>
+        <h2 class="section-title">רגעים מתוך פרויקטים אמיתיים</h2>
+      </div>
+      <p class="section-note">תמונות מפרויקטים שיעל תכננה וליוותה מקצה לקצה.</p>
+    </div>
+    <div class="carousel-wrap reveal">
+      <div class="carousel-track" id="workTrack">
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_1a7e55279d1c4677b146257140b89c3b~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_1a7e55279d1c4677b146257140b89c3b~mv2.jpg" alt="מטבח עם תאורת תלייה זהובה וחיפוי עץ" loading="lazy">
+          <div class="work-cap"><span>מטבח · תאורה ועץ טבעי</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_11e5761ed7ad429aae9e68436adf5c02~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_11e5761ed7ad429aae9e68436adf5c02~mv2.jpg" alt="מטבח עם אי שיש מפל ודוכני בר" loading="lazy">
+          <div class="work-cap"><span>מטבח · אי שיש מפל</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_bf96795bfa074dc9a4c83740450892c6~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_bf96795bfa074dc9a4c83740450892c6~mv2.jpg" alt="סלון עם ספת בד רכה וחלון קשתי" loading="lazy">
+          <div class="work-cap"><span>סלון · פינת ישיבה רכה</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_255c8705b8c1404fbfa70543dbed2451~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_255c8705b8c1404fbfa70543dbed2451~mv2.jpg" alt="שולחן סלון מעוצב עם סטיילינג" loading="lazy">
+          <div class="work-cap"><span>סטיילינג · שולחן סלון</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_acbf6bd012494634a35aac81abacab25~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_acbf6bd012494634a35aac81abacab25~mv2.jpg" alt="פרט אי מטבח עם שרפרפים" loading="lazy">
+          <div class="work-cap"><span>מטבח · פרט אי ושרפרפים</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_39dc5986c1e34f0086f0940f94745f38~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_39dc5986c1e34f0086f0940f94745f38~mv2.jpg" alt="פינת אוכל עם תאורה תלויה ונוף" loading="lazy">
+          <div class="work-cap"><span>פינת אוכל · עם נוף</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_42026c466cbe46ce8cca03ce3e673a74~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_42026c466cbe46ce8cca03ce3e673a74~mv2.jpg" alt="מטבח יוקרתי עם חיפוי זהב" loading="lazy">
+          <div class="work-cap"><span>מטבח · גימור זהב</span></div>
+        </div>
+        <div class="work-card">
+          <img src="https://static.wixstatic.com/media/16fd02_9d7703f5fc1c4212b00b55dc6ac14946~mv2.jpg/v1/fill/w_900,h_650,al_c,q_85,enc_avif,quality_auto/16fd02_9d7703f5fc1c4212b00b55dc6ac14946~mv2.jpg" alt="מרחב פתוח סלון ומטבח" loading="lazy">
+          <div class="work-cap"><span>מרחב פתוח · סלון ומטבח</span></div>
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="carousel-btn" data-dir="1" aria-label="הבא">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button class="carousel-btn" data-dir="-1" aria-label="הקודם">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="services">
   <div class="container">
     <div class="section-head reveal">
@@ -275,6 +364,65 @@
         <div class="service-tags">
           <span>בתי ספר</span><span>מרחבי למידה</span><span>עיצוב פנים אדריכלי</span>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <span class="section-kicker">ביקורות אמיתיות</span>
+        <h2 class="section-title">מה שהלקוחות אומרים ב-Google</h2>
+      </div>
+      <p class="section-note">5.0 מתוך 5 · 8 ביקורות. הציטוטים כאן הם ביקורות אמיתיות, כפי שנכתבו.</p>
+    </div>
+    <div class="carousel-wrap reveal">
+      <div class="carousel-track" id="reviewTrack">
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">ממליצה בחום על יעל זוהר קול. יעל מעצבת פנים מעולה בכל המובנים — החל משלב התכנון החכם שמשלב פרקטיות מקסימלית עם טעם מעולה, הזריזות, תשומת לב לפרטים והביצוע המעולה. הכל נעשה ברמה הגבוהה ביותר בשילוב עם האישיות המקסימה והלב הענק שלה — שהם דברים משמעותיים במיוחד כשמעצבים בית.</p>
+          <div class="review-author"><b>יעל סמואל</b><span>לפני 4 חודשים</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">יעל מעצבת מוכשרת ויצירתית ביותר. כל פינה בבית שלי עוצבה על ידה, ובימים אלו ממש היא מעצבת אצלי את המרתף. תמיד בסבלנות — עד שאהיה מרוצה, ובזמינות נדירה. ממליצה בחום — כישרון מיוחד.</p>
+          <div class="review-author"><b>גלית הלפרין</b><span>לפני 4 שנים</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">מאיפה להתחיל?! יעלי אהובה, מהפגישה הראשונה שהגענו למקום בלי קירות ובלי דמיון — את כבר ראית את הסטודיו בשלמותו!</p>
+          <div class="review-author"><b>שיר גינדי</b><span>מעצבת שמלות כלה · לפני 4 שנים</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">את יעל הכרתי דרך המלצות מהפייסבוק. מיד בפגישה הראשונה נוכחתי לדעת שיעל מקצועית ואנרגטית, כל פגישה ומחשבה הייתה מלווה בחיוך ובאיכות שלא מתפשרת.</p>
+          <div class="review-author"><b>כנרת מסילתי</b><span>לפני 4 שנים</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">יעל קול המעצבת הנדירה, ליוותה אותנו בתהליך עיצוב מלא, משלב התכנון האדריכלי ועד להעמדת החלל הסופית. יעל מקצועית מאד, קשובה לצרכי הלקוח, ויודעת לדייק עד לפרטים הקטנים. ליעל טעם משובח ביותר, יוצרת שינויים מדהימים עם צבע, גוון, אופי ואווירה.</p>
+          <div class="review-author"><b>דבורה נחום</b><span>ביקורת אחת</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">יעל עיצבה לנו 2 דירות בירושלים, העבודה איתה הייתה חווייתית ומהנה. תמיד עם חיוך וסבלנות. שרותית וזמינה. הדירות יצאו מדהימות, מומלצת מאד!</p>
+          <div class="review-author"><b>אביעד רוזנצויג</b><span>לפני שנה</span></div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text">מעצבת בחסד עליון. עיצבה לי מהמם את הבית בשילוב סינרגיה. מומלצת בחום.</p>
+          <div class="review-author"><b>יעל אברהם</b><span>לפני 3 שנים</span></div>
+        </div>
+      </div>
+      <div class="carousel-nav">
+        <button class="carousel-btn" data-dir="1" aria-label="הבא">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button class="carousel-btn" data-dir="-1" aria-label="הקודם">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -339,6 +487,22 @@
 (function(){
   var nav = document.getElementById('nav');
   window.addEventListener('scroll', function(){ nav.classList.toggle('scrolled', window.scrollY > 40); }, {passive:true});
+
+  document.querySelectorAll('.carousel-wrap').forEach(function(wrap){
+    var track = wrap.querySelector('.carousel-track');
+    var cards = Array.prototype.slice.call(track.children);
+    var index = 0;
+    track.style.scrollBehavior = 'auto';
+    cards[0].scrollIntoView({behavior:'auto', inline:'start', block:'nearest'});
+    track.style.scrollBehavior = '';
+    wrap.querySelectorAll('.carousel-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var dir = parseInt(btn.getAttribute('data-dir'), 10);
+        index = Math.max(0, Math.min(cards.length - 1, index + dir));
+        cards[index].scrollIntoView({behavior:'smooth', inline:'start', block:'nearest'});
+      });
+    });
+  });
 
   var reveals = document.querySelectorAll('.reveal');
   if('IntersectionObserver' in window){
