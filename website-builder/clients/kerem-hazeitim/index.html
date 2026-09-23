@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>כרם הזיתים — צימרים בוטיק בצפון הנגב</title>
+<meta name="description" content="שלוש בקתות אירוח בכרם זיתים במושב תלמי ביל״ו: בריכה ענקית ומחוממת, ג׳קוזי ספא, סאונה פינית ומדשאות עד האופק. בחרו בקתה והזמינו ישירות בוואטסאפ.">
+<meta name="theme-color" content="#0c0b0a">
+<meta name="robots" content="noindex, nofollow">
+<!-- PRIVATE DRAFT: contact details are placeholders until the owner approves publication. -->
+<meta property="og:title" content="כרם הזיתים — שלוש בקתות, בריכה, וכרם זיתים עד האופק">
+<meta property="og:description" content="צימרים בוטיק בתלמי ביל״ו: בריכה ענקית מחוממת, ג׳קוזי ספא וסאונה — רק לאורחי המתחם.">
+<meta property="og:image" content="https://arieleilon900-bit.github.io/ariel4/website-builder/clients/kerem-hazeitim/img/jacuzzi-dusk-sm.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230c0b0a'/%3E%3Cpath d='M50 80V38M50 52q-16-4-20-20q16 2 20 20zM50 44q14-6 18-22q-14 4-18 22z' stroke='%23c8a97e' stroke-width='5' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="image" href="img/jacuzzi-dusk.jpg" imagesrcset="img/jacuzzi-dusk-sm.jpg 900w, img/jacuzzi-dusk.jpg 1600w" imagesizes="(max-width: 900px) 100vw, 54vw">
+<link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c0b0a;
+    --ink-2:#151311;
+    --bone:#ece6da;
+    --bone-dim:rgba(236,230,218,.62);
+    --bone-faint:rgba(236,230,218,.14);
+    --gold:#c8a97e;
+    --gold-hi:#e7cfa6;
+    --olive:#a4b07a;
+    --line:rgba(236,230,218,.16);
+    --ease:cubic-bezier(.22,1,.36,1);
+    --display:'Bellefair', 'Heebo', serif;
+    --body:'Heebo', system-ui, sans-serif;
+    --gutter:clamp(16px, 4vw, 56px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{background:var(--ink);color-scheme:dark;}
+  html.lenis, html.lenis body{height:auto;}
+  .lenis.lenis-smooth{scroll-behavior:auto !important;}
+  body{font-family:var(--body);font-weight:300;background:var(--ink);color:var(--bone);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
+  img{display:block;max-width:100%;}
+  ::selection{background:var(--gold);color:var(--ink);}
+  :focus-visible{outline:1px solid var(--gold);outline-offset:4px;}
+
+  /* ---------- WebGL stage ---------- */
+  #stage{position:fixed;inset:0;z-index:0;width:100%;height:100%;display:block;}
+  .stage-fallback{position:fixed;inset:0;z-index:0;display:none;background:#0c0b0a url("img/grove.jpg") center/cover no-repeat;}
+  .stage-fallback::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(12,11,10,.55), rgba(12,11,10,.8));}
+  .no-webgl .stage-fallback{display:block;}
+  .no-webgl #stage{display:none;}
+  .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.5) 100%);}
+  .grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grain 1.2s steps(6) infinite;}
+  @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+
+  /* ---------- Preloader ---------- */
+  .loader{position:fixed;inset:0;z-index:100;background:var(--ink);display:flex;flex-direction:column;justify-content:space-between;padding:var(--gutter);
+    transition:clip-path 1.2s var(--ease);clip-path:inset(0 0 0 0);}
+  .loader.done{clip-path:inset(0 0 100% 0);pointer-events:none;}
+  .loader-top{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.3em;color:var(--bone-dim);}
+  .loader-count{font-family:var(--display);font-size:clamp(90px, 22vw, 300px);line-height:.8;color:var(--bone);font-variant-numeric:tabular-nums;direction:ltr;text-align:left;}
+  .loader-bar{height:1px;background:var(--line);position:relative;overflow:hidden;}
+  .loader-bar i{position:absolute;inset:0;background:var(--gold);transform-origin:right;transform:scaleX(0);transition:transform .3s linear;}
+
+  /* ---------- Cursor ---------- */
+  .cursor{position:fixed;top:0;left:0;z-index:90;pointer-events:none;opacity:0;transition:opacity .3s;}
+  .cursor.on{opacity:1;}
+  .cursor .dot{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--gold-hi);}
+  .cursor .ring{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;border:1px solid rgba(231,207,166,.55);
+    display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.15em;color:var(--ink);
+    transition:width .35s var(--ease), height .35s var(--ease), margin .35s var(--ease), background .35s, border-color .35s;}
+  .cursor.hover .ring{width:64px;height:64px;margin:-32px 0 0 -32px;border-color:var(--gold);}
+  .cursor.label .ring{width:84px;height:84px;margin:-42px 0 0 -42px;background:var(--gold-hi);border-color:transparent;}
+  .cursor .ring span{opacity:0;transition:opacity .2s;}
+  .cursor.label .ring span{opacity:1;}
+  @media (pointer:coarse){.cursor{display:none;}}
+
+  /* ---------- Nav ---------- */
+  .nav{position:fixed;top:0;inset-inline:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px var(--gutter);
+    transition:background .5s, padding .5s, transform .6s var(--ease);}
+  .nav.scrolled{background:rgba(12,11,10,.55);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px);padding-block:14px;}
+  .nav.hide{transform:translateY(-110%);}
+  .logo{display:flex;align-items:baseline;gap:10px;}
+  .logo b{font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.02em;}
+  .logo small{font-size:10px;letter-spacing:.35em;color:var(--bone-dim);direction:ltr;}
+  .nav-links{display:flex;gap:34px;font-size:14px;}
+  .nav-links a{position:relative;color:var(--bone-dim);transition:color .3s;}
+  .nav-links a::after{content:"";position:absolute;right:0;bottom:-4px;height:1px;width:100%;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease);}
+  .nav-links a:hover{color:var(--bone);}
+  .nav-links a:hover::after{transform:scaleX(1);transform-origin:right;}
+  .pill{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:11px 22px;font-size:14px;font-weight:400;
+    position:relative;overflow:hidden;isolation:isolate;transition:color .45s var(--ease), border-color .45s;}
+  .pill::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold);transform:scaleX(0);transform-origin:left;border-radius:inherit;transition:transform .55s var(--ease);}
+  .pill:hover{color:var(--ink);border-color:var(--gold);}
+  .pill:hover::before{transform:scaleX(1);transform-origin:right;}
+  .pill.solid{background:var(--bone);color:var(--ink);border-color:var(--bone);}
+  .pill.solid::before{background:var(--gold);}
+  .pill svg{width:16px;height:16px;}
+
+  /* ---------- Shared type ---------- */
+  main{position:relative;z-index:1;}
+  .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.32em;color:var(--gold);font-weight:400;}
+  .eyebrow::before{content:"";width:28px;height:1px;background:currentColor;}
+  .display{font-family:var(--display);font-weight:400;line-height:.95;letter-spacing:-.005em;}
+  .lines .ln{display:block;overflow:hidden;padding-bottom:.08em;}
+  .lines .ln > span{display:block;transform:translateY(105%);transition:transform 1.3s var(--ease);}
+  .lines.in .ln > span{transform:none;}
+  .lines .ln:nth-child(2) > span{transition-delay:.09s;}
+  .lines .ln:nth-child(3) > span{transition-delay:.18s;}
+  .fade{opacity:0;transform:translateY(24px);transition:opacity 1.1s var(--ease), transform 1.1s var(--ease);}
+  .fade.in{opacity:1;transform:none;}
+
+  /* ---------- Hero ---------- */
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--gutter) clamp(28px,6vh,64px);position:relative;background:var(--ink);overflow:hidden;}
+  .hero-photo{position:absolute;top:0;bottom:0;left:0;width:54%;margin:0;overflow:hidden;clip-path:inset(100% 0 0 0);transition:clip-path 1.7s var(--ease);}
+  .hero-photo.in{clip-path:inset(0 0 0 0);}
+  .hero-photo .px{position:absolute;inset:-6% 0;will-change:transform;}
+  .hero-photo img{width:100%;height:100%;object-fit:cover;object-position:40% 72%;transform:scale(1.18);transition:transform 2.8s var(--ease);filter:saturate(1.05) contrast(1.04);}
+  .hero-photo.in img{transform:scale(1.03);}
+  .hero-photo::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(to left, var(--ink) 0%, rgba(12,11,10,.35) 18%, transparent 42%),
+               linear-gradient(to bottom, rgba(12,11,10,.55) 0%, transparent 22%),
+               linear-gradient(to top, rgba(12,11,10,.55) 0%, transparent 32%);}
+  .hero-photo figcaption{position:absolute;left:var(--gutter);bottom:18px;z-index:1;font-size:11px;color:rgba(236,230,218,.6);letter-spacing:.04em;}
+  .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr;gap:28px;width:min(44%, 620px);}
+  .hero h1{font-size:clamp(78px, 10.5vw, 190px);margin:18px 0 10px;}
+  .hero .tag{font-size:clamp(18px,1.9vw,23px);color:var(--bone);max-width:32ch;font-weight:300;}
+  .hero-side{display:flex;flex-direction:column;gap:18px;align-items:flex-start;}
+  .hero-meta{display:flex;gap:28px;font-size:13px;color:var(--bone-dim);}
+  .hero-meta b{display:block;font-family:var(--display);font-size:30px;color:var(--bone);font-weight:400;line-height:1;}
+  .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+  .scroll-cue{position:absolute;left:calc(54% + 20px);top:50%;z-index:1;writing-mode:vertical-rl;font-size:11px;letter-spacing:.4em;color:var(--bone-dim);display:flex;align-items:center;gap:14px;}
+  .scroll-cue::after{content:"";width:1px;height:70px;background:linear-gradient(var(--gold), transparent);animation:cue 2.2s var(--ease) infinite;transform-origin:top;}
+  @keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* ---------- Marquee ---------- */
+  .marquee{border-block:1px solid var(--line);overflow:hidden;padding:22px 0;background:rgba(12,11,10,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+  .marquee-track{display:flex;gap:56px;width:max-content;animation:marquee 38s linear infinite;font-family:var(--display);font-size:clamp(28px,4vw,54px);color:var(--bone-dim);white-space:nowrap;}
+  .marquee-track span{display:flex;align-items:center;gap:56px;}
+  .marquee-track span::after{content:"✦";font-size:.4em;color:var(--gold);}
+  @keyframes marquee{to{transform:translateX(50%);}}
+
+  /* ---------- Story (camera chapters) ---------- */
+  .story{height:360vh;position:relative;}
+  .story-sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;padding:0 var(--gutter);}
+  .story-sticky::before{content:"";position:absolute;inset:0;background:linear-gradient(to left, rgba(12,11,10,.82) 0%, rgba(12,11,10,.25) 45%, transparent 70%);pointer-events:none;}
+  .chapters{position:relative;width:min(520px, 100%);height:380px;}
+  .chapter{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:18px;opacity:0;transform:translateY(40px);transition:opacity .9s var(--ease), transform .9s var(--ease);pointer-events:none;}
+  .chapter.active{opacity:1;transform:none;pointer-events:auto;}
+  .chapter .num{font-family:var(--display);font-size:15px;color:var(--gold);letter-spacing:.2em;direction:ltr;text-align:right;}
+  .chapter h2{font-size:clamp(46px,6vw,88px);}
+  .chapter p{color:var(--bone-dim);font-size:17px;max-width:40ch;}
+  .chapter .thumb{width:180px;aspect-ratio:3/2;border-radius:10px;overflow:hidden;border:1px solid var(--line);}
+  .chapter .thumb img{width:100%;height:100%;object-fit:cover;}
+  .progress-rail{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;}
+  .progress-rail i{display:block;width:2px;height:44px;background:var(--line);position:relative;overflow:hidden;}
+  .progress-rail i b{position:absolute;inset:0;background:var(--gold);transform-origin:top;transform:scaleY(0);}
+
+  /* ---------- Picker ---------- */
+  .picker{min-height:190vh;position:relative;display:flex;align-items:flex-start;padding:12vh var(--gutter) 30vh;}
+  .pick-panel{position:sticky;top:78px;width:min(440px,100%);background:rgba(16,14,12,.66);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+    border:1px solid var(--line);border-radius:22px;padding:22px 24px;box-shadow:0 40px 80px -30px rgba(0,0,0,.6);}
+  .pick-panel h2{font-size:clamp(34px,3.2vw,46px);margin:10px 0 4px;}
+  .pick-panel .hint{font-size:14px;color:var(--bone-dim);margin-bottom:12px;}
+  .pick-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .pick-tabs button{font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);color:var(--bone-dim);transition:all .35s var(--ease);}
+  .pick-tabs button:hover{border-color:var(--gold);color:var(--bone);}
+  .pick-tabs button[aria-pressed="true"]{background:var(--gold-hi);border-color:var(--gold-hi);color:var(--ink);}
+  .pick-photo{position:relative;aspect-ratio:2/1;border-radius:14px;overflow:hidden;margin-bottom:12px;background:#1a1714;}
+  .pick-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .6s var(--ease), transform 1.4s var(--ease);}
+  .pick-photo img.out{opacity:0;transform:scale(1.06);}
+  .pick-photo .cap{position:absolute;right:12px;bottom:10px;font-size:12px;background:rgba(12,11,10,.6);backdrop-filter:blur(6px);padding:4px 10px;border-radius:999px;}
+  .pick-name{font-family:var(--display);font-size:30px;line-height:1;margin-bottom:6px;}
+  .pick-desc{font-size:13.5px;color:var(--bone-dim);margin-bottom:10px;min-height:3.2em;line-height:1.55;}
+  .pick-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .pick-chips span{font-size:11.5px;padding:4px 10px;border-radius:999px;background:rgba(164,176,122,.13);color:#cfd8ab;}
+  .book{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:12px;align-items:end;}
+  .book label{display:flex;flex-direction:column;gap:4px;font-size:11px;letter-spacing:.12em;color:var(--bone-dim);}
+  .book input{font:inherit;font-size:14px;color:var(--bone);background:rgba(236,230,218,.05);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0;}
+  .book input:focus{outline:none;border-color:var(--gold);}
+  .guests{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;height:41px;}
+  .guests button{width:32px;height:100%;font-size:18px;color:var(--bone-dim);}
+  .guests button:hover{color:var(--gold-hi);}
+  .guests output{min-width:22px;text-align:center;font-variant-numeric:tabular-nums;}
+  .book.hidden{display:none;}
+  .pick-panel .pill{width:100%;justify-content:center;}
+  .pick-tag{position:fixed;z-index:5;pointer-events:none;padding:7px 14px;border-radius:999px;background:var(--gold-hi);color:var(--ink);font-size:13px;font-weight:500;
+    transform:translate(-50%,-160%);opacity:0;transition:opacity .25s;white-space:nowrap;}
+  .pick-tag.on{opacity:1;}
+
+  /* ---------- Solid content (covers the stage) ---------- */
+  .cover{background:var(--ink);position:relative;}
+  .cover::before{content:"";position:absolute;inset:-30vh 0 auto 0;height:30vh;background:linear-gradient(to top, var(--ink), transparent);pointer-events:none;}
+  .section{padding:clamp(90px,14vh,160px) var(--gutter);}
+  .section-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:64px;}
+  .section-head h2{font-size:clamp(48px,7vw,110px);}
+  .section-head p{color:var(--bone-dim);font-size:17px;max-width:44ch;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);}
+  .stat{padding:36px 0 0;border-inline-start:1px solid var(--line);padding-inline-start:28px;}
+  .stat:first-child{border-inline-start:0;padding-inline-start:0;}
+  .stat b{display:block;font-family:var(--display);font-weight:400;font-size:clamp(56px,7vw,110px);line-height:1;font-variant-numeric:tabular-nums;}
+  .stat b sup{font-size:.35em;color:var(--gold);margin-inline-start:4px;}
+  .stat span{color:var(--bone-dim);font-size:14px;}
+
+  /* Horizontal gallery of real photos */
+  .hscroll{height:420vh;position:relative;}
+  .hscroll-sticky{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:34px;}
+  .hscroll-head{padding:0 var(--gutter);display:flex;justify-content:space-between;align-items:end;gap:20px;}
+  .hscroll-head h2{font-size:clamp(44px,6vw,92px);}
+  .hscroll-count{font-family:var(--display);font-size:22px;color:var(--bone-dim);direction:ltr;}
+  .track{display:flex;gap:22px;padding:0 var(--gutter);will-change:transform;align-items:center;}
+  .shot{flex:0 0 auto;height:min(58vh,560px);position:relative;border-radius:18px;overflow:hidden;margin:0;}
+  .shot.w{aspect-ratio:3/2;} .shot.t{aspect-ratio:4/5;} .shot.s{aspect-ratio:1/1;height:min(44vh,420px);}
+  .shot img{position:absolute;top:0;bottom:0;left:-8%;width:116%;height:100%;object-fit:cover;will-change:transform;}
+  .shot figcaption{position:absolute;inset:auto 0 0 0;padding:40px 18px 14px;background:linear-gradient(to top, rgba(12,11,10,.8), transparent);font-size:14px;display:flex;justify-content:space-between;gap:10px;}
+  .shot figcaption small{color:var(--gold);font-size:11px;letter-spacing:.2em;}
+
+  /* Amenities list with floating photo */
+  .amen{border-top:1px solid var(--line);position:relative;}
+  .amen-row{display:grid;grid-template-columns:80px 1fr 1.1fr;gap:24px;align-items:center;padding:30px 0;border-bottom:1px solid var(--line);position:relative;overflow:hidden;}
+  .amen-row::before{content:"";position:absolute;inset:0;background:linear-gradient(to left, rgba(200,169,126,.14), transparent 70%);transform:scaleX(0);transform-origin:right;transition:transform .8s var(--ease);}
+  .amen-row:hover::before{transform:scaleX(1);}
+  .amen-row .n{font-family:var(--display);color:var(--gold);font-size:18px;direction:ltr;text-align:right;position:relative;}
+  .amen-row h3{font-family:var(--display);font-weight:400;font-size:clamp(30px,3.6vw,54px);line-height:1;position:relative;transition:transform .7s var(--ease);}
+  .amen-row:hover h3{transform:translateX(-14px);}
+  .amen-row p{color:var(--bone-dim);font-size:15px;position:relative;}
+  .amen-row .mthumb{display:none;}
+  .float-photo{position:fixed;top:0;left:0;z-index:20;width:300px;aspect-ratio:4/3;border-radius:14px;overflow:hidden;pointer-events:none;
+    opacity:0;transform:translate(-50%,-50%) scale(.85) rotate(-3deg);transition:opacity .35s var(--ease), transform .5s var(--ease);box-shadow:0 30px 60px -20px rgba(0,0,0,.7);}
+  .float-photo.on{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-2deg);}
+  .float-photo img{width:100%;height:100%;object-fit:cover;}
+
+  /* Olive oil split */
+  .oil{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center;}
+  /* clip the img, not the observed box: IntersectionObserver ignores a fully clipped target */
+  .oil-photo{border-radius:20px;overflow:hidden;aspect-ratio:4/3;}
+  .oil-photo img{width:100%;height:100%;object-fit:cover;clip-path:inset(0 0 100% 0);transform:scale(1.12);transition:clip-path 1.6s var(--ease), transform 2.4s var(--ease);}
+  .oil-photo.in img{clip-path:inset(0);transform:scale(1);}
+  .oil h2{font-size:clamp(46px,6vw,96px);margin:16px 0 20px;}
+  .oil p{color:var(--bone-dim);font-size:17px;max-width:42ch;margin-bottom:22px;}
+  .oil ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px;}
+  .oil li{font-size:13px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;}
+
+  /* Real reviews */
+  .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .review{border:1px solid var(--line);border-radius:20px;padding:30px;display:flex;flex-direction:column;gap:18px;background:linear-gradient(160deg,#171411,#0f0e0c);transition:border-color .5s, transform .6s var(--ease);}
+  .review:hover{border-color:rgba(200,169,126,.5);transform:translateY(-6px);}
+  .review blockquote{font-family:var(--display);font-size:clamp(22px,2vw,28px);line-height:1.3;flex:1;}
+  .review blockquote::before{content:"”";display:block;font-size:64px;line-height:.6;color:var(--gold);margin-bottom:6px;}
+  .review cite{font-style:normal;font-size:13px;color:var(--bone-dim);}
+  .review cite b{color:var(--bone);font-weight:400;}
+  .reviews-note{margin-top:18px;font-size:12px;color:rgba(236,230,218,.4);}
+
+  /* Contact */
+  .contact{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:end;}
+  .contact h2{font-size:clamp(56px,9vw,150px);}
+  .contact-cards{display:grid;gap:12px;}
+  .c-card{display:flex;justify-content:space-between;align-items:center;padding:24px 26px;border:1px solid var(--line);border-radius:18px;transition:border-color .4s, background .4s;}
+  .c-card:hover{border-color:var(--gold);background:rgba(200,169,126,.06);}
+  .c-card small{display:block;font-size:12px;color:var(--bone-dim);letter-spacing:.15em;}
+  .c-card b{font-weight:400;font-size:22px;}
+  .c-card svg{width:22px;height:22px;color:var(--gold);transition:transform .5s var(--ease);}
+  .c-card:hover svg{transform:translateX(-6px);}
+  .fine{margin-top:26px;font-size:13px;color:var(--bone-dim);display:flex;gap:18px;flex-wrap:wrap;}
+  footer{padding:40px var(--gutter);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--bone-dim);}
+  footer a{color:var(--gold);}
+
+  .m-cta{display:none;}
+
+  @media (max-width: 900px){
+    .nav-links{display:none;}
+    .hero-inner{width:100%;}
+    .hero-photo{width:100%;}
+    .hero-photo .px{inset:-4% 0;}
+    .hero-photo img{object-position:38% 62%;}
+    .hero-photo::after{background:linear-gradient(to top, var(--ink) 0%, rgba(12,11,10,.72) 40%, rgba(12,11,10,.1) 70%, rgba(12,11,10,.45) 100%);}
+    .hero-photo figcaption{top:86px;bottom:auto;left:auto;right:var(--gutter);}
+    .hero h1{font-size:clamp(72px,20vw,120px);}
+    .scroll-cue{display:none;}
+    .section-head, .contact, .oil{grid-template-columns:1fr;gap:20px;}
+    .stats{grid-template-columns:1fr 1fr;row-gap:30px;}
+    .stat:nth-child(3){border-inline-start:0;padding-inline-start:0;}
+    .amen-row{grid-template-columns:48px 1fr 88px;gap:14px;}
+    .amen-row p{grid-column:2 / 4;}
+    .amen-row .mthumb{display:block;grid-column:3;grid-row:1;width:88px;aspect-ratio:4/3;border-radius:8px;overflow:hidden;}
+    .amen-row .mthumb img{width:100%;height:100%;object-fit:cover;}
+    .float-photo{display:none;}
+    .reviews{grid-template-columns:1fr;}
+    .story-sticky{align-items:flex-end;padding-bottom:12vh;}
+    .story-sticky::before{background:linear-gradient(to top, rgba(12,11,10,.92) 0%, rgba(12,11,10,.3) 50%, transparent 75%);}
+    .chapters{height:330px;}
+    .chapter .thumb{display:none;}
+    .progress-rail{display:none;}
+    .picker{align-items:flex-end;min-height:150vh;padding:10vh var(--gutter);}
+    .pick-panel{position:relative;top:auto;}
+    .pick-panel{padding:16px;border-radius:18px;}
+    .pick-panel h2{font-size:30px;margin:6px 0 4px;}
+    .pick-panel .hint{font-size:13px;margin-bottom:10px;}
+    .pick-photo{aspect-ratio:16/8;}
+    .pick-name{font-size:28px;}
+    .pick-desc{font-size:13px;min-height:0;}
+    .book{grid-template-columns:1fr 1fr;}
+    .book .guests-wrap{grid-column:1 / 3;}
+    .shot{height:46vh;} .shot.s{height:38vh;}
+    .m-cta{display:flex;position:fixed;bottom:14px;inset-inline:14px;z-index:40;gap:10px;transition:transform .5s var(--ease);}
+    .m-cta.hide{transform:translateY(140%);}
+    .m-cta a{flex:1;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);background:rgba(12,11,10,.6);}
+    .m-cta a.solid{background:var(--bone);}
+    footer{padding-bottom:96px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important;}
+    .lines .ln > span, .fade{transform:none;opacity:1;}
+    .hero-photo, .oil-photo img{clip-path:none;} .hero-photo img, .oil-photo img{transform:none;}
+    .grain{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-top"><span>KEREM HAZEITIM</span><span>תלמי ביל״ו · צפון הנגב</span></div>
+  <div>
+    <div class="loader-count" id="loaderCount">0</div>
+    <div class="loader-bar"><i id="loaderBar"></i></div>
+  </div>
+</div>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="stage-fallback" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"><div class="ring"><span>בחרו</span></div><div class="dot"></div></div>
+<div class="pick-tag" id="pickTag" aria-hidden="true"></div>
+<div class="float-photo" id="floatPhoto" aria-hidden="true"><img alt="" id="floatImg"></div>
+
+<header class="nav" id="nav">
+  <a href="#top" class="logo" aria-label="כרם הזיתים — לראש העמוד"><b>כרם הזיתים</b><small>OLIVE GROVE</small></a>
+  <nav class="nav-links" aria-label="ניווט ראשי">
+    <a href="#story">המקום</a>
+    <a href="#picker">הבקתות</a>
+    <a href="#gallery">מבפנים</a>
+    <a href="#amenities">הספא</a>
+    <a href="#reviews">אורחים</a>
+  </nav>
+  <a href="#contact" class="pill" data-magnetic>הזמנת חופשה</a>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="פתיח">
+    <figure class="hero-photo" data-reveal>
+      <div class="px" id="heroPx">
+        <img src="img/jacuzzi-dusk.jpg" srcset="img/jacuzzi-dusk-sm.jpg 900w, img/jacuzzi-dusk.jpg 1600w" sizes="(max-width: 900px) 100vw, 54vw"
+             alt="ג׳קוזי הספא של כרם הזיתים בשקיעה, עם בקבוק יין ושתי כוסות" width="1600" height="1200" fetchpriority="high">
+      </div>
+      <figcaption>ג׳קוזי הספא בשקיעה · כרם הזיתים</figcaption>
+    </figure>
+    <div class="scroll-cue">גללו</div>
+    <div class="hero-inner">
+      <div>
+        <span class="eyebrow fade" data-reveal>צימרים בוטיק · צפון הנגב</span>
+        <h1 class="display lines" data-reveal><span class="ln"><span>כרם</span></span><span class="ln"><span>הזיתים</span></span></h1>
+        <p class="tag lines" data-reveal><span class="ln"><span>שלוש בקתות, בריכה ענקית ומחוממת,</span></span><span class="ln"><span>וכרם זיתים עד קו האופק.</span></span></p>
+      </div>
+      <div class="hero-side fade" data-reveal>
+        <div class="hero-meta">
+          <div><b>3</b>בקתות אירוח</div>
+          <div><b>5</b>נפשות בבקתה</div>
+          <div><b>60′</b>מהמרכז</div>
+        </div>
+        <div class="hero-btns">
+          <a href="#picker" class="pill solid" data-magnetic>בחרו בקתה בתלת־ממד
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>זית</span><span>שקט</span><span>מים</span><span>עץ</span><span>אופק</span><span>כלניות</span>
+      <span>זית</span><span>שקט</span><span>מים</span><span>עץ</span><span>אופק</span><span>כלניות</span>
+    </div>
+  </div>
+
+  <!-- STORY: the camera flies over the compound while these chapters swap -->
+  <section class="story" id="story" aria-label="על המקום">
+    <div class="story-sticky">
+      <div class="progress-rail" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+      <div class="chapters">
+        <article class="chapter active">
+          <span class="num">01 / 03</span>
+          <h2 class="display">המקום</h2>
+          <p>מושב תלמי ביל״ו, בין בית קמה לנתיבות. כשעה מהמרכז, ירידה מכביש 6 במחלף מאחז — ומסביב רק שדות, מטעים וכרם זיתים עד האופק.</p>
+          <div class="thumb"><img src="img/grove.jpg" alt="שורות עצי הזית של הכרם" loading="lazy"></div>
+        </article>
+        <article class="chapter">
+          <span class="num">02 / 03</span>
+          <h2 class="display">הבקתות</h2>
+          <p>שלוש בקתות על מדשאה רחבה: הכחולה, הירוקה ובקתת העץ. כל אחת עד 5 נפשות, מרפסת משלה, ופרטיות מלאה בין עצי הצל.</p>
+          <div class="thumb"><img src="img/blue-ext.jpg" alt="הבקתה הכחולה עם מרפסת העץ" loading="lazy"></div>
+        </article>
+        <article class="chapter">
+          <span class="num">03 / 03</span>
+          <h2 class="display">המים</h2>
+          <p>בריכה ענקית ומחוממת, ג׳קוזי ספא לקבוצה וסאונה פינית מעץ — פתוחים בקיץ ובחורף, ורק לאורחי המתחם.</p>
+          <div class="thumb"><img src="img/pool-deck.jpg" alt="הבריכה הגדולה" loading="lazy"></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PICKER: choose a cabin / facility on the 3D compound -->
+  <section class="picker" id="picker" aria-label="בחירת בקתה">
+    <div class="pick-panel fade" data-reveal>
+      <span class="eyebrow">בחירה חיה</span>
+      <h2 class="display">בחרו את הפינה שלכם</h2>
+      <p class="hint" id="pickHint">לחצו על בקתה במתחם — או בחרו כאן:</p>
+      <div class="pick-tabs" id="pickTabs" role="group" aria-label="יחידות במתחם"></div>
+      <div class="pick-photo"><img id="pickImg" alt=""><span class="cap" id="pickCap"></span></div>
+      <div class="pick-name" id="pickName" aria-live="polite"></div>
+      <p class="pick-desc" id="pickDesc"></p>
+      <div class="pick-chips" id="pickChips"></div>
+      <div class="book" id="book">
+        <label>הגעה<input type="date" id="dIn"></label>
+        <label>עזיבה<input type="date" id="dOut"></label>
+        <label class="guests-wrap">אורחים
+          <span class="guests"><button type="button" id="gMinus" aria-label="פחות אורחים">−</button><output id="gNum">2</output><button type="button" id="gPlus" aria-label="יותר אורחים">+</button></span>
+        </label>
+      </div>
+      <a class="pill solid" id="pickCta" href="#contact" target="_blank" rel="noopener" data-magnetic>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.8-.1 1.3z"/></svg>
+        <span id="pickCtaTxt">בדיקת זמינות בוואטסאפ</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="cover">
+    <section class="section" aria-label="המקום במספרים">
+      <div class="section-head">
+        <h2 class="display lines" data-reveal><span class="ln"><span>קטן,</span></span><span class="ln"><span>ורק שלכם.</span></span></h2>
+        <p class="fade" data-reveal>שלוש יחידות בלבד על מתחם שלם — כך שהבריכה, הג׳קוזי והמדשאות אף פעם לא צפופים. בעל המקום גר בסמוך ודואג לכל פרט.</p>
+      </div>
+      <div class="stats">
+        <div class="stat fade" data-reveal><b data-count="3">0</b><span>בקתות אירוח בלבד</span></div>
+        <div class="stat fade" data-reveal><b data-count="52.5" data-dec="1">0<sup>מ״ר</sup></b><span>בריכה מחוממת</span></div>
+        <div class="stat fade" data-reveal><b data-count="20">0<sup>דק׳</sup></b><span>מבאר שבע, אשקלון וקריית גת</span></div>
+        <div class="stat fade" data-reveal><b data-count="0.4" data-dec="1">0<sup>%</sup></b><span>חומציות שמן הזית מהכרם</span></div>
+      </div>
+    </section>
+
+    <!-- GALLERY: pinned horizontal scroll of real photos -->
+    <section class="hscroll" id="gallery" aria-label="גלריה">
+      <div class="hscroll-sticky">
+        <div class="hscroll-head">
+          <h2 class="display lines" data-reveal><span class="ln"><span>מבפנים</span></span></h2>
+          <span class="hscroll-count" id="hcount">01 — 10</span>
+        </div>
+        <div class="track" id="track"></div>
+      </div>
+    </section>
+
+    <section class="section" id="amenities" aria-label="ספא ומתחם">
+      <div class="section-head">
+        <h2 class="display lines" data-reveal><span class="ln"><span>בלי לצאת</span></span><span class="ln"><span>מהמתחם.</span></span></h2>
+        <p class="fade" data-reveal>כל מה שצריך לחופשה נמצא כאן, בין הבקתות לכרם. העבירו את העכבר על השורות.</p>
+      </div>
+      <div class="amen" id="amen">
+        <div class="amen-row fade" data-reveal data-img="img/pool-deck.jpg"><span class="n">01</span><h3>בריכה ענקית ומחוממת</h3><p>מגודרת ומוצלת חלקית, עם מיטות שיזוף ושמשיות. בחול 8:30–22:00, בשבת עד 17:00.</p><span class="mthumb"><img src="img/pool-deck.jpg" alt="" loading="lazy"></span></div>
+        <div class="amen-row fade" data-reveal data-img="img/jacuzzi.jpg"><span class="n">02</span><h3>ג׳קוזי ספא לקבוצה</h3><p>ג׳קוזי ענק ומחומם בצמוד לבריכה, עם זרמים מפנקים. פועל גם בחורף.</p><span class="mthumb"><img src="img/jacuzzi.jpg" alt="" loading="lazy"></span></div>
+        <div class="amen-row fade" data-reveal data-img="img/sauna.jpg"><span class="n">03</span><h3>סאונה פינית יבשה</h3><p>בנויה מעץ הוביצה פיני בעל ניחוח משגע. בריאה לעור, לשרירים ולנשמה.</p><span class="mthumb"><img src="img/sauna.jpg" alt="" loading="lazy"></span></div>
+        <div class="amen-row fade" data-reveal data-img="img/hammock.jpg"><span class="n">04</span><h3>מדשאות, ערסלים ומנגל</h3><p>עצי צל, ערסלים, פינות מנגל ותאורה — מקום לילדים לרוץ ולמבוגרים לנוח.</p><span class="mthumb"><img src="img/hammock.jpg" alt="" loading="lazy"></span></div>
+        <div class="amen-row fade" data-reveal data-img="img/welcome.jpg"><span class="n">05</span><h3>טיפולים ופינוקים</h3><p>טיפולי גוף בתיאום מראש, ואירוח לימי הולדת, ימי נישואין והצעות נישואין.</p><span class="mthumb"><img src="img/welcome.jpg" alt="" loading="lazy"></span></div>
+        <div class="amen-row fade" data-reveal data-img="img/lawn-trees.jpg"><span class="n">06</span><h3>מתאים גם לשומרי שבת</h3><p>פלטה ומיחם לשבתות וחגים, לפי בקשה.</p><span class="mthumb"><img src="img/lawn-trees.jpg" alt="" loading="lazy"></span></div>
+      </div>
+    </section>
+
+    <section class="section" aria-label="שמן זית מהכרם">
+      <div class="oil">
+        <div class="oil-photo" data-reveal><img src="img/olive-oil.jpg" alt="בקבוקי שמן זית בוטיק על רקע הכרם" loading="lazy"></div>
+        <div>
+          <span class="eyebrow fade" data-reveal>מהכרם שלנו</span>
+          <h2 class="display lines" data-reveal><span class="ln"><span>שמן זית</span></span><span class="ln"><span>שנקטף כאן.</span></span></h2>
+          <p class="fade" data-reveal>מחלוצי גידול הזיתים בצפון הנגב. זן פיקואל, מינימום ריסוסים, כבישה קרה — כתית מעולה בחומציות של פחות מ־0.4%. קחו בקבוק הביתה.</p>
+          <ul class="fade" data-reveal><li>1 ליטר</li><li>4 ליטר</li><li>5 ליטר</li><li>18 ליטר</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reviews" aria-label="מה אומרים האורחים">
+      <div class="section-head">
+        <h2 class="display lines" data-reveal><span class="ln"><span>מה אומרים</span></span><span class="ln"><span>האורחים.</span></span></h2>
+        <p class="fade" data-reveal>ציטוטים מלאים, כפי שנכתבו באתר של כרם הזיתים.</p>
+      </div>
+      <div class="reviews">
+        <figure class="review fade" data-reveal><blockquote>חוויה נהדרת, נוף מרהיב שקט מדהים פרטיות. שירות אדיב ומפנק.</blockquote><cite><b>Orly</b> · אוקטובר 2012</cite></figure>
+        <figure class="review fade" data-reveal><blockquote>התארחנו לירח דבש. [בעל המקום] פינק אותנו בגדול, מומלץ — שקט, יפה ונקי.</blockquote><cite><b>גיל</b> · יולי 2017</cite></figure>
+        <figure class="review fade" data-reveal><blockquote>הצימר מושלם לזוגות, נעים ומטופח. המקום שקט, פסטורלי למנוחה. בעל הצימר אדם נעים וקשוב — מומלץ ביותר.</blockquote><cite><b>דוד ויעל</b> · יוני 2019</cite></figure>
+      </div>
+      <p class="reviews-note">מקור: עמודי ההמלצות והצימרים באתר keremhazetim.co.il.</p>
+    </section>
+
+    <section class="section" id="contact" aria-label="יצירת קשר">
+      <div class="contact">
+        <div>
+          <span class="eyebrow fade" data-reveal>הזמנות ישירות מול המקום</span>
+          <h2 class="display lines" data-reveal style="margin-top:18px"><span class="ln"><span>בואו</span></span><span class="ln"><span>לנשום.</span></span></h2>
+        </div>
+        <div>
+          <div class="contact-cards fade" data-reveal>
+            <a class="c-card" id="waCard" href="https://wa.me/972500000000" target="_blank" rel="noopener">
+              <div><small>וואטסאפ</small><b>בדיקת תאריכים</b></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+            <a class="c-card" href="tel:+97230000000">
+              <div><small>טלפון (placeholder)</small><b dir="ltr">03-000-0000</b></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+            <a class="c-card" href="https://waze.com/ul?q=%D7%AA%D7%9C%D7%9E%D7%99%20%D7%91%D7%99%D7%9C%D7%95&navigate=yes" target="_blank" rel="noopener">
+              <div><small>ניווט</small><b>מושב תלמי ביל״ו</b></div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+          </div>
+          <div class="fine fade" data-reveal><span>לא מקבלים בעלי חיים.</span><span>בחורף — בואו בזמן פסטיבל ״דרום אדום״.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>טיוטה פרטית — קונספט עיצובי שהוכן עבור ״צימרים בכרם הזיתים״, לא לפרסום. התמונות, הפרטים והביקורות מתוך האתר של המקום; פרטי הקשר הם placeholders.</span>
+      <span>עיצוב ופיתוח: <a href="../../../index.html">אריאל אילון</a></span>
+    </footer>
+  </div>
+</main>
+
+<div class="m-cta" id="mcta">
+  <a class="pill" href="#picker">בחירת בקתה</a>
+  <a class="pill solid" href="#contact">הזמנה</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+
+<script>
+/* =========================================================
+   Shared state + all non-WebGL UI (works even without 3D)
+   ========================================================= */
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = window.matchMedia('(pointer: fine)').matches;
+  var WA = '972500000000';   // placeholder until the owner approves
+
+  /* ---- the compound: real data from keremhazetim.co.il ---- */
+  var UNITS = {
+    blue:  {name:'הבקתה הכחולה', inName:'בבקתה הכחולה', short:'הכחולה', cabin:true, img:'img/blue-ext.jpg', cap:'הבקתה הכחולה',
+            desc:'חלל אחד מרווח: סלון עם טלוויזיית LED, ספה וכורסה שנפתחות ללינה ל־3, מטבחון מאובזר ופינת אוכל. מרפסת עץ מול המדשאה.',
+            chips:['עד 5 נפשות','מטבחון מאובזר','מרפסת עץ','חניה צמודה']},
+    green: {name:'הבקתה הירוקה', inName:'בבקתה הירוקה', short:'הירוקה', cabin:true, img:'img/lawn.jpg', cap:'הבקתות על המדשאה',
+            desc:'התאומה של הכחולה — אותו חלל, אותו מטבחון ואותה פרטיות. מושלמת לשתי משפחות שמגיעות יחד.',
+            chips:['עד 5 נפשות','זהה לכחולה','טלוויזיית LED','פינת אוכל']},
+    wood:  {name:'בקתת העץ', inName:'בבקתת העץ', short:'בקתת העץ', cabin:true, img:'img/wood-living.jpg', cap:'בקתת העץ מבפנים',
+            desc:'בנויה כולה עץ בסגנון כפרי: סלון, ספה וכורסה נפתחות, מטבחון מאובזר ופינת קפה. השקט הכי עמוק במתחם.',
+            chips:['עד 5 נפשות','בסגנון כפרי מעץ','מטבחון מאובזר','פינת קפה']},
+    pool:  {name:'הבריכה', short:'הבריכה', cabin:false, img:'img/pool-deck.jpg', cap:'הבריכה הגדולה',
+            desc:'בריכת שחייה גדולה ומחוממת, מגודרת ומוצלת חלקית, עם מיטות שיזוף ושמשיות — רק לאורחי המתחם.',
+            chips:['חול 8:30–22:00','שבת 8:30–17:00','מחוממת','מוצלת חלקית']},
+    spa:   {name:'הספא', short:'הספא', cabin:false, img:'img/jacuzzi-dusk.jpg', cap:'ג׳קוזי הספא בערב',
+            desc:'ג׳קוזי ספא ענק לקבוצה וסאונה פינית מעץ הוביצה, פועלים בקיץ ובחורף. טיפולי גוף בתיאום מראש.',
+            chips:['ג׳קוזי לקבוצה','סאונה פינית','כל השנה','טיפולים בתיאום']}
+  };
+  var ORDER = ['blue','green','wood','pool','spa'];
+  window.KZ = { units:UNITS, order:ORDER, selected:'blue', hovered:null, reduce:reduce, fine:fine, onSelect:null };
+
+  /* ---- picker panel ---- */
+  var tabs = document.getElementById('pickTabs'), img = document.getElementById('pickImg'), cap = document.getElementById('pickCap'),
+      nameEl = document.getElementById('pickName'), descEl = document.getElementById('pickDesc'), chipsEl = document.getElementById('pickChips'),
+      book = document.getElementById('book'), cta = document.getElementById('pickCta'), ctaTxt = document.getElementById('pickCtaTxt'),
+      dIn = document.getElementById('dIn'), dOut = document.getElementById('dOut'), gNum = document.getElementById('gNum'), guests = 2;
+  tabs.innerHTML = ORDER.map(function(id){ return '<button type="button" data-id="' + id + '" aria-pressed="false">' + UNITS[id].short + '</button>'; }).join('');
+  tabs.addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) window.KZ.select(b.dataset.id); });
+
+  function iso(d){ return d.toISOString().slice(0, 10); }
+  function heb(v){ if (!v) return ''; var p = v.split('-'); return +p[2] + '.' + +p[1]; }
+  var t0 = new Date(); t0.setDate(t0.getDate() + 7);
+  var t1 = new Date(t0); t1.setDate(t1.getDate() + 2);
+  dIn.value = iso(t0); dOut.value = iso(t1); dIn.min = dOut.min = iso(new Date());
+  dIn.addEventListener('change', function(){ if (dOut.value <= dIn.value){ var d = new Date(dIn.value); d.setDate(d.getDate() + 1); dOut.value = iso(d); } updateCta(); });
+  dOut.addEventListener('change', updateCta);
+  document.getElementById('gMinus').addEventListener('click', function(){ guests = Math.max(1, guests - 1); gNum.textContent = guests; updateCta(); });
+  document.getElementById('gPlus').addEventListener('click', function(){ guests = Math.min(5, guests + 1); gNum.textContent = guests; updateCta(); });
+
+  function updateCta(){
+    var u = UNITS[window.KZ.selected], msg;
+    if (u.cabin){
+      msg = 'היי, מעוניינים ' + u.inName + ' ' + heb(dIn.value) + '–' + heb(dOut.value) + ', ' + guests + ' אורחים. יש זמינות?';
+      ctaTxt.textContent = 'בדיקת זמינות — ' + u.name;
+    } else {
+      msg = 'היי, רציתי לשאול על ' + u.name + ' בכרם הזיתים';
+      ctaTxt.textContent = 'שאלה על ' + u.name + ' בוואטסאפ';
+    }
+    cta.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
+  }
+  window.KZ.select = function(id){
+    if (!UNITS[id]) return;
+    window.KZ.selected = id;
+    var u = UNITS[id];
+    tabs.querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.id === id); });
+    nameEl.textContent = u.name; descEl.textContent = u.desc; cap.textContent = u.cap;
+    chipsEl.innerHTML = u.chips.map(function(c){ return '<span>' + c + '</span>'; }).join('');
+    book.classList.toggle('hidden', !u.cabin);
+    if (img.getAttribute('src') !== u.img){
+      img.classList.add('out');
+      setTimeout(function(){ img.src = u.img; img.alt = u.cap; }, reduce ? 0 : 280);
+    }
+    updateCta();
+    if (window.KZ.onSelect) window.KZ.onSelect(id);
+  };
+  img.addEventListener('load', function(){ img.classList.remove('out'); });
+  window.KZ.select('blue');
+
+  /* ---- gallery (real photos only) ---- */
+  var shots = [
+    ['wood-living.jpg','w','בקתת העץ','סלון'], ['blue-living.jpg','w','הבקתה הכחולה','סלון'], ['wood-loft.jpg','t','בקתת העץ','גלריה'],
+    ['blue-bedroom.jpg','w','חדר השינה','ג׳קוזי בחדר'], ['jacuzzi-dusk.jpg','w','הספא','ערב'], ['sauna.jpg','s','הסאונה','עץ הוביצה'],
+    ['pool-steps.jpg','w','הבריכה','בוקר'], ['lawn.jpg','w','המדשאה','צל'], ['grove.jpg','w','הכרם','זיתים'], ['welcome.jpg','s','קבלת פנים','פינוק']
+  ];
+  document.getElementById('track').innerHTML = shots.map(function(s){
+    return '<figure class="shot ' + s[1] + '"><img src="img/' + s[0] + '" alt="' + s[2] + ' — ' + s[3] + '" loading="lazy"><figcaption><span>' + s[2] + '</span><small>' + s[3] + '</small></figcaption></figure>';
+  }).join('');
+
+  /* ---- reveal on scroll ---- */
+  var toReveal = document.querySelectorAll('[data-reveal]');
+  if ('IntersectionObserver' in window && !reduce){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); countUp(e.target); } });
+    }, {threshold:.18, rootMargin:'0px 0px -6% 0px'});
+    toReveal.forEach(function(el){ if (!el.closest('.hero')) io.observe(el); });
+  } else {
+    toReveal.forEach(function(el){ el.classList.add('in'); countUp(el); });
+  }
+  function countUp(el){
+    var b = el.querySelector && el.querySelector('[data-count]');
+    if (!b) return;
+    var to = parseFloat(b.dataset.count), dec = +(b.dataset.dec || 0), sup = b.querySelector('sup'), supHtml = sup ? sup.outerHTML : '';
+    if (reduce){ b.innerHTML = to.toFixed(dec) + supHtml; return; }
+    var s0 = performance.now();
+    (function tick(now){
+      var p = Math.min(1, (now - s0) / 1800), e = 1 - Math.pow(1 - p, 4);
+      b.innerHTML = (to * e).toFixed(dec) + supHtml;
+      if (p < 1) requestAnimationFrame(tick);
+    })(s0);
+  }
+
+  /* ---- scroll-driven UI ---- */
+  var story = document.getElementById('story'), chapters = story.querySelectorAll('.chapter'),
+      rails = story.querySelectorAll('.progress-rail b'),
+      hs = document.getElementById('gallery'), track = document.getElementById('track'),
+      hcount = document.getElementById('hcount'), nav = document.getElementById('nav'),
+      mcta = document.getElementById('mcta'), pickerSec = document.getElementById('picker'),
+      heroPx = document.getElementById('heroPx'), lastY = 0, activeCh = 0;
+  function progress(el){
+    var r = el.getBoundingClientRect(), span = r.height - window.innerHeight;
+    return span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
+  }
+  window.KZ.progress = progress;
+  function onScroll(){
+    var y = window.scrollY, vw = window.innerWidth;
+    if (heroPx && !reduce && y < window.innerHeight * 1.2) heroPx.style.transform = 'translate3d(0,' + (y * 0.22).toFixed(1) + 'px,0)';
+    var p = progress(story), idx = Math.min(2, Math.floor(p * 3));
+    if (idx !== activeCh){ chapters[activeCh].classList.remove('active'); chapters[idx].classList.add('active'); activeCh = idx; }
+    rails.forEach(function(b, i){ b.style.transform = 'scaleY(' + Math.min(1, Math.max(0, p * 3 - i)) + ')'; });
+    var hp = progress(hs), dist = Math.max(0, track.scrollWidth - vw);
+    track.style.transform = 'translate3d(' + (hp * dist) + 'px,0,0)';
+    if (hs.getBoundingClientRect().top < window.innerHeight && hs.getBoundingClientRect().bottom > 0 && !reduce){
+      // inner parallax: each photo drifts against the track
+      track.querySelectorAll('.shot').forEach(function(s){
+        var r = s.getBoundingClientRect(), c = (r.left + r.width / 2) / vw - .5;
+        s.firstChild.style.transform = 'translate3d(' + (c * -6).toFixed(2) + '%,0,0)';
+      });
+    }
+    var n = track.children.length;
+    hcount.textContent = String(Math.min(n, 1 + Math.floor(hp * (n - .001)))).padStart(2, '0') + ' — ' + String(n).padStart(2, '0');
+    nav.classList.toggle('scrolled', y > 40);
+    nav.classList.toggle('hide', y > lastY && y > 400 && !window.KZ.navLock);
+    var fr = pickerSec.getBoundingClientRect();
+    mcta.classList.toggle('hide', fr.top < window.innerHeight * .6 && fr.bottom > window.innerHeight * .4);
+    lastY = y;
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  /* ---- cursor, magnetic buttons, floating amenity photo ---- */
+  var cur = document.getElementById('cursor');
+  window.KZ.cursor = cur;
+  if (fine && !reduce){
+    var mx = 0, my = 0, rx = 0, ry = 0, fx = 0, fy = 0, ring = cur.querySelector('.ring'), dot = cur.querySelector('.dot'),
+        fp = document.getElementById('floatPhoto'), fimg = document.getElementById('floatImg');
+    window.addEventListener('mousemove', function(e){ mx = e.clientX; my = e.clientY; cur.classList.add('on'); }, {passive:true});
+    (function loop(){
+      rx += (mx - rx) * .16; ry += (my - ry) * .16; fx += (mx - fx) * .1; fy += (my - fy) * .1;
+      dot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+      ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)';
+      fp.style.left = fx + 'px'; fp.style.top = fy + 'px';
+      requestAnimationFrame(loop);
+    })();
+    document.querySelectorAll('a, button').forEach(function(el){
+      el.addEventListener('mouseenter', function(){ cur.classList.add('hover'); });
+      el.addEventListener('mouseleave', function(){ cur.classList.remove('hover'); });
+    });
+    document.querySelectorAll('[data-magnetic]').forEach(function(el){
+      el.addEventListener('mousemove', function(e){
+        var r = el.getBoundingClientRect();
+        el.style.transform = 'translate(' + (e.clientX - r.left - r.width / 2) * .22 + 'px,' + (e.clientY - r.top - r.height / 2) * .3 + 'px)';
+      });
+      el.addEventListener('mouseleave', function(){ el.style.transition = 'transform .6s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; setTimeout(function(){ el.style.transition = ''; }, 600); });
+    });
+    document.querySelectorAll('.amen-row').forEach(function(row){
+      row.addEventListener('mouseenter', function(){ fimg.src = row.dataset.img; fp.classList.add('on'); });
+      row.addEventListener('mouseleave', function(){ fp.classList.remove('on'); });
+    });
+  }
+
+  /* ---- smooth scroll ---- */
+  window.addEventListener('DOMContentLoaded', function(){
+    if (reduce || !window.Lenis) return;
+    try {
+      var lenis = new Lenis({lerp:.09, smoothWheel:true});
+      (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
+      document.querySelectorAll('a[href^="#"]').forEach(function(a){
+        a.addEventListener('click', function(e){
+          var id = a.getAttribute('href'); if (id.length < 2) return;
+          var t = document.querySelector(id); if (!t) return;
+          e.preventDefault(); window.KZ.navLock = true;
+          lenis.scrollTo(t, {duration:1.8, onComplete:function(){ window.KZ.navLock = false; }});
+        });
+      });
+    } catch (e) {}
+  });
+
+  /* ---- preloader: waits for the 3D scene (or gives up gracefully) ---- */
+  var loader = document.getElementById('loader'), cnt = document.getElementById('loaderCount'), bar = document.getElementById('loaderBar'),
+      shown = 0, start = performance.now(), finished = false;
+  window.KZ.ready = false;
+  function finish(){
+    if (finished) return; finished = true;
+    cnt.textContent = '100'; bar.style.transform = 'scaleX(1)';
+    setTimeout(function(){
+      loader.classList.add('done');
+      document.querySelectorAll('.hero [data-reveal]').forEach(function(el){ el.classList.add('in'); });
+    }, reduce ? 0 : 350);
+  }
+  (function tickLoader(){
+    if (finished) return;
+    var elapsed = performance.now() - start, target = window.KZ.ready ? 100 : Math.min(88, elapsed / 22);
+    shown += (target - shown) * .12;
+    cnt.textContent = Math.round(shown); bar.style.transform = 'scaleX(' + shown / 100 + ')';
+    if ((window.KZ.ready && shown > 99) || (window.KZ.ready && reduce)) return finish();
+    if (elapsed > 10000){ document.documentElement.classList.add('no-webgl'); return finish(); }
+    requestAnimationFrame(tickLoader);
+  })();
+})();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+/* =========================================================
+   The 3D compound: three cabins, pool and spa in an olive grove
+   at golden hour. Scroll-driven camera, clickable units.
+   ========================================================= */
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const K = window.KZ;
+const canvas = document.getElementById('stage');
+const mobile = window.matchMedia('(max-width: 900px)').matches;
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: !mobile, powerPreference: 'high-performance' });
+} catch (e) {
+  document.documentElement.classList.add('no-webgl');
+  K.ready = true;
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.5 : 1.75));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.95;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(new THREE.Color(0x3a2e28), 0.016);
+const camera = new THREE.PerspectiveCamera(mobile ? 50 : 38, window.innerWidth / window.innerHeight, 0.1, 400);
+
+/* ---------- Golden-hour sky (shader) — baked into the env map ---------- */
+const SUN_DIR = new THREE.Vector3(-0.75, 0.16, 0.62).normalize();
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: { sun: { value: SUN_DIR } },
+  vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform vec3 sun; varying vec3 vDir;
+    void main(){
+      float h = vDir.y;
+      vec3 top = vec3(0.07,0.1,0.2), mid = vec3(0.34,0.27,0.3), hor = vec3(0.95,0.6,0.34);
+      vec3 c = mix(hor, mid, smoothstep(-0.02, 0.2, h));
+      c = mix(c, top, smoothstep(0.16, 0.7, h));
+      float s = max(dot(normalize(vDir), sun), 0.0);
+      c += vec3(1.0,0.62,0.32) * pow(s, 14.0) * 0.6 + vec3(1.0,0.85,0.6) * pow(s, 500.0) * 2.2;
+      c = mix(c, vec3(0.16,0.12,0.1), smoothstep(0.0, -0.25, h));
+      gl_FragColor = vec4(c, 1.0);
+    }`
+});
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(200, 48, 24), skyMat));
+{
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const envScene = new THREE.Scene();
+  envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), skyMat));
+  scene.environment = pmrem.fromScene(envScene, 0.02).texture;
+  pmrem.dispose();
+}
+
+/* ---------- Lights ---------- */
+scene.add(new THREE.HemisphereLight(0x9fb0d0, 0x3a2a1a, 0.7));
+const sun = new THREE.DirectionalLight(0xffc08a, 2.8);
+sun.position.copy(SUN_DIR).multiplyScalar(40);
+sun.castShadow = true;
+sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
+Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 100 });
+sun.shadow.bias = -0.0006;
+scene.add(sun);
+
+/* ---------- Ground: fields, lawn ---------- */
+const field = new THREE.Mesh(new THREE.CircleGeometry(160, 64), new THREE.MeshStandardMaterial({ color: 0x6d5a3c, roughness: 1 }));
+field.rotation.x = -Math.PI / 2; field.receiveShadow = true; scene.add(field);
+const lawn = new THREE.Mesh(new THREE.CircleGeometry(15, 64), new THREE.MeshStandardMaterial({ color: 0x5b7a30, roughness: 0.95 }));
+lawn.rotation.x = -Math.PI / 2; lawn.position.y = 0.01; lawn.receiveShadow = true; scene.add(lawn);
+
+/* ---------- Olive grove (instanced) ---------- */
+const trunkGeo = new THREE.CylinderGeometry(0.08, 0.14, 1.2, 6); trunkGeo.translate(0, 0.6, 0);
+const crownGeo = new THREE.IcosahedronGeometry(0.9, 1); crownGeo.scale(1.15, 0.8, 1.15); crownGeo.translate(0, 1.55, 0);
+const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3a2a, roughness: 1 });
+const oliveMat = new THREE.MeshStandardMaterial({ color: 0x8a9868, roughness: 0.85, flatShading: true });
+const shadeMat = new THREE.MeshStandardMaterial({ color: 0x4d6a2e, roughness: 0.9, flatShading: true });
+function grove(){
+  const pos = [];
+  const step = mobile ? 3.6 : 3;
+  for (let x = -70; x <= 70; x += step) for (let z = -70; z <= 70; z += step) {
+    const px = x + (Math.random() - .5) * .6, pz = z + (Math.random() - .5) * .6, d = Math.hypot(px, pz);
+    if (d < 18 || d > 72) continue;
+    pos.push([px, pz, 0.8 + Math.random() * 0.45]);
+  }
+  // a few big shade trees on the lawn (kept off the camera path)
+  const shade = [[-11, -9, 1.9], [11.5, -8, 1.7], [-12, 6, 1.8], [-3, -11.5, 1.6], [12, 1, 1.5]];
+  const n = pos.length + shade.length;
+  const trunks = new THREE.InstancedMesh(trunkGeo, trunkMat, n);
+  const crowns = new THREE.InstancedMesh(crownGeo, oliveMat, pos.length);
+  const shadeCrowns = new THREE.InstancedMesh(crownGeo, shadeMat, shade.length);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
+  pos.concat(shade).forEach(([x, z, sc], i) => {
+    q.setFromAxisAngle(up, Math.random() * Math.PI * 2); s.setScalar(sc); p.set(x, 0, z);
+    m.compose(p, q, s); trunks.setMatrixAt(i, m);
+    if (i < pos.length) crowns.setMatrixAt(i, m); else shadeCrowns.setMatrixAt(i - pos.length, m);
+  });
+  [trunks, crowns, shadeCrowns].forEach(o => { o.castShadow = true; o.receiveShadow = !mobile; scene.add(o); });
+}
+grove();
+
+/* ---------- Cabins ---------- */
+const pickables = [];
+const items = {};   // id -> { group, radius, center }
+const winMat = new THREE.MeshStandardMaterial({ color: 0x1b1a18, emissive: 0xffc98f, emissiveIntensity: 1.1 });
+const white = new THREE.MeshStandardMaterial({ color: 0xece6da, roughness: 0.7 });
+const deckMat = new THREE.MeshStandardMaterial({ color: 0x8a6444, roughness: 0.8 });
+function register(id, group, radius){
+  group.traverse(o => { if (o.isMesh){ o.userData.unit = id; o.castShadow = true; o.receiveShadow = true; pickables.push(o); } });
+  items[id] = { group, radius, baseY: group.position.y };
+  scene.add(group);
+}
+function cabin(id, wall, roof, x, z, rot){
+  const g = new THREE.Group();
+  const W = 4.2, D = 3.2, H = 2.1;
+  const body = new THREE.Mesh(new THREE.BoxGeometry(W, H, D), new THREE.MeshStandardMaterial({ color: wall, roughness: 0.85 }));
+  body.position.y = H / 2 + 0.3; g.add(body);
+  const base = new THREE.Mesh(new THREE.BoxGeometry(W + 0.2, 0.3, D + 0.2), deckMat); base.position.y = 0.15; g.add(base);
+  // gable roof as an extruded triangle
+  const tri = new THREE.Shape(); tri.moveTo(-D / 2 - 0.35, 0); tri.lineTo(D / 2 + 0.35, 0); tri.lineTo(0, 1.25); tri.closePath();
+  const roofGeo = new THREE.ExtrudeGeometry(tri, { depth: W + 0.5, bevelEnabled: false }); roofGeo.translate(0, 0, -(W + 0.5) / 2);
+  const roofM = new THREE.Mesh(roofGeo, new THREE.MeshStandardMaterial({ color: roof, roughness: 0.7 }));
+  roofM.rotation.y = Math.PI / 2; roofM.position.y = H + 0.3; g.add(roofM);
+  // porch deck + railing + posts
+  const porch = new THREE.Mesh(new THREE.BoxGeometry(W + 0.4, 0.12, 1.5), deckMat); porch.position.set(0, 0.3, D / 2 + 0.75); g.add(porch);
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(W + 0.4, 0.06, 0.06), white); rail.position.set(0, 1.0, D / 2 + 1.45); g.add(rail);
+  for (const px of [-W / 2, -W / 6, W / 6, W / 2]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.0, 0.1), white); post.position.set(px, 1.3, D / 2 + 1.45); g.add(post);
+  }
+  const awning = new THREE.Mesh(new THREE.BoxGeometry(W + 0.5, 0.08, 1.7), new THREE.MeshStandardMaterial({ color: roof, roughness: 0.7 }));
+  awning.position.set(0, 2.32, D / 2 + 0.8); awning.rotation.x = 0.12; g.add(awning);
+  // door + warm windows
+  const door = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.5, 0.05), new THREE.MeshStandardMaterial({ color: 0xb07a3c, roughness: 0.6 }));
+  door.position.set(0.9, 1.05, D / 2 + 0.02); g.add(door);
+  for (const wx of [-1.2]) { const w = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.7, 0.05), winMat); w.position.set(wx, 1.4, D / 2 + 0.02); g.add(w); }
+  const side = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.6, 0.9), winMat); side.position.set(W / 2 + 0.02, 1.45, 0); g.add(side);
+  g.position.set(x, 0, z); g.rotation.y = rot;
+  register(id, g, 3.4);
+}
+// the three real cabins, facing the pool
+cabin('blue',  0x9db6c6, 0x5c6d7a, -6.2, -3.2, 0.45);
+cabin('green', 0xa9bd98, 0x5b6b54, -1.2, -7.0, 0.05);
+cabin('wood',  0x9a7250, 0x56604e,  5.4, -5.2, -0.4);
+
+/* ---------- Pool ---------- */
+const waterMat = new THREE.MeshStandardMaterial({ color: 0x1fa3bd, metalness: 0.35, roughness: 0.06, envMapIntensity: 1.2, emissive: 0x0a4a5a, emissiveIntensity: 0.35 });
+waterMat.onBeforeCompile = (sh) => {
+  sh.uniforms.uTime = { value: 0 };
+  waterMat.userData.shader = sh;
+  sh.vertexShader = sh.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
+    .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed,1.0)).xyz;');
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', '#include <common>\nuniform float uTime; varying vec3 vWPos;')
+    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+      float w1 = sin(vWPos.x * 3.1 + uTime * 1.2) * cos(vWPos.z * 2.7 - uTime * 0.9);
+      float w2 = sin(vWPos.x * 7.3 - uTime * 1.7 + vWPos.z * 6.1);
+      normal = normalize(normal + vec3(w1 * 0.06 + w2 * 0.03, 0.0, w2 * 0.05));`);
+};
+{
+  const g = new THREE.Group();
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.2, 6), new THREE.MeshStandardMaterial({ color: 0xcbb89a, roughness: 0.9 }));
+  deck.position.y = 0.1; g.add(deck);
+  const edge = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.24, 3.8), white); edge.position.y = 0.12; g.add(edge);
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 3.4), waterMat); water.rotation.x = -Math.PI / 2; water.position.y = 0.245; g.add(water);
+  // loungers + umbrellas
+  for (const lx of [-3.2, -1.6, 0, 1.6]) {
+    const l = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.18, 1.5), white); l.position.set(lx, 0.3, -2.45); g.add(l);
+  }
+  for (const ux of [-2.4, 0.8]) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2), white); pole.position.set(ux, 1.2, -2.5); g.add(pole);
+    const top = new THREE.Mesh(new THREE.ConeGeometry(1.1, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0xf1ece2, roughness: 0.8 }));
+    top.position.set(ux, 2.2, -2.5); g.add(top);
+  }
+  g.position.set(0.8, 0, 4.2);
+  register('pool', g, 5.8);
+}
+
+/* ---------- Spa pavilion: jacuzzi + sauna ---------- */
+{
+  const g = new THREE.Group();
+  const wood = new THREE.MeshStandardMaterial({ color: 0x7a5638, roughness: 0.8 });
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(5, 0.25, 4.2), deckMat); deck.position.y = 0.125; g.add(deck);
+  for (const [px, pz] of [[-2.3, -1.9], [2.3, -1.9], [-2.3, 1.9], [2.3, 1.9]]) {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.14, 2.6, 0.14), wood); post.position.set(px, 1.4, pz); g.add(post);
+  }
+  for (let i = 0; i < 9; i++) {   // pergola slats
+    const s = new THREE.Mesh(new THREE.BoxGeometry(5, 0.08, 0.14), wood); s.position.set(0, 2.72, -1.9 + i * 0.475); g.add(s);
+  }
+  const tub = new THREE.Mesh(new THREE.BoxGeometry(2, 0.7, 2), new THREE.MeshStandardMaterial({ color: 0x5a4030, roughness: 0.7 }));
+  tub.position.set(-0.9, 0.6, 0.2); g.add(tub);
+  const tubWater = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7), waterMat); tubWater.rotation.x = -Math.PI / 2; tubWater.position.set(-0.9, 0.96, 0.2); g.add(tubWater);
+  const sauna = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.1, 1.6), wood); sauna.position.set(1.5, 1.3, -0.6); g.add(sauna);
+  const glow = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.05), winMat); glow.position.set(1.5, 1.8, 0.21); g.add(glow);
+  g.position.set(8.6, 0, 3.4); g.rotation.y = -0.5;
+  register('spa', g, 3.6);
+}
+
+/* ---------- Festoon lights between the lawn trees + evening dust ---------- */
+{
+  const pts = [];
+  const lines = [[[-11, -9], [-6.2, 0]], [[-6.2, 0], [0.8, 0.8]], [[0.8, 0.8], [8.6, 0.6]], [[8.6, 0.6], [12, 1]]];
+  for (const [[ax, az], [bx, bz]] of lines) for (let i = 0; i <= 14; i++) {
+    const t = i / 14; pts.push(ax + (bx - ax) * t, 3.1 - Math.sin(t * Math.PI) * 0.7, az + (bz - az) * t);
+  }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffd9a0, size: 0.14, transparent: true, opacity: 0.95 })));
+}
+const dustN = mobile ? 200 : 500, dustPos = new Float32Array(dustN * 3);
+for (let i = 0; i < dustN; i++) { dustPos[i * 3] = (Math.random() - .5) * 40; dustPos[i * 3 + 1] = Math.random() * 8; dustPos[i * 3 + 2] = (Math.random() - .5) * 40; }
+const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xffe2b8, size: 0.04, transparent: true, opacity: 0.6, depthWrite: false }));
+scene.add(dust);
+
+/* ---------- Highlight rings under hovered / selected unit ---------- */
+function ring(color, opacity){
+  const m = new THREE.Mesh(new THREE.RingGeometry(0.92, 1, 72),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.06; m.visible = false; scene.add(m);
+  return m;
+}
+const selRing = ring(0xe7cfa6, 0.9), hovRing = ring(0xffffff, 0.45);
+const selDisc = new THREE.Mesh(new THREE.CircleGeometry(1, 72),
+  new THREE.MeshBasicMaterial({ color: 0xe7cfa6, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending, depthWrite: false }));
+selDisc.rotation.x = -Math.PI / 2; selDisc.position.y = 0.05; scene.add(selDisc);
+function placeRing(r, id){
+  const it = items[id];
+  if (!it){ r.visible = false; return; }
+  r.visible = true; r.position.x = it.group.position.x; r.position.z = it.group.position.z; r.scale.setScalar(it.radius);
+}
+K.onSelect = (id) => { placeRing(selRing, id); selDisc.position.x = selRing.position.x; selDisc.position.z = selRing.position.z; selDisc.scale.setScalar(items[id].radius); };
+K.onSelect(K.selected);
+
+/* ---------- Post-processing: subtle bloom on desktop ---------- */
+let composer = null;
+if (!mobile){
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.3, 0.5, 0.9));
+  composer.addPass(new OutputPass());
+}
+
+/* ---------- Camera path keyed to page sections ----------
+   Each stop: [angle, radius, height, lookAt height, lateral shift, target x, target z] */
+const stops = mobile ? {
+  hero:   [1.0, 34, 14, 0, 0, 0, 0],
+  place:  [1.5, 40, 30, -4, 0, 0, 0],
+  cabins: [1.75, 16, 7, -1, 0, -0.5, -4.5],
+  water:  [0.55, 13, 6, -0.5, 0, 4.5, 3.8],
+  picker: [1.2, 36, 26, -7, 0, 1, 0],
+} : {
+  hero:   [1.0, 28, 10, 0.5, -3, 0, 0],
+  place:  [1.5, 38, 26, 0, 5, 0, 0],
+  cabins: [1.8, 13, 4.6, 1.2, 3, -0.5, -4.5],
+  water:  [0.55, 10.5, 4.2, 0.4, 2.6, 4.5, 3.8],
+  picker: [1.2, 27, 17, 0, 6.5, 1, 0],
+};
+const cam = {}; const keys = ['a', 'r', 'h', 'l', 's', 'tx', 'tz'];
+keys.forEach((k, i) => cam[k] = stops.hero[i]); cam.r += 12; cam.h += 6;
+const tgt = { ...cam };
+const story = document.getElementById('story'), pickerSec = document.getElementById('picker');
+const smooth = (x) => x * x * (3 - 2 * x);
+const lerpStop = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+function targetFromScroll(){
+  const vh = window.innerHeight, sr = story.getBoundingClientRect();
+  let s;
+  if (sr.top > 0) s = lerpStop(stops.hero, stops.place, smooth(Math.min(1, Math.max(0, 1 - sr.top / vh))));
+  else {
+    const p = K.progress(story);
+    if (p < 0.5) s = lerpStop(stops.place, stops.cabins, smooth(Math.min(1, p / 0.42)));
+    else s = lerpStop(stops.cabins, stops.water, smooth(Math.min(1, (p - 0.5) / 0.42)));
+    const fr = pickerSec.getBoundingClientRect();
+    if (sr.bottom < vh * 1.02) s = lerpStop(stops.water, stops.picker, smooth(Math.min(1, Math.max(0, 1 - fr.top / (vh * 0.9)))));
+  }
+  keys.forEach((k, i) => tgt[k] = s[i]);
+}
+
+/* ---------- Pointer: parallax + picking ---------- */
+const mouse = new THREE.Vector2(), ndc = new THREE.Vector2(-9, -9), ray = new THREE.Raycaster();
+const tag = document.getElementById('pickTag');
+let pickMode = false, lastPx = 0, lastPy = 0;
+window.addEventListener('pointermove', (e) => {
+  mouse.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  ndc.copy(mouse); lastPx = e.clientX; lastPy = e.clientY;
+}, { passive: true });
+function overUI(x, y){ const el = document.elementFromPoint(x, y); return el && el.closest('.pick-panel, .nav, a, button, .m-cta'); }
+function pick(){
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  return hit ? hit.object.userData.unit : null;
+}
+pickerSec.addEventListener('click', (e) => {
+  if (!pickMode || overUI(e.clientX, e.clientY)) return;
+  ndc.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  const id = pick(); if (id) K.select(id);
+});
+
+/* ---------- Resize / visibility ---------- */
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h); if (composer) composer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+let visible = true;
+document.addEventListener('visibilitychange', () => { visible = !document.hidden; });
+const cover = document.querySelector('.cover');
+const hero = document.querySelector('.hero');
+
+/* ---------- Loop ---------- */
+const clock = new THREE.Clock();
+const look = new THREE.Vector3(), side = new THREE.Vector3();
+let intro = K.reduce ? 1 : 0;
+function frame(){
+  requestAnimationFrame(frame);
+  if (!visible) return;
+  // the opaque hero and content cover the stage: skip rendering then
+  if (cover.getBoundingClientRect().top < -40){ canvas.style.visibility = 'hidden'; return; }
+  canvas.style.visibility = '';
+  if (hero.getBoundingClientRect().bottom > window.innerHeight - 2){ clock.getDelta(); return; }
+  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+
+  targetFromScroll();
+  const k = K.reduce ? 1 : 1 - Math.pow(0.0015, dt);
+  for (const key of keys) cam[key] += (tgt[key] - cam[key]) * k;
+  intro = Math.min(1, intro + dt * 0.35);
+  const ease = 1 - Math.pow(1 - intro, 3);
+  const a = cam.a + (K.reduce ? 0 : Math.sin(t * 0.12) * 0.05) + mouse.x * 0.05;
+  const r = cam.r + (1 - ease) * 12, h = cam.h + mouse.y * 0.4 + (1 - ease) * 5;
+  camera.position.set(cam.tx + Math.cos(a) * r, h, cam.tz + Math.sin(a) * r);
+  look.set(cam.tx, cam.l, cam.tz); camera.lookAt(look);
+  side.setFromMatrixColumn(camera.matrixWorld, 0).multiplyScalar(cam.s);
+  camera.position.add(side); look.add(side); camera.lookAt(look);
+
+  const fr = pickerSec.getBoundingClientRect();
+  pickMode = fr.top < window.innerHeight * 0.35 && fr.bottom > window.innerHeight * 0.6;
+  let hov = null;
+  if (pickMode && !overUI(lastPx, lastPy)) hov = pick();
+  if (hov !== K.hovered){
+    K.hovered = hov;
+    placeRing(hovRing, hov && hov !== K.selected ? hov : null);
+    K.cursor.classList.toggle('label', !!hov);
+    tag.classList.toggle('on', !!hov);
+    if (hov) tag.textContent = K.units[hov].name;
+  }
+  if (hov) tag.style.transform = `translate(${lastPx}px, ${lastPy}px) translate(-50%, -160%)`;
+  // selected unit floats gently, others settle
+  for (const id in items){
+    const it = items[id], up = id === K.selected ? 0.18 + Math.sin(t * 2) * 0.05 : id === hov ? 0.1 : 0;
+    it.group.position.y += (it.baseY + up - it.group.position.y) * 0.12;
+  }
+  selRing.material.opacity = 0.65 + Math.sin(t * 3) * 0.25;
+  dust.rotation.y = t * 0.01;
+  if (waterMat.userData.shader) waterMat.userData.shader.uniforms.uTime.value = t;
+
+  if (composer) composer.render(); else renderer.render(scene, camera);
+}
+renderer.compile(scene, camera);
+frame();
+document.documentElement.classList.remove('no-webgl');
+K.ready = true;
+</script>
+</body>
+</html>

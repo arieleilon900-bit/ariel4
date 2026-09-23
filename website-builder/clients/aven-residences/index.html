@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#faf6ec">
 <meta property="og:title" content="אֶבֶן — 32 קומות של שקט מעל הים">
 <meta property="og:description" content="מגדל תלת־ממדי אינטראקטיבי: בוחרים קומה, רואים דירות פנויות, שולחים בקשה בוואטסאפ.">
+<meta property="og:image" content="https://arieleilon900-bit.github.io/ariel4/website-builder/clients/aven-residences/hero-tower-sm.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23b06b2c'/%3E%3Cpath d='M30 78h40M36 78V30q14-12 28 0v48' stroke='%23faf6ec' stroke-width='6' fill='none'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,17 +111,27 @@
   .fade.in{opacity:1;transform:none;}
 
   /* ---------- Hero ---------- */
-  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--gutter) clamp(28px,6vh,64px);position:relative;}
-  .hero::before{content:"";position:absolute;inset:auto 0 0 0;height:60%;background:linear-gradient(to top, rgba(250,246,236,.82), transparent);pointer-events:none;}
-  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 88% 70%, rgba(250,246,236,.55), transparent 70%);pointer-events:none;}
-  .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;align-items:end;gap:32px;}
-  .hero h1{font-size:clamp(84px, 17vw, 260px);margin:18px 0 6px;}
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--gutter) clamp(28px,6vh,64px);position:relative;background:var(--ink);overflow:hidden;}
+  /* Real photo: left half on desktop (text on the right), full-bleed on mobile */
+  .hero-photo{position:absolute;top:0;bottom:0;left:0;width:52%;margin:0;overflow:hidden;clip-path:inset(100% 0 0 0);transition:clip-path 1.7s var(--ease);}
+  .hero-photo.in{clip-path:inset(0 0 0 0);}
+  .hero-photo .px{position:absolute;inset:-6% 0;will-change:transform;}
+  .hero-photo img{width:100%;height:100%;object-fit:cover;object-position:62% 38%;display:block;transform:scale(1.16);transition:transform 2.8s var(--ease);}
+  .hero-photo.in img{transform:scale(1.02);}
+  .hero-photo::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(to left, var(--ink) 0%, rgba(250,246,236,.4) 18%, transparent 42%),
+               linear-gradient(to bottom, rgba(250,246,236,.6) 0%, transparent 22%),
+               linear-gradient(to top, rgba(250,246,236,.55) 0%, transparent 30%);}
+  .hero-photo figcaption{position:absolute;left:var(--gutter);bottom:18px;z-index:1;font-size:11px;color:rgba(255,252,244,.85);text-shadow:0 1px 6px rgba(36,31,25,.55);letter-spacing:.04em;}
+  .hero-photo figcaption a{text-decoration:underline;text-underline-offset:2px;}
+  .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr;gap:28px;width:min(46%, 640px);}
+  .hero h1{font-size:clamp(84px, 13vw, 230px);margin:18px 0 6px;}
   .hero .tag{font-size:clamp(18px,2vw,24px);color:var(--bone);max-width:30ch;font-weight:300;}
   .hero-side{display:flex;flex-direction:column;gap:18px;align-items:flex-start;padding-bottom:18px;}
   .hero-meta{display:flex;gap:28px;font-size:13px;color:var(--bone-dim);}
   .hero-meta b{display:block;font-family:var(--display);font-size:30px;color:var(--bone);font-weight:400;line-height:1;}
   .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
-  .scroll-cue{position:absolute;left:var(--gutter);top:50%;writing-mode:vertical-rl;font-size:11px;letter-spacing:.4em;color:var(--bone-dim);display:flex;align-items:center;gap:14px;}
+  .scroll-cue{position:absolute;left:calc(52% + 20px);top:50%;z-index:1;writing-mode:vertical-rl;font-size:11px;letter-spacing:.4em;color:var(--bone-dim);display:flex;align-items:center;gap:14px;}
   .scroll-cue::after{content:"";width:1px;height:70px;background:linear-gradient(var(--gold), transparent);animation:cue 2.2s var(--ease) infinite;transform-origin:top;}
   @keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 
@@ -249,7 +260,12 @@
 
   @media (max-width: 900px){
     .nav-links{display:none;}
-    .hero-inner{grid-template-columns:1fr;}
+    .hero-inner{width:100%;}
+    .hero-photo{width:100%;}
+    .hero-photo .px{inset:-4% 0;}
+    .hero-photo img{object-position:64% 30%;}
+    .hero-photo::after{background:linear-gradient(to top, var(--ink) 0%, rgba(250,246,236,.78) 38%, rgba(250,246,236,.15) 68%, rgba(250,246,236,.5) 100%);}
+    .hero-photo figcaption{top:86px;bottom:auto;left:auto;right:var(--gutter);}
     .scroll-cue{display:none;}
     .section-head, .contact{grid-template-columns:1fr;gap:20px;}
     .stats{grid-template-columns:1fr 1fr;}
@@ -279,6 +295,7 @@
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{animation:none !important;transition:none !important;}
     .lines .ln > span, .fade{transform:none;opacity:1;}
+    .hero-photo{clip-path:none;} .hero-photo img{transform:none;}
     .grain{display:none;}
   }
 </style>
@@ -317,6 +334,13 @@
 
   <!-- HERO -->
   <section class="hero" aria-label="פתיח">
+    <figure class="hero-photo" data-reveal>
+      <div class="px" id="heroPx">
+        <img src="hero-tower.jpg" srcset="hero-tower-sm.jpg 900w, hero-tower.jpg 1600w" sizes="(max-width: 900px) 100vw, 52vw"
+             alt="מגדל מגורים מזכוכית עם מרפסות גליות על חוף הים בשעת בין ערביים" width="1600" height="2133" fetchpriority="high">
+      </div>
+      <figcaption>תמונת השראה · צילום: <a href="https://unsplash.com/photos/a-tall-building-sitting-on-top-of-a-sandy-beach-bmJjhsZt4NY" target="_blank" rel="noopener">Zoshua Colah / Unsplash</a></figcaption>
+    </figure>
     <div class="scroll-cue">גללו</div>
     <div class="hero-inner">
       <div>
@@ -589,8 +613,10 @@
     return span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
   }
   window.AVEN.progress = progress;
+  var heroPx = document.getElementById('heroPx');
   function onScroll(){
     var y = window.scrollY;
+    if (heroPx && !reduce && y < window.innerHeight * 1.2) heroPx.style.transform = 'translate3d(0,' + (y * 0.22).toFixed(1) + 'px,0)';
     var p = progress(story), idx = Math.min(2, Math.floor(p * 3));
     if (idx !== activeCh){ chapters[activeCh].classList.remove('active'); chapters[idx].classList.add('active'); activeCh = idx; }
     rails.forEach(function(b, i){ b.style.transform = 'scaleY(' + Math.min(1, Math.max(0, p * 3 - i)) + ')'; });
