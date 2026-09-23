@@ -5,7 +5,7 @@ description: Build a premium "Flagship" client website (tens of thousands of she
 
 # Flagship site
 
-The reference build is `website-builder/clients/aven-residences/` (frozen as git tag `flagship-v1`, live at
+The reference build is `website-builder/clients/aven-residences/` (frozen at commit `ad2f82d`, live at
 https://arieleilon900-bit.github.io/ariel4/website-builder/clients/aven-residences/).
 
 ## Before starting, read these in order
