@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>אֶבֶן — מגדל מגורים על הים (קונספט)</title>
-<meta name="description" content="קונספט עיצובי: אתר פרויקט נדל״ן פרימיום עם מגדל תלת־ממדי אינטראקטיבי, בחירת קומה חיה ומסע מצלמה בגלילה.">
+<title>בְּרִיחַ — מנעולן פרימיום 24/7 (קונספט)</title>
+<meta name="description" content="קונספט עיצובי: אתר מנעולנות פרימיום עם גליל מנעול תלת־ממדי אינטראקטיבי, בחירת שירות חיה ומסע מצלמה בגלילה.">
 <meta name="theme-color" content="#faf6ec">
-<meta property="og:title" content="אֶבֶן — 32 קומות של שקט מעל הים">
-<meta property="og:description" content="מגדל תלת־ממדי אינטראקטיבי: בוחרים קומה, רואים דירות פנויות, שולחים בקשה בוואטסאפ.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23b06b2c'/%3E%3Cpath d='M30 78h40M36 78V30q14-12 28 0v48' stroke='%23faf6ec' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<meta property="og:title" content="בְּרִיחַ — מנעולן שמגיע תוך 20 דקות, בכל הארץ">
+<meta property="og:description" content="גליל מנעול תלת־ממדי אינטראקטיבי: בוחרים שירות, רואים זמינות טכנאים, שולחים בקשה בוואטסאפ.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23b06b2c'/%3E%3Ccircle cx='50' cy='38' r='13' fill='none' stroke='%23faf6ec' stroke-width='7'/%3E%3Cpath d='M50 50 L60 80 L40 80 Z' fill='%23faf6ec'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -191,7 +191,7 @@
   .stat b sup{font-size:.35em;color:var(--gold);margin-inline-start:4px;}
   .stat span{color:var(--bone-dim);font-size:14px;}
 
-  /* Horizontal residences */
+  /* Horizontal service types */
   .hscroll{height:320vh;position:relative;}
   .hscroll-sticky{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:40px;}
   .hscroll-head{padding:0 var(--gutter);display:flex;justify-content:space-between;align-items:end;gap:20px;}
@@ -225,11 +225,19 @@
   .amen-row:hover h3{transform:translateX(-14px);}
   .amen-row p{color:var(--bone-dim);font-size:15px;position:relative;}
 
-  /* Quote */
-  .quote{text-align:center;}
-  .quote blockquote{font-family:var(--display);font-size:clamp(34px,5vw,76px);line-height:1.1;max-width:18ch;margin:0 auto 28px;}
-  .quote blockquote em{font-style:normal;color:var(--gold);}
-  .quote cite{font-style:normal;font-size:14px;color:var(--bone-dim);letter-spacing:.1em;}
+  /* Reviews */
+  .reviews-head{text-align:center;margin-bottom:56px;}
+  .reviews-score{display:inline-flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+  .reviews-score b{font-family:var(--display);font-size:56px;font-weight:400;}
+  .reviews-score .stars{color:var(--gold);font-size:20px;letter-spacing:.1em;}
+  .reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .review-card{border:1px solid var(--line);border-radius:20px;padding:26px;background:linear-gradient(160deg, #fffdf7, #f6efe0);
+    display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 50px -34px rgba(60,45,30,.22);}
+  .review-card .stars{color:var(--gold);font-size:15px;letter-spacing:.15em;}
+  .review-card p{font-size:15px;color:var(--bone);line-height:1.7;}
+  .review-card .r-foot{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--bone-dim);}
+  .review-card .r-foot b{color:var(--bone);font-weight:500;}
+  @media (max-width:900px){ .reviews-grid{grid-template-columns:1fr;} }
 
   /* Contact */
   .contact{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:end;}
@@ -286,7 +294,7 @@
 <body>
 
 <div class="loader" id="loader" aria-hidden="true">
-  <div class="loader-top"><span>AVEN RESIDENCES</span><span>קו המים · 2029</span></div>
+  <div class="loader-top"><span>BARIACH LOCKSMITH</span><span>זמינות 24/7 · כל הארץ</span></div>
   <div>
     <div class="loader-count" id="loaderCount">0</div>
     <div class="loader-bar"><i id="loaderBar"></i></div>
@@ -295,7 +303,7 @@
 
 <canvas id="stage" aria-hidden="true"></canvas>
 <div class="stage-fallback" aria-hidden="true">
-  <svg viewBox="0 0 120 400" fill="none"><path d="M30 400V70q30-30 60 0v330" fill="#fffaf0" stroke="#b06b2c" stroke-width=".6"/><g stroke="#b06b2c" stroke-opacity=".35" stroke-width=".4"><path d="M30 100h60M30 130h60M30 160h60M30 190h60M30 220h60M30 250h60M30 280h60M30 310h60M30 340h60M30 370h60"/></g></svg>
+  <svg viewBox="0 0 200 400" fill="none"><rect x="40" y="180" width="120" height="140" rx="16" fill="#fffaf0" stroke="#b06b2c" stroke-width="4"/><path d="M60 180v-40a40 40 0 0 1 80 0v40" stroke="#b06b2c" stroke-width="10" fill="none"/><circle cx="100" cy="240" r="14" fill="#b06b2c"/><rect x="93" y="248" width="14" height="30" rx="6" fill="#b06b2c"/></svg>
 </div>
 <div class="vignette" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
@@ -303,14 +311,14 @@
 <div class="floor-tag" id="floorTag" aria-hidden="true"></div>
 
 <header class="nav" id="nav">
-  <a href="#top" class="logo" aria-label="אבן — לראש העמוד"><b>אֶבֶן</b><small>RESIDENCES</small></a>
+  <a href="#top" class="logo" aria-label="בריח — לראש העמוד"><b>בְּרִיחַ</b><small>LOCKSMITH</small></a>
   <nav class="nav-links" aria-label="ניווט ראשי">
-    <a href="#story">הפרויקט</a>
-    <a href="#floors">בחירת קומה</a>
-    <a href="#residences">הדירות</a>
-    <a href="#amenities">חיים בבניין</a>
+    <a href="#story">מי אנחנו</a>
+    <a href="#services">בחירת שירות</a>
+    <a href="#lock-types">השירותים</a>
+    <a href="#reviews">ביקורות</a>
   </nav>
-  <a href="#contact" class="pill" data-magnetic>תיאום סיור</a>
+  <a href="#contact" class="pill" data-magnetic>קריאה דחופה</a>
 </header>
 
 <main id="top">
@@ -320,17 +328,17 @@
     <div class="scroll-cue">גללו</div>
     <div class="hero-inner">
       <div>
-        <span class="eyebrow fade" data-reveal>קו המים · 32 קומות · 118 דירות</span>
-        <h1 class="display lines" data-reveal><span class="ln"><span>אֶבֶן</span></span></h1>
-        <p class="tag lines" data-reveal><span class="ln"><span>שלושים ושתיים קומות של שקט,</span></span><span class="ln"><span>והים מתחת לרגליים.</span></span></p>
+        <span class="eyebrow fade" data-reveal>מענה תוך 20 דקות · כל הארץ · 24/7</span>
+        <h1 class="display lines" data-reveal><span class="ln"><span>בְּרִיחַ</span></span></h1>
+        <p class="tag lines" data-reveal><span class="ln"><span>מנעולן שמגיע לפני שהספקתם להתעצבן,</span></span><span class="ln"><span>ונועל אחריו דלת שבאמת בטוחה.</span></span></p>
       </div>
       <div class="hero-side fade" data-reveal>
         <div class="hero-meta">
-          <div><b>180°</b>נוף פתוח לים</div>
-          <div><b>2029</b>אכלוס משוער</div>
+          <div><b>20 דק'</b>זמן הגעה ממוצע</div>
+          <div><b>24/7</b>כולל שישי, שבת וחגים</div>
         </div>
         <div class="hero-btns">
-          <a href="#floors" class="pill solid" data-magnetic>בחרו קומה בתלת־ממד
+          <a href="#services" class="pill solid" data-magnetic>בחרו שירות בתלת־ממד
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
         </div>
       </div>
@@ -339,8 +347,8 @@
 
   <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
-      <span>אור</span><span>ים</span><span>שקט</span><span>אבן</span><span>גובה</span><span>מרחב</span>
-      <span>אור</span><span>ים</span><span>שקט</span><span>אבן</span><span>גובה</span><span>מרחב</span>
+      <span>אבטחה</span><span>אמינות</span><span>מהירות</span><span>דיסקרטיות</span><span>24/7</span><span>מקצועיות</span>
+      <span>אבטחה</span><span>אמינות</span><span>מהירות</span><span>דיסקרטיות</span><span>24/7</span><span>מקצועיות</span>
     </div>
   </div>
 
@@ -351,123 +359,143 @@
       <div class="chapters">
         <article class="chapter active">
           <span class="num">01 / 03</span>
-          <h2 class="display">המיקום</h2>
-          <p>שורה ראשונה לים, בין הטיילת לפארק. שש דקות הליכה לרכבת, ושקט של רחוב ללא מוצא.</p>
+          <h2 class="display">הניסיון</h2>
+          <p>אלפי קריאות שירות ומעל עשור בשטח. כל תקלה כבר קרתה לנו פעם, אז אנחנו יודעים לפתור אותה מהר.</p>
         </article>
         <article class="chapter">
           <span class="num">02 / 03</span>
-          <h2 class="display">הארכיטקטורה</h2>
-          <p>מרפסות שזורמות כמו גלים — כל קומה מסובבת בכמה מעלות, כך שאף דירה לא מסתירה לשכנה את האופק.</p>
+          <h2 class="display">הכלים</h2>
+          <p>ציוד מקצועי לפתיחה עדינה ללא נזק, לצד יכולת התקנה של המנעולים המאובטחים והחכמים בשוק.</p>
         </article>
         <article class="chapter">
           <span class="num">03 / 03</span>
-          <h2 class="display">הפנטהאוז</h2>
-          <p>קומה שלמה, 360 מעלות של זכוכית, ובריכה פרטית שנשפכת אל קו השמיים.</p>
+          <h2 class="display">החירום</h2>
+          <p>ננעלתם בחוץ בשתיים בלילה? אותו מספר, אותה רצינות. טכנאי בדרך אליכם תוך דקות, בכל שעה.</p>
         </article>
       </div>
     </div>
   </section>
 
   <!-- FLOOR PICKER -->
-  <section class="floors" id="floors" aria-label="בחירת קומה">
+  <section class="floors" id="services" aria-label="בחירת שירות">
     <div class="floors-panel fade" data-reveal>
-      <span class="eyebrow">בחירת קומה חיה</span>
-      <h2 class="display">בחרו את הגובה שלכם</h2>
-      <p class="hint" id="floorHint">רחפו מעל המגדל ולחצו על קומה — או השתמשו בחצים.</p>
+      <span class="eyebrow">בחירת שירות חיה</span>
+      <h2 class="display">איך אפשר לעזור?</h2>
+      <p class="hint" id="floorHint">רחפו מעל גליל המנעול ולחצו על טבעת — או השתמשו בחצים.</p>
       <div class="floor-readout">
         <div>
-          <div class="lbl">קומה</div>
+          <div class="lbl">זמן הגעה משוער</div>
           <div class="big" id="floorNum" aria-live="polite">18</div>
-          <div class="type" id="floorType">4 דירות · 3–5 חדרים</div>
+          <div class="type" id="floorType">פתיחת דלת · 3 טכנאים באזור</div>
         </div>
         <div class="stepper">
-          <button type="button" id="floorUp" aria-label="קומה למעלה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 15l6-6 6 6"/></svg></button>
-          <button type="button" id="floorDown" aria-label="קומה למטה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button type="button" id="floorUp" aria-label="השירות הבא"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 15l6-6 6 6"/></svg></button>
+          <button type="button" id="floorDown" aria-label="השירות הקודם"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
         </div>
       </div>
       <ul class="units" id="units"></ul>
       <a class="pill solid" id="floorCta" href="#contact" target="_blank" rel="noopener" data-magnetic>
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.8-.1 1.3z"/></svg>
-        <span id="floorCtaTxt">קבלו תוכנית קומה 18 בוואטסאפ</span>
+        <span id="floorCtaTxt">קבלו הצעת מחיר בוואטסאפ</span>
       </a>
-      <p class="note">* נתוני זמינות ומחירים להמחשה בלבד — פרויקט קונספט.</p>
+      <p class="note">* זמני הגעה ומחירים להמחשה בלבד — קונספט עיצובי.</p>
     </div>
   </section>
 
   <div class="cover">
-    <section class="section" aria-label="הפרויקט במספרים">
+    <section class="section" aria-label="המספרים שלנו">
       <div class="section-head">
-        <h2 class="display lines" data-reveal><span class="ln"><span>מספרים</span></span><span class="ln"><span>שמרגישים.</span></span></h2>
-        <p class="fade" data-reveal>כל פרט בבניין תוכנן סביב דבר אחד: שבכל דירה, מכל חדר, יהיה חלון שפונה אל משהו יפה.</p>
+        <h2 class="display lines" data-reveal><span class="ln"><span>מספרים</span></span><span class="ln"><span>שסומכים עליהם.</span></span></h2>
+        <p class="fade" data-reveal>לא סתם חוזרים אלינו. כל קריאה מטופלת עד הסוף, בלי הפתעות ובלי לחכות לשבוע הבא.</p>
       </div>
       <div class="stats">
-        <div class="stat fade" data-reveal><b data-count="32">0</b><span>קומות מגורים</span></div>
-        <div class="stat fade" data-reveal><b data-count="118">0</b><span>דירות, 3 עד 7 חדרים</span></div>
-        <div class="stat fade" data-reveal><b data-count="3.2" data-dec="1">0</b><span>מטר גובה תקרה</span></div>
-        <div class="stat fade" data-reveal><b data-count="70"><sup>%</sup></b><span>משטח המגרש — גינה</span></div>
+        <div class="stat fade" data-reveal><b data-count="12">0</b><span>שנות ותק בשטח</span></div>
+        <div class="stat fade" data-reveal><b data-count="4000" data-suffix="+">0</b><span>קריאות שירות שהושלמו</span></div>
+        <div class="stat fade" data-reveal><b data-count="18">0</b><span>דקות זמן הגעה ממוצע</span></div>
+        <div class="stat fade" data-reveal><b data-count="4.9" data-dec="1"><sup>★</sup></b><span>דירוג ממוצע מלקוחות</span></div>
       </div>
     </section>
 
     <!-- RESIDENCES: pinned horizontal scroll -->
-    <section class="hscroll" id="residences" aria-label="סוגי הדירות">
+    <section class="hscroll" id="lock-types" aria-label="השירותים שלנו">
       <div class="hscroll-sticky">
         <div class="hscroll-head">
-          <h2 class="display lines" data-reveal><span class="ln"><span>ארבעה סוגים של בית</span></span></h2>
+          <h2 class="display lines" data-reveal><span class="ln"><span>ארבעה תחומי עבודה</span></span></h2>
           <span class="hscroll-count" id="hcount">01 — 04</span>
         </div>
         <div class="track" id="track"></div>
       </div>
     </section>
 
-    <section class="section" id="amenities" aria-label="חיים בבניין">
+    <section class="section" id="why-us" aria-label="למה לבחור בנו">
       <div class="section-head">
-        <h2 class="display lines" data-reveal><span class="ln"><span>חיים</span></span><span class="ln"><span>בבניין.</span></span></h2>
-        <p class="fade" data-reveal>לובי בגובה כפול, קונסיירז׳ 24/7, ומתחם פנאי שפתוח רק לדיירים. כמו מלון — רק שזה הבית.</p>
+        <h2 class="display lines" data-reveal><span class="ln"><span>למה</span></span><span class="ln"><span>בוחרים בנו.</span></span></h2>
+        <p class="fade" data-reveal>בלי הפתעות במחיר ובלי לחכות עד מחר. מנעולן שעונה כשמתקשרים, ומגיע כשהוא אומר שיגיע.</p>
       </div>
       <div class="amen">
-        <div class="amen-row fade" data-reveal><span class="n">01</span><h3>לובי בגובה 9 מטר</h3><p>אבן טרוורטין, תאורה אדריכלית ודלפק קונסיירז׳ מאויש מסביב לשעון.</p></div>
-        <div class="amen-row fade" data-reveal><span class="n">02</span><h3>בריכה מחוממת על הגג</h3><p>25 מטר של מים מול השקיעה, עם מרפסת שיזוף ומקלחות חוץ.</p></div>
-        <div class="amen-row fade" data-reveal><span class="n">03</span><h3>מועדון כושר וספא</h3><p>חדר כושר מאובזר, סאונה יבשה וחדר טיפולים — בלי לצאת מהבניין.</p></div>
-        <div class="amen-row fade" data-reveal><span class="n">04</span><h3>לאונג׳ וחדר עבודה</h3><p>עמדות עבודה שקטות, חדר ישיבות להזמנה ופינת קפה לדיירים.</p></div>
-        <div class="amen-row fade" data-reveal><span class="n">05</span><h3>חניה רובוטית</h3><p>שתי חניות לכל דירה, עמדות טעינה לרכב חשמלי ומחסן צמוד.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">01</span><h3>הגעה תוך 20 דקות</h3><p>רכבי שירות פרוסים בכל האזור, כדי שלא תישארו נעולים בחוץ יותר מדי זמן.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">02</span><h3>פתיחה ללא נזק לדלת</h3><p>כלים מקצועיים ושיטות עדינות — קודם ננסה בלי לקדוח, ורק אם צריך נחליף.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">03</span><h3>מחיר קבוע מראש</h3><p>מקבלים הצעת מחיר בטלפון לפני שמתחילים לעבוד, ובלי תוספות שלא סוכמו.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">04</span><h3>אחריות בכתב</h3><p>על כל מנעול שמותקן ועל כל עבודה שמבוצעת — חשבונית ואחריות בסוף העבודה.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">05</span><h3>זמינים 24/7</h3><p>כולל לילות, סופי שבוע וחגים — לחירום אמיתי אין שעות פעילות.</p></div>
       </div>
     </section>
 
-    <section class="section quote" aria-label="מהאדריכלים">
-      <blockquote class="fade" data-reveal>"לא תכננו בניין. תכננו <em>את האור</em> שנכנס אליו."</blockquote>
-      <cite class="fade" data-reveal>— צוות התכנון (דמו)</cite>
+    <section class="section reviews" id="reviews" aria-label="ביקורות לקוחות">
+      <div class="reviews-head fade" data-reveal>
+        <span class="eyebrow">מה אומרים עלינו</span>
+        <div class="reviews-score" style="margin-top:14px"><b>4.9</b><span class="stars">★★★★★</span></div>
+        <div><span style="color:var(--bone-dim);font-size:14px">מבוסס על 210+ ביקורות גוגל (דמו)</span></div>
+      </div>
+      <div class="reviews-grid">
+        <article class="review-card fade" data-reveal>
+          <span class="stars">★★★★★</span>
+          <p>"נעלתי את עצמי בחוץ בשתיים בלילה עם תינוק בבית. הגיעו תוך רבע שעה ופתחו בלי לשבור כלום."</p>
+          <div class="r-foot"><b>מיכל א׳</b><span>רמת גן</span></div>
+        </article>
+        <article class="review-card fade" data-reveal>
+          <span class="stars">★★★★★</span>
+          <p>"קיבלתי מחיר בטלפון ושילמתי בדיוק את זה בסוף. אין הפתעות, ויש אחריות בכתב על ההתקנה."</p>
+          <div class="r-foot"><b>דורון ל׳</b><span>תל אביב</span></div>
+        </article>
+        <article class="review-card fade" data-reveal>
+          <span class="stars">★★★★★</span>
+          <p>"החליפו לי מנעול רב-בריח אחרי ניסיון פריצה. הסבירו הכל, עבדו נקי ומהר. ממליצה בחום."</p>
+          <div class="r-foot"><b>שירה כ׳</b><span>גבעתיים</span></div>
+        </article>
+      </div>
     </section>
 
     <section class="section" id="contact" aria-label="יצירת קשר">
       <div class="contact">
         <div>
-          <span class="eyebrow fade" data-reveal>גלריית המכירות פתוחה</span>
-          <h2 class="display lines" data-reveal style="margin-top:18px"><span class="ln"><span>בואו לראות</span></span><span class="ln"><span>את הים מבפנים.</span></span></h2>
+          <span class="eyebrow fade" data-reveal>זמינים עכשיו</span>
+          <h2 class="display lines" data-reveal style="margin-top:18px"><span class="ln"><span>ננעלתם בחוץ?</span></span><span class="ln"><span>אנחנו כבר בדרך.</span></span></h2>
         </div>
         <div class="contact-cards fade" data-reveal>
-          <a class="c-card" href="https://wa.me/972500000000?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%AA%D7%90%D7%9D%20%D7%A1%D7%99%D7%95%D7%A8%20%D7%91%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%90%D7%91%D7%9F" target="_blank" rel="noopener">
-            <div><small>וואטסאפ</small><b>תיאום סיור פרטי</b></div>
+          <a class="c-card" href="https://wa.me/972500000000?text=%D7%94%D7%99%D7%99%2C%20%D7%A0%D7%A2%D7%9C%D7%AA%D7%99%20%D7%91%D7%97%D7%95%D7%A5%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A2%D7%96%D7%A8%D7%94%20%D7%93%D7%97%D7%95%D7%A4%D7%94" target="_blank" rel="noopener">
+            <div><small>וואטסאפ</small><b>קריאה דחופה עכשיו</b></div>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
-          <a class="c-card" href="tel:+97230000000">
-            <div><small>טלפון</small><b dir="ltr">03-000-0000</b></div>
+          <a class="c-card" href="tel:+97250000000">
+            <div><small>טלפון · זמין 24/7</small><b dir="ltr">050-000-0000</b></div>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
-          <a class="c-card" href="mailto:sales@example.com">
-            <div><small>אימייל</small><b dir="ltr">sales@example.com</b></div>
+          <a class="c-card" href="mailto:info@example.com">
+            <div><small>אימייל</small><b dir="ltr">info@example.com</b></div>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
         </div>
       </div>
     </section>
 
     <footer>
-      <span>אֶבֶן Residences — פרויקט קונספט. השם, הנתונים והמחירים בדיוניים.</span>
+      <span>בריח מנעולנות — קונספט עיצובי. השם, הנתונים והביקורות להמחשה בלבד.</span>
       <span>עיצוב ופיתוח: <a href="../../../index.html">אריאל אילון</a></span>
     </footer>
   </div>
 </main>
 
 <div class="m-cta" id="mcta">
-  <a class="pill" href="#floors">בחירת קומה</a>
-  <a class="pill solid" href="#contact">תיאום סיור</a>
+  <a class="pill" href="#services">בחירת שירות</a>
+  <a class="pill solid" href="tel:+97250000000">התקשרו עכשיו</a>
 </div>
 
 <!-- Lenis smooth scroll (optional; page works without it) -->
@@ -482,73 +510,67 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var fine = window.matchMedia('(pointer: fine)').matches;
   var WA = '972500000000';
-  var FLOORS = 32, FIRST = 3;
+  var SERVICES_N = 6, FIRST = 1;
 
-  /* ---- deterministic demo inventory ---- */
+  /* ---- deterministic demo inventory: 6 services, each a ring on the lock cylinder ---- */
   function rnd(seed){ var x = Math.sin(seed * 9301 + 49297) * 233280; return x - Math.floor(x); }
-  function fmt(n){ return '₪' + (Math.round(n / 10000) * 10000).toLocaleString('he-IL'); }
+  function fmt(n){ return '₪' + Math.round(n).toLocaleString('he-IL'); }
+  var SERVICES = [
+    { name:'פתיחת דלת נעולה', eta:15, base:280, areas:['מרכז העיר','צפון העיר','דרום העיר'] },
+    { name:'החלפת צילינדר ומנעול', eta:22, base:350, areas:['מרכז העיר','רמת גן','חולון'] },
+    { name:'מנעול רב-בריח ודלת פלדה', eta:30, base:550, areas:['מרכז העיר','גבעתיים','בת ים'] },
+    { name:'פריצת רכב', eta:20, base:380, areas:['מרכז העיר','צפון העיר','רמת גן'] },
+    { name:'כספות ומיגון', eta:40, base:650, areas:['מרכז העיר','דרום העיר'] },
+    { name:'קריאת חירום 24/7', eta:12, base:320, areas:['מרכז העיר','צפון העיר','דרום העיר','רמת גן'] }
+  ];
   function floorData(f){
-    var units = [];
-    if (f === FLOORS){
-      units.push({name:'פנטהאוז · 7 חד׳', sqm:410, base:24500000});
-    } else if (f >= 26){
-      units.push({name:'מיני־פנטהאוז · 5 חד׳', sqm:185, base:7900000});
-      units.push({name:'מיני־פנטהאוז · 6 חד׳', sqm:210, base:8900000});
-    } else {
-      units.push({name:'3 חד׳ · צפון', sqm:92, base:3150000});
-      units.push({name:'4 חד׳ · מערב', sqm:118, base:4100000});
-      units.push({name:'4 חד׳ · דרום', sqm:121, base:4250000});
-      units.push({name:'5 חד׳ · ים', sqm:152, base:5600000});
-    }
-    return units.map(function(u, i){
-      var r = rnd(f * 7 + i * 13), status = r < .42 ? 'sold' : r < .56 ? 'hold' : 'free';
-      return {name:u.name, sqm:u.sqm, status:status, price:u.base * (1 + (f - FIRST) * .012)};
+    var s = SERVICES[f - 1];
+    return s.areas.map(function(area, i){
+      var r = rnd(f * 7 + i * 13), status = r < .16 ? 'sold' : r < .36 ? 'hold' : 'free';
+      return {name:'טכנאי · ' + area, eta:s.eta + Math.round(r * 12), price:s.base + Math.round(r * 15) * 10, status:status};
     });
   }
-  window.AVEN = { floors:FLOORS, first:FIRST, selected:18, hovered:null, floorData:floorData, reduce:reduce, fine:fine, onSelect:null };
+  window.BAR = { floors:SERVICES_N, first:FIRST, selected:1, hovered:null, floorData:floorData, reduce:reduce, fine:fine, onSelect:null,
+    serviceName:function(f){ return SERVICES[Math.max(0, Math.min(SERVICES.length - 1, f - 1))].name; } };
 
   var numEl = document.getElementById('floorNum'), typeEl = document.getElementById('floorType'),
       unitsEl = document.getElementById('units'), ctaEl = document.getElementById('floorCta'),
       ctaTxt = document.getElementById('floorCtaTxt');
-  var statusTxt = {free:'פנויה', hold:'בהזמנה', sold:'נמכרה'};
+  var statusTxt = {free:'פנוי עכשיו', hold:'בתור', sold:'תפוס'};
 
-  window.AVEN.select = function(f){
-    f = Math.max(FIRST, Math.min(FLOORS, f));
-    window.AVEN.selected = f;
-    var d = floorData(f);
-    numEl.textContent = f;
+  window.BAR.select = function(f){
+    f = Math.max(FIRST, Math.min(SERVICES_N, f));
+    window.BAR.selected = f;
+    var s = SERVICES[f - 1], d = floorData(f);
+    numEl.textContent = s.eta;
     var free = d.filter(function(u){ return u.status !== 'sold'; }).length;
-    typeEl.textContent = (f === FLOORS ? 'קומת פנטהאוז' : f >= 26 ? 'קומת מיני־פנטהאוזים' : d.length + ' דירות בקומה') + ' · ' + (free ? free + ' זמינות' : 'אזלו');
+    typeEl.textContent = s.name + ' · ' + (free ? free + ' טכנאים פנויים' : 'התור מלא כרגע');
     unitsEl.innerHTML = d.map(function(u){
-      return '<li class="' + u.status + '"><span>' + u.name + '<span class="sqm"> · ' + u.sqm + ' מ״ר</span></span>' +
-        '<span class="price">' + (u.status === 'sold' ? '—' : 'החל מ־' + fmt(u.price)) + '</span>' +
+      return '<li class="' + u.status + '"><span>' + u.name + '<span class="sqm"> · כ-' + u.eta + ' דק׳</span></span>' +
+        '<span class="price">' + (u.status === 'sold' ? '—' : 'מ-' + fmt(u.price)) + '</span>' +
         '<span class="chip ' + u.status + '">' + statusTxt[u.status] + '</span></li>';
     }).join('');
-    var msg = 'היי, אשמח לקבל תוכנית ומחירים לקומה ' + f + ' בפרויקט אבן';
+    var msg = 'היי, אשמח ל' + s.name + ' - אפשר הצעת מחיר?';
     ctaEl.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
-    ctaTxt.textContent = 'קבלו תוכנית קומה ' + f + ' בוואטסאפ';
-    if (window.AVEN.onSelect) window.AVEN.onSelect(f);
+    ctaTxt.textContent = 'קבלו הצעת מחיר ל' + s.name + ' בוואטסאפ';
+    if (window.BAR.onSelect) window.BAR.onSelect(f);
   };
-  document.getElementById('floorUp').addEventListener('click', function(){ window.AVEN.select(window.AVEN.selected + 1); });
-  document.getElementById('floorDown').addEventListener('click', function(){ window.AVEN.select(window.AVEN.selected - 1); });
-  window.AVEN.select(18);
+  document.getElementById('floorUp').addEventListener('click', function(){ window.BAR.select(window.BAR.selected + 1); });
+  document.getElementById('floorDown').addEventListener('click', function(){ window.BAR.select(window.BAR.selected - 1); });
+  window.BAR.select(1);
 
-  /* ---- residences: floor plans drawn as SVG ---- */
+  /* ---- our four work areas: simple line-icons drawn as SVG ---- */
   var types = [
-    {t:'3 חדרים', sz:'92 מ״ר + 14 מרפסת', f:['סלון 34 מ״ר','מטבח פתוח','חדר הורים + רחצה','ממ״ד'], rooms:[[4,4,52,40,'סלון'],[56,4,40,22,'מטבח'],[56,26,40,26,'הורים'],[4,44,26,22,'ממ״ד'],[30,44,26,22,'רחצה']], bal:[4,56,92,10]},
-    {t:'4 חדרים', sz:'121 מ״ר + 18 מרפסת', f:['סלון 40 מ״ר','חדר ארונות','2 חדרי רחצה','כניסה נפרדת'], rooms:[[4,4,48,38,'סלון'],[52,4,44,20,'מטבח'],[52,24,44,22,'הורים'],[4,42,24,22,'חדר'],[28,42,24,22,'ממ״ד'],[52,46,22,18,'רחצה'],[74,46,22,18,'ארונות']], bal:[4,64,92,4]},
-    {t:'5 חדרים · ים', sz:'152 מ״ר + 26 מרפסת', f:['חזית ים מלאה','סוויטת הורים','מטבח שף','חדר עבודה'], rooms:[[4,4,60,32,'סלון · ים'],[64,4,32,32,'מטבח שף'],[4,36,30,22,'סוויטה'],[34,36,20,22,'עבודה'],[54,36,21,22,'חדר'],[75,36,21,22,'ממ״ד']], bal:[4,58,92,10]},
-    {t:'פנטהאוז', sz:'410 מ״ר + 180 גג', f:['קומה שלמה','בריכה פרטית','מעלית ישירה','360° זכוכית'], rooms:[[4,4,44,30,'סלון'],[48,4,24,30,'אוכל'],[72,4,24,30,'מטבח'],[4,34,30,22,'סוויטה'],[34,34,22,22,'חדר'],[56,34,40,22,'בריכה']], bal:[4,56,92,12]}
+    { t:'דלתות ומנעולים', sz:'פתיחה והתקנה', f:['פתיחה ללא נזק','החלפת צילינדר','מנעולי רב-בריח','דלתות פלדה'],
+      icon:'<rect class="out draw" x="30" y="6" width="30" height="58" rx="2"/><line class="draw" x1="30" y1="6" x2="30" y2="64"/><circle class="draw" cx="52" cy="35" r="4.5"/><line class="draw" x1="52" y1="39.5" x2="52" y2="46"/>' },
+    { t:'רכבים', sz:'פריצה והעתקת מפתח', f:['פתיחת רכב נעול','שכפול מפתח','מפתח שנשבר במנעול','תכנות שלט חכם'],
+      icon:'<rect class="out draw" x="26" y="14" width="30" height="16" rx="4"/><rect class="draw" x="14" y="26" width="58" height="18" rx="6"/><circle class="draw" cx="28" cy="46" r="6"/><circle class="draw" cx="62" cy="46" r="6"/>' },
+    { t:'כספות ומיגון', sz:'התקנה ופתיחה', f:['פתיחת כספת נעולה','התקנת כספת חדשה','שדרוג מנגנון נעילה','ייעוץ מיגון לעסק'],
+      icon:'<rect class="out draw" x="24" y="10" width="46" height="50" rx="4"/><circle class="draw" cx="47" cy="35" r="10"/><circle class="draw" cx="47" cy="35" r="2"/><rect class="draw" x="64" y="30" width="6" height="10" rx="2"/>' },
+    { t:'מנעולים חכמים', sz:'התקנה וסנכרון', f:['מנעול טביעת אצבע','נעילה מהאפליקציה','קוד כניסה דיגיטלי','אינטגרציה לבית חכם'],
+      icon:'<rect class="out draw" x="34" y="20" width="32" height="40" rx="8"/><circle class="draw" cx="50" cy="38" r="4"/><line class="draw" x1="50" y1="42" x2="50" y2="48"/><path class="draw" d="M40 10 q10-8 20 0"/><path class="draw" d="M36 6 q14-12 28 0"/>' }
   ];
-  function planSvg(r){
-    var s = '<svg viewBox="0 0 100 70" aria-hidden="true"><rect class="out draw" x="2" y="2" width="96" height="66" rx="1"/>';
-    r.rooms.forEach(function(q){
-      s += '<rect class="draw" x="' + q[0] + '" y="' + q[1] + '" width="' + q[2] + '" height="' + q[3] + '"/>' +
-           '<text x="' + (q[0] + q[2] / 2) + '" y="' + (q[1] + q[3] / 2 + 1) + '">' + q[4] + '</text>';
-    });
-    var b = r.bal;
-    return s + '<rect class="bal" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] + '"/></svg>';
-  }
+  function planSvg(r){ return '<svg viewBox="0 0 100 70" aria-hidden="true">' + r.icon + '</svg>'; }
   document.getElementById('track').innerHTML = types.map(function(r){
     return '<article class="res-card"><div class="top"><h3>' + r.t + '</h3><span class="sz">' + r.sz + '</span></div>' +
       '<div class="plan">' + planSvg(r) + '</div><ul>' + r.f.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul></article>';
@@ -567,12 +589,12 @@
   function countUp(el){
     var b = el.querySelector && el.querySelector('[data-count]');
     if (!b) return;
-    var to = parseFloat(b.dataset.count), dec = +(b.dataset.dec || 0), sup = b.querySelector('sup'), supHtml = sup ? sup.outerHTML : '';
-    if (reduce){ b.innerHTML = to.toFixed(dec) + supHtml; return; }
+    var to = parseFloat(b.dataset.count), dec = +(b.dataset.dec || 0), suffix = b.dataset.suffix || '', sup = b.querySelector('sup'), supHtml = sup ? sup.outerHTML : '';
+    if (reduce){ b.innerHTML = to.toFixed(dec) + suffix + supHtml; return; }
     var t0 = performance.now();
     (function tick(now){
       var p = Math.min(1, (now - t0) / 1800), e = 1 - Math.pow(1 - p, 4);
-      b.innerHTML = (to * e).toFixed(dec) + supHtml;
+      b.innerHTML = (to * e).toFixed(dec) + suffix + supHtml;
       if (p < 1) requestAnimationFrame(tick);
     })(t0);
   }
@@ -580,15 +602,15 @@
   /* ---- scroll-driven UI: chapters, horizontal track, nav ---- */
   var story = document.getElementById('story'), chapters = story.querySelectorAll('.chapter'),
       rails = story.querySelectorAll('.progress-rail b'),
-      hs = document.getElementById('residences'), track = document.getElementById('track'),
+      hs = document.getElementById('lock-types'), track = document.getElementById('track'),
       hcount = document.getElementById('hcount'), nav = document.getElementById('nav'),
-      mcta = document.getElementById('mcta'), floorsSec = document.getElementById('floors'),
+      mcta = document.getElementById('mcta'), floorsSec = document.getElementById('services'),
       lastY = 0, activeCh = 0;
   function progress(el){
     var r = el.getBoundingClientRect(), span = r.height - window.innerHeight;
     return span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
   }
-  window.AVEN.progress = progress;
+  window.BAR.progress = progress;
   function onScroll(){
     var y = window.scrollY;
     var p = progress(story), idx = Math.min(2, Math.floor(p * 3));
@@ -598,7 +620,7 @@
     track.style.transform = 'translate3d(' + (hp * dist) + 'px,0,0)';
     hcount.textContent = '0' + Math.min(4, 1 + Math.floor(hp * 3.999)) + ' — 04';
     nav.classList.toggle('scrolled', y > 40);
-    nav.classList.toggle('hide', y > lastY && y > 400 && !window.AVEN.navLock);
+    nav.classList.toggle('hide', y > lastY && y > 400 && !window.BAR.navLock);
     var fr = floorsSec.getBoundingClientRect();
     mcta.classList.toggle('hide', fr.top < window.innerHeight * .6 && fr.bottom > window.innerHeight * .4);
     lastY = y;
@@ -630,7 +652,7 @@
       el.addEventListener('mouseleave', function(){ el.style.transition = 'transform .6s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; setTimeout(function(){ el.style.transition = ''; }, 600); });
     });
   }
-  window.AVEN.cursor = cur;
+  window.BAR.cursor = cur;
 
   /* ---- smooth scroll ---- */
   window.addEventListener('DOMContentLoaded', function(){
@@ -642,8 +664,8 @@
         a.addEventListener('click', function(e){
           var id = a.getAttribute('href'); if (id.length < 2) return;
           var t = document.querySelector(id); if (!t) return;
-          e.preventDefault(); window.AVEN.navLock = true;
-          lenis.scrollTo(t, {duration:1.8, onComplete:function(){ window.AVEN.navLock = false; }});
+          e.preventDefault(); window.BAR.navLock = true;
+          lenis.scrollTo(t, {duration:1.8, onComplete:function(){ window.BAR.navLock = false; }});
         });
       });
     } catch (e) {}
@@ -652,7 +674,7 @@
   /* ---- preloader: waits for the 3D scene (or gives up gracefully) ---- */
   var loader = document.getElementById('loader'), cnt = document.getElementById('loaderCount'), bar = document.getElementById('loaderBar'),
       shown = 0, start = performance.now(), finished = false;
-  window.AVEN.ready = false;
+  window.BAR.ready = false;
   function finish(){
     if (finished) return; finished = true;
     cnt.textContent = '100'; bar.style.transform = 'scaleX(1)';
@@ -663,11 +685,11 @@
   }
   (function tickLoader(){
     if (finished) return;
-    var elapsed = performance.now() - start, target = window.AVEN.ready ? 100 : Math.min(88, elapsed / 22);
+    var elapsed = performance.now() - start, target = window.BAR.ready ? 100 : Math.min(88, elapsed / 22);
     shown += (target - shown) * .12;
     cnt.textContent = Math.round(shown); bar.style.transform = 'scaleX(' + shown / 100 + ')';
-    if ((window.AVEN.ready && shown > 99) || (window.AVEN.ready && reduce)) return finish();
-    if (elapsed > 10000 && !window.AVEN.ready){ document.documentElement.classList.add('no-webgl'); return finish(); }
+    if ((window.BAR.ready && shown > 99) || (window.BAR.ready && reduce)) return finish();
+    if (elapsed > 10000 && !window.BAR.ready){ document.documentElement.classList.add('no-webgl'); return finish(); }
     requestAnimationFrame(tickLoader);
   })();
 })();
@@ -682,8 +704,9 @@
 
 <script type="module">
 /* =========================================================
-   The 3D tower: procedural geometry, dusk sky baked into the
-   environment map, scroll-driven camera path, live floor picking.
+   The 3D lock cylinder: procedural geometry, bright daytime sky
+   baked into the environment map, scroll-driven camera path,
+   live service picking on the cylinder's rings.
    ========================================================= */
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -691,7 +714,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-const A = window.AVEN;
+const A = window.BAR;
 const canvas = document.getElementById('stage');
 const mobile = window.matchMedia('(max-width: 900px)').matches;
 
@@ -715,7 +738,7 @@ const FOG = new THREE.Color(0xdcebf0);
 scene.fog = new THREE.FogExp2(FOG, 0.013);
 const camera = new THREE.PerspectiveCamera(mobile ? 50 : 38, window.innerWidth / window.innerHeight, 0.1, 400);
 
-/* ---------- Dusk sky (shader) — also baked into the env map for glass reflections ---------- */
+/* ---------- Daytime sky (shader) — also baked into the env map for brass reflections ---------- */
 const SUN_DIR = new THREE.Vector3(-0.55, 0.62, -0.42).normalize();
 const skyMat = new THREE.ShaderMaterial({
   side: THREE.BackSide, depthWrite: false, fog: false,
@@ -754,73 +777,48 @@ Object.assign(sunLight.shadow.camera, { left: -14, right: 14, top: 18, bottom: -
 sunLight.shadow.bias = -0.0008;
 scene.add(sunLight);
 
-/* ---------- Tower ---------- */
-const N = A.floors, FH = 0.38, RX = 2.2, RZ = 1.55, SEG = mobile ? 48 : 72;
+/* ---------- Lock cylinder: one ring per service ---------- */
+const N = A.floors, FH = 2.03, RX = 2.2, RZ = 1.55, SEG = mobile ? 48 : 72;
 const tower = new THREE.Group();
 scene.add(tower);
 
-// Window texture: mullions + randomly lit rooms (warm interiors at dusk)
-function windowTexture(seed){
-  const c = document.createElement('canvas'); c.width = 512; c.height = 32;
-  const g = c.getContext('2d');
-  g.fillStyle = '#000'; g.fillRect(0, 0, 512, 32);
-  const cols = 40;
-  for (let i = 0; i < cols; i++){
-    const r = Math.abs(Math.sin((i + 1) * 12.9898 + seed * 78.233) * 43758.5453) % 1;
-    if (r > 0.52){
-      const warm = 180 + Math.floor(r * 70);
-      g.fillStyle = `rgb(255,${warm},${Math.floor(warm * 0.62)})`;
-      g.globalAlpha = 0.35 + r * 0.65;
-      g.fillRect(i * (512 / cols) + 2, 5, 512 / cols - 4, 24);
-    }
-  }
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.wrapS = THREE.RepeatWrapping;
-  return t;
-}
-const glassGeo = new THREE.CylinderGeometry(1, 1, FH - 0.07, SEG, 1, true);
+const bodyGeo = new THREE.CylinderGeometry(1, 1, FH - 0.07, SEG, 1, true);
 const slabGeo = new THREE.CylinderGeometry(1, 1, 0.07, SEG);
 const slabMat = new THREE.MeshStandardMaterial({ color: 0xd9d2c5, roughness: 0.55, metalness: 0.05 });
 const pickables = [];
 const floorMeshes = [];
-const texPool = [0, 1, 2, 3, 4, 5].map(windowTexture);
+const brassA = new THREE.Color(0xc9a05a), brassB = new THREE.Color(0x8f7350);
 
 for (let i = 0; i < N; i++){
   const f = i + 1, y = i * FH;
   const floor = new THREE.Group();
   floor.position.y = y;
   floor.rotation.y = i * 0.022;
-  const wave = 1 + 0.085 * Math.sin(i * 0.55) + (f === N ? 0.12 : 0);
+  const wave = 1 + 0.06 * Math.sin(i * 1.3) + (f === N ? 0.1 : 0);
 
   const slab = new THREE.Mesh(slabGeo, slabMat);
   slab.scale.set(RX * wave + 0.28, 1, RZ * wave + 0.28);
   slab.castShadow = slab.receiveShadow = true;
   floor.add(slab);
 
-  const tex = texPool[i % texPool.length].clone();
-  tex.offset.x = (i * 0.137) % 1;
-  tex.needsUpdate = true;
-  const lobby = f <= 2;
-  const glassMat = new THREE.MeshStandardMaterial({
-    color: lobby ? 0xcbd8dc : 0x9fc4d6, metalness: 0.85, roughness: 0.12, envMapIntensity: 1.35,
-    emissive: 0xfff0d2, emissiveMap: lobby ? null : tex, emissiveIntensity: lobby ? 0.12 : 0.22
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: brassA.clone().lerp(brassB, (i % 3) / 3), metalness: 0.88, roughness: 0.16 + (i % 2) * 0.1,
+    envMapIntensity: 1.35, emissive: 0x2a1d10, emissiveIntensity: 0.08
   });
-  const glass = new THREE.Mesh(glassGeo, glassMat);
-  glass.position.y = 0.035 + (FH - 0.07) / 2;
-  glass.scale.set(RX, 1, RZ);
-  glass.castShadow = true;
-  floor.add(glass);
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = 0.035 + (FH - 0.07) / 2;
+  body.scale.set(RX, 1, RZ);
+  body.castShadow = true;
+  floor.add(body);
 
-  glass.userData.floor = slab.userData.floor = f;
-  if (f >= A.first){ pickables.push(glass, slab); }
-  floorMeshes[f] = { group: floor, glass, base: glassMat.emissiveIntensity, wave };
+  body.userData.floor = slab.userData.floor = f;
+  if (f >= A.first){ pickables.push(body, slab); }
+  floorMeshes[f] = { group: floor };
   tower.add(floor);
 }
-// crown
-// penthouse crown: a double-height glass pavilion lit from inside
+// keyway cap: the brass plate that reads "this is a lock", capping the cylinder
 const crown = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.9, SEG, 1, true),
-  new THREE.MeshStandardMaterial({ color: 0x9fc4d6, metalness: 0.85, roughness: 0.08, envMapIntensity: 1.4, side: THREE.DoubleSide, emissive: 0xfff0d2, emissiveIntensity: 0.15 }));
+  new THREE.MeshStandardMaterial({ color: 0xc9a05a, metalness: 0.88, roughness: 0.14, envMapIntensity: 1.4, side: THREE.DoubleSide, emissive: 0x2a1d10, emissiveIntensity: 0.1 }));
 crown.scale.set(RX * 1.04, 1, RZ * 1.04);
 crown.position.y = N * FH + 0.45;
 crown.rotation.y = N * 0.022;
@@ -830,6 +828,23 @@ crownRing.scale.set(RX * 1.05, RZ * 1.05, 1);
 crownRing.rotation.x = Math.PI / 2;
 crownRing.position.y = N * FH + 0.9;
 tower.add(crownRing);
+const capGroup = new THREE.Group();
+capGroup.position.y = N * FH + 0.95;
+capGroup.rotation.y = N * 0.022;
+tower.add(capGroup);
+const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.1, SEG),
+  new THREE.MeshStandardMaterial({ color: 0xdd9d52, metalness: 0.9, roughness: 0.16, envMapIntensity: 1.3 }));
+plate.castShadow = true;
+capGroup.add(plate);
+const keyholeMat = new THREE.MeshBasicMaterial({ color: 0x241f19 });
+const keyholeTop = new THREE.Mesh(new THREE.CircleGeometry(0.13, 28), keyholeMat);
+keyholeTop.rotation.x = -Math.PI / 2;
+keyholeTop.position.set(0, 0.051, 0.05);
+capGroup.add(keyholeTop);
+const keyholeSlot = new THREE.Mesh(new THREE.PlaneGeometry(0.13, 0.34), keyholeMat);
+keyholeSlot.rotation.x = -Math.PI / 2;
+keyholeSlot.position.set(0, 0.051, -0.16);
+capGroup.add(keyholeSlot);
 // podium
 const podium = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.04, 0.6, SEG),
   new THREE.MeshStandardMaterial({ color: 0xe4dcc8, roughness: 0.7 }));
@@ -865,32 +880,13 @@ function placeHalo(h, f){
   h.scale.set(RX * 1.03, 1, RZ * 1.03);
 }
 
-/* ---------- Ground, sea, city context ---------- */
+/* ---------- Ground, city context ---------- */
 const ground = new THREE.Mesh(new THREE.CircleGeometry(120, 64),
   new THREE.MeshStandardMaterial({ color: 0xdccfa9, roughness: 0.85, metalness: 0.05 }));
 ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.6;
 ground.receiveShadow = true;
 scene.add(ground);
-
-const seaMat = new THREE.MeshStandardMaterial({ color: 0x2a9fc2, metalness: 0.7, roughness: 0.2, envMapIntensity: 1.1 });
-seaMat.onBeforeCompile = (sh) => {
-  sh.uniforms.uTime = { value: 0 };
-  seaMat.userData.shader = sh;
-  sh.vertexShader = sh.vertexShader
-    .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
-    .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed,1.0)).xyz;');
-  sh.fragmentShader = sh.fragmentShader
-    .replace('#include <common>', '#include <common>\nuniform float uTime; varying vec3 vWPos;')
-    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
-      float w1 = sin(vWPos.x * 1.7 + uTime * 0.9) * cos(vWPos.z * 1.3 - uTime * 0.7);
-      float w2 = sin(vWPos.x * 4.1 - uTime * 1.3 + vWPos.z * 3.3);
-      normal = normalize(normal + vec3(w1 * 0.05 + w2 * 0.025, 0.0, w2 * 0.04));`);
-};
-const sea = new THREE.Mesh(new THREE.PlaneGeometry(120, 240), seaMat);
-sea.rotation.x = -Math.PI / 2;
-sea.position.set(-66, -0.55, 0);
-scene.add(sea);
 
 const cityMat = new THREE.MeshStandardMaterial({ color: 0xcbb896, roughness: 0.8, metalness: 0.1 });
 const cityCount = mobile ? 70 : 140;
@@ -952,7 +948,7 @@ const stops = {
 const cam = { a: 0, r: 0, h: 0, l: 0, s: 0 };
 Object.assign(cam, { a: stops.hero[0], r: stops.hero[1] + 10, h: stops.hero[2] + 4, l: stops.hero[3], s: stops.hero[4] });
 const tgt = { ...cam };
-const story = document.getElementById('story'), floorsSec = document.getElementById('floors');
+const story = document.getElementById('story'), floorsSec = document.getElementById('services');
 const smooth = (x) => x * x * (3 - 2 * x);
 const lerpStop = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 
@@ -1050,16 +1046,15 @@ function frame(){
     placeHalo(hovHalo, hov && hov !== A.selected ? hov : 0);
     A.cursor.classList.toggle('label', !!hov);
     tag.classList.toggle('on', !!hov);
-    if (hov) tag.textContent = 'קומה ' + hov;
+    if (hov) tag.textContent = A.serviceName(hov);
   }
   if (hov) tag.style.transform = `translate(${lastPx}px, ${lastPy}px) translate(-50%, -160%)`;
   selHalo.material.opacity = 0.2 + Math.sin(t * 3) * 0.08;
 
-  // life: crown glow breathes, dust drifts, sea moves, windows flicker slightly
-  crown.material.emissiveIntensity = 0.15 + Math.sin(t * 0.8) * 0.05;
+  // life: keyway cap glow breathes, dust drifts
+  crown.material.emissiveIntensity = 0.1 + Math.sin(t * 0.8) * 0.04;
   dust.rotation.y = t * 0.01;
   dust.position.y = Math.sin(t * 0.2) * 0.3;
-  if (seaMat.userData.shader) seaMat.userData.shader.uniforms.uTime.value = t;
 
   if (composer) composer.render(); else renderer.render(scene, camera);
 }
