@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אֶבֶן — מגדל מגורים על הים (קונספט)</title>
+<meta name="description" content="קונספט עיצובי: אתר פרויקט נדל״ן פרימיום עם מגדל תלת־ממדי אינטראקטיבי, בחירת קומה חיה ומסע מצלמה בגלילה.">
+<meta name="theme-color" content="#0c0b0a">
+<meta property="og:title" content="אֶבֶן — 32 קומות של שקט מעל הים">
+<meta property="og:description" content="מגדל תלת־ממדי אינטראקטיבי: בוחרים קומה, רואים דירות פנויות, שולחים בקשה בוואטסאפ.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230c0b0a'/%3E%3Cpath d='M30 78h40M36 78V30q14-12 28 0v48' stroke='%23c8a97e' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c0b0a;
+    --ink-2:#151311;
+    --bone:#ece6da;
+    --bone-dim:rgba(236,230,218,.62);
+    --bone-faint:rgba(236,230,218,.14);
+    --gold:#c8a97e;
+    --gold-hi:#e7cfa6;
+    --line:rgba(236,230,218,.16);
+    --ease:cubic-bezier(.22,1,.36,1);
+    --display:'Bellefair', 'Heebo', serif;
+    --body:'Heebo', system-ui, sans-serif;
+    --gutter:clamp(16px, 4vw, 56px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{background:var(--ink);}
+  html.lenis, html.lenis body{height:auto;}
+  .lenis.lenis-smooth{scroll-behavior:auto !important;}
+  body{font-family:var(--body);font-weight:300;background:var(--ink);color:var(--bone);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
+  ::selection{background:var(--gold);color:var(--ink);}
+  :focus-visible{outline:1px solid var(--gold);outline-offset:4px;}
+
+  /* ---------- WebGL stage ---------- */
+  #stage{position:fixed;inset:0;z-index:0;width:100%;height:100%;display:block;}
+  .stage-fallback{position:fixed;inset:0;z-index:0;display:none;
+    background:radial-gradient(120% 70% at 30% 88%, #d9895a 0%, #6b3f45 28%, #221c2c 55%, #0b0d16 100%);}
+  .stage-fallback svg{position:absolute;left:18%;bottom:0;height:86vh;opacity:.9;}
+  .no-webgl .stage-fallback{display:block;}
+  .no-webgl #stage{display:none;}
+  .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);}
+  .grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grain 1.2s steps(6) infinite;}
+  @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+
+  /* ---------- Preloader ---------- */
+  .loader{position:fixed;inset:0;z-index:100;background:var(--ink);display:flex;flex-direction:column;justify-content:space-between;padding:var(--gutter);
+    transition:clip-path 1.2s var(--ease);clip-path:inset(0 0 0 0);}
+  .loader.done{clip-path:inset(0 0 100% 0);pointer-events:none;}
+  .loader-top{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.3em;color:var(--bone-dim);}
+  .loader-count{font-family:var(--display);font-size:clamp(90px, 22vw, 300px);line-height:.8;color:var(--bone);font-variant-numeric:tabular-nums;direction:ltr;text-align:left;}
+  .loader-bar{height:1px;background:var(--line);position:relative;overflow:hidden;}
+  .loader-bar i{position:absolute;inset:0;background:var(--gold);transform-origin:right;transform:scaleX(0);transition:transform .3s linear;}
+
+  /* ---------- Cursor ---------- */
+  .cursor{position:fixed;top:0;left:0;z-index:90;pointer-events:none;opacity:0;transition:opacity .3s;}
+  .cursor.on{opacity:1;}
+  .cursor .dot{position:absolute;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--gold-hi);}
+  .cursor .ring{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;border:1px solid rgba(231,207,166,.55);
+    display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.15em;color:var(--ink);
+    transition:width .35s var(--ease), height .35s var(--ease), margin .35s var(--ease), background .35s, border-color .35s;}
+  .cursor.hover .ring{width:64px;height:64px;margin:-32px 0 0 -32px;border-color:var(--gold);}
+  .cursor.label .ring{width:84px;height:84px;margin:-42px 0 0 -42px;background:var(--gold-hi);border-color:transparent;}
+  .cursor .ring span{opacity:0;transition:opacity .2s;}
+  .cursor.label .ring span{opacity:1;}
+  @media (pointer:coarse){.cursor{display:none;}}
+
+  /* ---------- Nav ---------- */
+  .nav{position:fixed;top:0;inset-inline:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:22px var(--gutter);
+    transition:background .5s, padding .5s, transform .6s var(--ease);}
+  .nav.scrolled{background:rgba(12,11,10,.55);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px);padding-block:14px;}
+  .nav.hide{transform:translateY(-110%);}
+  .logo{display:flex;align-items:baseline;gap:10px;}
+  .logo b{font-family:var(--display);font-weight:400;font-size:28px;letter-spacing:.04em;}
+  .logo small{font-size:10px;letter-spacing:.35em;color:var(--bone-dim);direction:ltr;}
+  .nav-links{display:flex;gap:34px;font-size:14px;}
+  .nav-links a{position:relative;color:var(--bone-dim);transition:color .3s;}
+  .nav-links a::after{content:"";position:absolute;right:0;bottom:-4px;height:1px;width:100%;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease);}
+  .nav-links a:hover{color:var(--bone);}
+  .nav-links a:hover::after{transform:scaleX(1);transform-origin:right;}
+  .pill{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:999px;padding:11px 22px;font-size:14px;font-weight:400;
+    position:relative;overflow:hidden;isolation:isolate;transition:color .45s var(--ease), border-color .45s;}
+  .pill::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--gold);transform:scaleX(0);transform-origin:left;border-radius:inherit;transition:transform .55s var(--ease);}
+  .pill:hover{color:var(--ink);border-color:var(--gold);}
+  .pill:hover::before{transform:scaleX(1);transform-origin:right;}
+  .pill.solid{background:var(--bone);color:var(--ink);border-color:var(--bone);}
+  .pill.cover::before{background:var(--gold);}
+  .pill svg{width:16px;height:16px;}
+
+  /* ---------- Shared type ---------- */
+  main{position:relative;z-index:1;}
+  .eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.32em;color:var(--gold);font-weight:400;}
+  .eyebrow::before{content:"";width:28px;height:1px;background:currentColor;}
+  .display{font-family:var(--display);font-weight:400;line-height:.95;letter-spacing:-.005em;}
+  .lines .ln{display:block;overflow:hidden;padding-bottom:.08em;}
+  .lines .ln > span{display:block;transform:translateY(105%);transition:transform 1.3s var(--ease);}
+  .lines.in .ln > span{transform:none;}
+  .lines .ln:nth-child(2) > span{transition-delay:.09s;}
+  .lines .ln:nth-child(3) > span{transition-delay:.18s;}
+  .fade{opacity:0;transform:translateY(24px);transition:opacity 1.1s var(--ease), transform 1.1s var(--ease);}
+  .fade.in{opacity:1;transform:none;}
+
+  /* ---------- Hero ---------- */
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 var(--gutter) clamp(28px,6vh,64px);position:relative;}
+  .hero::before{content:"";position:absolute;inset:auto 0 0 0;height:60%;background:linear-gradient(to top, rgba(12,11,10,.72), transparent);pointer-events:none;}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 70% at 88% 70%, rgba(12,11,10,.6), transparent 70%);pointer-events:none;}
+  .hero-inner{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;align-items:end;gap:32px;}
+  .hero h1{font-size:clamp(84px, 17vw, 260px);margin:18px 0 6px;}
+  .hero .tag{font-size:clamp(18px,2vw,24px);color:var(--bone);max-width:30ch;font-weight:300;}
+  .hero-side{display:flex;flex-direction:column;gap:18px;align-items:flex-start;padding-bottom:18px;}
+  .hero-meta{display:flex;gap:28px;font-size:13px;color:var(--bone-dim);}
+  .hero-meta b{display:block;font-family:var(--display);font-size:30px;color:var(--bone);font-weight:400;line-height:1;}
+  .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+  .scroll-cue{position:absolute;left:var(--gutter);top:50%;writing-mode:vertical-rl;font-size:11px;letter-spacing:.4em;color:var(--bone-dim);display:flex;align-items:center;gap:14px;}
+  .scroll-cue::after{content:"";width:1px;height:70px;background:linear-gradient(var(--gold), transparent);animation:cue 2.2s var(--ease) infinite;transform-origin:top;}
+  @keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* ---------- Marquee ---------- */
+  .marquee{border-block:1px solid var(--line);overflow:hidden;padding:22px 0;background:rgba(12,11,10,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+  .marquee-track{display:flex;gap:56px;width:max-content;animation:marquee 38s linear infinite;font-family:var(--display);font-size:clamp(28px,4vw,54px);color:var(--bone-dim);white-space:nowrap;}
+  .marquee-track span{display:flex;align-items:center;gap:56px;}
+  .marquee-track span::after{content:"✦";font-size:.4em;color:var(--gold);}
+  @keyframes marquee{to{transform:translateX(50%);}}
+
+  /* ---------- Story (camera chapters) ---------- */
+  .story{height:360vh;position:relative;}
+  .story-sticky{position:sticky;top:0;height:100svh;display:flex;align-items:center;padding:0 var(--gutter);}
+  .story-sticky::before{content:"";position:absolute;inset:0;background:linear-gradient(to left, rgba(12,11,10,.8) 0%, rgba(12,11,10,.25) 45%, transparent 70%);pointer-events:none;}
+  .chapters{position:relative;width:min(520px, 100%);height:340px;}
+  .chapter{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:18px;opacity:0;transform:translateY(40px);transition:opacity .9s var(--ease), transform .9s var(--ease);pointer-events:none;}
+  .chapter.active{opacity:1;transform:none;pointer-events:auto;}
+  .chapter .num{font-family:var(--display);font-size:15px;color:var(--gold);letter-spacing:.2em;direction:ltr;text-align:right;}
+  .chapter h2{font-size:clamp(46px,6vw,88px);}
+  .chapter p{color:var(--bone-dim);font-size:17px;max-width:40ch;}
+  .progress-rail{position:absolute;left:var(--gutter);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;}
+  .progress-rail i{display:block;width:2px;height:44px;background:var(--line);position:relative;overflow:hidden;}
+  .progress-rail i b{position:absolute;inset:0;background:var(--gold);transform-origin:top;transform:scaleY(0);}
+
+  /* ---------- Floor picker ---------- */
+  .floors{min-height:130vh;position:relative;display:flex;align-items:center;padding:14vh var(--gutter);}
+  .floors-panel{position:relative;width:min(440px,100%);background:rgba(16,14,12,.62);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+    border:1px solid var(--line);border-radius:22px;padding:30px;box-shadow:0 40px 80px -30px rgba(0,0,0,.6);}
+  .floors-panel h2{font-size:clamp(38px,4vw,54px);margin:14px 0 8px;}
+  .floors-panel .hint{font-size:14px;color:var(--bone-dim);margin-bottom:22px;}
+  .floor-readout{display:flex;align-items:center;justify-content:space-between;border-block:1px solid var(--line);padding:16px 0;margin-bottom:18px;}
+  .floor-readout .big{font-family:var(--display);font-size:78px;line-height:.9;min-width:2ch;font-variant-numeric:tabular-nums;}
+  .floor-readout .lbl{font-size:12px;letter-spacing:.25em;color:var(--bone-dim);}
+  .floor-readout .type{font-size:15px;margin-top:4px;}
+  .stepper{display:flex;flex-direction:column;gap:8px;}
+  .stepper button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;transition:background .3s, border-color .3s;}
+  .stepper button:hover{background:var(--bone-faint);border-color:var(--gold);}
+  .stepper svg{width:16px;height:16px;}
+  .units{list-style:none;display:grid;gap:8px;margin-bottom:22px;min-height:196px;}
+  .units li{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:12px 14px;border-radius:12px;background:rgba(236,230,218,.04);font-size:14px;
+    animation:unitIn .6s var(--ease) both;}
+  .units li:nth-child(2){animation-delay:.05s}.units li:nth-child(3){animation-delay:.1s}.units li:nth-child(4){animation-delay:.15s}
+  @keyframes unitIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+  .units .price{color:var(--bone-dim);font-variant-numeric:tabular-nums;}
+  .chip{font-size:11px;padding:4px 10px;border-radius:999px;letter-spacing:.05em;}
+  .chip.free{background:rgba(157,200,150,.14);color:#b9dcb0;}
+  .chip.hold{background:rgba(231,207,166,.14);color:var(--gold-hi);}
+  .chip.sold{background:rgba(236,230,218,.06);color:rgba(236,230,218,.4);}
+  .units li.sold span:first-child{color:rgba(236,230,218,.4);text-decoration:line-through;text-decoration-color:rgba(236,230,218,.25);}
+  .floors-panel .note{font-size:11px;color:rgba(236,230,218,.4);margin-top:14px;}
+  .floors-panel .pill{width:100%;justify-content:center;}
+  .floor-tag{position:fixed;z-index:5;pointer-events:none;padding:7px 14px;border-radius:999px;background:var(--gold-hi);color:var(--ink);font-size:13px;font-weight:500;
+    transform:translate(-50%,-160%);opacity:0;transition:opacity .25s;white-space:nowrap;}
+  .floor-tag.on{opacity:1;}
+
+  /* ---------- Solid content (covers the stage) ---------- */
+  .cover{background:var(--ink);position:relative;}
+  .cover::before{content:"";position:absolute;inset:-30vh 0 auto 0;height:30vh;background:linear-gradient(to top, var(--ink), transparent);pointer-events:none;}
+  .section{padding:clamp(90px,14vh,160px) var(--gutter);}
+  .section-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:64px;}
+  .section-head h2{font-size:clamp(48px,7vw,110px);}
+  .section-head p{color:var(--bone-dim);font-size:17px;max-width:44ch;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);}
+  .stat{padding:36px 0 0;border-inline-start:1px solid var(--line);padding-inline-start:28px;}
+  .stat:first-child{border-inline-start:0;padding-inline-start:0;}
+  .stat b{display:block;font-family:var(--display);font-weight:400;font-size:clamp(56px,7vw,110px);line-height:1;font-variant-numeric:tabular-nums;}
+  .stat b sup{font-size:.35em;color:var(--gold);margin-inline-start:4px;}
+  .stat span{color:var(--bone-dim);font-size:14px;}
+
+  /* Horizontal residences */
+  .hscroll{height:320vh;position:relative;}
+  .hscroll-sticky{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:40px;}
+  .hscroll-head{padding:0 var(--gutter);display:flex;justify-content:space-between;align-items:end;gap:20px;}
+  .hscroll-head h2{font-size:clamp(44px,6vw,92px);}
+  .hscroll-count{font-family:var(--display);font-size:22px;color:var(--bone-dim);direction:ltr;}
+  .track{display:flex;gap:28px;padding:0 var(--gutter);will-change:transform;}
+  .res-card{flex:0 0 clamp(300px, 34vw, 500px);border:1px solid var(--line);border-radius:22px;padding:28px;background:linear-gradient(160deg, #1a1714, #100f0d);
+    display:flex;flex-direction:column;gap:18px;transition:border-color .5s, transform .6s var(--ease);}
+  .res-card:hover{border-color:rgba(200,169,126,.55);transform:translateY(-6px);}
+  .res-card .top{display:flex;justify-content:space-between;align-items:baseline;}
+  .res-card h3{font-family:var(--display);font-weight:400;font-size:38px;line-height:1;}
+  .res-card .sz{font-size:13px;color:var(--gold);letter-spacing:.1em;}
+  .plan{aspect-ratio:10/7;border-radius:14px;background:rgba(236,230,218,.03);border:1px solid rgba(236,230,218,.06);padding:14px;}
+  .plan svg{width:100%;height:100%;}
+  .plan rect{fill:none;stroke:rgba(236,230,218,.7);stroke-width:.5;}
+  .plan rect.out{stroke:var(--bone);stroke-width:1.1;}
+  .plan rect.bal{stroke:var(--gold);stroke-dasharray:1.5 1.2;}
+  .plan text{fill:rgba(236,230,218,.55);font-size:3.1px;font-family:var(--body);text-anchor:middle;}
+  .plan .draw{stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 2.4s var(--ease);}
+  .res-card.in .plan .draw{stroke-dashoffset:0;}
+  .res-card ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:14px;color:var(--bone-dim);}
+  .res-card ul li::before{content:"— ";color:var(--gold);}
+
+  /* Amenities list */
+  .amen{border-top:1px solid var(--line);}
+  .amen-row{display:grid;grid-template-columns:80px 1fr 1.1fr;gap:24px;align-items:center;padding:30px 0;border-bottom:1px solid var(--line);position:relative;overflow:hidden;}
+  .amen-row::before{content:"";position:absolute;inset:0;background:linear-gradient(to left, rgba(200,169,126,.14), transparent 70%);transform:scaleX(0);transform-origin:right;transition:transform .8s var(--ease);}
+  .amen-row:hover::before{transform:scaleX(1);}
+  .amen-row .n{font-family:var(--display);color:var(--gold);font-size:18px;direction:ltr;text-align:right;position:relative;}
+  .amen-row h3{font-family:var(--display);font-weight:400;font-size:clamp(30px,3.6vw,54px);line-height:1;position:relative;transition:transform .7s var(--ease);}
+  .amen-row:hover h3{transform:translateX(-14px);}
+  .amen-row p{color:var(--bone-dim);font-size:15px;position:relative;}
+
+  /* Quote */
+  .quote{text-align:center;}
+  .quote blockquote{font-family:var(--display);font-size:clamp(34px,5vw,76px);line-height:1.1;max-width:18ch;margin:0 auto 28px;}
+  .quote blockquote em{font-style:normal;color:var(--gold);}
+  .quote cite{font-style:normal;font-size:14px;color:var(--bone-dim);letter-spacing:.1em;}
+
+  /* Contact */
+  .contact{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:end;}
+  .contact h2{font-size:clamp(56px,9vw,150px);}
+  .contact-cards{display:grid;gap:12px;}
+  .c-card{display:flex;justify-content:space-between;align-items:center;padding:24px 26px;border:1px solid var(--line);border-radius:18px;transition:border-color .4s, background .4s;}
+  .c-card:hover{border-color:var(--gold);background:rgba(200,169,126,.06);}
+  .c-card small{display:block;font-size:12px;color:var(--bone-dim);letter-spacing:.15em;}
+  .c-card b{font-weight:400;font-size:22px;}
+  .c-card svg{width:22px;height:22px;color:var(--gold);transition:transform .5s var(--ease);}
+  .c-card:hover svg{transform:translateX(-6px);}
+  footer{padding:40px var(--gutter);border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--bone-dim);}
+  footer a{color:var(--gold);}
+
+  /* Mobile sticky CTA */
+  .m-cta{display:none;}
+
+  @media (max-width: 900px){
+    .nav-links{display:none;}
+    .hero-inner{grid-template-columns:1fr;}
+    .scroll-cue{display:none;}
+    .section-head, .contact{grid-template-columns:1fr;gap:20px;}
+    .stats{grid-template-columns:1fr 1fr;}
+    .stat:nth-child(3){border-inline-start:0;padding-inline-start:0;}
+    .amen-row{grid-template-columns:48px 1fr;}
+    .amen-row p{grid-column:2;}
+    .story-sticky{align-items:flex-end;padding-bottom:12vh;}
+    .story-sticky::before{background:linear-gradient(to top, rgba(12,11,10,.9) 0%, rgba(12,11,10,.3) 50%, transparent 75%);}
+    .progress-rail{display:none;}
+    .floors{align-items:flex-end;min-height:120vh;}
+    .floors-panel{padding:18px 18px 14px;border-radius:18px;}
+    .floors-panel h2{font-size:32px;margin:8px 0 4px;}
+    .floors-panel .hint{font-size:13px;margin-bottom:10px;}
+    .floor-readout{padding:8px 0;margin-bottom:10px;}
+    .stepper{flex-direction:row;}
+    .units{min-height:0;gap:6px;margin-bottom:12px;}
+    .units li{padding:8px 10px;font-size:12.5px;gap:8px;}
+    .units li .sqm{display:none;}
+    .floor-readout .big{font-size:52px;}
+    .res-card{flex-basis:82vw;}
+    .m-cta{display:flex;position:fixed;bottom:14px;inset-inline:14px;z-index:40;gap:10px;transition:transform .5s var(--ease);}
+    .m-cta.hide{transform:translateY(140%);}
+    .m-cta a{flex:1;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);background:rgba(12,11,10,.6);}
+    .m-cta a.solid{background:var(--bone);}
+    footer{padding-bottom:96px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important;}
+    .lines .ln > span, .fade{transform:none;opacity:1;}
+    .grain{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-top"><span>AVEN RESIDENCES</span><span>קו המים · 2029</span></div>
+  <div>
+    <div class="loader-count" id="loaderCount">0</div>
+    <div class="loader-bar"><i id="loaderBar"></i></div>
+  </div>
+</div>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="stage-fallback" aria-hidden="true">
+  <svg viewBox="0 0 120 400" fill="none"><path d="M30 400V70q30-30 60 0v330" fill="#0f0d12" stroke="#c8a97e" stroke-width=".6"/><g stroke="#e7cfa6" stroke-opacity=".35" stroke-width=".4"><path d="M30 100h60M30 130h60M30 160h60M30 190h60M30 220h60M30 250h60M30 280h60M30 310h60M30 340h60M30 370h60"/></g></svg>
+</div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"><div class="ring"><span id="cursorLabel">בחרו</span></div><div class="dot"></div></div>
+<div class="floor-tag" id="floorTag" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a href="#top" class="logo" aria-label="אבן — לראש העמוד"><b>אֶבֶן</b><small>RESIDENCES</small></a>
+  <nav class="nav-links" aria-label="ניווט ראשי">
+    <a href="#story">הפרויקט</a>
+    <a href="#floors">בחירת קומה</a>
+    <a href="#residences">הדירות</a>
+    <a href="#amenities">חיים בבניין</a>
+  </nav>
+  <a href="#contact" class="pill" data-magnetic>תיאום סיור</a>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" aria-label="פתיח">
+    <div class="scroll-cue">גללו</div>
+    <div class="hero-inner">
+      <div>
+        <span class="eyebrow fade" data-reveal>קו המים · 32 קומות · 118 דירות</span>
+        <h1 class="display lines" data-reveal><span class="ln"><span>אֶבֶן</span></span></h1>
+        <p class="tag lines" data-reveal><span class="ln"><span>שלושים ושתיים קומות של שקט,</span></span><span class="ln"><span>והים מתחת לרגליים.</span></span></p>
+      </div>
+      <div class="hero-side fade" data-reveal>
+        <div class="hero-meta">
+          <div><b>180°</b>נוף פתוח לים</div>
+          <div><b>2029</b>אכלוס משוער</div>
+        </div>
+        <div class="hero-btns">
+          <a href="#floors" class="pill solid" data-magnetic>בחרו קומה בתלת־ממד
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>אור</span><span>ים</span><span>שקט</span><span>אבן</span><span>גובה</span><span>מרחב</span>
+      <span>אור</span><span>ים</span><span>שקט</span><span>אבן</span><span>גובה</span><span>מרחב</span>
+    </div>
+  </div>
+
+  <!-- STORY: the camera flies around the tower while these chapters swap -->
+  <section class="story" id="story" aria-label="על הפרויקט">
+    <div class="story-sticky">
+      <div class="progress-rail" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+      <div class="chapters">
+        <article class="chapter active">
+          <span class="num">01 / 03</span>
+          <h2 class="display">המיקום</h2>
+          <p>שורה ראשונה לים, בין הטיילת לפארק. שש דקות הליכה לרכבת, ושקט של רחוב ללא מוצא.</p>
+        </article>
+        <article class="chapter">
+          <span class="num">02 / 03</span>
+          <h2 class="display">הארכיטקטורה</h2>
+          <p>מרפסות שזורמות כמו גלים — כל קומה מסובבת בכמה מעלות, כך שאף דירה לא מסתירה לשכנה את האופק.</p>
+        </article>
+        <article class="chapter">
+          <span class="num">03 / 03</span>
+          <h2 class="display">הפנטהאוז</h2>
+          <p>קומה שלמה, 360 מעלות של זכוכית, ובריכה פרטית שנשפכת אל קו השמיים.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOOR PICKER -->
+  <section class="floors" id="floors" aria-label="בחירת קומה">
+    <div class="floors-panel fade" data-reveal>
+      <span class="eyebrow">בחירת קומה חיה</span>
+      <h2 class="display">בחרו את הגובה שלכם</h2>
+      <p class="hint" id="floorHint">רחפו מעל המגדל ולחצו על קומה — או השתמשו בחצים.</p>
+      <div class="floor-readout">
+        <div>
+          <div class="lbl">קומה</div>
+          <div class="big" id="floorNum" aria-live="polite">18</div>
+          <div class="type" id="floorType">4 דירות · 3–5 חדרים</div>
+        </div>
+        <div class="stepper">
+          <button type="button" id="floorUp" aria-label="קומה למעלה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 15l6-6 6 6"/></svg></button>
+          <button type="button" id="floorDown" aria-label="קומה למטה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></button>
+        </div>
+      </div>
+      <ul class="units" id="units"></ul>
+      <a class="pill solid" id="floorCta" href="#contact" target="_blank" rel="noopener" data-magnetic>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.8-.1 1.3z"/></svg>
+        <span id="floorCtaTxt">קבלו תוכנית קומה 18 בוואטסאפ</span>
+      </a>
+      <p class="note">* נתוני זמינות ומחירים להמחשה בלבד — פרויקט קונספט.</p>
+    </div>
+  </section>
+
+  <div class="cover">
+    <section class="section" aria-label="הפרויקט במספרים">
+      <div class="section-head">
+        <h2 class="display lines" data-reveal><span class="ln"><span>מספרים</span></span><span class="ln"><span>שמרגישים.</span></span></h2>
+        <p class="fade" data-reveal>כל פרט בבניין תוכנן סביב דבר אחד: שבכל דירה, מכל חדר, יהיה חלון שפונה אל משהו יפה.</p>
+      </div>
+      <div class="stats">
+        <div class="stat fade" data-reveal><b data-count="32">0</b><span>קומות מגורים</span></div>
+        <div class="stat fade" data-reveal><b data-count="118">0</b><span>דירות, 3 עד 7 חדרים</span></div>
+        <div class="stat fade" data-reveal><b data-count="3.2" data-dec="1">0</b><span>מטר גובה תקרה</span></div>
+        <div class="stat fade" data-reveal><b data-count="70"><sup>%</sup></b><span>משטח המגרש — גינה</span></div>
+      </div>
+    </section>
+
+    <!-- RESIDENCES: pinned horizontal scroll -->
+    <section class="hscroll" id="residences" aria-label="סוגי הדירות">
+      <div class="hscroll-sticky">
+        <div class="hscroll-head">
+          <h2 class="display lines" data-reveal><span class="ln"><span>ארבעה סוגים של בית</span></span></h2>
+          <span class="hscroll-count" id="hcount">01 — 04</span>
+        </div>
+        <div class="track" id="track"></div>
+      </div>
+    </section>
+
+    <section class="section" id="amenities" aria-label="חיים בבניין">
+      <div class="section-head">
+        <h2 class="display lines" data-reveal><span class="ln"><span>חיים</span></span><span class="ln"><span>בבניין.</span></span></h2>
+        <p class="fade" data-reveal>לובי בגובה כפול, קונסיירז׳ 24/7, ומתחם פנאי שפתוח רק לדיירים. כמו מלון — רק שזה הבית.</p>
+      </div>
+      <div class="amen">
+        <div class="amen-row fade" data-reveal><span class="n">01</span><h3>לובי בגובה 9 מטר</h3><p>אבן טרוורטין, תאורה אדריכלית ודלפק קונסיירז׳ מאויש מסביב לשעון.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">02</span><h3>בריכה מחוממת על הגג</h3><p>25 מטר של מים מול השקיעה, עם מרפסת שיזוף ומקלחות חוץ.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">03</span><h3>מועדון כושר וספא</h3><p>חדר כושר מאובזר, סאונה יבשה וחדר טיפולים — בלי לצאת מהבניין.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">04</span><h3>לאונג׳ וחדר עבודה</h3><p>עמדות עבודה שקטות, חדר ישיבות להזמנה ופינת קפה לדיירים.</p></div>
+        <div class="amen-row fade" data-reveal><span class="n">05</span><h3>חניה רובוטית</h3><p>שתי חניות לכל דירה, עמדות טעינה לרכב חשמלי ומחסן צמוד.</p></div>
+      </div>
+    </section>
+
+    <section class="section quote" aria-label="מהאדריכלים">
+      <blockquote class="fade" data-reveal>"לא תכננו בניין. תכננו <em>את האור</em> שנכנס אליו."</blockquote>
+      <cite class="fade" data-reveal>— צוות התכנון (דמו)</cite>
+    </section>
+
+    <section class="section" id="contact" aria-label="יצירת קשר">
+      <div class="contact">
+        <div>
+          <span class="eyebrow fade" data-reveal>גלריית המכירות פתוחה</span>
+          <h2 class="display lines" data-reveal style="margin-top:18px"><span class="ln"><span>בואו לראות</span></span><span class="ln"><span>את הים מבפנים.</span></span></h2>
+        </div>
+        <div class="contact-cards fade" data-reveal>
+          <a class="c-card" href="https://wa.me/972500000000?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%AA%D7%90%D7%9D%20%D7%A1%D7%99%D7%95%D7%A8%20%D7%91%D7%A4%D7%A8%D7%95%D7%99%D7%A7%D7%98%20%D7%90%D7%91%D7%9F" target="_blank" rel="noopener">
+            <div><small>וואטסאפ</small><b>תיאום סיור פרטי</b></div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+          <a class="c-card" href="tel:+97230000000">
+            <div><small>טלפון</small><b dir="ltr">03-000-0000</b></div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+          <a class="c-card" href="mailto:sales@example.com">
+            <div><small>אימייל</small><b dir="ltr">sales@example.com</b></div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>אֶבֶן Residences — פרויקט קונספט. השם, הנתונים והמחירים בדיוניים.</span>
+      <span>עיצוב ופיתוח: <a href="../../../index.html">אריאל אילון</a></span>
+    </footer>
+  </div>
+</main>
+
+<div class="m-cta" id="mcta">
+  <a class="pill" href="#floors">בחירת קומה</a>
+  <a class="pill solid" href="#contact">תיאום סיור</a>
+</div>
+
+<!-- Lenis smooth scroll (optional; page works without it) -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
+
+<script>
+/* =========================================================
+   Shared state + non-WebGL UI (classic script; runs even if
+   the 3D module fails to load)
+   ========================================================= */
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = window.matchMedia('(pointer: fine)').matches;
+  var WA = '972500000000';
+  var FLOORS = 32, FIRST = 3;
+
+  /* ---- deterministic demo inventory ---- */
+  function rnd(seed){ var x = Math.sin(seed * 9301 + 49297) * 233280; return x - Math.floor(x); }
+  function fmt(n){ return '₪' + (Math.round(n / 10000) * 10000).toLocaleString('he-IL'); }
+  function floorData(f){
+    var units = [];
+    if (f === FLOORS){
+      units.push({name:'פנטהאוז · 7 חד׳', sqm:410, base:24500000});
+    } else if (f >= 26){
+      units.push({name:'מיני־פנטהאוז · 5 חד׳', sqm:185, base:7900000});
+      units.push({name:'מיני־פנטהאוז · 6 חד׳', sqm:210, base:8900000});
+    } else {
+      units.push({name:'3 חד׳ · צפון', sqm:92, base:3150000});
+      units.push({name:'4 חד׳ · מערב', sqm:118, base:4100000});
+      units.push({name:'4 חד׳ · דרום', sqm:121, base:4250000});
+      units.push({name:'5 חד׳ · ים', sqm:152, base:5600000});
+    }
+    return units.map(function(u, i){
+      var r = rnd(f * 7 + i * 13), status = r < .42 ? 'sold' : r < .56 ? 'hold' : 'free';
+      return {name:u.name, sqm:u.sqm, status:status, price:u.base * (1 + (f - FIRST) * .012)};
+    });
+  }
+  window.AVEN = { floors:FLOORS, first:FIRST, selected:18, hovered:null, floorData:floorData, reduce:reduce, fine:fine, onSelect:null };
+
+  var numEl = document.getElementById('floorNum'), typeEl = document.getElementById('floorType'),
+      unitsEl = document.getElementById('units'), ctaEl = document.getElementById('floorCta'),
+      ctaTxt = document.getElementById('floorCtaTxt');
+  var statusTxt = {free:'פנויה', hold:'בהזמנה', sold:'נמכרה'};
+
+  window.AVEN.select = function(f){
+    f = Math.max(FIRST, Math.min(FLOORS, f));
+    window.AVEN.selected = f;
+    var d = floorData(f);
+    numEl.textContent = f;
+    var free = d.filter(function(u){ return u.status !== 'sold'; }).length;
+    typeEl.textContent = (f === FLOORS ? 'קומת פנטהאוז' : f >= 26 ? 'קומת מיני־פנטהאוזים' : d.length + ' דירות בקומה') + ' · ' + (free ? free + ' זמינות' : 'אזלו');
+    unitsEl.innerHTML = d.map(function(u){
+      return '<li class="' + u.status + '"><span>' + u.name + '<span class="sqm"> · ' + u.sqm + ' מ״ר</span></span>' +
+        '<span class="price">' + (u.status === 'sold' ? '—' : 'החל מ־' + fmt(u.price)) + '</span>' +
+        '<span class="chip ' + u.status + '">' + statusTxt[u.status] + '</span></li>';
+    }).join('');
+    var msg = 'היי, אשמח לקבל תוכנית ומחירים לקומה ' + f + ' בפרויקט אבן';
+    ctaEl.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
+    ctaTxt.textContent = 'קבלו תוכנית קומה ' + f + ' בוואטסאפ';
+    if (window.AVEN.onSelect) window.AVEN.onSelect(f);
+  };
+  document.getElementById('floorUp').addEventListener('click', function(){ window.AVEN.select(window.AVEN.selected + 1); });
+  document.getElementById('floorDown').addEventListener('click', function(){ window.AVEN.select(window.AVEN.selected - 1); });
+  window.AVEN.select(18);
+
+  /* ---- residences: floor plans drawn as SVG ---- */
+  var types = [
+    {t:'3 חדרים', sz:'92 מ״ר + 14 מרפסת', f:['סלון 34 מ״ר','מטבח פתוח','חדר הורים + רחצה','ממ״ד'], rooms:[[4,4,52,40,'סלון'],[56,4,40,22,'מטבח'],[56,26,40,26,'הורים'],[4,44,26,22,'ממ״ד'],[30,44,26,22,'רחצה']], bal:[4,56,92,10]},
+    {t:'4 חדרים', sz:'121 מ״ר + 18 מרפסת', f:['סלון 40 מ״ר','חדר ארונות','2 חדרי רחצה','כניסה נפרדת'], rooms:[[4,4,48,38,'סלון'],[52,4,44,20,'מטבח'],[52,24,44,22,'הורים'],[4,42,24,22,'חדר'],[28,42,24,22,'ממ״ד'],[52,46,22,18,'רחצה'],[74,46,22,18,'ארונות']], bal:[4,64,92,4]},
+    {t:'5 חדרים · ים', sz:'152 מ״ר + 26 מרפסת', f:['חזית ים מלאה','סוויטת הורים','מטבח שף','חדר עבודה'], rooms:[[4,4,60,32,'סלון · ים'],[64,4,32,32,'מטבח שף'],[4,36,30,22,'סוויטה'],[34,36,20,22,'עבודה'],[54,36,21,22,'חדר'],[75,36,21,22,'ממ״ד']], bal:[4,58,92,10]},
+    {t:'פנטהאוז', sz:'410 מ״ר + 180 גג', f:['קומה שלמה','בריכה פרטית','מעלית ישירה','360° זכוכית'], rooms:[[4,4,44,30,'סלון'],[48,4,24,30,'אוכל'],[72,4,24,30,'מטבח'],[4,34,30,22,'סוויטה'],[34,34,22,22,'חדר'],[56,34,40,22,'בריכה']], bal:[4,56,92,12]}
+  ];
+  function planSvg(r){
+    var s = '<svg viewBox="0 0 100 70" aria-hidden="true"><rect class="out draw" x="2" y="2" width="96" height="66" rx="1"/>';
+    r.rooms.forEach(function(q){
+      s += '<rect class="draw" x="' + q[0] + '" y="' + q[1] + '" width="' + q[2] + '" height="' + q[3] + '"/>' +
+           '<text x="' + (q[0] + q[2] / 2) + '" y="' + (q[1] + q[3] / 2 + 1) + '">' + q[4] + '</text>';
+    });
+    var b = r.bal;
+    return s + '<rect class="bal" x="' + b[0] + '" y="' + b[1] + '" width="' + b[2] + '" height="' + b[3] + '"/></svg>';
+  }
+  document.getElementById('track').innerHTML = types.map(function(r){
+    return '<article class="res-card"><div class="top"><h3>' + r.t + '</h3><span class="sz">' + r.sz + '</span></div>' +
+      '<div class="plan">' + planSvg(r) + '</div><ul>' + r.f.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul></article>';
+  }).join('');
+
+  /* ---- reveal on scroll ---- */
+  var toReveal = document.querySelectorAll('[data-reveal], .res-card');
+  if ('IntersectionObserver' in window && !reduce){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); countUp(e.target); } });
+    }, {threshold:.18, rootMargin:'0px 0px -6% 0px'});
+    toReveal.forEach(function(el){ io.observe(el); });
+  } else {
+    toReveal.forEach(function(el){ el.classList.add('in'); countUp(el); });
+  }
+  function countUp(el){
+    var b = el.querySelector && el.querySelector('[data-count]');
+    if (!b) return;
+    var to = parseFloat(b.dataset.count), dec = +(b.dataset.dec || 0), sup = b.querySelector('sup'), supHtml = sup ? sup.outerHTML : '';
+    if (reduce){ b.innerHTML = to.toFixed(dec) + supHtml; return; }
+    var t0 = performance.now();
+    (function tick(now){
+      var p = Math.min(1, (now - t0) / 1800), e = 1 - Math.pow(1 - p, 4);
+      b.innerHTML = (to * e).toFixed(dec) + supHtml;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  /* ---- scroll-driven UI: chapters, horizontal track, nav ---- */
+  var story = document.getElementById('story'), chapters = story.querySelectorAll('.chapter'),
+      rails = story.querySelectorAll('.progress-rail b'),
+      hs = document.getElementById('residences'), track = document.getElementById('track'),
+      hcount = document.getElementById('hcount'), nav = document.getElementById('nav'),
+      mcta = document.getElementById('mcta'), floorsSec = document.getElementById('floors'),
+      lastY = 0, activeCh = 0;
+  function progress(el){
+    var r = el.getBoundingClientRect(), span = r.height - window.innerHeight;
+    return span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
+  }
+  window.AVEN.progress = progress;
+  function onScroll(){
+    var y = window.scrollY;
+    var p = progress(story), idx = Math.min(2, Math.floor(p * 3));
+    if (idx !== activeCh){ chapters[activeCh].classList.remove('active'); chapters[idx].classList.add('active'); activeCh = idx; }
+    rails.forEach(function(b, i){ b.style.transform = 'scaleY(' + Math.min(1, Math.max(0, p * 3 - i)) + ')'; });
+    var hp = progress(hs), dist = Math.max(0, track.scrollWidth - window.innerWidth);
+    track.style.transform = 'translate3d(' + (hp * dist) + 'px,0,0)';
+    hcount.textContent = '0' + Math.min(4, 1 + Math.floor(hp * 3.999)) + ' — 04';
+    nav.classList.toggle('scrolled', y > 40);
+    nav.classList.toggle('hide', y > lastY && y > 400 && !window.AVEN.navLock);
+    var fr = floorsSec.getBoundingClientRect();
+    mcta.classList.toggle('hide', fr.top < window.innerHeight * .6 && fr.bottom > window.innerHeight * .4);
+    lastY = y;
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  /* ---- custom cursor + magnetic buttons ---- */
+  var cur = document.getElementById('cursor');
+  if (fine && !reduce){
+    var mx = 0, my = 0, rx = 0, ry = 0, ring = cur.querySelector('.ring'), dot = cur.querySelector('.dot');
+    window.addEventListener('mousemove', function(e){ mx = e.clientX; my = e.clientY; cur.classList.add('on'); }, {passive:true});
+    (function loop(){
+      rx += (mx - rx) * .16; ry += (my - ry) * .16;
+      dot.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0)';
+      ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)';
+      requestAnimationFrame(loop);
+    })();
+    document.querySelectorAll('a, button').forEach(function(el){
+      el.addEventListener('mouseenter', function(){ cur.classList.add('hover'); });
+      el.addEventListener('mouseleave', function(){ cur.classList.remove('hover'); });
+    });
+    document.querySelectorAll('[data-magnetic]').forEach(function(el){
+      el.addEventListener('mousemove', function(e){
+        var r = el.getBoundingClientRect();
+        el.style.transform = 'translate(' + (e.clientX - r.left - r.width / 2) * .22 + 'px,' + (e.clientY - r.top - r.height / 2) * .3 + 'px)';
+      });
+      el.addEventListener('mouseleave', function(){ el.style.transition = 'transform .6s cubic-bezier(.22,1,.36,1)'; el.style.transform = ''; setTimeout(function(){ el.style.transition = ''; }, 600); });
+    });
+  }
+  window.AVEN.cursor = cur;
+
+  /* ---- smooth scroll ---- */
+  window.addEventListener('DOMContentLoaded', function(){
+    if (reduce || !window.Lenis) return;
+    try {
+      var lenis = new Lenis({lerp:.09, smoothWheel:true});
+      (function raf(t){ lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
+      document.querySelectorAll('a[href^="#"]').forEach(function(a){
+        a.addEventListener('click', function(e){
+          var id = a.getAttribute('href'); if (id.length < 2) return;
+          var t = document.querySelector(id); if (!t) return;
+          e.preventDefault(); window.AVEN.navLock = true;
+          lenis.scrollTo(t, {duration:1.8, onComplete:function(){ window.AVEN.navLock = false; }});
+        });
+      });
+    } catch (e) {}
+  });
+
+  /* ---- preloader: waits for the 3D scene (or gives up gracefully) ---- */
+  var loader = document.getElementById('loader'), cnt = document.getElementById('loaderCount'), bar = document.getElementById('loaderBar'),
+      shown = 0, start = performance.now(), finished = false;
+  window.AVEN.ready = false;
+  function finish(){
+    if (finished) return; finished = true;
+    cnt.textContent = '100'; bar.style.transform = 'scaleX(1)';
+    setTimeout(function(){
+      loader.classList.add('done');
+      document.querySelectorAll('.hero [data-reveal]').forEach(function(el){ el.classList.add('in'); });
+    }, reduce ? 0 : 350);
+  }
+  (function tickLoader(){
+    if (finished) return;
+    var elapsed = performance.now() - start, target = window.AVEN.ready ? 100 : Math.min(88, elapsed / 22);
+    shown += (target - shown) * .12;
+    cnt.textContent = Math.round(shown); bar.style.transform = 'scaleX(' + shown / 100 + ')';
+    if ((window.AVEN.ready && shown > 99) || (window.AVEN.ready && reduce)) return finish();
+    if (elapsed > 10000){ document.documentElement.classList.add('no-webgl'); return finish(); }
+    requestAnimationFrame(tickLoader);
+  })();
+})();
+</script>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+/* =========================================================
+   The 3D tower: procedural geometry, dusk sky baked into the
+   environment map, scroll-driven camera path, live floor picking.
+   ========================================================= */
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const A = window.AVEN;
+const canvas = document.getElementById('stage');
+const mobile = window.matchMedia('(max-width: 900px)').matches;
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: !mobile, powerPreference: 'high-performance' });
+} catch (e) {
+  document.documentElement.classList.add('no-webgl');
+  A.ready = true;
+  throw e;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.5 : 1.75));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.92;
+renderer.shadowMap.enabled = !mobile;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+const FOG = new THREE.Color(0x1d1824);
+scene.fog = new THREE.FogExp2(FOG, 0.018);
+const camera = new THREE.PerspectiveCamera(mobile ? 50 : 38, window.innerWidth / window.innerHeight, 0.1, 400);
+
+/* ---------- Dusk sky (shader) — also baked into the env map for glass reflections ---------- */
+const SUN_DIR = new THREE.Vector3(-0.8, 0.12, -0.55).normalize();
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false, fog: false,
+  uniforms: { sun: { value: SUN_DIR } },
+  vertexShader: `varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform vec3 sun; varying vec3 vDir;
+    void main(){
+      float h = vDir.y;
+      vec3 top = vec3(0.02,0.025,0.06), mid = vec3(0.11,0.075,0.14), hor = vec3(0.78,0.38,0.22);
+      vec3 c = mix(hor, mid, smoothstep(-0.02, 0.22, h));
+      c = mix(c, top, smoothstep(0.18, 0.75, h));
+      float s = max(dot(normalize(vDir), sun), 0.0);
+      c += vec3(1.0,0.55,0.3) * pow(s, 18.0) * 0.55 + vec3(1.0,0.8,0.55) * pow(s, 600.0) * 2.0;
+      c = mix(c, vec3(0.1,0.08,0.1), smoothstep(0.0, -0.25, h));
+      gl_FragColor = vec4(c, 1.0);
+    }`
+});
+const sky = new THREE.Mesh(new THREE.SphereGeometry(200, 48, 24), skyMat);
+scene.add(sky);
+{
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const envScene = new THREE.Scene();
+  envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), skyMat));
+  scene.environment = pmrem.fromScene(envScene, 0.02).texture;
+  pmrem.dispose();
+}
+
+/* ---------- Lights ---------- */
+scene.add(new THREE.HemisphereLight(0x8e9cc9, 0x1c1410, 0.55));
+const sunLight = new THREE.DirectionalLight(0xffb07a, 2.6);
+sunLight.position.copy(SUN_DIR).multiplyScalar(40);
+sunLight.castShadow = !mobile;
+sunLight.shadow.mapSize.set(1024, 1024);
+Object.assign(sunLight.shadow.camera, { left: -14, right: 14, top: 18, bottom: -4, near: 1, far: 90 });
+sunLight.shadow.bias = -0.0008;
+scene.add(sunLight);
+
+/* ---------- Tower ---------- */
+const N = A.floors, FH = 0.38, RX = 2.2, RZ = 1.55, SEG = mobile ? 48 : 72;
+const tower = new THREE.Group();
+scene.add(tower);
+
+// Window texture: mullions + randomly lit rooms (warm interiors at dusk)
+function windowTexture(seed){
+  const c = document.createElement('canvas'); c.width = 512; c.height = 32;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 512, 32);
+  const cols = 40;
+  for (let i = 0; i < cols; i++){
+    const r = Math.abs(Math.sin((i + 1) * 12.9898 + seed * 78.233) * 43758.5453) % 1;
+    if (r > 0.52){
+      const warm = 180 + Math.floor(r * 70);
+      g.fillStyle = `rgb(255,${warm},${Math.floor(warm * 0.62)})`;
+      g.globalAlpha = 0.35 + r * 0.65;
+      g.fillRect(i * (512 / cols) + 2, 5, 512 / cols - 4, 24);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = THREE.RepeatWrapping;
+  return t;
+}
+const glassGeo = new THREE.CylinderGeometry(1, 1, FH - 0.07, SEG, 1, true);
+const slabGeo = new THREE.CylinderGeometry(1, 1, 0.07, SEG);
+const slabMat = new THREE.MeshStandardMaterial({ color: 0xd9d2c5, roughness: 0.55, metalness: 0.05 });
+const pickables = [];
+const floorMeshes = [];
+const texPool = [0, 1, 2, 3, 4, 5].map(windowTexture);
+
+for (let i = 0; i < N; i++){
+  const f = i + 1, y = i * FH;
+  const floor = new THREE.Group();
+  floor.position.y = y;
+  floor.rotation.y = i * 0.022;
+  const wave = 1 + 0.085 * Math.sin(i * 0.55) + (f === N ? 0.12 : 0);
+
+  const slab = new THREE.Mesh(slabGeo, slabMat);
+  slab.scale.set(RX * wave + 0.28, 1, RZ * wave + 0.28);
+  slab.castShadow = slab.receiveShadow = true;
+  floor.add(slab);
+
+  const tex = texPool[i % texPool.length].clone();
+  tex.offset.x = (i * 0.137) % 1;
+  tex.needsUpdate = true;
+  const lobby = f <= 2;
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: lobby ? 0x2a2622 : 0x0e1620, metalness: 0.92, roughness: 0.07, envMapIntensity: 1.35,
+    emissive: 0xffc68c, emissiveMap: lobby ? null : tex, emissiveIntensity: lobby ? 0.35 : 0.85
+  });
+  const glass = new THREE.Mesh(glassGeo, glassMat);
+  glass.position.y = 0.035 + (FH - 0.07) / 2;
+  glass.scale.set(RX, 1, RZ);
+  glass.castShadow = true;
+  floor.add(glass);
+
+  glass.userData.floor = slab.userData.floor = f;
+  if (f >= A.first){ pickables.push(glass, slab); }
+  floorMeshes[f] = { group: floor, glass, base: glassMat.emissiveIntensity, wave };
+  tower.add(floor);
+}
+// crown
+// penthouse crown: a double-height glass pavilion lit from inside
+const crown = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.9, SEG, 1, true),
+  new THREE.MeshStandardMaterial({ color: 0x0e1620, metalness: 0.9, roughness: 0.05, envMapIntensity: 1.4, side: THREE.DoubleSide, emissive: 0xffc68c, emissiveIntensity: 0.3 }));
+crown.scale.set(RX * 1.04, 1, RZ * 1.04);
+crown.position.y = N * FH + 0.45;
+crown.rotation.y = N * 0.022;
+tower.add(crown);
+const crownRing = new THREE.Mesh(new THREE.TorusGeometry(1, 0.02, 8, SEG), new THREE.MeshBasicMaterial({ color: 0xffd9a0 }));
+crownRing.scale.set(RX * 1.05, RZ * 1.05, 1);
+crownRing.rotation.x = Math.PI / 2;
+crownRing.position.y = N * FH + 0.9;
+tower.add(crownRing);
+// podium
+const podium = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.04, 0.6, SEG),
+  new THREE.MeshStandardMaterial({ color: 0xbdb3a3, roughness: 0.7 }));
+podium.scale.set(RX * 1.9, 1, RZ * 2.1);
+podium.position.y = -0.3;
+podium.receiveShadow = true;
+tower.add(podium);
+const TOWER_H = N * FH;
+
+/* ---------- Highlight for hovered / selected floor ---------- */
+function makeHalo(color, opacity){
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, FH - 0.04, SEG, 1, true),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  const ring = new THREE.LineLoop(
+    new THREE.BufferGeometry().setFromPoints(Array.from({ length: SEG }, (_, k) => {
+      const a = k / SEG * Math.PI * 2; return new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
+    })),
+    new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.9 }));
+  ring.position.y = -(FH - 0.04) / 2;
+  m.add(ring);
+  m.visible = false;
+  scene.add(m);
+  return m;
+}
+const selHalo = makeHalo(0xe7cfa6, 0.28);
+const hovHalo = makeHalo(0xffffff, 0.12);
+function placeHalo(h, f){
+  const fm = floorMeshes[f];
+  if (!fm){ h.visible = false; return; }
+  h.visible = true;
+  h.position.y = (f - 1) * FH + 0.035 + (FH - 0.07) / 2;
+  h.rotation.y = (f - 1) * 0.022;
+  h.scale.set(RX * 1.03, 1, RZ * 1.03);
+}
+
+/* ---------- Ground, sea, city context ---------- */
+const ground = new THREE.Mesh(new THREE.CircleGeometry(120, 64),
+  new THREE.MeshStandardMaterial({ color: 0x14120f, roughness: 0.85, metalness: 0.1 }));
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.6;
+ground.receiveShadow = true;
+scene.add(ground);
+
+const seaMat = new THREE.MeshStandardMaterial({ color: 0x0b1420, metalness: 1, roughness: 0.16, envMapIntensity: 1.1 });
+seaMat.onBeforeCompile = (sh) => {
+  sh.uniforms.uTime = { value: 0 };
+  seaMat.userData.shader = sh;
+  sh.vertexShader = sh.vertexShader
+    .replace('#include <common>', '#include <common>\nvarying vec3 vWPos;')
+    .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWPos = (modelMatrix * vec4(transformed,1.0)).xyz;');
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <common>', '#include <common>\nuniform float uTime; varying vec3 vWPos;')
+    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+      float w1 = sin(vWPos.x * 1.7 + uTime * 0.9) * cos(vWPos.z * 1.3 - uTime * 0.7);
+      float w2 = sin(vWPos.x * 4.1 - uTime * 1.3 + vWPos.z * 3.3);
+      normal = normalize(normal + vec3(w1 * 0.05 + w2 * 0.025, 0.0, w2 * 0.04));`);
+};
+const sea = new THREE.Mesh(new THREE.PlaneGeometry(120, 240), seaMat);
+sea.rotation.x = -Math.PI / 2;
+sea.position.set(-66, -0.55, 0);
+scene.add(sea);
+
+const cityMat = new THREE.MeshStandardMaterial({ color: 0x1a1714, roughness: 0.8, metalness: 0.2 });
+const cityCount = mobile ? 70 : 140;
+const city = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), cityMat, cityCount);
+const lightsGeo = [];
+{
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
+  let k = 0, tries = 0;
+  while (k < cityCount && tries++ < 5000){
+    // a ring of low-rise city inland (x > 0), kept outside the camera's orbit
+    const ang = (Math.random() - 0.5) * Math.PI * 1.1, rad = 44 + Math.random() * 50;
+    const x = Math.cos(ang) * rad, z = Math.sin(ang) * rad;
+    const h = 0.8 + Math.pow(Math.random(), 2.5) * 9;
+    s.set(1 + Math.random() * 2.6, h, 1 + Math.random() * 2.6);
+    p.set(x, h / 2 - 0.6, z);
+    q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 0.3);
+    m.compose(p, q, s); city.setMatrixAt(k++, m);
+    if (Math.random() > 0.35) lightsGeo.push(x + (Math.random() - .5) * s.x, h - 0.6 + 0.05, z + (Math.random() - .5) * s.z);
+  }
+  city.count = k;
+}
+city.castShadow = city.receiveShadow = !mobile;
+scene.add(city);
+
+// warm points: rooftop lights of the city + floating dust in the sunset
+const pts = new THREE.BufferGeometry();
+pts.setAttribute('position', new THREE.Float32BufferAttribute(lightsGeo, 3));
+scene.add(new THREE.Points(pts, new THREE.PointsMaterial({ color: 0xffc98f, size: 0.09, transparent: true, opacity: 0.9 })));
+const dustN = mobile ? 250 : 600, dustPos = new Float32Array(dustN * 3);
+for (let i = 0; i < dustN; i++){
+  dustPos[i * 3] = (Math.random() - 0.5) * 40;
+  dustPos[i * 3 + 1] = Math.random() * 18;
+  dustPos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+}
+const dustGeo = new THREE.BufferGeometry();
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xffe2b8, size: 0.035, transparent: true, opacity: 0.55, depthWrite: false }));
+scene.add(dust);
+
+/* ---------- Post-processing: subtle bloom on desktop ---------- */
+let composer = null;
+if (!mobile){
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.32, 0.5, 0.9));
+  composer.addPass(new OutputPass());
+}
+
+/* ---------- Camera path keyed to page sections ----------
+   Each stop: [angle (rad), radius, height, lookAt height, lateral shift]
+   Lateral shift nudges the tower sideways so text/panels have room. */
+const stops = {
+  hero:    mobile ? [0.35, 36, 3.5, 1.2, 0] : [0.35, 27, 3.2, 6.8, -2.6],
+  aerial:  [1.25, 36, 20, 4.5, mobile ? 0 : 3.2],
+  facade:  [2.25, 9.5, 5.2, 7.2, mobile ? 0 : 2.4],
+  top:     [3.05, 10.5, 15.5, 12.0, mobile ? 0 : 2.0],
+  floors:  mobile ? [3.75, 36, 5, -1.5, 0] : [3.75, 23, 6.5, 6.3, 3.6],
+};
+const cam = { a: 0, r: 0, h: 0, l: 0, s: 0 };
+Object.assign(cam, { a: stops.hero[0], r: stops.hero[1] + 10, h: stops.hero[2] + 4, l: stops.hero[3], s: stops.hero[4] });
+const tgt = { ...cam };
+const story = document.getElementById('story'), floorsSec = document.getElementById('floors');
+const smooth = (x) => x * x * (3 - 2 * x);
+const lerpStop = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+
+function targetFromScroll(){
+  const vh = window.innerHeight;
+  const sr = story.getBoundingClientRect();
+  let s;
+  if (sr.top > 0){
+    // hero → first chapter as the story section scrolls into view
+    s = lerpStop(stops.hero, stops.aerial, smooth(Math.min(1, Math.max(0, 1 - sr.top / vh))));
+  } else {
+    const p = A.progress(story);
+    if (p < 0.5) s = lerpStop(stops.aerial, stops.facade, smooth(Math.min(1, p / 0.42)));
+    else s = lerpStop(stops.facade, stops.top, smooth(Math.min(1, (p - 0.5) / 0.42)));
+    const fr = floorsSec.getBoundingClientRect();
+    if (sr.bottom < vh * 1.02) s = lerpStop(stops.top, stops.floors, smooth(Math.min(1, Math.max(0, 1 - fr.top / (vh * 0.9)))));
+  }
+  [tgt.a, tgt.r, tgt.h, tgt.l, tgt.s] = s;
+}
+
+/* ---------- Pointer: parallax + floor picking ---------- */
+const mouse = new THREE.Vector2(), ndc = new THREE.Vector2(-9, -9), ray = new THREE.Raycaster();
+const tag = document.getElementById('floorTag');
+let pickMode = false, lastPx = 0, lastPy = 0;
+window.addEventListener('pointermove', (e) => {
+  mouse.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  ndc.copy(mouse); lastPx = e.clientX; lastPy = e.clientY;
+}, { passive: true });
+function isOverUI(x, y){
+  const el = document.elementFromPoint(x, y);
+  return el && el.closest('.floors-panel, .nav, a, button');
+}
+floorsSec.addEventListener('click', (e) => {
+  if (!pickMode || isOverUI(e.clientX, e.clientY)) return;
+  ndc.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  const f = pick();
+  if (f) A.select(f);
+});
+function pick(){
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  return hit ? hit.object.userData.floor : null;
+}
+A.onSelect = (f) => placeHalo(selHalo, f);
+placeHalo(selHalo, A.selected);
+
+/* ---------- Resize / visibility ---------- */
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  if (composer) composer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+let visible = true;
+document.addEventListener('visibilitychange', () => { visible = !document.hidden; });
+const solid = document.querySelector('.cover');
+
+/* ---------- Loop ---------- */
+const clock = new THREE.Clock();
+const look = new THREE.Vector3(), side = new THREE.Vector3();
+let intro = A.reduce ? 1 : 0;
+function frame(){
+  requestAnimationFrame(frame);
+  if (!visible) return;
+  // stop rendering when the solid content fully covers the stage
+  if (solid.getBoundingClientRect().top < -40){ canvas.style.visibility = 'hidden'; return; }
+  canvas.style.visibility = '';
+  const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+
+  targetFromScroll();
+  const k = A.reduce ? 1 : 1 - Math.pow(0.0015, dt);
+  for (const key in cam) cam[key] += (tgt[key] - cam[key]) * k;
+  intro = Math.min(1, intro + dt * 0.35);
+  const introEase = 1 - Math.pow(1 - intro, 3);
+
+  const idle = A.reduce ? 0 : Math.sin(t * 0.12) * 0.06;
+  const a = cam.a + idle + mouse.x * 0.06;
+  const r = cam.r + (1 - introEase) * 14;
+  const h = cam.h + mouse.y * 0.5 + (1 - introEase) * 6;
+  camera.position.set(Math.cos(a) * r, h, Math.sin(a) * r);
+  look.set(0, cam.l, 0);
+  camera.lookAt(look);
+  // lateral shift: move camera & target along camera's right vector
+  side.setFromMatrixColumn(camera.matrixWorld, 0).multiplyScalar(cam.s);
+  camera.position.add(side); look.add(side); camera.lookAt(look);
+
+  // floor picking only while the floors section is on screen
+  const fr = floorsSec.getBoundingClientRect();
+  pickMode = fr.top < window.innerHeight * 0.35 && fr.bottom > window.innerHeight * 0.6;
+  let hov = null;
+  if (pickMode && !isOverUI(lastPx, lastPy)) hov = pick();
+  if (hov !== A.hovered){
+    A.hovered = hov;
+    placeHalo(hovHalo, hov && hov !== A.selected ? hov : 0);
+    A.cursor.classList.toggle('label', !!hov);
+    tag.classList.toggle('on', !!hov);
+    if (hov) tag.textContent = 'קומה ' + hov;
+  }
+  if (hov) tag.style.transform = `translate(${lastPx}px, ${lastPy}px) translate(-50%, -160%)`;
+  selHalo.material.opacity = 0.2 + Math.sin(t * 3) * 0.08;
+
+  // life: crown glow breathes, dust drifts, sea moves, windows flicker slightly
+  crown.material.emissiveIntensity = 0.32 + Math.sin(t * 0.8) * 0.08;
+  dust.rotation.y = t * 0.01;
+  dust.position.y = Math.sin(t * 0.2) * 0.3;
+  if (seaMat.userData.shader) seaMat.userData.shader.uniforms.uTime.value = t;
+
+  if (composer) composer.render(); else renderer.render(scene, camera);
+}
+frame();
+document.documentElement.classList.remove('no-webgl');
+A.ready = true;
+</script>
+</body>
+</html>
