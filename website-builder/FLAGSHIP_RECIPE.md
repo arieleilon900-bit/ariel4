@@ -2,7 +2,7 @@
 
 זה המתכון המדויק לבניית אתרי Flagship (25,000 ₪ ומעלה). הקובץ המקורי שמור ונעול:
 - **הקוד:** `clients/aven-residences/index.html` (+ `hero-tower.jpg`, `hero-tower-sm.jpg`)
-- **גרסה מוקפאת ב-git:** התג `flagship-v1`. לשחזור: `git show flagship-v1:website-builder/clients/aven-residences/index.html`
+- **גרסה מוקפאת ב-git:** commit `ad2f82d` ("flagship-v1"). לשחזור: `git show ad2f82d:website-builder/clients/aven-residences/index.html`, או לשכפול כל התיקייה: `git archive ad2f82d website-builder/clients/aven-residences | tar -x -C /tmp/aven`
 - **האתר החי:** https://arieleilon900-bit.github.io/ariel4/website-builder/clients/aven-residences/
 
 למה זה עובד ומה מוכר: `PREMIUM_PLAYBOOK.md`. קטעי קוד ומלכודות: `component-library/premium-effects.md`. **המסמך הזה = סדר הפעולות.**
