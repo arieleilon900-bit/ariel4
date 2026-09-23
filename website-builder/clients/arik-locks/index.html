@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>אריק מנעולים — מנעולן 24 שעות בחדרה, פרדס חנה, עמק חפר ומאור | 052-5585883</title>
-<meta name="description" content="אריק מנעולים: פתיחת דלתות, החלפת צילינדרים ומפתחות, כספות ומנעולים חשמליים בחדרה, פרדס חנה, עמק חפר ומאור. זמין 24 שעות. 5.0 בגוגל. 052-5585883">
+<title>אריק מנעולים — מנעולן בחדרה, פרדס חנה ועמק חפר · יום ולילה · 052-5585883</title>
+<meta name="description" content="נעולים בחוץ? אריק מנעולים — פתיחת דלתות, צילינדרים, מפתחות, כספות ומנעולים חשמליים בחדרה, פרדס חנה, עמק חפר ומאור. זמין יום ולילה, שומר שבת. 5.0 בגוגל · 052-5585883">
 <meta name="theme-color" content="#ffffff">
-<meta property="og:title" content="אריק מנעולים — מנעולן 24 שעות">
-<meta property="og:description" content="פתיחת דלתות, צילינדרים, כספות ומנעולים חשמליים. זמין 24 שעות · 5.0 בגוגל.">
+<meta property="og:title" content="אריק מנעולים — נעולים בחוץ? אריק כבר בדרך">
+<meta property="og:description" content="מנעולן אמין בחדרה, פרדס חנה ועמק חפר. יום ולילה, שומר שבת · 5.0 בגוגל.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230f1e2c'/%3E%3Cpath d='M34 46V36a16 16 0 0 1 32 0v10' stroke='%23b8894a' stroke-width='7' fill='none'/%3E%3Crect x='26' y='46' width='48' height='34' rx='8' fill='%23b8894a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,11 @@
   "name": "אריק מנעולים",
   "telephone": "+972-52-558-5883",
   "address": { "@type": "PostalAddress", "streetAddress": "הזית", "addressLocality": "מאור", "postalCode": "3883000", "addressCountry": "IL" },
-  "openingHoursSpecification": { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], "opens": "00:00", "closes": "23:59" },
+  "openingHoursSpecification": [
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Sunday","Monday","Tuesday","Wednesday","Thursday"], "opens": "00:00", "closes": "23:59" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "00:00", "closes": "14:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "21:00", "closes": "23:59" }
+  ],
   "areaServed": ["חדרה","פרדס חנה-כרכור","עמק חפר","מאור"],
   "aggregateRating": { "@type": "AggregateRating", "ratingValue": "5.0", "reviewCount": "8" }
 }
@@ -82,6 +86,7 @@
   .logo i svg{width:18px;height:18px;}
   .open{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2);}
   .open b{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite;}
+  .open.shabbat b{background:#9aa6b2;animation:none;}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,143,91,.5)}70%{box-shadow:0 0 0 9px rgba(47,143,91,0)}100%{box-shadow:0 0 0 0 rgba(47,143,91,0)}}
   .nav .btn{height:44px;padding:0 18px;font-size:15px;}
   .nav-links{display:flex;gap:28px;font-size:15px;color:var(--ink-2);}
@@ -257,7 +262,7 @@
   }
   @media (max-width: 520px){
     .opts{grid-template-columns:1fr;}
-    .cta-row .btn{flex:1;}
+    .cta-row .btn{flex:1;white-space:nowrap;padding:0 14px;font-size:15px;gap:8px;}
     .trust{gap:18px;}
   }
   @media (prefers-reduced-motion: reduce){
@@ -293,7 +298,7 @@
   <div class="wrap">
     <a href="#top" class="logo" aria-label="אריק מנעולים — לראש העמוד"><i><svg><use href="#i-lock"/></svg></i>אריק מנעולים</a>
     <nav class="nav-links" aria-label="ניווט"><a href="#help">מה קרה?</a><a href="#services">שירותים</a><a href="#reviews">ביקורות</a><a href="#faq">שאלות</a></nav>
-    <span class="open"><b></b>זמין 24 שעות</span>
+    <span class="open" data-status><b></b><span>זמין עכשיו</span></span>
     <a class="btn btn-dark tel" href="tel:+972525585883"><svg><use href="#i-phone"/></svg>התקשרו</a>
   </div>
 </header>
@@ -303,17 +308,17 @@
   <section class="hero" aria-label="פתיח">
     <div class="wrap">
       <div>
-        <span class="eyebrow rv">מנעולן · חדרה · פרדס חנה · עמק חפר · 24 שעות</span>
+        <span class="eyebrow rv">מנעולן בחדרה · פרדס חנה · עמק חפר · שומר שבת</span>
         <h1 class="display"><span class="ln"><span>ננעלתם בחוץ?</span></span><span class="ln"><span><em>אריק</em> כבר בדרך.</span></span></h1>
-        <p class="sub rv">פתיחת דלתות, צילינדרים ומפתחות, כספות ומנעולים חשמליים — ביום, בלילה ובשבת. שיחה אחת, ואריק בדרך אליכם.</p>
+        <p class="sub rv">מנעולן שקודם מנסה <b style="font-weight:500;color:var(--ink)">לתקן</b> — ורק אם אין ברירה, מחליף. ככה חוסכים לכם כסף, וככה כל 8 הלקוחות שדירגו אותו בגוגל נתנו חמישה כוכבים.</p>
         <div class="cta-row rv">
-          <a class="btn btn-dark tel" href="tel:+972525585883"><svg><use href="#i-phone"/></svg><span dir="ltr">052-558-5883</span></a>
+          <a class="btn btn-dark tel" href="tel:+972525585883"><svg><use href="#i-phone"/></svg><span>התקשרו עכשיו</span></a>
           <a class="btn btn-line" href="https://wa.me/972525585883" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>וואטסאפ לאריק</a>
         </div>
         <div class="trust rv">
-          <div><b>5.0 <span class="stars">★★★★★</span></b><span>8 ביקורות בגוגל</span></div>
+          <div><b>5.0 <span class="stars">★★★★★</span></b><span>כל 8 הביקורות בגוגל</span></div>
           <hr>
-          <div><b>24/7</b><span>זמין כל השעות</span></div>
+          <div><b>יום ולילה</b><span>א׳–ה׳ · שישי עד כניסת שבת</span></div>
           <hr>
           <div><b>4 אזורים</b><span>חדרה · פרדס חנה · עמק חפר · מאור</span></div>
         </div>
@@ -332,7 +337,7 @@
           </g>
           <path d="M44 112h112" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
         </svg>
-        <div class="badge-float a"><i><svg><use href="#i-clock"/></svg></i><div><b>זמין עכשיו</b><br><small>24 שעות ביממה</small></div></div>
+        <div class="badge-float a"><i><svg><use href="#i-clock"/></svg></i><div data-status><b>זמין עכשיו</b><br><small>יום ולילה · שומר שבת</small></div></div>
         <div class="badge-float b"><i><svg><use href="#i-key"/></svg></i><div><b>★ 5.0</b> <small>בגוגל</small></div></div>
       </div>
     </div>
@@ -350,9 +355,9 @@
     <div class="wrap">
       <div class="help rv">
         <div>
-          <span class="eyebrow">30 שניות, בלי להסביר בטלפון</span>
+          <span class="eyebrow">בלי להסביר, בלי לחכות על הקו</span>
           <h2 class="display">מה קרה?</h2>
-          <p class="lead">בחרו את המצב, כתבו איפה אתם — ואריק מקבל הודעה מוכנה בוואטסאפ.</p>
+          <p class="lead">שתי לחיצות: מה קרה ואיפה אתם. אריק מקבל את כל הפרטים בוואטסאפ — ואתם רק מחכים שהדלת תיפתח.</p>
           <div class="preview" aria-live="polite"><small>ההודעה שתישלח:</small><span id="msg"></span></div>
           <a class="btn btn-dark" id="sendWa" href="https://wa.me/972525585883" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>שליחה לאריק בוואטסאפ</a>
         </div>
@@ -377,31 +382,31 @@
   <section class="sec ice" id="services" aria-label="שירותים">
     <div class="wrap">
       <div class="head">
-        <h2 class="display rv"><span class="ln"><span>כל מה שקשור</span></span><span class="ln"><span>למנעול ולדלת.</span></span></h2>
-        <p class="rv">מהמקרה הדחוף בשתיים בלילה ועד התקנה מתוכננת — אותו אדם, אותה הקפדה.</p>
+        <h2 class="display rv"><span class="ln"><span>מה שנתקע,</span></span><span class="ln"><span>אריק פותח.</span></span></h2>
+        <p class="rv">מקרה דחוף באמצע הלילה או התקנה מתוכננת — אותו אדם, אותה יסודיות, ואותה הגינות שהלקוחות שלו כותבים עליה.</p>
       </div>
       <div class="svc">
-        <article class="card feat rv"><span class="n">01</span><div class="ic"><svg><use href="#i-door"/></svg></div><h3>פתיחת דלתות</h3><p>ננעלתם בחוץ או שהמנעול נתקע? אריק מגיע ופותח — גם בלילה ובשבת.</p></article>
-        <article class="card rv"><span class="n">02</span><div class="ic"><svg><use href="#i-cyl"/></svg></div><h3>החלפת צילינדרים</h3><p>צילינדר תקוע, שחוק או אחרי מעבר דירה — החלפה במקום לצילינדר חדש ומאובטח.</p></article>
-        <article class="card rv"><span class="n">03</span><div class="ic"><svg><use href="#i-key"/></svg></div><h3>החלפת מפתח למנעול</h3><p>מפתח אבד או נשבר בתוך המנעול — חילוץ, החלפה והתאמה של מפתחות חדשים.</p></article>
-        <article class="card rv"><span class="n">04</span><div class="ic"><svg><use href="#i-tool"/></svg></div><h3>התקנה ותיקון מנעולים</h3><p>התקנה, החלפה ותיקון של מנעולים לדלתות כניסה, דלתות פנים ושערים.</p></article>
-        <article class="card rv"><span class="n">05</span><div class="ic"><svg><use href="#i-safe"/></svg></div><h3>כספות</h3><p>פתיחה ותיקון של מנעולים לכספות — כשהקוד נשכח או שהמנגנון נתקע.</p></article>
-        <article class="card rv"><span class="n">06</span><div class="ic"><svg><use href="#i-bolt"/></svg></div><h3>מנעולים חשמליים</h3><p>התקנת מנעולים חשמליים ואלקטרומגנטיים לדלתות, שערים ולובאים.</p></article>
+        <article class="card feat rv"><span class="n">01</span><div class="ic"><svg><use href="#i-door"/></svg></div><h3>פתיחת דלתות</h3><p>עומדים בחוץ עם השקיות, הילדים או בלי הטלפון? שיחה אחת — ואריק בדרך לפתוח לכם, בזהירות מקסימלית על הדלת.</p></article>
+        <article class="card rv"><span class="n">02</span><div class="ic"><svg><use href="#i-cyl"/></svg></div><h3>החלפת צילינדרים</h3><p>עברתם דירה? איבדתם מפתח? צילינדר חדש זה שקט בראש. אריק מחליף במקום, באותו ביקור.</p></article>
+        <article class="card rv"><span class="n">03</span><div class="ic"><svg><use href="#i-key"/></svg></div><h3>החלפת מפתח למנעול</h3><p>מפתח שנשבר בפנים, נתקע או פשוט נעלם — אריק מחלץ, מחליף ומתאים לכם מפתחות חדשים.</p></article>
+        <article class="card rv"><span class="n">04</span><div class="ic"><svg><use href="#i-tool"/></svg></div><h3>התקנה ותיקון מנעולים</h3><p>לפני שמחליפים — בודקים אם אפשר לתקן. ואם צריך מנעול חדש, הוא מותקן כמו שצריך, בפעם הראשונה.</p></article>
+        <article class="card rv"><span class="n">05</span><div class="ic"><svg><use href="#i-safe"/></svg></div><h3>כספות</h3><p>הקוד נשכח? המנגנון נתקע? פתיחה ותיקון של מנעולי כספות — בשקט ובדיסקרטיות.</p></article>
+        <article class="card rv"><span class="n">06</span><div class="ic"><svg><use href="#i-bolt"/></svg></div><h3>מנעולים חשמליים</h3><p>שליטה מלאה בכניסה לבית, לעסק או לבניין: התקנת מנעולים חשמליים ואלקטרומגנטיים שעובדים חלק.</p></article>
       </div>
-      <p class="svc-note rv">לא מצאתם את מה שאתם צריכים? <a href="https://wa.me/972525585883" target="_blank" rel="noopener">כתבו לאריק בוואטסאפ</a>.</p>
+      <p class="svc-note rv">לא בטוחים מה צריך? <a href="https://wa.me/972525585883" target="_blank" rel="noopener">שלחו לאריק תמונה של המנעול בוואטסאפ</a> — והוא יגיד לכם.</p>
     </div>
   </section>
 
   <!-- WHY -->
   <section class="sec" aria-label="למה אריק">
     <div class="wrap">
-      <div class="head"><h2 class="display rv"><span class="ln"><span>למה</span></span><span class="ln"><span>דווקא אריק.</span></span></h2>
-        <p class="rv">מה שהלקוחות שלו כותבים שוב ושוב: אמין, יסודי, ומנסה קודם לתקן לפני שמחליף.</p></div>
+      <div class="head"><h2 class="display rv"><span class="ln"><span>כשאתם נעולים בחוץ,</span></span><span class="ln"><span>לא מהמרים.</span></span></h2>
+        <p class="rv">אתם רוצים את המנעולן שכל הלקוחות שלו ממליצים עליו. זה מה שהם כתבו — לא אנחנו.</p></div>
       <div class="why">
-        <div class="rv"><b>5.0<small> ★</small></b><span>דירוג מושלם בגוגל, מכל 8 המדרגים</span></div>
-        <div class="rv"><b>24/7</b><span>זמין בכל שעה — גם בלילה ובשבת</span></div>
-        <div class="rv"><b>8/8</b><span>כל המדרגים בגוגל נתנו חמישה כוכבים</span></div>
-        <div class="rv"><b>₪<small> חוסך</small></b><span>"התעקש להציל לי את המנעול ולחסוך לי הרבה כסף"</span></div>
+        <div class="rv"><b>5.0<small> ★</small></b><span>8 מתוך 8 — כל מי שדירג אותו בגוגל נתן חמישה כוכבים</span></div>
+        <div class="rv"><b>₪<small> נשאר אצלכם</small></b><span>"התעקש להציל לי את המנעול ולחסוך לי הרבה, הרבה כסף"</span></div>
+        <div class="rv"><b>הגון<small>.</small></b><span>"יושר והגינות שכבר כמעט לא רואים היום בבעלי מקצוע"</span></div>
+        <div class="rv"><b>יום ולילה</b><span>זמין בכל שעה בימי חול, ובשישי עד כניסת שבת. שומר שבת.</span></div>
       </div>
     </div>
   </section>
@@ -409,11 +414,11 @@
   <!-- HOW -->
   <section class="sec" id="how" aria-label="איך זה עובד" style="padding-top:0">
     <div class="wrap">
-      <div class="head"><h2 class="display rv"><span class="ln"><span>שלושה צעדים,</span></span><span class="ln"><span>ודלת פתוחה.</span></span></h2></div>
+      <div class="head"><h2 class="display rv"><span class="ln"><span>שלושה צעדים,</span></span><span class="ln"><span>ואתם בפנים.</span></span></h2></div>
       <div class="steps">
-        <div class="step rv"><b>01</b><h3>מתקשרים או כותבים</h3><p>שיחה או הודעת וואטסאפ — מה קרה ואיפה אתם. אפשר לצרף תמונה של המנעול.</p></div>
-        <div class="step rv"><b>02</b><h3>אריק מגיע</h3><p>מגיע אליכם עם הציוד — ובודק מה בדיוק הבעיה.</p></div>
-        <div class="step rv"><b>03</b><h3>פותח ומסדר</h3><p>פותח, מתקן או מחליף במקום — ואתם חוזרים הביתה.</p></div>
+        <div class="step rv"><b>01</b><h3>מתקשרים או כותבים</h3><p>מספרים מה קרה ואיפה אתם. רוצים הערכה? שולחים תמונה של המנעול בוואטסאפ.</p></div>
+        <div class="step rv"><b>02</b><h3>אריק יוצא אליכם</h3><p>עם הציוד, ישר לכתובת — חדרה, פרדס חנה, עמק חפר או מאור.</p></div>
+        <div class="step rv"><b>03</b><h3>הדלת נפתחת</h3><p>פותח, מתקן או מחליף במקום — ומסביר לכם בדיוק מה נעשה.</p></div>
       </div>
     </div>
   </section>
@@ -426,7 +431,7 @@
         <div>
           <div class="stars">★★★★★</div>
           <h2 class="display">"יושר והגינות שכבר כמעט לא רואים."</h2>
-          <p>כל הביקורות של אריק מנעולים בגוגל — חמישה כוכבים, מילה במילה.</p>
+          <p>8 לקוחות, 8 פעמים חמישה כוכבים. לא אנחנו אומרים את זה — הם. מילה במילה, מגוגל.</p>
         </div>
       </div>
     </div>
@@ -439,9 +444,10 @@
     <div class="wrap">
       <div class="head"><h2 class="display rv"><span class="ln"><span>שאלות</span></span><span class="ln"><span>שכדאי לשאול.</span></span></h2></div>
       <div class="faq">
-        <details class="rv"><summary>אתה עובד גם בלילה ובשבת?<i></i></summary><p>כן. אריק מנעולים זמין 24 שעות ביממה — פשוט מתקשרים או שולחים וואטסאפ.</p></details>
+        <details class="rv"><summary>ננעלתי בחוץ עכשיו — מה עושים?<i></i></summary><p>מתקשרים ל-052-558-5883 או שולחים וואטסאפ עם המיקום. ככה אריק יכול לצאת אליכם הכי מהר.</p></details>
+        <details class="rv"><summary>מתי אפשר להשיג את אריק?<i></i></summary><p>ביום ובלילה, בימים א׳–ה׳, ובשישי עד כניסת שבת. אריק שומר שבת — הודעות שנשלחות בשבת נענות במוצאי שבת.</p></details>
         <details class="rv"><summary>לאילו אזורים אתה מגיע?<i></i></summary><p>אריק מגיע לחדרה, לפרדס חנה-כרכור, ליישובי עמק חפר ולמושב מאור. כתבו איפה אתם — והוא יגיד לכם מיד מתי הוא יכול להגיע.</p></details>
-        <details class="rv"><summary>אפשר לתקן את המנעול במקום להחליף?<i></i></summary><p>הרבה פעמים כן. אריק בודק קודם אם אפשר להציל את המנעול — וזה חוסך כסף. אם צריך להחליף, הוא יסביר למה.</p></details>
+        <details class="rv"><summary>אפשר לתקן את המנעול במקום להחליף?<i></i></summary><p>ברוב המקרים — כן, וזה בדיוק מה שמייחד את אריק. הוא בודק קודם אם אפשר להציל את המנעול, כי זה חוסך לכם כסף. מחליף רק כשבאמת אין ברירה — ומסביר למה.</p></details>
         <details class="rv"><summary>כמה זה עולה?<i></i></summary><p>המחיר תלוי בסוג המנעול ובעבודה. שלחו תמונה של המנעול בוואטסאפ ותקבלו הערכה לפני שאריק יוצא.</p></details>
       </div>
     </div>
@@ -450,8 +456,8 @@
   <!-- FINAL CTA -->
   <section class="sec final" aria-label="יצירת קשר">
     <div class="wrap">
-      <span class="eyebrow rv">זמין עכשיו</span>
-      <h2 class="display"><span class="ln"><span>דלת נעולה?</span></span><span class="ln"><span>שיחה אחת.</span></span></h2>
+      <span class="eyebrow rv" data-status><span>זמין עכשיו</span></span>
+      <h2 class="display"><span class="ln"><span>אל תישארו</span></span><span class="ln"><span>בחוץ.</span></span></h2>
       <a class="num rv tel" href="tel:+972525585883" dir="ltr">052-558-5883</a>
       <div class="cta-row rv">
         <a class="btn btn-dark tel" href="tel:+972525585883"><svg><use href="#i-phone"/></svg>התקשרו לאריק</a>
@@ -464,7 +470,7 @@
 
 <footer>
   <div class="wrap">
-    <span>© אריק מנעולים · חדרה, פרדס חנה, עמק חפר ומאור · זמין 24 שעות · <span dir="ltr">052-558-5883</span></span>
+    <span>© אריק מנעולים · חדרה, פרדס חנה, עמק חפר ומאור · יום ולילה · שומר שבת · <span dir="ltr">052-558-5883</span></span>
     <span>עיצוב ופיתוח: <a href="../../../index.html">אריאל אילון</a></span>
   </div>
 </footer>
@@ -529,6 +535,19 @@
     }, {threshold:.12});
     targets.forEach(function(t){ io.observe(t); });
   } else { targets.forEach(function(t){ t.classList.add('in'); }); lock.classList.add('unlocked'); }
+
+  /* ---- Shabbat-aware status: Fri from 14:00 until Sat 21:00, Israel time (a safe approximation) ---- */
+  (function(){
+    var parts = new Intl.DateTimeFormat('en-US', {timeZone:'Asia/Jerusalem', weekday:'short', hour:'numeric', hour12:false}).formatToParts(new Date());
+    var day = parts.find(function(x){ return x.type === 'weekday'; }).value, hour = +parts.find(function(x){ return x.type === 'hour'; }).value % 24;
+    var shabbat = (day === 'Fri' && hour >= 14) || (day === 'Sat' && hour < 21);
+    if (!shabbat) return;
+    document.querySelectorAll('.open[data-status]').forEach(function(el){ el.classList.add('shabbat'); el.querySelector('span').textContent = 'שבת שלום · חוזר במוצ״ש'; });
+    var badge = document.querySelector('.badge-float.a [data-status]');
+    if (badge) badge.innerHTML = '<b>שבת שלום</b><br><small>חוזר לעבודה במוצ״ש</small>';
+    var eb = document.querySelector('.eyebrow[data-status] span');
+    if (eb) eb.textContent = 'שבת שלום — הודעות נענות במוצאי שבת';
+  })();
 
   /* ---- nav + mobile bar ---- */
   var nav = document.getElementById('nav'), mbar = document.getElementById('mbar'), help = document.getElementById('help');
