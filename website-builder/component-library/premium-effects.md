@@ -74,6 +74,13 @@ seaMat.onBeforeCompile = sh => {
 - **גלילה אופקית ב-RTL**: `translateX(+progress * (track.scrollWidth - innerWidth))`, חיובי ולא שלילי.
 - **Preloader**: `clip-path: inset(0 0 100% 0)` כיציאה, ורק אחריה מוסיפים `.in` לאלמנטים של ה-hero.
 
+## 7.5 פתיח עם תמונה אמיתית מעל תלת-ממד
+- ה-`.hero` מקבל רקע אטום (`var(--ink)`) ומסתיר את ה-canvas. כשגוללים, הפתיח עולה והתלת-ממד "נחשף" מתחתיו, וזה מרגיש כמו מעבר מכוון.
+- `figure.hero-photo`: במחשב `width:52%` בצד שמאל (הטקסט מימין), במובייל `width:100%`.
+- כניסה: `clip-path: inset(100% 0 0 0)` → `inset(0)` ו-`img` מ-`scale(1.16)` ל-`1.02` (2.8s). פרלקסה: `.px` זז ב-`translate3d(0, scrollY*0.22px, 0)` רק בזמן שהפתיח על המסך.
+- שכבת מעבר מעל התמונה: gradient מצד הטקסט אל הדיו, ועוד אחד למעלה כדי שהניווט יהיה קריא. במובייל gradient מלמטה (הטקסט יושב על התמונה).
+- `srcset` עם שני קבצים (900w / 1600w), `fetchpriority="high"`, `width/height` כדי שהפריסה לא תקפוץ, `og:image` עם כתובת מלאה.
+
 ## 8. מלכודות שעלו בבנייה
 - **התנגשות class**: `.solid` שימש גם לעטיפת התוכן וגם ל-`.pill.solid`, ו-`querySelector('.solid')` תפס את הכפתור. התוצאה: ה-canvas הוסתר מהסקציה השנייה. לתת לעטיפות מבניות שמות ייחודיים (`.cover`).
 - **בדיקות בסנדבוקס**: Chromium לא עובר דרך ה-proxy ל-CDN. בבדיקת Playwright מנתבים `page.route(/^https:\/\//)` שמביא את הקובץ עם `curl` ומחזיר `route.fulfill`. להרצה עם WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader`, ולחכות ~14 שניות לפני צילום.
