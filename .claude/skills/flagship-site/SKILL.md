@@ -12,6 +12,7 @@ https://arieleilon900-bit.github.io/ariel4/website-builder/clients/aven-residenc
 1. `website-builder/FLAGSHIP_RECIPE.md` — the step-by-step recipe and a map of the file (what to change where). **Follow it.**
 2. `website-builder/PREMIUM_PLAYBOOK.md` — why it sells, design pillars, copy and image prompts, QA checklist.
 3. `website-builder/component-library/premium-effects.md` — tested code patterns and pitfalls.
+4. `website-builder/ANTI_AI_RULES.md` — what makes a site read as AI-made (copy, punctuation, layout, fonts) and the pre-delivery checklist. **Every site must pass it.**
 
 ## Non-negotiables
 - Start by copying `clients/aven-residences/` to `clients/<client-slug>/`, not from a blank file.
