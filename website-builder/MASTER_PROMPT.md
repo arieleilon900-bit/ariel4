@@ -20,6 +20,9 @@
 
 כל האתרים הם דפי HTML סטטיים בודדים (HTML+CSS+JS inline בקובץ אחד), בעברית, עם `dir="rtl"`, פרוסים ב-GitHub Pages ישירות מהמאגר (workflow ב-`.github/workflows/pages.yml`, נדחף ל-`main`).
 
+## לפני כל מסירה: `ANTI_AI_RULES.md`
+כל אתר, בכל רמה, עובר את הצ׳קליסט ב-`ANTI_AI_RULES.md`: בלי מקפים ארוכים, בלי שלישיות, בלי eyebrow/01-02-03/שורת נתונים, קונספט מהעולם של העסק. הרפרנס: `clients/arik-locks/`.
+
 ## שתי רמות אתר
 - **אתר נחיתה לעסק מקומי** (ברירת המחדל, רוב התיק): התהליך שבהמשך הקובץ הזה.
 - **אתר פרימיום / Flagship** (יזמי נדל״ן, אדריכלים, מותגי יוקרה, 25,000 ₪ ומעלה): עבדו לפי `FLAGSHIP_RECIPE.md` (מתכון צעד-אחר-צעד + מפת הקובץ), ובנוסף קראו את `PREMIUM_PLAYBOOK.md` ואת `component-library/premium-effects.md`. שם תלת-ממד ותנועה הם חלק מהמוצר, לא קישוט. דוגמה חיה: `clients/aven-residences/`.
