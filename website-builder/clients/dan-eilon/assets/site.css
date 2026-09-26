@@ -176,6 +176,15 @@ p{max-width:64ch;}
 .ticket p{color:var(--ink-2);margin-bottom:18px;}
 .ticket .row{border-top:1px dashed var(--rule);margin-top:18px;padding-top:18px;display:flex;gap:12px;flex-wrap:wrap;}
 
+/* pricing table (rehearsal room hours + rates) */
+.pricing{width:100%;border-collapse:collapse;margin:20px 0 8px;}
+.pricing th,.pricing td{padding:14px 10px;text-align:center;border-bottom:1px solid var(--rule);}
+.pricing th:first-child,.pricing td:first-child{text-align:right;}
+.pricing thead th{font-family:var(--sans);font-weight:600;font-size:14px;color:var(--mute);border-bottom:1.5px solid var(--ink);}
+.pricing tbody td:first-child{font-weight:500;}
+.pricing td.num,.pricing .num{font-family:var(--mono);font-size:17px;color:var(--gold-2);}
+@media (max-width:560px){.pricing{font-size:14px;} .pricing th,.pricing td{padding:10px 6px;}}
+
 /* youtube facade */
 .yt{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--ink);cursor:pointer;border:1.5px solid var(--ink);
   box-shadow:0 16px 32px -12px rgba(24,19,14,.28);transition:transform .3s var(--ease),box-shadow .3s var(--ease);}
