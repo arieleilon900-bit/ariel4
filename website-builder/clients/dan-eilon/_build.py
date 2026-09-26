@@ -191,27 +191,32 @@ def yt_box(v):
   <figcaption>{esc(v['title'])}</figcaption>
 </div>'''
 
-HERO_STAFF = '''<svg class="hero-staff" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset-inline:0;top:38%;width:100%;height:auto;opacity:.35;z-index:0">
-  <g stroke="#c8922f" stroke-width="0.15">
-    <line x1="0" y1="4" x2="100" y2="4"/><line x1="0" y1="7" x2="100" y2="7"/><line x1="0" y1="10" x2="100" y2="10"/>
-    <line x1="0" y1="13" x2="100" y2="13"/><line x1="0" y1="16" x2="100" y2="16"/>
-  </g>
-</svg>'''
+def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה'):
+    return f'''<section class="hero-photo{" short" if short else ""}" aria-label="פתיח">
+  <picture>
+    <source media="(max-width:640px)" srcset="{r}assets/img/hero-band-sm.jpg">
+    <img src="{r}assets/img/hero-band.jpg" alt="{esc(img_alt)}" loading="eager" fetchpriority="high">
+  </picture>
+  <div class="hero-photo-scrim" aria-hidden="true"></div>
+  <div class="hero-photo-inner">
+    <div class="wrap">
+      <p class="where">{kicker}</p>
+      <h1>{h1}</h1>
+      <p class="lead">{lead}</p>
+    </div>
+  </div>
+</section>'''
 
 # ----------------------------------------------------------------- pages ---
 def home():
     r = ''
     faq = ''.join(f'<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in FAQ[:2])
     svc = ''.join(f'<a href="{s["slug"]}/"><h3>{s["name"]}</h3><p>{s["short"]}</p></a>' for s in SERVICES)
-    body = f'''<div class="wrap">
-<section class="hero" aria-label="פתיח" style="position:relative">
-  {HERO_STAFF}
-  <div style="position:relative;z-index:1">
-    <p class="where">ירושלים והסביבה · עשרים שנה בעולם המוזיקה</p>
-    <h1>שיעורי נגינה, ולהקה שממשיכה עד הבמה.</h1>
-    <p class="lead">אני דן אילון. שיעורי מוזיקה פרטיים וקורסי גיטרה דיגיטליים בכל ירושלים והסביבה, חדר חזרות בבית הכרם, ולהקת <b>פריצת דיסק</b> עם הגברה ותאורה לאירועים.</p>
-  </div>
-  <div class="fork rv" style="position:relative;z-index:1">
+    body = f'''{hero_photo(r, 'ירושלים והסביבה &middot; עשרים שנה בעולם המוזיקה',
+        'שיעורי נגינה, ולהקה שממשיכה עד הבמה.',
+        'אני דן אילון. שיעורי מוזיקה פרטיים וקורסי גיטרה דיגיטליים בכל ירושלים והסביבה, חדר חזרות בבית הכרם, ולהקת <b>פריצת דיסק</b> עם הגברה ותאורה לאירועים.')}
+<div class="wrap">
+  <div class="fork lifted rv">
     <a href="private-lessons/">
       <span class="tag">ללמוד</span>
       <h2>שיעורי מוזיקה פרטיים</h2>
@@ -227,7 +232,6 @@ def home():
     <div class="stub-l" aria-hidden="true"></div>
     <div class="stub-r" aria-hidden="true"></div>
   </div>
-</section>
 </div>
 
 <section class="sec" aria-label="שירותים">
@@ -344,12 +348,9 @@ def band():
     r = '../'
     vids = ''.join(yt_box(v) for v in VIDEOS)
     credits = ''.join(f'<li><span class="what">{esc(name)}</span><a class="where" href="{url}" target="_blank" rel="noopener">{esc(where)} ↗</a></li>' for name, where, url in CREDITS)
-    body = f'''<div class="wrap">
-<section class="sec" style="padding-top:8px" aria-label="פתיח להקה">
-  <h1 style="font-family:var(--display);font-size:clamp(36px,5vw,64px);margin-bottom:16px">פריצת דיסק</h1>
-  <p class="lead rv" style="max-width:60ch">להקת קאברים ומחווה לרוק, בניהולי. מופיעים בחתונות, בר ובת מצווה, מסיבות פרטיות וערבי מחווה לענקי הרוק: קווין, דייר סטרייטס וגאנז אנד רוזס. יש גם הרכב אקוסטי מצומצם לאירועים אינטימיים, ואפשר להזמין גם הגברה ותאורה לאירוע.</p>
-</section>
-</div>
+    body = f'''{hero_photo(r, 'פריצת דיסק &middot; להקת קאברים ומחווה לרוק',
+        'פריצת דיסק', 'מופיעים בחתונות, בר ובת מצווה, מסיבות פרטיות וערבי מחווה לענקי הרוק: קווין, דייר סטרייטס וגאנז אנד רוזס. יש גם הרכב אקוסטי מצומצם לאירועים אינטימיים, ואפשר להזמין גם הגברה ותאורה לאירוע.',
+        short=True)}
 
 <section class="sec paper2" aria-label="סרטונים">
   <div class="wrap">

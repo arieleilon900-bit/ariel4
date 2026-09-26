@@ -22,7 +22,10 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{background:var(--paper);scroll-behavior:smooth;}
-body{font-family:var(--sans);font-size:17px;line-height:1.75;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body{font-family:var(--sans);font-size:17px;line-height:1.75;color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative;}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.025;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+@media (prefers-reduced-motion: reduce){body::after{display:none;}}
 a{color:var(--gold-2);text-underline-offset:3px;}
 img{max-width:100%;display:block;}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
@@ -78,12 +81,24 @@ p{max-width:64ch;}
 .hero h1{font-size:clamp(38px,5.6vw,72px);margin-bottom:22px;max-width:18ch;}
 .hero .lead{font-size:clamp(18px,1.5vw,20px);color:var(--ink-2);margin-bottom:8px;max-width:56ch;}
 
-/* ticket fork: two halves of a torn concert ticket */
-.fork{display:grid;grid-template-columns:1fr 1fr;margin-top:clamp(30px,5vw,52px);border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;position:relative;background:var(--white);}
+/* ---------- photo hero (real band photo, home + band page) ---------- */
+.hero-photo{position:relative;min-height:clamp(440px,64vh,660px);display:flex;align-items:flex-end;overflow:hidden;background:var(--ink);}
+.hero-photo.short{min-height:clamp(320px,42vh,460px);}
+.hero-photo picture,.hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 32%;}
+.hero-photo-scrim{position:absolute;inset:0;background:linear-gradient(to top, rgba(15,11,7,.94) 0%, rgba(15,11,7,.68) 38%, rgba(15,11,7,.22) 68%, rgba(15,11,7,.4) 100%);}
+.hero-photo-inner{position:relative;z-index:1;padding:64px 0 clamp(30px,5vw,52px);width:100%;}
+.hero-photo-inner .where{font-size:15px;color:#e7d6ab;letter-spacing:.01em;margin-bottom:14px;}
+.hero-photo-inner h1{color:var(--paper);font-size:clamp(36px,5.6vw,68px);max-width:19ch;margin-bottom:18px;text-shadow:0 2px 22px rgba(0,0,0,.4);}
+.hero-photo-inner .lead{color:#f1e8d3;font-size:clamp(17px,1.4vw,19px);max-width:56ch;margin-bottom:0;}
+.hero-photo-inner .lead b{color:var(--paper);}
+
+/* ticket fork: two halves of a torn concert ticket, lifted over the photo */
+.fork{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;position:relative;background:var(--white);}
+.fork.lifted{margin-top:-58px;z-index:2;box-shadow:0 28px 56px -12px rgba(24,19,14,.32),0 2px 8px rgba(24,19,14,.08);}
 .fork::before{content:"";position:absolute;top:0;bottom:0;right:50%;width:0;border-right:2px dashed var(--rule);}
 .fork a{padding:clamp(26px,4vw,40px) clamp(20px,4vw,36px);text-decoration:none;color:var(--ink);transition:background .2s;}
 .fork a:hover{background:var(--paper-2);}
-.fork .tag{display:block;font-size:13px;color:var(--gold-2);letter-spacing:.03em;margin-bottom:8px;}
+.fork .tag{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--gold-2);letter-spacing:.04em;margin-bottom:12px;background:rgba(200,146,47,.14);padding:4px 10px;border-radius:4px;}
 .fork h2{font-size:clamp(22px,2.6vw,30px);margin-bottom:8px;}
 .fork p{color:var(--ink-2);font-size:15px;margin-bottom:14px;}
 .fork .go{font-family:var(--mono);font-size:14px;color:var(--ink);}
@@ -93,6 +108,7 @@ p{max-width:64ch;}
   .fork{grid-template-columns:1fr;}
   .fork::before{right:0;bottom:50%;top:auto;left:0;width:auto;height:0;border-right:0;border-top:2px dashed var(--rule);}
   .fork .stub-l,.fork .stub-r{display:none;}
+  .fork.lifted{margin-top:-36px;}
 }
 
 /* ---------- sections ---------- */
@@ -106,7 +122,8 @@ p{max-width:64ch;}
 
 /* backstage board: dashed rows, like a rider/schedule chalkboard */
 .board{border-top:1.5px solid var(--ink);}
-.board a,.board .row{display:grid;grid-template-columns:1fr auto;gap:4px 20px;padding:22px 0;border-bottom:1px dashed var(--rule);text-decoration:none;color:var(--ink);align-items:baseline;}
+.board a,.board .row{display:grid;grid-template-columns:1fr auto;gap:4px 20px;padding:24px 4px;border-bottom:1px dashed var(--rule);text-decoration:none;color:var(--ink);align-items:baseline;transition:background .2s,padding .2s;border-radius:4px;}
+.board a:hover{background:rgba(200,146,47,.06);padding-inline-start:14px;}
 .board a h3,.board .row h3{font-family:var(--display);font-size:24px;font-weight:400;grid-column:1;}
 .board a p,.board .row p{grid-column:1;color:var(--ink-2);font-size:15px;margin-top:4px;}
 .board a .meta,.board .row .meta{grid-row:1;grid-column:2;font-family:var(--mono);font-size:14px;color:var(--gold-2);white-space:nowrap;align-self:start;}
@@ -135,7 +152,7 @@ p{max-width:64ch;}
 .note{background:var(--paper-2);border-radius:6px;padding:18px 20px;margin:26px 0;color:var(--ink-2);}
 .note b{color:var(--ink);font-weight:600;}
 .aside{position:sticky;top:96px;display:grid;gap:14px;}
-.card-call{background:var(--ink);color:var(--white);border-radius:8px;padding:24px;}
+.card-call{background:var(--ink);color:var(--white);border-radius:8px;padding:24px;box-shadow:0 20px 36px -14px rgba(24,19,14,.35);}
 .card-call h2{color:var(--white);font-size:23px;margin-bottom:6px;}
 .card-call p{color:#d8cbad;font-size:15px;margin-bottom:16px;}
 .card-call .num{display:block;font-size:24px;color:var(--white);text-decoration:none;margin-bottom:16px;}
@@ -152,7 +169,7 @@ p{max-width:64ch;}
 .instruments{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(30px,5vw,80px);}
 
 /* ticket-stub CTA card (used on band + contact pages) */
-.ticket{border:1.5px solid var(--ink);border-radius:10px;padding:clamp(24px,4vw,40px);position:relative;background:var(--white);}
+.ticket{border:1.5px solid var(--ink);border-radius:10px;padding:clamp(24px,4vw,40px);position:relative;background:var(--white);box-shadow:0 24px 48px -16px rgba(24,19,14,.28);}
 .ticket::before,.ticket::after{content:"";position:absolute;width:22px;height:22px;background:var(--paper);border-radius:50%;top:50%;transform:translateY(-50%);}
 .ticket::before{right:-11px;} .ticket::after{left:-11px;}
 .ticket h2{font-size:clamp(24px,2.8vw,32px);margin-bottom:10px;}
@@ -160,20 +177,24 @@ p{max-width:64ch;}
 .ticket .row{border-top:1px dashed var(--rule);margin-top:18px;padding-top:18px;display:flex;gap:12px;flex-wrap:wrap;}
 
 /* youtube facade */
-.yt{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--ink);cursor:pointer;border:1.5px solid var(--ink);}
-.yt img{width:100%;height:100%;object-fit:cover;opacity:.82;}
+.yt{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--ink);cursor:pointer;border:1.5px solid var(--ink);
+  box-shadow:0 16px 32px -12px rgba(24,19,14,.28);transition:transform .3s var(--ease),box-shadow .3s var(--ease);}
+.yt:hover{transform:translateY(-3px);box-shadow:0 22px 40px -12px rgba(24,19,14,.38);}
+.yt img{width:100%;height:100%;object-fit:cover;opacity:.86;}
 .yt .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.yt .play span{width:64px;height:64px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.35);}
+.yt .play span{width:64px;height:64px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:transform .25s var(--ease);}
+.yt:hover .play span{transform:scale(1.08);}
 .yt .play svg{width:22px;height:22px;fill:var(--ink);margin-inline-start:3px;}
-.yt figcaption{position:absolute;inset-inline:0;bottom:0;padding:10px 14px;font-size:14px;color:var(--white);background:linear-gradient(to top,rgba(0,0,0,.65),transparent);}
+.yt figcaption{position:absolute;inset-inline:0;bottom:0;padding:16px 16px 14px;font-family:var(--display);font-size:18px;color:var(--white);background:linear-gradient(to top,rgba(0,0,0,.78),transparent);}
 .yt iframe{width:100%;height:100%;border:0;}
-.videos{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.videos{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
 
 /* credits list (real performance credits, instead of fabricated reviews) */
 .credits{list-style:none;border-top:1.5px solid var(--ink);}
-.credits li{padding:18px 0;border-bottom:1px dashed var(--rule);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.credits .what{color:var(--ink-2);}
-.credits .where{font-family:var(--mono);font-size:14px;color:var(--gold-2);white-space:nowrap;}
+.credits li{padding:20px 0;border-bottom:1px dashed var(--rule);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.credits .what{color:var(--ink);font-weight:500;font-size:17px;}
+.credits .where{font-family:var(--mono);font-size:13px;color:var(--gold-2);white-space:nowrap;background:rgba(200,146,47,.12);padding:6px 12px;border-radius:20px;text-decoration:none;}
+.credits .where:hover{background:rgba(200,146,47,.22);}
 
 /* faq */
 .faq details{border-bottom:1px solid var(--rule);}
