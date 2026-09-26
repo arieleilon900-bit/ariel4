@@ -91,6 +91,7 @@ p{max-width:64ch;}
 .hero-photo-inner h1{color:var(--paper);font-size:clamp(36px,5.6vw,68px);max-width:19ch;margin-bottom:18px;text-shadow:0 2px 22px rgba(0,0,0,.4);}
 .hero-photo-inner .lead{color:#f1e8d3;font-size:clamp(17px,1.4vw,19px);max-width:56ch;margin-bottom:0;}
 .hero-photo-inner .lead b{color:var(--paper);}
+.hero-photo-caption{margin-top:14px;font-size:12px;color:#c9bb99;opacity:.8;}
 
 /* ticket fork: two halves of a torn concert ticket, lifted over the photo */
 .fork{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;position:relative;background:var(--white);}

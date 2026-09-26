@@ -203,11 +203,12 @@ def yt_box(v):
   <figcaption>{esc(v['title'])}</figcaption>
 </div>'''
 
-def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה'):
+def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה', img='hero-band', caption=None):
+    cap = f'<p class="hero-photo-caption">{esc(caption)}</p>' if caption else ''
     return f'''<section class="hero-photo{" short" if short else ""}" aria-label="פתיח">
   <picture>
-    <source media="(max-width:640px)" srcset="{r}assets/img/hero-band-sm.jpg">
-    <img src="{r}assets/img/hero-band.jpg" alt="{esc(img_alt)}" loading="eager" fetchpriority="high">
+    <source media="(max-width:640px)" srcset="{r}assets/img/{img}-sm.jpg">
+    <img src="{r}assets/img/{img}.jpg" alt="{esc(img_alt)}" loading="eager" fetchpriority="high">
   </picture>
   <div class="hero-photo-scrim" aria-hidden="true"></div>
   <div class="hero-photo-inner">
@@ -215,6 +216,7 @@ def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת ד
       <p class="where">{kicker}</p>
       <h1>{h1}</h1>
       <p class="lead">{lead}</p>
+      {cap}
     </div>
   </div>
 </section>'''
@@ -279,11 +281,13 @@ def private_lessons():
     r = '../'
     inst = ''.join(f'<li>{esc(i["name"])}</li>' for i in INSTRUMENTS)
     locs = ''.join(f'<li>{esc(loc)}</li>' for loc in LOCATIONS)
-    body = f'''<div class="wrap">
+    body = f'''{hero_photo(r, 'שיעורי מוזיקה פרטיים &middot; ירושלים והסביבה', 'שיעורי מוזיקה פרטיים',
+        'פסנתר, גיטרה, תופים ופיתוח קול, עם מורים מקצועיים ונעימים שיודעים להתאים את הקצב לכל תלמיד ותלמידה.',
+        short=True, img='hero-lessons', img_alt='ידיים מנגנות אקורד על גיטרה באור חם',
+        caption='תמונת אווירה')}
+<div class="wrap">
 <div class="page">
   <article class="prose">
-    <h1>שיעורי מוזיקה פרטיים</h1>
-    <p class="lead">פסנתר, גיטרה, תופים ופיתוח קול, עם מורים מקצועיים ונעימים שיודעים להתאים את הקצב לכל תלמיד ותלמידה.</p>
     <h2>כלי הנגינה</h2>
     <ul class="picklist" style="columns:2;column-gap:30px">{inst}</ul>
     <h2>בחרו את המקום הקרוב אליכם</h2>
@@ -335,11 +339,13 @@ def studio():
     r = '../'
     equip = ''.join(f'<li>{esc(e)}</li>' for e in ROOM_EQUIPMENT)
     rows = ''.join(f'<tr><td><bdi>{esc(h)}</bdi></td><td class="num"><bdi>{esc(p1)}</bdi></td><td class="num"><bdi>{esc(p3)}</bdi></td></tr>' for h, p1, p3 in ROOM_HOURS)
-    body = f'''<div class="wrap">
+    body = f'''{hero_photo(r, 'חדר חזרות &middot; בית הכרם, ירושלים', 'חדר חזרות, בית הכרם',
+        'חדר חזרות ברמת בית הכרם, ירושלים. משמש לשיעורים, לתרגול חופשי ולחזרות של הרכבים.',
+        short=True, img='hero-studio', img_alt='מערכת תופים וגיטרות בחדר חזרות באור חם',
+        caption='תמונת אווירה')}
+<div class="wrap">
 <div class="page">
   <article class="prose">
-    <h1>חדר חזרות, בית הכרם</h1>
-    <p class="lead">חדר חזרות ברמת בית הכרם, ירושלים. משמש לשיעורים, לתרגול חופשי ולחזרות של הרכבים.</p>
     <h2>מה יש בחדר</h2>
     <ul class="picklist" style="columns:2;column-gap:30px">{equip}</ul>
     <h2>שעות פעילות ומחירים</h2>
@@ -444,11 +450,13 @@ def band():
 def equipment_rental():
     r = '../'
     equip = ''.join(f'<li>{esc(e)}</li>' for e in RENTAL_EQUIPMENT)
-    body = f'''<div class="wrap">
+    body = f'''{hero_photo(r, 'הגברה ותאורה &middot; ירושלים והסביבה', 'הגברה, תאורה והשכרת ציוד',
+        'אנחנו מספקים הגברה ותאורה לכל סוגי האירועים, בירושלים והסביבה.',
+        short=True, img='hero-equipment', img_alt='מערכת הגברה ותאורת במה זהובה',
+        caption='תמונת אווירה')}
+<div class="wrap">
 <div class="page">
   <article class="prose">
-    <h1>הגברה, תאורה והשכרת ציוד</h1>
-    <p class="lead">אנחנו מספקים הגברה ותאורה לכל סוגי האירועים, בירושלים והסביבה.</p>
     <h2>שתי דרכים לשכור</h2>
     <p><b>שכירת ציוד עצמאית:</b> אתם לוקחים את הציוד ומפעילים אותו בעצמכם.</p>
     <p><b>שירות מלא:</b> אנחנו מגיעים עם איש סאונד מקצועי שמפעיל הכל עבורכם, מהחיבור ועד סוף האירוע.</p>
