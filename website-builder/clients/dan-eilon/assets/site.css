@@ -198,6 +198,18 @@ p{max-width:64ch;}
 .yt iframe{width:100%;height:100%;border:0;}
 .videos{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
 
+/* tribute-show lineup, styled like festival badges on a poster */
+.lineup{display:flex;flex-wrap:wrap;gap:10px;}
+.lineup span{display:inline-block;border:1.5px solid var(--ink);border-radius:4px;padding:9px 16px;font-family:var(--display);font-size:16px;background:var(--white);}
+.lineup.israeli span{border-color:var(--gold-2);background:rgba(200,146,47,.08);}
+
+/* show-format cards (acoustic / upbeat / party) */
+.formats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.formats div{border:1px solid var(--rule);border-radius:8px;padding:20px;}
+.formats h3{font-size:19px;margin-bottom:6px;}
+.formats p{color:var(--ink-2);font-size:15px;}
+@media (max-width:720px){.formats{grid-template-columns:1fr;}}
+
 /* credits list (real performance credits, instead of fabricated reviews) */
 .credits{list-style:none;border-top:1.5px solid var(--ink);}
 .credits li{padding:20px 0;border-bottom:1px dashed var(--rule);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}

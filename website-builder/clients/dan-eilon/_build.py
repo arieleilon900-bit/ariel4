@@ -49,6 +49,16 @@ ROOM_HOURS = [('8:00–14:00', '40 ₪', '100 ₪'), ('14:00–20:30', '60 ₪',
 ROOM_EQUIPMENT = ['גיטרות', 'מגברים', 'מערכת תופים', 'פסנתר חשמלי', 'הגברה ומיקרופונים']
 RENTAL_EQUIPMENT = ['מערכות הגברה', 'מערכות תופים', 'מגברים לגיטרות', 'כל סוגי הגיטרות', 'פסנתרים חשמליים']
 
+TRIBUTE_ARTISTS = ['U2', 'Queen', 'Dire Straits', 'ABBA', 'The Beatles', 'Bon Jovi', 'Pink Floyd', 'Led Zeppelin',
+                    "Guns N' Roses", 'Elton John', 'Sting', 'Leonard Cohen', 'Simon & Garfunkel', 'Elvis Presley', 'Frank Sinatra']
+ISRAELI_SHOWS = ['מחווה לאסקימו לימון', 'ערב הדיוות הגדולות', 'נוסטלגיה ישראלית',
+                 'שלמה ארצי וארז איינשטיין', 'להיטים ישראליים עכשוויים', 'מחווה למשפחת בנאי']
+SHOW_FORMATS = [
+    ('אקוסטי', 'מופע מצומצם ומרגש, לאירוע אינטימי.'),
+    ('קצבי', 'מופע קצבי ומקפיץ, לרחבת ריקודים.'),
+    ('מסיבה', 'מופע המסיבה המטורף, האנרגיה הכי גבוהה.'),
+]
+
 VIDEOS = [
     dict(id='XUSqmL6BEgY', title='להקת פריצת דיסק', desc='קליפ הופעה של הלהקה.'),
     dict(id='y2GQTsdZAfU', title='פריצת דיסק, קליפ מסיבות', desc='סט מסיבות, אנרגיה גבוהה.'),
@@ -248,7 +258,7 @@ def home():
   <div class="wrap">
     <div class="bigquote rv">
       <span class="mark" aria-hidden="true">״</span>
-      <figure><blockquote>פריצת דיסק היא להקת המחווה שלי לענקי הרוק: קווין, דייר סטרייטס וגאנז אנד רוזס, לצד סט אקוסטי לאירועים אינטימיים.</blockquote><cite>דן אילון · <a href="band/">לעמוד הלהקה וסרטונים</a></cite></figure>
+      <figure><blockquote>פריצת דיסק היא הלהקה שלי לעשרים מופעי מחווה, ממופע רוק מקפיץ ועד סט אקוסטי מרגש. אפשר גם לבקש כל שיר ולבנות מופע לפי טעם.</blockquote><cite>דן אילון · <a href="band/">לעמוד הלהקה וסרטונים</a></cite></figure>
     </div>
   </div>
 </section>
@@ -300,23 +310,25 @@ def digital_guitar():
 <div class="page">
   <article class="prose">
     <h1>קורס גיטרה דיגיטלי</h1>
-    <p class="lead">לא כולם יכולים להגיע לשיעור קבוע כל שבוע. הקורס הדיגיטלי בנוי משיעורים מצולמים שלומדים לפיהם בקצב אישי, מכל מקום.</p>
+    <p class="lead">הקורס היחיד שבו אתם מקבלים פידבק אישי מגיטריסט מקצועי על הנגינה שלכם, לא רק סרטוני לימוד.</p>
+    <h2>25 שנה, אלפי תלמידים</h2>
+    <p>אני מלמד גיטרה כבר עשרים וחמש שנה, לאלפי תלמידים. הדבר הכי חשוב שלמדתי מזה הוא שפידבק ממורה מקצועי, שיכול לתקן ולהסביר בדיוק מה לשפר, שווה יותר מכל סרטון לימוד עצמו.</p>
+    <h2>איך זה עובד</h2>
+    <p>אתם מקבלים ממני סרטון קצר. אתם מתרגלים ומחזירים לי סרטון של עצמכם מנגנים את אותו הקטע. אני צופה בו, ועונה לכם בוואטסאפ עם הערות מדויקות: מה לתקן, ואיך.</p>
+    <h2>שלושים רמות, שישה סרטונים בכל רמה</h2>
+    <p>הקורס בנוי משלושים רמות. בכל רמה מקבלים שישה סרטונים מותאמים בדיוק לאיפה שאתם נמצאים, ומתקדמים משם לרמה הבאה. יש לי תלמידים שבשיטה הזו התקדמו הכי מהר מכל מי שלימדתי. עלות כל רמה: <b>99 ₪</b>.</p>
     <h2>למי זה מתאים</h2>
-    <p>למי שרוצה להתחיל לנגן לבד, למי שגר רחוק מירושלים, ולתלמידים שרוצים תרגול נוסף בין השיעורים הפרטיים שלהם.</p>
-    <h2>איך זה בנוי</h2>
-    <p>שיעורים מצולמים לפי סדר, מהאחזקה הבסיסית של הגיטרה ועד אקורדים וליווי שירים שלמים. כל שיעור אפשר לחזור עליו כמה פעמים שצריך.</p>
-    <h2>ליווי אישי, גם בדיגיטלי</h2>
-    <p>מי שנתקע או רוצה משוב יכול לשלוח שאלה או הקלטת תרגול קצרה בוואטסאפ ולקבל תשובה אישית ממני, לא רק מהסרטונים.</p>
-    <h2>שילוב עם שיעור חי</h2>
-    <p>אפשר גם וגם: קורס דיגיטלי לתרגול עצמי, לצד <a href="{r}private-lessons/">שיעור פרטי</a> קבוע. מי שרוצה רק את הקורס, גם זה אפשרי.</p>
-    <div class="note"><b>לפרטי הרשמה ומחיר:</b> שלחו הודעה בוואטסאפ, זה הכי מהיר.</div>
+    <p>לתלמידים עם משמעת עצמית, שיכולים להתאמן לפחות עשרים דקות ביום, או שעה וחצי בשבוע. בלי תרגול קבוע, גם הפידבק הכי מדויק לא עוזר.</p>
+    <div class="note"><b>לפרטי הרשמה:</b> שלחו הודעה בוואטסאפ. אפשר גם לשלב את הקורס עם <a href="{r}private-lessons/">שיעור פרטי</a> קבוע.</div>
   </article>
   {aside(r, 'digital-guitar')}
 </div>
 </div>
 {band_strip(r)}'''
-    svc_ld = {"@type": "Course", "name": "קורס גיטרה דיגיטלי", "description": "שיעורי גיטרה מצולמים ללימוד עצמי בקצב אישי, עם ליווי אישי בוואטסאפ.", "provider": {"@id": BASE + "#business"}}
-    return page('digital-guitar/index.html', 'קורס גיטרה דיגיטלי | דן אילון', 'שיעורי גיטרה מצולמים ללימוד עצמי בקצב אישי, מכל מקום, עם ליווי אישי בוואטסאפ.',
+    svc_ld = {"@type": "Course", "name": "קורס גיטרה דיגיטלי", "description": "קורס גיטרה דיגיטלי בשלושים רמות, שישה סרטונים בכל רמה, עם פידבק אישי בוואטסאפ מגיטריסט מקצועי בעל 25 שנות ניסיון.",
+              "provider": {"@id": BASE + "#business"}, "offers": {"@type": "Offer", "price": "99", "priceCurrency": "ILS"}}
+    return page('digital-guitar/index.html', 'קורס גיטרה דיגיטלי | פידבק אישי מגיטריסט מקצועי | דן אילון',
+                'קורס גיטרה דיגיטלי בשלושים רמות, שישה סרטונים בכל רמה, 99 ₪ לרמה. שולחים סרטון תרגול ומקבלים פידבק אישי בוואטסאפ מגיטריסט עם 25 שנות ניסיון.',
                 body, crumbs=[(None, 'קורסי גיטרה דיגיטליים')], current='digital-guitar/', extra_ld=[svc_ld])
 
 def studio():
@@ -352,8 +364,11 @@ def band():
     r = '../'
     vids = ''.join(yt_box(v) for v in VIDEOS)
     credits = ''.join(f'<li><span class="what">{esc(name)}</span><a class="where" href="{url}" target="_blank" rel="noopener">{esc(where)} ↗</a></li>' for name, where, url in CREDITS)
+    artists = ''.join(f'<span>{esc(a)}</span>' for a in TRIBUTE_ARTISTS)
+    israeli = ''.join(f'<span>{esc(a)}</span>' for a in ISRAELI_SHOWS)
+    formats = ''.join(f'<div><h3>{esc(name)}</h3><p>{esc(text)}</p></div>' for name, text in SHOW_FORMATS)
     body = f'''{hero_photo(r, 'פריצת דיסק &middot; להקת קאברים ומחווה לרוק',
-        'פריצת דיסק', 'מופיעים בחתונות, בר ובת מצווה, מסיבות פרטיות וערבי מחווה לענקי הרוק: קווין, דייר סטרייטס וגאנז אנד רוזס. יש גם הרכב אקוסטי מצומצם לאירועים אינטימיים, ואפשר להזמין גם הגברה ותאורה לאירוע.',
+        'פריצת דיסק', 'עשרים מופעי מחווה, מסיבה או סט אקוסטי, עם הגברה ותאורה מלאים. לא מצאתם מה שאתם מחפשים? מבקשים כל שיר, ובונים איתנו את המופע שאתם אוהבים.',
         short=True)}
 
 <section class="sec paper2" aria-label="סרטונים">
@@ -364,31 +379,57 @@ def band():
   </div>
 </section>
 
-<section class="sec" aria-label="סוגי אירועים">
+<section class="sec" aria-label="מופעי מחווה">
+  <div class="wrap">
+    <h2 class="sec-title rv">עשרים מופעי מחווה</h2>
+    <p class="sec-intro rv">הלהיטים הגדולים, על במה אחת. אפשר לבחור מופע אחד, או לשלב בין כמה מהם באותו ערב.</p>
+    <div class="lineup rv">{artists}</div>
+    <h3 style="font-family:var(--display);font-weight:400;font-size:22px;margin:32px 0 14px">חגיגה ישראלית ונוסטלגית</h3>
+    <div class="lineup israeli rv">{israeli}</div>
+  </div>
+</section>
+
+<section class="sec paper2" aria-label="פורמט המופע">
+  <div class="wrap">
+    <h2 class="sec-title rv">איזה מופע מתאים לכם</h2>
+    <div class="formats rv">{formats}</div>
+  </div>
+</section>
+
+<section class="sec" aria-label="בקשות אישיות">
+  <div class="wrap">
+    <div class="bigquote rv">
+      <span class="mark" aria-hidden="true">״</span>
+      <figure><blockquote>לא מצאתם כלום שמתאים? איתנו אפשר לבקש כל שיר שרוצים, ולהרכיב בעצמכם את המופע האהוב עליכם. יש עוד עשרות אמנים ושירים מעבר לרשימה.</blockquote><cite>דן אילון</cite></figure>
+    </div>
+  </div>
+</section>
+
+<section class="sec paper2" aria-label="סוגי אירועים">
   <div class="wrap">
     <h2 class="sec-title rv">לאיזה אירוע</h2>
     <ul class="picklist rv" style="columns:2;column-gap:40px;max-width:640px">
       <li>חתונות וקבלות פנים</li>
       <li>בר ובת מצווה</li>
       <li>מסיבות פרטיות</li>
-      <li>ערבי מחווה לרוק</li>
+      <li>ערבי מחווה</li>
       <li>סט אקוסטי לאירוע אינטימי</li>
     </ul>
   </div>
 </section>
 
-<section class="sec paper2" aria-label="קרדיטים">
+<section class="sec" aria-label="קרדיטים">
   <div class="wrap">
     <h2 class="sec-title rv">איפה כבר הופענו</h2>
     <ul class="credits rv">{credits}</ul>
   </div>
 </section>
 
-<section class="sec" aria-label="הזמנה">
+<section class="sec paper2" aria-label="הזמנה">
   <div class="wrap">
     <div class="ticket rv">
       <h2>להזמין את פריצת דיסק לאירוע</h2>
-      <p>ספרו מה סוג האירוע, מתי ואיפה, ותקבלו תשובה עם מה שאפשר להציע. אפשר להזמין גם רק הגברה ותאורה, ראו <a href="{r}equipment-rental/">עמוד הציוד</a>.</p>
+      <p>ספרו מה סוג האירוע, מתי ואיפה, ואיזה מופע מעניין אתכם (או אם אתם רוצים לבנות מופע לפי בקשה) ותקבלו תשובה עם מה שאפשר להציע. הלהקה מגיעה עם הגברה ותאורה מלאים. אפשר להזמין גם רק ציוד, ראו <a href="{r}equipment-rental/">עמוד ההגברה והתאורה</a>.</p>
       <div class="row">
         <a class="btn btn-ink" href="{WA}" target="_blank" rel="noopener">{ICON_WA}וואטסאפ</a>
         <a class="btn btn-line" href="tel:{TEL}">{ICON_PHONE}חייגו</a>
@@ -397,7 +438,7 @@ def band():
     </div>
   </div>
 </section>'''
-    return page('band/index.html', 'פריצת דיסק | להקת קאברים ומחווה לרוק | דן אילון', 'להקת פריצת דיסק בניהול דן אילון: קאברים ומחווה לקווין, דייר סטרייטס וגאנז אנד רוזס. חתונות, בר ובת מצווה, מסיבות וסט אקוסטי.',
+    return page('band/index.html', 'פריצת דיסק | עשרים מופעי מחווה | דן אילון', 'להקת פריצת דיסק בניהול דן אילון: עשרים מופעי מחווה (Queen, ABBA, The Beatles ועוד), מופע מסיבה, סט אקוסטי, או מופע לפי בקשה. חתונות, בר ובת מצווה ומסיבות, עם הגברה ותאורה מלאים.',
                 body, crumbs=[(None, 'פריצת דיסק')], current='band/')
 
 def equipment_rental():
