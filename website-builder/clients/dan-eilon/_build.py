@@ -32,11 +32,18 @@ NAV = [('studio/', 'חדר חזרות'), ('band/', 'פריצת דיסק'), ('dig
        ('about/', 'על דן'), ('contact/', 'יצירת קשר')]
 
 SERVICES = [
-    dict(slug='private-lessons', name='שיעורי מוזיקה פרטיים', short='גיטרה, תופים, פסנתר ושירה, באולפן או אצלכם בבית, בכל ירושלים והסביבה'),
-    dict(slug='digital-guitar', name='קורסי גיטרה דיגיטליים', short='שיעורים מצולמים ללימוד עצמי בקצב אישי, עם ליווי בוואטסאפ'),
-    dict(slug='studio', name='חדר חזרות', short='מערכת תופים, קלידים וגיטרות באולפן בבית הכרם, להשכרה לפי שעה'),
-    dict(slug='band', name='פריצת דיסק', short='להקת קאברים ומחווה לרוק, לחתונות, בר מצווה ואירועים'),
-    dict(slug='equipment-rental', name='הגברה, תאורה והשכרת ציוד', short='מערכות הגברה, תאורה וכלי נגינה לאירוע או להפקה'),
+    dict(slug='private-lessons', name='שיעורי מוזיקה פרטיים', short='גיטרה, תופים, פסנתר ושירה, באולפן או אצלכם בבית, בכל ירושלים והסביבה', img='hero-lessons', wide=True),
+    dict(slug='band', name='פריצת דיסק', short='להקת קאברים ומחווה לרוק, לחתונות, בר מצווה ואירועים', img='hero-band', wide=False),
+    dict(slug='digital-guitar', name='קורסי גיטרה דיגיטליים', short='שיעורים מצולמים ללימוד עצמי בקצב אישי, עם ליווי בוואטסאפ', img='hero-digital', wide=False),
+    dict(slug='studio', name='חדר חזרות', short='מערכת תופים, קלידים וגיטרות באולפן בבית הכרם, להשכרה לפי שעה', img='hero-studio', wide=False),
+    dict(slug='equipment-rental', name='הגברה, תאורה והשכרת ציוד', short='מערכות הגברה, תאורה וכלי נגינה לאירוע או להפקה', img='hero-equipment', wide=False),
+]
+
+STATS = [
+    ('20', 'שנה בעולם המוזיקה'),
+    ('21', 'מופעי מחווה ונוסטלגיה'),
+    ('8', 'שכונות לשיעורים פרטיים'),
+    ('30', 'רמות בקורס הגיטרה הדיגיטלי'),
 ]
 
 INSTRUMENTS = [
@@ -97,7 +104,7 @@ def band_ld():
             "genre": ["Rock", "Cover"], "url": BASE + "band/",
             "member": {"@type": "Person", "name": "דן אילון"}}
 
-def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None):
+def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None, has_hero=True):
     depth = path.count('/')
     r = '../' * depth
     ld = {"@context": "https://schema.org", "@graph": [business_ld(), band_ld()] + (extra_ld or [])}
@@ -106,8 +113,11 @@ def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None):
         for i, (u, n) in enumerate(crumbs, 2):
             items.append({"@type": "ListItem", "position": i, "name": n, **({"item": BASE + u} if u else {})})
         ld["@graph"].append({"@type": "BreadcrumbList", "itemListElement": items})
-        crumb_html = '<nav class="crumbs" aria-label="פירורי לחם"><a href="' + r + '">ראשי</a>' + ''.join(
-            '<span>/</span>' + (f'<a href="{r}{u}">{esc(n)}</a>' if u else f'<span aria-current="page">{esc(n)}</span>') for u, n in crumbs) + '</nav>'
+        # on hero pages the crumb trail is skipped visually (it would sit
+        # awkwardly between the fixed transparent header and the full-bleed
+        # photo) but the structured data above is still emitted for SEO.
+        crumb_html = '' if has_hero else ('<nav class="crumbs" aria-label="פירורי לחם"><a href="' + r + '">ראשי</a>' + ''.join(
+            '<span>/</span>' + (f'<a href="{r}{u}">{esc(n)}</a>' if u else f'<span aria-current="page">{esc(n)}</span>') for u, n in crumbs) + '</nav>')
     else:
         crumb_html = ''
     CUR = ' aria-current="page"'
@@ -136,7 +146,7 @@ def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None):
 <link rel="stylesheet" href="{r}assets/site.css">
 <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
 </head>
-<body>
+<body class="{'has-hero' if has_hero else 'no-hero'}">
 <a class="skip" href="#main">דלג לתוכן</a>
 <header class="hdr">
   <div class="wrap">
@@ -168,7 +178,6 @@ def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None):
   </div>
 </footer>
 <nav class="mbar" aria-label="יצירת קשר מהירה"><a href="tel:{TEL}">חייגו לדן</a><a href="{WA}" target="_blank" rel="noopener">וואטסאפ</a></nav>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 <script src="{r}assets/site.js" defer></script>
 </body>
 </html>
@@ -207,6 +216,7 @@ def yt_box(v):
 
 def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה', img='hero-band', caption=None):
     cap = f'<p class="hero-photo-caption">{esc(caption)}</p>' if caption else ''
+    cue = '' if short else '<div class="hero-scroll-cue" aria-hidden="true"><span>גללו</span><i></i></div>'
     return f'''<section class="hero-photo{" short" if short else ""}" aria-label="פתיח">
   <picture>
     <source media="(max-width:640px)" srcset="{r}assets/img/{img}-sm.jpg">
@@ -221,13 +231,19 @@ def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת ד
       {cap}
     </div>
   </div>
+  {cue}
 </section>'''
 
 # ----------------------------------------------------------------- pages ---
 def home():
     r = ''
     faq = ''.join(f'<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in FAQ[:2])
-    svc = ''.join(f'<a href="{s["slug"]}/"><h3>{s["name"]}</h3><p>{s["short"]}</p></a>' for s in SERVICES)
+    svc = ''.join(
+        f'<a class="svc-tile{" wide" if s["wide"] else ""}" href="{s["slug"]}/">'
+        f'<img src="assets/img/{s["img"]}-sm.jpg" alt="" loading="lazy">'
+        f'<div class="t"><h3>{esc(s["name"])}</h3><p>{esc(s["short"])}</p></div></a>'
+        for s in SERVICES)
+    stats = ''.join(f'<div><strong>{esc(n)}</strong><span>{esc(label)}</span></div>' for n, label in STATS)
     body = f'''{hero_photo(r, 'ירושלים והסביבה &middot; עשרים שנה בעולם המוזיקה',
         'שיעורי נגינה, ולהקה שממשיכה עד הבמה.',
         'אני דן אילון. שיעורי מוזיקה פרטיים וקורסי גיטרה דיגיטליים בכל ירושלים והסביבה, חדר חזרות בבית הכרם, ולהקת <b>פריצת דיסק</b> עם הגברה ותאורה לאירועים.')}
@@ -254,16 +270,17 @@ def home():
   <div class="wrap">
     <h2 class="sec-title rv">חמישה דברים שאני עושה</h2>
     <p class="sec-intro rv">כל שירות עם עמוד משלו. אותו מספר וואטסאפ לכולם.</p>
-    <div class="instruments board rv">{svc}</div>
+    <div class="svc-grid rv">{svc}</div>
   </div>
 </section>
 
-<section class="sec paper2" aria-label="הלהקה">
+<section class="sec dark" aria-label="הלהקה ומספרים">
   <div class="wrap">
     <div class="bigquote rv">
       <span class="mark" aria-hidden="true">״</span>
       <figure><blockquote>פריצת דיסק היא הלהקה שלי לעשרים מופעי מחווה, ממופע רוק מקפיץ ועד סט אקוסטי מרגש. אפשר גם לבקש כל שיר ולבנות מופע לפי טעם.</blockquote><cite>דן אילון · <a href="band/">לעמוד הלהקה וסרטונים</a></cite></figure>
     </div>
+    <div class="stats rv">{stats}</div>
   </div>
 </section>
 
@@ -531,7 +548,7 @@ def contact():
 </div>'''
     faq_ld = {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]}
     return page('contact/index.html', f'יצירת קשר | דן אילון | {PHONE}', f'טלפון {PHONE}, וואטסאפ, מייל ומיקום. שיעורי מוזיקה, קורס גיטרה דיגיטלי, חדר חזרות, הגברה ותאורה, ולהקת פריצת דיסק.',
-                body, crumbs=[(None, 'יצירת קשר')], current='contact/', extra_ld=[faq_ld])
+                body, crumbs=[(None, 'יצירת קשר')], current='contact/', extra_ld=[faq_ld], has_hero=False)
 
 def accessibility():
     r = '../'
@@ -557,7 +574,7 @@ def accessibility():
   {aside(r)}
 </div>
 </div>'''
-    return page('accessibility/index.html', 'הצהרת נגישות | דן אילון', 'הצהרת הנגישות של אתר דן אילון.', body, crumbs=[(None, 'הצהרת נגישות')])
+    return page('accessibility/index.html', 'הצהרת נגישות | דן אילון', 'הצהרת הנגישות של אתר דן אילון.', body, crumbs=[(None, 'הצהרת נגישות')], has_hero=False)
 
 # ----------------------------------------------------------------- write ---
 def write(path, content):
