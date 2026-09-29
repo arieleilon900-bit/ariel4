@@ -142,10 +142,11 @@ def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None):
   <div class="wrap">
     <a class="logo" href="{r}" aria-label="דן אילון, לדף הבית">{LOGO}<b>דן אילון</b></a>
     <nav class="menu" id="menu" aria-label="ניווט ראשי">{menu}</nav>
-    <button class="burger" type="button" aria-label="תפריט" aria-controls="menu" aria-expanded="false"><span></span></button>
+    <button class="burger" type="button" aria-label="תפריט" aria-controls="mobile-menu" aria-expanded="false"><span></span></button>
     <div class="hdr-call"><a class="num" href="tel:{TEL}">{PHONE}</a><a class="btn btn-ink btn-small" href="{WA}" target="_blank" rel="noopener">{ICON_WA}וואטסאפ</a></div>
   </div>
 </header>
+<nav class="mobile-menu" id="mobile-menu" aria-label="ניווט נייד">{menu}</nav>
 <main id="main">
 {('<div class="wrap">' + crumb_html + '</div>') if crumb_html else ''}
 {body}
@@ -167,6 +168,7 @@ def page(path, title, desc, body, crumbs=None, current=None, extra_ld=None):
   </div>
 </footer>
 <nav class="mbar" aria-label="יצירת קשר מהירה"><a href="tel:{TEL}">חייגו לדן</a><a href="{WA}" target="_blank" rel="noopener">וואטסאפ</a></nav>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 <script src="{r}assets/site.js" defer></script>
 </body>
 </html>
@@ -310,11 +312,13 @@ def private_lessons():
 
 def digital_guitar():
     r = '../'
-    body = f'''<div class="wrap">
+    body = f'''{hero_photo(r, 'קורס גיטרה דיגיטלי &middot; פידבק אישי', 'קורס גיטרה דיגיטלי',
+        'הקורס היחיד שבו אתם מקבלים פידבק אישי מגיטריסט מקצועי על הנגינה שלכם, לא רק סרטוני לימוד.',
+        short=True, img='hero-digital', img_alt='שולחים סרטון תרגול גיטרה מהטלפון',
+        caption='תמונת אווירה')}
+<div class="wrap">
 <div class="page">
   <article class="prose">
-    <h1>קורס גיטרה דיגיטלי</h1>
-    <p class="lead">הקורס היחיד שבו אתם מקבלים פידבק אישי מגיטריסט מקצועי על הנגינה שלכם, לא רק סרטוני לימוד.</p>
     <h2>25 שנה, אלפי תלמידים</h2>
     <p>אני מלמד גיטרה כבר עשרים וחמש שנה, לאלפי תלמידים. הדבר הכי חשוב שלמדתי מזה הוא שפידבק ממורה מקצועי, שיכול לתקן ולהסביר בדיוק מה לשפר, שווה יותר מכל סרטון לימוד עצמו.</p>
     <h2>איך זה עובד</h2>
@@ -477,11 +481,13 @@ def equipment_rental():
 
 def about():
     r = '../'
-    body = f'''<div class="wrap">
+    body = f'''{hero_photo(r, 'על דן אילון &middot; עשרים שנה בעולם המוזיקה', 'קצת עליי',
+        'אני דן אילון. עשרים שנה בעולם המוזיקה, כנגן גיטרה ובס, כמורה וכמנהל להקה.',
+        short=True, img='hero-about', img_alt='דמות מנגנת בגיטרה מוארת באור אחורי חם',
+        caption='תמונת אווירה')}
+<div class="wrap">
 <div class="page">
   <article class="prose">
-    <h1>קצת עליי</h1>
-    <p class="lead">אני דן אילון. עשרים שנה בעולם המוזיקה, כנגן גיטרה ובס, כמורה וכמנהל להקה.</p>
     <h2>איך זה מתחבר</h2>
     <p>אני מלמד נגינה, פרטני ובקורס דיגיטלי, בכל ירושלים והסביבה: גיטרה, תופים, פסנתר, פיתוח קול והדרכת הרכבים. באותו זמן אני מנהל את פריצת דיסק, ומספק הגברה, תאורה וציוד לאירועים.</p>
     <h2>מהשיעור לבמה</h2>

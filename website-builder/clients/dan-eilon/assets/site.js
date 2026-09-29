@@ -1,19 +1,31 @@
 (function(){
+  var lenis = null;
+  if (window.Lenis && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    try {
+      lenis = new window.Lenis({ duration: 1.05, easing: function(t){ return 1 - Math.pow(1 - t, 3); } });
+      function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+      requestAnimationFrame(raf);
+    } catch (e) { lenis = null; }
+  }
+
   var burger = document.querySelector('.burger');
-  var menu = document.getElementById('menu');
-  if (burger && menu) {
-    burger.addEventListener('click', function(){
-      var open = menu.classList.toggle('open');
-      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-    menu.querySelectorAll('a').forEach(function(a){
-      a.addEventListener('click', function(){ menu.classList.remove('open'); burger.setAttribute('aria-expanded', 'false'); });
+  var mobileMenu = document.getElementById('mobile-menu');
+  function setMenu(open) {
+    mobileMenu.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.style.overflow = open ? 'hidden' : '';
+    if (lenis) { open ? lenis.stop() : lenis.start(); }
+  }
+  if (burger && mobileMenu) {
+    burger.addEventListener('click', function(){ setMenu(!mobileMenu.classList.contains('open')); });
+    mobileMenu.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ setMenu(false); });
     });
   }
 
   var mbar = document.querySelector('.mbar');
   if (mbar) {
-    var hero = document.querySelector('.hero');
+    var hero = document.querySelector('.hero-photo, .hero');
     if ('IntersectionObserver' in window && hero) {
       new IntersectionObserver(function(entries){
         mbar.classList.toggle('show', !entries[0].isIntersecting);
@@ -30,6 +42,11 @@
     document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
   } else {
     document.querySelectorAll('.rv').forEach(function(el){ el.classList.add('in'); });
+  }
+
+  var heroH1 = document.querySelector('.hero-photo-inner h1');
+  if (heroH1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    requestAnimationFrame(function(){ heroH1.classList.add('reveal-in'); });
   }
 
   document.querySelectorAll('.yt').forEach(function(box){

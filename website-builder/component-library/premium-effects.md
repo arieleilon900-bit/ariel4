@@ -67,7 +67,7 @@ seaMat.onBeforeCompile = sh => {
 
 ## 7. UI שמרגיש יקר
 - **חשיפת שורות**: `.ln{overflow:hidden}` + `span{transform:translateY(105%)}`, ו-`.in` מחזיר ל-`none` עם `1.3s cubic-bezier(.22,1,.36,1)`.
-- **מילוי כפתור בהובר**: `::before` עם `transform:scaleX(0)` ו-origin שמתחלף (left→right). **לא** `translateY(101%)` + `overflow:hidden`: ב-Chrome, כשההורה עובר transform, הקליפ של border-radius נשבר ורואים חצי עיגול.
+- **מילוי כפתור בהובר**: **לא** `translateY(101%)` + `overflow:hidden` (שובר קליפ של border-radius ב-Chrome), **וגם לא** `::before` עם `position:absolute`+`z-index`+`transform:scaleX(0)`: אם תוכן הכפתור הוא טקסט גולמי בלי `<span>` עוטף (כמו `<a class="btn">{icon}וואטסאפ</a>`), ל-`z-index` אין שום השפעה על טקסט-נוד, וה-`::before` המלא מצטייר *מעל* הטקסט ומכסה אותו לגמרי ב-hover (נבדק ב-`clients/dan-eilon`, לא רק בתיאוריה). **הפתרון הבטוח**: `background-image:linear-gradient(color,color)` על הכפתור עצמו, מונפש עם `background-size` מ-0% ל-100% (לא transform, לא אלמנט נוסף). רקע (background) תמיד מצטייר מתחת לתוכן של האלמנט עצמו לפי הספסיפיקציה, בלי תלות בסדר ה-DOM או בעטיפת ה-span, ובלי לשבור קליפ של border-radius.
 - **כפתור מגנטי**: `translate((x - w/2) * .22, (y - h/2) * .3)` ב-mousemove, וחזרה עם transition ב-mouseleave.
 - **קורסור עם תווית**: טבעת שמתרחבת ל-84px עם טקסט ("בחרו") כשעוברים מעל אובייקט בחיר בתלת-ממד.
 - **Grain**: SVG `feTurbulence` כ-data URI, `opacity:.07`, `mix-blend-mode:overlay`, מונפש ב-`steps(6)`.
@@ -92,3 +92,4 @@ seaMat.onBeforeCompile = sh => {
 - **`IntersectionObserver` ו-`clip-path`:** אלמנט שמוסתר לגמרי ב-`clip-path` שלו לא נחשב כנראה, ולכן ה-reveal לא יופעל לעולם. שמים את ה-clip על ילד (ה-`img`) ומשאירים את הקופסה הנצפית בלי clip.
 - **התנגשות class**: `.solid` שימש גם לעטיפת התוכן וגם ל-`.pill.solid`, ו-`querySelector('.solid')` תפס את הכפתור. התוצאה: ה-canvas הוסתר מהסקציה השנייה. לתת לעטיפות מבניות שמות ייחודיים (`.cover`).
 - **בדיקות בסנדבוקס**: Chromium לא עובר דרך ה-proxy ל-CDN. בבדיקת Playwright מנתבים `page.route(/^https:\/\//)` שמביא את הקובץ עם `curl` ומחזיר `route.fulfill`. להרצה עם WebGL: `--use-angle=swiftshader --enable-unsafe-swiftshader`, ולחכות ~14 שניות לפני צילום.
+- **`backdrop-filter` הורס תפריט נייד `position:fixed`**: אם לכותרת (`header`) יש `backdrop-filter` (לזכוכית מטושטשת), כל צאצא שלה עם `position:fixed` מקבל את הכותרת עצמה כ-containing block במקום את ה-viewport (בדיוק כמו `transform`/`filter`/`perspective`) — תפריט נייד "מסך מלא" שגר בתוך ה-`<header>` יתכווץ לגובה הכותרת (72px) ולא יתפוס את המסך. **פתרון:** תפריט הנייד חייב DOM נפרד, אח (sibling) של `<header>`, לא צאצא שלו. **חובה לבדוק בפועל:** לחיצה אמיתית על כפתור ההמבורגר וצילום מסך של התפריט הפתוח — בדיקות גלילה/scroll בלבד לעולם לא יתפסו את הבאג הזה, כי הן לא מפעילות את הכפתור.

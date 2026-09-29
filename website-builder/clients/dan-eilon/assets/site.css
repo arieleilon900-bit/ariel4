@@ -27,6 +27,9 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;op
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
 @media (prefers-reduced-motion: reduce){body::after{display:none;}}
 a{color:var(--gold-2);text-underline-offset:3px;}
+.prose a,.card-plain a,.note a,.faq a{text-decoration:none;background-image:linear-gradient(var(--gold-2),var(--gold-2));background-repeat:no-repeat;background-position:left bottom;background-size:0% 1.5px;transition:background-size .32s var(--ease);padding-bottom:1px;}
+.prose a:hover,.card-plain a:hover,.note a:hover,.faq a:hover{background-size:100% 1.5px;}
+@media (prefers-reduced-motion: reduce){.prose a,.card-plain a,.note a,.faq a{transition:none;}}
 img{max-width:100%;display:block;}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;}
 :focus-visible{outline:2px solid var(--gold-2);outline-offset:3px;}
@@ -44,14 +47,19 @@ p{max-width:64ch;}
 @media (prefers-reduced-motion: reduce){.rv{opacity:1;transform:none;transition:none;}}
 
 /* ---------- buttons ---------- */
+/* the fill-sweep on hover is a background-image, not an overlay element: it
+   always paints behind the button's own text/icon, so there is no z-index
+   trick needed and no risk of covering a bare text node. */
 .btn{display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 22px;border-radius:4px;font-size:16px;font-weight:500;text-decoration:none;
-  transition:background .2s, color .2s, border-color .2s;white-space:nowrap;}
+  white-space:nowrap;background-repeat:no-repeat;background-position:right center;background-size:0% 100%;
+  transition:background-size .38s var(--ease),color .35s var(--ease),border-color .2s;}
 .btn svg{width:18px;height:18px;flex:none;}
-.btn-ink{background:var(--ink);color:var(--white);}
-.btn-ink:hover{background:#000;}
-.btn-line{border:1.5px solid var(--ink);color:var(--ink);background:transparent;}
-.btn-line:hover{background:var(--paper-2);}
+.btn-ink{background-color:var(--ink);background-image:linear-gradient(var(--gold),var(--gold));color:var(--white);}
+.btn-ink:hover{background-size:100% 100%;color:var(--ink);}
+.btn-line{border:1.5px solid var(--ink);color:var(--ink);background-color:transparent;background-image:linear-gradient(var(--ink),var(--ink));}
+.btn-line:hover{background-size:100% 100%;color:var(--white);}
 .btn-small{height:42px;padding:0 16px;font-size:15px;}
+@media (prefers-reduced-motion: reduce){.btn{transition:color .1s,border-color .1s;}}
 
 /* ---------- header ---------- */
 .hdr{position:sticky;top:0;z-index:40;background:rgba(246,240,227,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule);}
@@ -89,6 +97,8 @@ p{max-width:64ch;}
 .hero-photo-inner{position:relative;z-index:1;padding:64px 0 clamp(30px,5vw,52px);width:100%;}
 .hero-photo-inner .where{font-size:15px;color:#e7d6ab;letter-spacing:.01em;margin-bottom:14px;}
 .hero-photo-inner h1{color:var(--paper);font-size:clamp(36px,5.6vw,68px);max-width:19ch;margin-bottom:18px;text-shadow:0 2px 22px rgba(0,0,0,.4);}
+.hero-photo-inner h1:not(.reveal-in){clip-path:inset(0 0 0 100%);opacity:0;}
+.hero-photo-inner h1.reveal-in{clip-path:inset(0 0 0 0);opacity:1;transition:clip-path 1s var(--ease) .1s,opacity .4s ease .1s;}
 .hero-photo-inner .lead{color:#f1e8d3;font-size:clamp(17px,1.4vw,19px);max-width:56ch;margin-bottom:0;}
 .hero-photo-inner .lead b{color:var(--paper);}
 .hero-photo-caption{margin-top:14px;font-size:12px;color:#c9bb99;opacity:.8;}
@@ -257,13 +267,19 @@ p{max-width:64ch;}
 /* mobile call bar */
 .mbar{display:none;}
 
+/* the mobile nav lives outside <header> on purpose: .hdr has backdrop-filter,
+   which (per spec) makes it a containing block for any position:fixed
+   descendant, so a fixed full-screen overlay nested inside it gets sized
+   against the 72px header bar instead of the viewport. Keeping it a sibling
+   of <header> avoids that trap entirely. */
+.mobile-menu{display:none;}
 @media (max-width: 960px){
   .menu, .hdr-call .num{display:none;}
   .burger{display:inline-flex;}
   .hdr .wrap{gap:12px;}
   .hdr-call{margin-inline-start:0;}
-  .menu.open{display:flex;flex-direction:column;position:fixed;inset:72px 0 0 0;background:var(--paper);padding:24px var(--gut);gap:0;margin:0;overflow:auto;}
-  .menu.open a{font-family:var(--display);font-size:24px;color:var(--ink);padding:14px 0;border-bottom:1px solid var(--rule);}
+  .mobile-menu.open{display:flex;flex-direction:column;position:fixed;top:72px;right:0;bottom:0;left:0;background:var(--paper);padding:24px var(--gut);gap:0;margin:0;overflow:auto;z-index:39;}
+  .mobile-menu.open a{font-family:var(--display);font-size:24px;color:var(--ink);padding:14px 0;border-bottom:1px solid var(--rule);}
   .page,.split{grid-template-columns:1fr;}
   .instruments{grid-template-columns:1fr;}
   .videos{grid-template-columns:1fr;}
