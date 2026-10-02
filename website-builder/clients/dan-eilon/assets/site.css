@@ -1,6 +1,6 @@
 /* דן אילון — design system
-   שיעורי נגינה + להקת הופעות, בית הכרם, ירושלים. הקונספט החוזר: כרטיס
-   הופעה שנקרע לשניים, קו ניקוב מקווקו שמפריד בין "ללמוד" ל"להופיע".
+   שיעורי נגינה + להקת הופעות, בית הכרם, ירושלים. פתיח בגובה מסך מלא עם
+   תמונה אמיתית/אווירה בכל עמוד, ורשת תמונות לחמשת השירותים בעמוד הבית.
    פלטה: דיו חם + נייר קרם + זהב זרקור אחד. גופן תצוגה: Suez One (אופי
    פוסטר מוזיקלי), גוף: IBM Plex Sans Hebrew, מספרים: IBM Plex Mono. */
 :root{
@@ -107,7 +107,7 @@ body.no-hero{padding-top:72px;}
 .hero-photo.short{height:74vh;height:74dvh;min-height:560px;}
 .hero-photo picture,.hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 32%;}
 .hero-photo-scrim{position:absolute;inset:0;background:linear-gradient(to top, rgba(15,11,7,.96) 0%, rgba(15,11,7,.72) 32%, rgba(15,11,7,.2) 62%, rgba(15,11,7,.45) 100%);}
-.hero-photo-inner{position:relative;z-index:1;padding:64px 0 clamp(64px,10vh,120px);width:100%;}
+.hero-photo-inner{position:relative;z-index:1;padding:64px 0 clamp(140px,16vh,190px);width:100%;}
 .hero-photo-inner .where{font-family:var(--mono);font-size:13px;color:var(--gold);letter-spacing:.08em;margin-bottom:20px;}
 .hero-photo-inner h1{color:var(--paper);font-size:clamp(52px,9.5vw,132px);line-height:.98;letter-spacing:-.01em;max-width:14ch;margin-bottom:26px;text-shadow:0 4px 32px rgba(0,0,0,.45);}
 .hero-photo.short .hero-photo-inner h1{font-size:clamp(44px,7.5vw,96px);}
@@ -124,33 +124,11 @@ body.no-hero{padding-top:72px;}
 @media (prefers-reduced-motion: reduce){.hero-scroll-cue i::after{animation:none;top:40%;}}
 @media (max-width:720px){.hero-scroll-cue{display:none;}}
 
-/* ticket fork: two halves of a torn concert ticket, lifted over the photo */
-.fork{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;position:relative;background:var(--white);}
-.fork.lifted{margin-top:-58px;z-index:2;box-shadow:0 28px 56px -12px rgba(24,19,14,.32),0 2px 8px rgba(24,19,14,.08);}
-.fork::before{content:"";position:absolute;top:0;bottom:0;right:50%;width:0;border-right:2px dashed var(--rule);}
-.fork a{padding:clamp(26px,4vw,40px) clamp(20px,4vw,36px);text-decoration:none;color:var(--ink);transition:background .2s;}
-.fork a:hover{background:var(--paper-2);}
-.fork .tag{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--gold-2);letter-spacing:.04em;margin-bottom:12px;background:rgba(200,146,47,.14);padding:4px 10px;border-radius:4px;}
-.fork h2{font-size:clamp(22px,2.6vw,30px);margin-bottom:8px;}
-.fork p{color:var(--ink-2);font-size:15px;margin-bottom:14px;}
-.fork .go{font-family:var(--mono);font-size:14px;color:var(--ink);}
-.fork .stub-l{width:14px;height:28px;background:var(--paper);border-radius:0 14px 14px 0;position:absolute;right:calc(50% - 7px);top:50%;transform:translateY(-50%) translateX(50%);border:1.5px solid var(--ink);border-inline-start:0;}
-.fork .stub-r{width:14px;height:28px;background:var(--paper);border-radius:14px 0 0 14px;position:absolute;right:calc(50% - 7px);bottom:24px;transform:translateX(-50%);border:1.5px solid var(--ink);border-inline-end:0;}
-@media (max-width:720px){
-  .fork{grid-template-columns:1fr;}
-  .fork::before{right:0;bottom:50%;top:auto;left:0;width:auto;height:0;border-right:0;border-top:2px dashed var(--rule);}
-  .fork .stub-l,.fork .stub-r{display:none;}
-  .fork.lifted{margin-top:-36px;}
-}
-
 /* ---------- sections ---------- */
 .sec{padding:clamp(56px,9vh,104px) 0;}
-.sec.dark{background:var(--ink);color:var(--paper);}
-.sec.dark h2,.sec.dark h1{color:var(--paper);}
 .sec.paper2{background:var(--paper-2);}
 .sec-title{font-size:clamp(30px,3.8vw,50px);margin-bottom:14px;}
 .sec-intro{color:var(--ink-2);font-size:18px;margin-bottom:36px;max-width:60ch;}
-.sec.dark .sec-intro{color:#d8cbad;}
 
 /* backstage board: dashed rows, like a rider/schedule chalkboard */
 .board{border-top:1.5px solid var(--ink);}
@@ -172,15 +150,6 @@ body.no-hero{padding-top:72px;}
 .bigquote .mark{font-family:var(--display);font-size:clamp(110px,13vw,180px);line-height:.6;color:var(--gold);}
 .bigquote blockquote{font-family:var(--display);font-weight:400;font-size:clamp(24px,2.8vw,36px);line-height:1.35;max-width:32ch;}
 .bigquote cite{display:block;margin-top:18px;font-style:normal;font-size:15px;color:var(--mute);}
-.sec.dark .bigquote cite{color:#c2b393;}
-.sec.dark .bigquote cite a{color:var(--gold);}
-
-/* stat band: full-bleed dark, giant numbers */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(24px,4vw,40px);border-top:1px solid #3a3121;padding-top:clamp(40px,6vw,56px);margin-top:clamp(40px,6vw,56px);}
-.stats div{text-align:center;}
-.stats strong{display:block;font-family:var(--display);font-size:clamp(44px,6vw,80px);color:var(--gold);line-height:1;}
-.stats span{display:block;margin-top:10px;font-size:14px;color:#d8cbad;}
-@media (max-width:720px){.stats{grid-template-columns:1fr 1fr;row-gap:32px;}}
 
 /* image-tile service grid (home page) */
 .svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
@@ -218,9 +187,6 @@ body.no-hero{padding-top:72px;}
 .card-plain ul{list-style:none;}
 .card-plain li{padding:5px 0;border-bottom:1px solid var(--paper-2);}
 .card-plain li:last-child{border:0;}
-
-/* instrument grid on lessons index */
-.instruments{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(30px,5vw,80px);}
 
 /* ticket-stub CTA card (used on band + contact pages) */
 .ticket{border:1.5px solid var(--ink);border-radius:10px;padding:clamp(24px,4vw,40px);position:relative;background:var(--white);box-shadow:0 24px 48px -16px rgba(24,19,14,.28);}
@@ -324,7 +290,6 @@ body.no-hero{padding-top:72px;}
   .mobile-menu.open{display:flex;flex-direction:column;position:fixed;top:72px;right:0;bottom:0;left:0;background:var(--paper);padding:24px var(--gut);gap:0;margin:0;overflow:auto;z-index:39;}
   .mobile-menu.open a{font-family:var(--display);font-size:24px;color:var(--ink);padding:14px 0;border-bottom:1px solid var(--rule);}
   .page,.split{grid-template-columns:1fr;}
-  .instruments{grid-template-columns:1fr;}
   .videos{grid-template-columns:1fr;}
   .aside{position:static;}
   .ftr .cols{grid-template-columns:1fr 1fr;}

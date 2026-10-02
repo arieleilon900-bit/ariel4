@@ -39,13 +39,6 @@ SERVICES = [
     dict(slug='equipment-rental', name='הגברה, תאורה והשכרת ציוד', short='מערכות הגברה, תאורה וכלי נגינה לאירוע או להפקה', img='hero-equipment', wide=False),
 ]
 
-STATS = [
-    ('20', 'שנה בעולם המוזיקה'),
-    ('21', 'מופעי מחווה ונוסטלגיה'),
-    ('8', 'שכונות לשיעורים פרטיים'),
-    ('30', 'רמות בקורס הגיטרה הדיגיטלי'),
-]
-
 INSTRUMENTS = [
     dict(name='פסנתר'), dict(name='גיטרה'), dict(name='תופים'), dict(name='פיתוח קול'),
 ]
@@ -217,6 +210,8 @@ def yt_box(v):
 def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה', img='hero-band', caption=None):
     cap = f'<p class="hero-photo-caption">{esc(caption)}</p>' if caption else ''
     cue = '' if short else '<div class="hero-scroll-cue" aria-hidden="true"><span>גללו</span><i></i></div>'
+    where = f'<p class="where">{kicker}</p>' if kicker else ''
+    leadp = f'<p class="lead">{lead}</p>' if lead else ''
     return f'''<section class="hero-photo{" short" if short else ""}" aria-label="פתיח">
   <picture>
     <source media="(max-width:640px)" srcset="{r}assets/img/{img}-sm.jpg">
@@ -225,9 +220,9 @@ def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת ד
   <div class="hero-photo-scrim" aria-hidden="true"></div>
   <div class="hero-photo-inner">
     <div class="wrap">
-      <p class="where">{kicker}</p>
+      {where}
       <h1>{h1}</h1>
-      <p class="lead">{lead}</p>
+      {leadp}
       {cap}
     </div>
   </div>
@@ -243,48 +238,14 @@ def home():
         f'<img src="assets/img/{s["img"]}-sm.jpg" alt="" loading="lazy">'
         f'<div class="t"><h3>{esc(s["name"])}</h3><p>{esc(s["short"])}</p></div></a>'
         for s in SERVICES)
-    stats = ''.join(f'<div><strong>{esc(n)}</strong><span>{esc(label)}</span></div>' for n, label in STATS)
-    body = f'''{hero_photo(r, 'ירושלים והסביבה &middot; עשרים שנה בעולם המוזיקה',
-        'שיעורי נגינה, ולהקה שממשיכה עד הבמה.',
-        'אני דן אילון. שיעורי מוזיקה פרטיים וקורסי גיטרה דיגיטליים בכל ירושלים והסביבה, חדר חזרות בבית הכרם, ולהקת <b>פריצת דיסק</b> עם הגברה ותאורה לאירועים.')}
-<div class="wrap">
-  <div class="fork lifted rv">
-    <a href="private-lessons/">
-      <span class="tag">ללמוד</span>
-      <h2>שיעורי מוזיקה פרטיים</h2>
-      <p>גיטרה, תופים, פסנתר, שירה והדרכת הרכבים. באולפן או אצלכם בבית, בכל ירושלים והסביבה.</p>
-      <span class="go">לפרטים ←</span>
-    </a>
-    <a href="band/">
-      <span class="tag">להזמין</span>
-      <h2>פריצת דיסק</h2>
-      <p>להקת קאברים ומחווה לרוק לחתונות, בר ובת מצווה ואירועים, כולל הגברה ותאורה.</p>
-      <span class="go">לפרטי הלהקה ←</span>
-    </a>
-    <div class="stub-l" aria-hidden="true"></div>
-    <div class="stub-r" aria-hidden="true"></div>
-  </div>
-</div>
-
+    body = f'''{hero_photo(r, None, 'פשוט לעשות מוזיקה', None)}
 <section class="sec" aria-label="שירותים">
   <div class="wrap">
-    <h2 class="sec-title rv">חמישה דברים שאני עושה</h2>
-    <p class="sec-intro rv">כל שירות עם עמוד משלו. אותו מספר וואטסאפ לכולם.</p>
     <div class="svc-grid rv">{svc}</div>
   </div>
 </section>
 
-<section class="sec dark" aria-label="הלהקה ומספרים">
-  <div class="wrap">
-    <div class="bigquote rv">
-      <span class="mark" aria-hidden="true">״</span>
-      <figure><blockquote>פריצת דיסק היא הלהקה שלי לעשרים מופעי מחווה, ממופע רוק מקפיץ ועד סט אקוסטי מרגש. אפשר גם לבקש כל שיר ולבנות מופע לפי טעם.</blockquote><cite>דן אילון · <a href="band/">לעמוד הלהקה וסרטונים</a></cite></figure>
-    </div>
-    <div class="stats rv">{stats}</div>
-  </div>
-</section>
-
-<section class="sec" aria-label="שאלות" style="padding-top:36px">
+<section class="sec paper2" aria-label="שאלות" style="padding-top:36px">
   <div class="wrap faq rv">
     <h2 class="sec-title" style="font-size:32px">שאלות שחוזרות</h2>
     {faq}
