@@ -1,9 +1,15 @@
 (function(){
   var hdr = document.querySelector('.hdr');
   if (hdr) {
-    var setScrolled = function(){ hdr.classList.toggle('scrolled', window.scrollY > 40); };
+    var ticking = false;
+    var setScrolled = function(){
+      hdr.classList.toggle('scrolled', window.scrollY > 40);
+      ticking = false;
+    };
     setScrolled();
-    window.addEventListener('scroll', setScrolled, { passive: true });
+    window.addEventListener('scroll', function(){
+      if (!ticking) { ticking = true; requestAnimationFrame(setScrolled); }
+    }, { passive: true });
   }
 
   var burger = document.querySelector('.burger');

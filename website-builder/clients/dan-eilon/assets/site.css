@@ -67,7 +67,11 @@ p{max-width:64ch;}
    without a photo hero the "no-hero" class on <body> keeps it solid from
    the start, since there is nothing dark to sit on top of. */
 .hdr{position:fixed;top:0;inset-inline:0;z-index:40;background:transparent;border-bottom:1px solid transparent;transition:background .3s var(--ease),border-color .3s var(--ease);}
-.hdr.scrolled,body.no-hero .hdr{background:rgba(246,240,227,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule);}
+/* solid, not blurred: backdrop-filter on a fixed header repaints every
+   scroll frame as the page moves underneath it, which is what made
+   scrolling feel janky on phones. A flat near-opaque color looks almost
+   identical and costs nothing during scroll. */
+.hdr.scrolled,body.no-hero .hdr{background:rgba(246,240,227,.98);border-bottom:1px solid var(--rule);}
 .hdr .wrap{display:flex;align-items:center;gap:18px;height:72px;}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--paper);transition:color .3s var(--ease);}
 .hdr.scrolled .logo,body.no-hero .logo{color:var(--ink);}
@@ -276,11 +280,11 @@ body.no-hero{padding-top:72px;}
 /* mobile call bar */
 .mbar{display:none;}
 
-/* the mobile nav lives outside <header> on purpose: .hdr has backdrop-filter,
-   which (per spec) makes it a containing block for any position:fixed
-   descendant, so a fixed full-screen overlay nested inside it gets sized
-   against the 72px header bar instead of the viewport. Keeping it a sibling
-   of <header> avoids that trap entirely. */
+/* the mobile nav lives outside <header> on purpose: any filter/transform
+   on .hdr would (per spec) make it a containing block for a position:fixed
+   descendant, so a fixed full-screen overlay nested inside it would size
+   itself against the 72px header bar instead of the viewport. Keeping it a
+   sibling of <header> avoids that trap even if .hdr gains one later. */
 .mobile-menu{display:none;}
 @media (max-width: 960px){
   .menu, .hdr-call .num{display:none;}
