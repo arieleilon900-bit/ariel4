@@ -53,24 +53,11 @@ TRIBUTE_ARTISTS = ['U2', 'Queen', 'Dire Straits', 'ABBA', 'The Beatles', 'Bon Jo
                     "Guns N' Roses", 'Elton John', 'Sting', 'Leonard Cohen', 'Simon & Garfunkel', 'Elvis Presley', 'Frank Sinatra']
 ISRAELI_SHOWS = ['מחווה לאסקימו לימון', 'ערב הדיוות הגדולות', 'נוסטלגיה ישראלית',
                  'שלמה ארצי וארז איינשטיין', 'להיטים ישראליים עכשוויים', 'מחווה למשפחת בנאי']
-SHOW_FORMATS = [
-    ('אקוסטי', 'מופע מצומצם ומרגש, לאירוע אינטימי.'),
-    ('קצבי', 'מופע קצבי ומקפיץ, לרחבת ריקודים.'),
-    ('מסיבה', 'מופע המסיבה המטורף, האנרגיה הכי גבוהה.'),
-]
 
 VIDEOS = [
     dict(id='XUSqmL6BEgY', title='להקת פריצת דיסק', desc='קליפ הופעה של הלהקה.'),
     dict(id='y2GQTsdZAfU', title='פריצת דיסק, קליפ מסיבות', desc='סט מסיבות, אנרגיה גבוהה.'),
     dict(id='Jga5UCIiITw', title='Get Back, סט אקוסטי ביקב נבו', desc='ההרכב האקוסטי המצומצם, מופע חי ביקב נבו.'),
-]
-
-CREDITS = [
-    ('מופע מחווה לקווין', 'היכל התרבות, מעלה אדומים', 'https://www.facebook.com/pritzatdisc/'),
-    ('ערב מחווה לקווין, דייר סטרייטס וגאנז אנד רוזס', 'הופעה חיה', 'https://modiinapp.com/en/page/5732/queen-dire-straits-guns-roses-tribute-night-with-pritzat-disc-live-at'),
-    ('הופעה במועדון Volume', 'מעלה אדומים', 'https://www.instagram.com/pritzat_disc_band/'),
-    ('סט אקוסטי, Get Back', 'יקב נבו', 'https://www.youtube.com/watch?v=Jga5UCIiITw'),
-    ('רישום קונצרטים ואירועים', 'כיכר המוזיקה', 'https://kikar-hamusica.com/shows/he/event/%D7%A4%D7%A8%D7%99%D7%A6%D7%AA-%D7%93%D7%99%D7%A1%D7%A7/'),
 ]
 
 FAQ = [
@@ -207,7 +194,7 @@ def yt_box(v):
   <figcaption>{esc(v['title'])}</figcaption>
 </div>'''
 
-def hero_photo(r, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה', img='hero-band', caption=None, price_badge=None):
+def hero_photo(r, h1, lead, short=False, img_alt='ידיים מנגנות גיטרה חשמלית באור במה זהוב', img='hero-band', caption=None, price_badge=None):
     cap = f'<p class="hero-photo-caption">{esc(caption)}</p>' if caption else ''
     cue = '' if short else '<div class="hero-scroll-cue" aria-hidden="true"><span>גללו</span><i></i></div>'
     leadp = f'<p class="lead">{lead}</p>' if lead else ''
@@ -241,7 +228,7 @@ def home():
         f'<img src="assets/img/{s["img"]}-sm.jpg" alt="" loading="lazy">'
         f'<div class="t"><h3>{esc(s["name"])}</h3><p>{esc(s["short"])}</p></div></a>'
         for s in SERVICES)
-    body = f'''{hero_photo(r, 'פשוט לעשות מוזיקה', None)}
+    body = f'''{hero_photo(r, 'פשוט לעשות מוזיקה', None, caption='תמונת אווירה')}
 <section class="sec" aria-label="שירותים">
   <div class="wrap">
     <div class="svc-grid rv">{svc}</div>
@@ -360,13 +347,12 @@ def studio():
 def band():
     r = '../'
     vids = ''.join(yt_box(v) for v in VIDEOS)
-    credits = ''.join(f'<li><span class="what">{esc(name)}</span><a class="where" href="{url}" target="_blank" rel="noopener">{esc(where)} ↗</a></li>' for name, where, url in CREDITS)
     artists = ''.join(f'<span>{esc(a)}</span>' for a in TRIBUTE_ARTISTS)
     israeli = ''.join(f'<span>{esc(a)}</span>' for a in ISRAELI_SHOWS)
-    formats = ''.join(f'<div><h3>{esc(name)}</h3><p>{esc(text)}</p></div>' for name, text in SHOW_FORMATS)
     body = f'''{hero_photo(r,
-        'פריצת דיסק', 'עשרים מופעי מחווה, מסיבה או סט אקוסטי, עם הגברה ותאורה מלאים. לא מצאתם מה שאתם מחפשים? מבקשים כל שיר, ובונים איתנו את המופע שאתם אוהבים.',
-        short=True)}
+        'להקת פריצת דיסק',
+        'להקת פריצת דיסק היא אחת מלהקות הקאברים המובילות בארץ. ללהקה רפרטואר שירים עשיר ומבחר של מופעים שמותאמים לכל אירוע. הלהקה מתמחה במופעי מחווה ייחודיים לענקי הרוק, ובמסיבות ריקודים סוחפות לחתונות ואירועים נוספים, המשלבת להיטים ישנים וחדשים. ללהקה יש גם מופע אקוסטי מרגש, המתאים לאירועים שקטים יותר.',
+        short=True, caption='תמונת אווירה')}
 
 <section class="sec paper2" aria-label="סרטונים">
   <div class="wrap">
@@ -378,7 +364,7 @@ def band():
 
 <section class="sec" aria-label="מופעי מחווה">
   <div class="wrap">
-    <h2 class="sec-title rv">עשרים מופעי מחווה</h2>
+    <h2 class="sec-title rv">25 מופעי מחווה</h2>
     <p class="sec-intro rv">הלהיטים הגדולים, על במה אחת. אפשר לבחור מופע אחד, או לשלב בין כמה מהם באותו ערב.</p>
     <div class="lineup rv">{artists}</div>
     <h3 style="font-family:var(--display);font-weight:400;font-size:22px;margin:32px 0 14px">חגיגה ישראלית ונוסטלגית</h3>
@@ -386,14 +372,7 @@ def band():
   </div>
 </section>
 
-<section class="sec paper2" aria-label="פורמט המופע">
-  <div class="wrap">
-    <h2 class="sec-title rv">איזה מופע מתאים לכם</h2>
-    <div class="formats rv">{formats}</div>
-  </div>
-</section>
-
-<section class="sec" aria-label="בקשות אישיות">
+<section class="sec paper2" aria-label="בקשות אישיות">
   <div class="wrap">
     <div class="bigquote rv">
       <span class="mark" aria-hidden="true">״</span>
@@ -402,7 +381,7 @@ def band():
   </div>
 </section>
 
-<section class="sec paper2" aria-label="סוגי אירועים">
+<section class="sec" aria-label="סוגי אירועים">
   <div class="wrap">
     <h2 class="sec-title rv">לאיזה אירוע</h2>
     <ul class="picklist rv" style="columns:2;column-gap:40px;max-width:640px">
@@ -412,13 +391,6 @@ def band():
       <li>ערבי מחווה</li>
       <li>סט אקוסטי לאירוע אינטימי</li>
     </ul>
-  </div>
-</section>
-
-<section class="sec" aria-label="קרדיטים">
-  <div class="wrap">
-    <h2 class="sec-title rv">איפה כבר הופענו</h2>
-    <ul class="credits rv">{credits}</ul>
   </div>
 </section>
 
@@ -435,7 +407,7 @@ def band():
     </div>
   </div>
 </section>'''
-    return page('band/index.html', 'פריצת דיסק | עשרים מופעי מחווה | דן אילון', 'להקת פריצת דיסק בניהול דן אילון: עשרים מופעי מחווה (Queen, ABBA, The Beatles ועוד), מופע מסיבה, סט אקוסטי, או מופע לפי בקשה. חתונות, בר ובת מצווה ומסיבות, עם הגברה ותאורה מלאים.',
+    return page('band/index.html', 'להקת פריצת דיסק | 25 מופעי מחווה | דן אילון', 'להקת פריצת דיסק בניהול דן אילון: 25 מופעי מחווה (Queen, ABBA, The Beatles ועוד), מופע מסיבה, סט אקוסטי, או מופע לפי בקשה. חתונות, בר ובת מצווה ומסיבות, עם הגברה ותאורה מלאים.',
                 body, crumbs=[(None, 'פריצת דיסק')], current='band/')
 
 def equipment_rental():

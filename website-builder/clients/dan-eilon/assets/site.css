@@ -236,20 +236,6 @@ body.no-hero{padding-top:72px;}
 .lineup span{display:inline-block;border:1.5px solid var(--ink);border-radius:4px;padding:9px 16px;font-family:var(--display);font-size:16px;background:var(--white);}
 .lineup.israeli span{border-color:var(--gold-2);background:rgba(200,146,47,.08);}
 
-/* show-format cards (acoustic / upbeat / party) */
-.formats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.formats div{border:1px solid var(--rule);border-radius:8px;padding:20px;}
-.formats h3{font-size:19px;margin-bottom:6px;}
-.formats p{color:var(--ink-2);font-size:15px;}
-@media (max-width:720px){.formats{grid-template-columns:1fr;}}
-
-/* credits list (real performance credits, instead of fabricated reviews) */
-.credits{list-style:none;border-top:1.5px solid var(--ink);}
-.credits li{padding:20px 0;border-bottom:1px dashed var(--rule);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
-.credits .what{color:var(--ink);font-weight:500;font-size:17px;}
-.credits .where{font-family:var(--mono);font-size:13px;color:var(--gold-2);white-space:nowrap;background:rgba(200,146,47,.12);padding:6px 12px;border-radius:20px;text-decoration:none;}
-.credits .where:hover{background:rgba(200,146,47,.22);}
-
 /* faq */
 .faq details{border-bottom:1px solid var(--rule);}
 .faq details:first-of-type{border-top:1.5px solid var(--ink);}
@@ -316,7 +302,6 @@ body.no-hero{padding-top:72px;}
   .ftr .cols{grid-template-columns:1fr;}
   .bigquote{grid-template-columns:1fr;}
   .bigquote .mark{line-height:.4;}
-  .credits li{flex-direction:column;gap:4px;}
 }
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto;}
