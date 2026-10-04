@@ -185,10 +185,10 @@ def call_card(kicker='שאלה על שיעור, על הלהקה או על ציו
   <a class="btn btn-line" href="tel:{TEL}">{ICON_PHONE}חייגו</a>
 </div>'''
 
-def aside(r, current_slug=None, kicker=None):
+def aside(r, current_slug=None):
     others = ''.join(f'<li><a href="{r}{s["slug"]}/">{s["name"]}</a></li>' for s in SERVICES if s['slug'] != current_slug)
     return f'''<aside class="aside">
-  {call_card(kicker) if kicker else call_card()}
+  {call_card()}
   <div class="card-plain"><h3>עוד שירותים</h3><ul>{others}</ul></div>
 </aside>'''
 
@@ -207,20 +207,23 @@ def yt_box(v):
   <figcaption>{esc(v['title'])}</figcaption>
 </div>'''
 
-def hero_photo(r, kicker, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה', img='hero-band', caption=None):
+def hero_photo(r, h1, lead, short=False, img_alt='להקת פריצת דיסק מופיעה בלילה', img='hero-band', caption=None, price_badge=None):
     cap = f'<p class="hero-photo-caption">{esc(caption)}</p>' if caption else ''
     cue = '' if short else '<div class="hero-scroll-cue" aria-hidden="true"><span>גללו</span><i></i></div>'
-    where = f'<p class="where">{kicker}</p>' if kicker else ''
     leadp = f'<p class="lead">{lead}</p>' if lead else ''
+    badge = f'''<div class="hero-price" aria-hidden="true">
+    <span class="hero-price-value">{esc(price_badge[0])}</span>
+    <span class="hero-price-label">{esc(price_badge[1])}</span>
+  </div>''' if price_badge else ''
     return f'''<section class="hero-photo{" short" if short else ""}" aria-label="פתיח">
   <picture>
     <source media="(max-width:640px)" srcset="{r}assets/img/{img}-sm.jpg">
     <img src="{r}assets/img/{img}.jpg" alt="{esc(img_alt)}" loading="eager" fetchpriority="high">
   </picture>
   <div class="hero-photo-scrim" aria-hidden="true"></div>
+  {badge}
   <div class="hero-photo-inner">
     <div class="wrap">
-      {where}
       <h1>{h1}</h1>
       {leadp}
       {cap}
@@ -238,7 +241,7 @@ def home():
         f'<img src="assets/img/{s["img"]}-sm.jpg" alt="" loading="lazy">'
         f'<div class="t"><h3>{esc(s["name"])}</h3><p>{esc(s["short"])}</p></div></a>'
         for s in SERVICES)
-    body = f'''{hero_photo(r, None, 'פשוט לעשות מוזיקה', None)}
+    body = f'''{hero_photo(r, 'פשוט לעשות מוזיקה', None)}
 <section class="sec" aria-label="שירותים">
   <div class="wrap">
     <div class="svc-grid rv">{svc}</div>
@@ -261,7 +264,7 @@ def private_lessons():
     r = '../'
     inst = ''.join(f'<li>{esc(i["name"])}</li>' for i in INSTRUMENTS)
     locs = ''.join(f'<li>{esc(loc)}</li>' for loc in LOCATIONS)
-    body = f'''{hero_photo(r, 'שיעורי מוזיקה פרטיים &middot; ירושלים והסביבה', 'שיעורי מוזיקה פרטיים',
+    body = f'''{hero_photo(r, 'שיעורי מוזיקה פרטיים',
         'פסנתר, גיטרה, תופים ופיתוח קול, עם מורים מקצועיים ונעימים שיודעים להתאים את הקצב לכל תלמיד ותלמידה.',
         short=True, img='hero-lessons', img_alt='ידיים מנגנות אקורד על גיטרה באור חם',
         caption='תמונת אווירה')}
@@ -290,15 +293,15 @@ def private_lessons():
 
 def digital_guitar():
     r = '../'
-    body = f'''{hero_photo(r, 'קורס גיטרה דיגיטלי &middot; פידבק אישי', 'קורס גיטרה דיגיטלי',
+    body = f'''{hero_photo(r, 'קורס גיטרה דיגיטלי',
         'הקורס היחיד שבו אתם מקבלים פידבק אישי וליווי צמוד מגיטריסט מקצועי על הנגינה שלכם, לא רק סרטוני לימוד.',
         short=True, img='hero-digital', img_alt='שולחים סרטון תרגול גיטרה מהטלפון',
-        caption='תמונת אווירה')}
+        caption='תמונת אווירה', price_badge=('99 ₪', 'לרמה'))}
 <div class="wrap">
 <div class="page">
   <article class="prose">
     <h2>25 שנה, אלפי תלמידים</h2>
-    <p>אני מלמד גיטרה כבר עשרים וחמש שנה, לאלפי תלמידים. הדבר הכי חשוב שלמדתי מזה הוא שפידבק ממורה מקצועי, שיכול לתקן ולהסביר בדיוק מה לשפר, שווה יותר מכל סרטון לימוד עצמו.</p>
+    <p>לאחר יותר מ-25 שנה ואלפי תלמידים שלימדתי, אני יכול לומר שאחד הדברים החשובים ביותר בלימוד גיטרה הוא פידבק ממורה מקצועי, שיכול לתקן ולהסביר בדיוק איך לנגן ומה צריך לשפר. פידבק כזה שווה יותר מכל סרטון שקיים ברשת וביוטיוב, וזה בדיוק מה שאני מציע בקורס שלי.</p>
     <h2>איך זה עובד</h2>
     <p>אתם מקבלים ממני סרטון קצר. אתם מתרגלים ומחזירים לי סרטון של עצמכם מנגנים את אותו הקטע. אני צופה בו, ועונה לכם בוואטסאפ עם הערות מדויקות: מה לתקן, ואיך.</p>
     <div class="highlight-box">
@@ -307,27 +310,27 @@ def digital_guitar():
       <p>לשם ההשוואה: כמה מתלמידי הקורסים שלי שהתחילו ברמה 1, כלומר מתחילים, עברו לגיטרה חשמלית והגיעו לרמה 5 בקורס תוך 5 חודשים. אני יכול לומר שזה שווה ערך ללימודים של שנה שלמה עם מורה פרטי.</p>
       <p>בנוסף, תוכלו לחסוך לא מעט כסף. לשם ההשוואה: שנה של שיעורים פרטיים תעלה לכם סביב 4,800 ש״ח, וקורס דיגיטלי עולה רק 1,200 ש״ח לשנה. אתם חוסכים יותר מ-3,500 ש״ח, ובנוסף תוכלו להגיע לרמה פי 3 משיעורים פרטיים.</p>
     </div>
-    <h2>שלושים רמות, שישה סרטונים בכל רמה</h2>
-    <p>הקורס בנוי משלושים רמות. בכל רמה מקבלים שישה סרטונים מותאמים בדיוק לאיפה שאתם נמצאים, ומתקדמים משם לרמה הבאה. יש לי תלמידים שבשיטה הזו התקדמו הכי מהר מכל מי שלימדתי. עלות כל רמה: <b>99 ₪</b>.</p>
+    <h2>30 רמות, 6 סרטונים בכל רמה</h2>
+    <p>הקורס בנוי מ-30 רמות. בכל רמה מקבלים 6 סרטונים מותאמים בדיוק לאיפה שאתם נמצאים, ומתקדמים משם לרמה הבאה. יש לי תלמידים שבשיטה הזו התקדמו הכי מהר מכל מי שלימדתי. עלות כל רמה: <b>99 ₪</b>.</p>
     <h2>למי זה מתאים</h2>
-    <p>לתלמידים עם משמעת עצמית, שיכולים להתאמן לפחות עשרים דקות ביום, או שעה וחצי בשבוע. בלי תרגול קבוע, גם הפידבק הכי מדויק לא עוזר.</p>
+    <p>לתלמידים עם משמעת עצמית, שיכולים להתאמן לפחות 20 דקות ביום, או שעה וחצי בשבוע. בלי תרגול קבוע, גם הפידבק הכי מדויק לא עוזר.</p>
     <div class="note"><b>לפרטי הרשמה:</b> שלחו הודעה בוואטסאפ. אפשר גם לשלב את הקורס עם <a href="{r}private-lessons/">שיעור פרטי</a> קבוע.</div>
   </article>
-  {aside(r, 'digital-guitar', kicker='99 ₪')}
+  {aside(r, 'digital-guitar')}
 </div>
 </div>
 {band_strip(r)}'''
-    svc_ld = {"@type": "Course", "name": "קורס גיטרה דיגיטלי", "description": "קורס גיטרה דיגיטלי בשלושים רמות, שישה סרטונים בכל רמה, עם פידבק אישי בוואטסאפ מגיטריסט מקצועי בעל 25 שנות ניסיון.",
+    svc_ld = {"@type": "Course", "name": "קורס גיטרה דיגיטלי", "description": "קורס גיטרה דיגיטלי ב-30 רמות, 6 סרטונים בכל רמה, עם פידבק אישי בוואטסאפ מגיטריסט מקצועי בעל 25 שנות ניסיון.",
               "provider": {"@id": BASE + "#business"}, "offers": {"@type": "Offer", "price": "99", "priceCurrency": "ILS"}}
     return page('digital-guitar/index.html', 'קורס גיטרה דיגיטלי | פידבק אישי מגיטריסט מקצועי | דן אילון',
-                'קורס גיטרה דיגיטלי בשלושים רמות, שישה סרטונים בכל רמה, 99 ₪ לרמה. שולחים סרטון תרגול ומקבלים פידבק אישי בוואטסאפ מגיטריסט עם 25 שנות ניסיון.',
+                'קורס גיטרה דיגיטלי ב-30 רמות, 6 סרטונים בכל רמה, 99 ₪ לרמה. שולחים סרטון תרגול ומקבלים פידבק אישי בוואטסאפ מגיטריסט עם 25 שנות ניסיון.',
                 body, crumbs=[(None, 'קורסי גיטרה דיגיטליים')], current='digital-guitar/', extra_ld=[svc_ld])
 
 def studio():
     r = '../'
     equip = ''.join(f'<li>{esc(e)}</li>' for e in ROOM_EQUIPMENT)
     rows = ''.join(f'<tr><td><bdi>{esc(h)}</bdi></td><td class="num"><bdi>{esc(p1)}</bdi></td><td class="num"><bdi>{esc(p3)}</bdi></td></tr>' for h, p1, p3 in ROOM_HOURS)
-    body = f'''{hero_photo(r, 'חדר חזרות &middot; בית הכרם, ירושלים', 'חדר חזרות, בית הכרם',
+    body = f'''{hero_photo(r, 'חדר חזרות, בית הכרם',
         'חדר חזרות ברמת בית הכרם, ירושלים. משמש לשיעורים, לתרגול חופשי ולחזרות של הרכבים.',
         short=True, img='hero-studio', img_alt='מערכת תופים וגיטרות בחדר חזרות באור חם',
         caption='תמונת אווירה')}
@@ -361,7 +364,7 @@ def band():
     artists = ''.join(f'<span>{esc(a)}</span>' for a in TRIBUTE_ARTISTS)
     israeli = ''.join(f'<span>{esc(a)}</span>' for a in ISRAELI_SHOWS)
     formats = ''.join(f'<div><h3>{esc(name)}</h3><p>{esc(text)}</p></div>' for name, text in SHOW_FORMATS)
-    body = f'''{hero_photo(r, 'פריצת דיסק &middot; להקת קאברים ומחווה לרוק',
+    body = f'''{hero_photo(r,
         'פריצת דיסק', 'עשרים מופעי מחווה, מסיבה או סט אקוסטי, עם הגברה ותאורה מלאים. לא מצאתם מה שאתם מחפשים? מבקשים כל שיר, ובונים איתנו את המופע שאתם אוהבים.',
         short=True)}
 
@@ -438,7 +441,7 @@ def band():
 def equipment_rental():
     r = '../'
     equip = ''.join(f'<li>{esc(e)}</li>' for e in RENTAL_EQUIPMENT)
-    body = f'''{hero_photo(r, 'הגברה ותאורה &middot; ירושלים והסביבה', 'הגברה, תאורה והשכרת ציוד',
+    body = f'''{hero_photo(r, 'הגברה, תאורה והשכרת ציוד',
         'אנחנו מספקים הגברה ותאורה לכל סוגי האירועים, בירושלים והסביבה.',
         short=True, img='hero-equipment', img_alt='מערכת הגברה ותאורת במה זהובה',
         caption='תמונת אווירה')}
@@ -465,7 +468,7 @@ def equipment_rental():
 
 def about():
     r = '../'
-    body = f'''{hero_photo(r, 'על דן אילון &middot; עשרים שנה בעולם המוזיקה', 'קצת עליי',
+    body = f'''{hero_photo(r, 'קצת עליי',
         'אני דן אילון. עשרים שנה בעולם המוזיקה, כנגן גיטרה ובס, כמורה וכמנהל להקה.',
         short=True, img='hero-about', img_alt='דמות מנגנת בגיטרה מוארת באור אחורי חם',
         caption='תמונת אווירה')}
