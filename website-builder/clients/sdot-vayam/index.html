@@ -188,17 +188,15 @@
   .g-item .g-cap{position:absolute;right:16px;bottom:14px;color:#fdfbf5;font-size:13px;letter-spacing:.04em;opacity:0;transform:translateY(8px);transition:opacity .4s, transform .4s;text-shadow:0 1px 6px rgba(0,0,0,.4);}
   .g-item:hover .g-cap{opacity:1;transform:none;}
   .g-1{grid-column:1 / 4;grid-row:1 / 3;}
-  .g-2{grid-column:4 / 6;grid-row:1 / 2;}
+  .g-2{grid-column:4 / 6;grid-row:1 / 3;}
   .g-3{grid-column:6 / 7;grid-row:1 / 3;}
-  .g-4{grid-column:4 / 6;grid-row:2 / 3;}
-  .g-5{grid-column:1 / 7;grid-row:3 / 4;}
+  .g-4{grid-column:1 / 7;grid-row:3 / 4;}
   @media (max-width:900px){
     .g-grid{grid-template-columns:repeat(2,1fr);grid-auto-rows:46vw;}
     .g-1{grid-column:1/3;grid-row:1/2;}
     .g-2{grid-column:1/2;grid-row:2/3;}
-    .g-3{grid-column:2/3;grid-row:2/4;}
-    .g-4{grid-column:1/2;grid-row:3/4;}
-    .g-5{grid-column:1/3;grid-row:4/5;}
+    .g-3{grid-column:2/3;grid-row:2/3;}
+    .g-4{grid-column:1/3;grid-row:3/4;}
   }
 
   /* ---------- Lightbox ---------- */
@@ -223,18 +221,17 @@
   .terrace-text .micro{font-size:13px;color:var(--bone-dim);letter-spacing:.04em;}
   @media (max-width:900px){.terrace-wrap{grid-template-columns:1fr;}.terrace-text{padding:40px var(--gutter) 0;}.terrace-photo img{min-height:280px;}}
 
-  /* ---------- Apartment rooms ---------- */
-  .rooms{display:flex;flex-direction:column;gap:clamp(60px,9vh,110px);}
-  .room-row{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
-  .room-row:nth-child(even){direction:ltr;}
-  .room-row:nth-child(even) > *{direction:rtl;}
-  .room-photo{overflow:hidden;border-radius:4px;aspect-ratio:4/3;}
-  .room-photo img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease);}
-  .room-row:hover .room-photo img{transform:scale(1.04);}
-  .room-text .n{font-family:var(--display);color:var(--gold);font-size:16px;direction:ltr;text-align:right;display:block;margin-bottom:10px;}
-  .room-text h3{font-family:var(--display);font-weight:400;font-size:clamp(28px,3.2vw,44px);margin-bottom:12px;}
-  .room-text p{color:var(--bone-dim);font-size:16px;max-width:36ch;}
-  @media (max-width:900px){.room-row, .room-row:nth-child(even){grid-template-columns:1fr;direction:rtl;gap:20px;}}
+  /* ---------- Apartment: one photo + a compact fact list ---------- */
+  .apt-wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+  .apt-photo{overflow:hidden;border-radius:4px;aspect-ratio:4/5;}
+  .apt-photo img{width:100%;height:100%;object-fit:cover;}
+  .apt-facts{display:flex;flex-direction:column;}
+  .fact{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:20px 0;border-top:1px solid var(--line);}
+  .fact:last-child{border-bottom:1px solid var(--line);}
+  .fact .n{font-family:var(--display);color:var(--gold);font-size:15px;direction:ltr;text-align:right;}
+  .fact h3{font-family:var(--display);font-weight:400;font-size:21px;margin-bottom:6px;}
+  .fact p{color:var(--bone-dim);font-size:15px;max-width:40ch;}
+  @media (max-width:900px){.apt-wrap{grid-template-columns:1fr;gap:28px;}.apt-photo{aspect-ratio:4/3;}}
 
   /* ---------- Experience: morning / day / evening ---------- */
   .exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);}
@@ -246,6 +243,9 @@
   .exp-body .when{font-size:12px;letter-spacing:.22em;color:var(--gold);margin-bottom:10px;}
   .exp-body h3{font-family:var(--display);font-weight:400;font-size:28px;margin-bottom:10px;}
   .exp-body p{font-size:15px;color:var(--bone-dim);}
+  .exp-card.text-only{justify-content:center;background:var(--ink-2);padding:32px 26px;}
+  .exp-card.text-only .exp-body{padding:0;}
+  .exp-card.text-only .exp-body p{font-size:16px;line-height:1.75;}
   @media (max-width:900px){.exp-grid{grid-template-columns:1fr;}.exp-photo{aspect-ratio:16/10;}}
 
   /* ---------- Location ---------- */
@@ -264,6 +264,12 @@
   .rev-num span{font-size:14px;color:var(--bone-dim);}
   .rev-themes{grid-column:1 / -1;font-size:19px;color:var(--bone-dim);max-width:62ch;margin-top:30px;line-height:1.7;}
   .rev-themes b{color:var(--bone);font-weight:500;}
+  .rev-quote{grid-column:1 / -1;border-top:1px solid var(--line);padding-top:40px;margin-top:10px;}
+  .rev-quote blockquote{font-family:var(--display);font-size:clamp(24px,3vw,36px);line-height:1.4;max-width:34ch;min-height:4.6em;}
+  .rev-quote cite{display:block;font-style:normal;font-size:13px;color:var(--bone-dim);letter-spacing:.06em;margin-top:18px;}
+  .rev-dots{display:flex;gap:9px;margin-top:22px;}
+  .rev-dots button{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .3s, transform .3s;}
+  .rev-dots button.on{background:var(--gold);transform:scale(1.3);}
   @media (max-width:700px){.rev-wrap{grid-template-columns:1fr 1fr;}}
 
   /* ---------- Hosts ---------- */
@@ -361,7 +367,7 @@
       <div class="hero-side fade" data-reveal>
         <div class="hero-meta">
           <div><b>30</b>מ״ר, כולו שלכם</div>
-          <div><b>2</b>אורחים, לא יותר</div>
+          <div><b>1</b>דירה, בלי שכנים בפנים</div>
         </div>
         <div class="hero-btns">
           <a href="#book" class="pill solid" data-magnetic>בדיקת זמינות</a>
@@ -435,8 +441,7 @@
         <button type="button" class="g-item g-1" data-idx="0"><img src="img/terrace-palm.jpg" srcset="img/terrace-palm-sm.jpg 900w, img/terrace-palm.jpg 1200w" sizes="(max-width:900px) 100vw, 50vw" loading="lazy" alt="פינת ישיבה במרפסת מוצלת בדקל ענק, מול שדות פתוחים"><span class="g-cap">המרפסת, בצל הדקל</span></button>
         <button type="button" class="g-item g-2" data-idx="1"><img src="img/terrace-hammock.jpg" srcset="img/terrace-hammock-sm.jpg 900w, img/terrace-hammock.jpg 1200w" sizes="(max-width:900px) 100vw, 33vw" loading="lazy" alt="ערסל ושולחן קפה קטן במרפסת, שמשייה בהירה"><span class="g-cap">הערסל</span></button>
         <button type="button" class="g-item g-3" data-idx="2"><img src="img/sea.jpg" srcset="img/sea-sm.jpg 900w, img/sea.jpg 1200w" sizes="(max-width:900px) 100vw, 17vw" loading="lazy" alt="חוף ים צלול ושקט ליד שבי ציון, מים טורקיז ואבני שובר גלים"><span class="g-cap">החוף</span></button>
-        <button type="button" class="g-item g-4" data-idx="3"><img src="img/detail-orchid.jpg" srcset="img/detail-orchid-sm.jpg 900w, img/detail-orchid.jpg 1200w" sizes="(max-width:900px) 100vw, 33vw" loading="lazy" alt="פרח סחלב ליד המיטה, תאורה חמה"><span class="g-cap">פרט קטן</span></button>
-        <button type="button" class="g-item g-5" data-idx="4"><img src="img/terrace-fields.jpg" srcset="img/terrace-fields-sm.jpg 900w, img/terrace-fields.jpg 1200w" sizes="100vw" loading="lazy" alt="שולחן קפה במרפסת המזרחית עם זר פרחי בר, ושדות זהובים ברקע"><span class="g-cap">המרפסת המזרחית, מול השדות</span></button>
+        <button type="button" class="g-item g-4" data-idx="3"><img src="img/terrace-fields.jpg" srcset="img/terrace-fields-sm.jpg 900w, img/terrace-fields.jpg 1200w" sizes="100vw" loading="lazy" alt="שולחן קפה במרפסת המזרחית עם זר פרחי בר, ושדות זהובים ברקע"><span class="g-cap">המרפסת המזרחית, מול השדות</span></button>
       </div>
     </section>
 
@@ -460,22 +465,15 @@
         <h2 class="display lines" data-reveal><span class="ln"><span>הבית עצמו</span></span></h2>
         <p class="fade" data-reveal>שלושים מטר מתוכננים היטב, בלי שום דבר מיותר.</p>
       </div>
-      <div class="rooms">
-        <div class="room-row fade" data-reveal>
-          <figure class="room-photo"><img src="img/bedroom.jpg" srcset="img/bedroom-sm.jpg 900w, img/bedroom.jpg 1200w" sizes="(max-width:900px) 100vw, 50vw" loading="lazy" alt="חדר שינה לבן עם מיטה זוגית, מאוורר תקרה וחלון כפול"></figure>
-          <div class="room-text"><span class="n">01</span><h3>חדר שינה</h3><p>מיטה זוגית, מאוורר תקרה, וחלון שמביא את הבוקר פנימה לפני כולם.</p></div>
-        </div>
-        <div class="room-row fade" data-reveal>
-          <figure class="room-photo"><img src="img/kitchen.jpg" srcset="img/kitchen-sm.jpg 900w, img/kitchen.jpg 1200w" sizes="(max-width:900px) 100vw, 50vw" loading="lazy" alt="מטבח קטן ומאובזר עם כיריים גז ומדף כלים פתוח"></figure>
-          <div class="room-text"><span class="n">02</span><h3>מטבח מאובזר</h3><p>כיריים גז, מקרר ופינת אוכל. מספיק בשביל ארוחת בוקר איטית, בלי למהר לשום מקום.</p></div>
-        </div>
-        <div class="room-row fade" data-reveal>
-          <figure class="room-photo"><img src="img/bathroom.jpg" srcset="img/bathroom-sm.jpg 900w, img/bathroom.jpg 1200w" sizes="(max-width:900px) 100vw, 50vw" loading="lazy" alt="חדר רחצה מרווח עם מקלחת גשם וצדפים על השיש"></figure>
-          <div class="room-text"><span class="n">03</span><h3>מקלחת מרווחת</h3><p>מקלחת גשם, ונגיעות קטנות של ים: צדפים על השיש, ממש כמו שמצאו אותם בחוף.</p></div>
-        </div>
-        <div class="room-row fade" data-reveal>
-          <figure class="room-photo"><img src="img/terrace-lounge.jpg" srcset="img/terrace-lounge-sm.jpg 900w, img/terrace-lounge.jpg 1200w" sizes="(max-width:900px) 100vw, 50vw" loading="lazy" alt="מרפסת גדולה עם ערסל וכיסאות נוח, מבט לגגות שבי ציון"></figure>
-          <div class="room-text"><span class="n">04</span><h3>מרפסת וחניה פרטית</h3><p>חניה צמודה לבית, ומרפסת שמתחלקת בין מזרח למערב: שדה בבוקר, ים בשקיעה.</p></div>
+      <div class="apt-wrap">
+        <figure class="apt-photo fade" data-reveal>
+          <img src="img/bedroom.jpg" srcset="img/bedroom-sm.jpg 900w, img/bedroom.jpg 1200w" sizes="(max-width:900px) 100vw, 46vw" loading="lazy" alt="חדר שינה לבן עם מיטה זוגית, מאוורר תקרה וחלון כפול">
+        </figure>
+        <div class="apt-facts">
+          <div class="fact fade" data-reveal><span class="n">01</span><div><h3>חדר שינה</h3><p>מיטה זוגית, ומזרן רצפה נוסף לילד שמצטרף. מאוורר תקרה וחלון שמביא את הבוקר פנימה.</p></div></div>
+          <div class="fact fade" data-reveal><span class="n">02</span><div><h3>מטבח מאובזר</h3><p>כיריים גז, מקרר ופינת אוכל. מספיק בשביל ארוחת בוקר איטית, בלי למהר לשום מקום.</p></div></div>
+          <div class="fact fade" data-reveal><span class="n">03</span><div><h3>מקלחת מרווחת</h3><p>מקלחת גשם, ונגיעות קטנות של ים: צדפים על השיש, ממש כמו שמצאו אותם בחוף.</p></div></div>
+          <div class="fact fade" data-reveal><span class="n">04</span><div><h3>מרפסת וחניה פרטית</h3><p>חניה צמודה לבית, ומרפסת שמתחלקת בין מזרח למערב: שדה בבוקר, ים בשקיעה.</p></div></div>
         </div>
       </div>
     </section>
@@ -484,16 +482,15 @@
     <section class="section" id="experience" aria-label="החוויה">
       <div class="section-head">
         <h2 class="display lines" data-reveal><span class="ln"><span>יום שלם, בלי לוח זמנים</span></span></h2>
-        <p class="fade" data-reveal>שלוש שעות ביום ששוות את כל הנסיעה.</p>
+        <p class="fade" data-reveal>מה שעושים כאן: קצת, אבל בדיוק את הדברים הנכונים.</p>
       </div>
       <div class="exp-grid fade" data-reveal>
         <article class="exp-card">
           <figure class="exp-photo"><img src="img/terrace-fields.jpg" srcset="img/terrace-fields-sm.jpg 900w, img/terrace-fields.jpg 1200w" sizes="(max-width:900px) 100vw, 33vw" loading="lazy" alt="שדה זהוב ודקלים בשעת בוקר, נראה מהמרפסת"></figure>
-          <div class="exp-body"><span class="when">בוקר</span><h3 class="display">קפה מזרחה</h3><p>כוס ראשונה במרפסת המזרחית. השדה עוד קריר, ואף אחד לא ממהר.</p></div>
+          <div class="exp-body"><span class="when">בוקר</span><h3 class="display">קפה מזרחה</h3><p>כוס ראשונה במרפסת המזרחית, מול השדה. מי שקם מוקדם מקבל את החצר כולה לעצמו.</p></div>
         </article>
-        <article class="exp-card">
-          <figure class="exp-photo"><img src="img/sea.jpg" srcset="img/sea-sm.jpg 900w, img/sea.jpg 1200w" sizes="(max-width:900px) 100vw, 33vw" loading="lazy" alt="מים צלולים ושקטים בחוף הסמוך"></figure>
-          <div class="exp-body"><span class="when">יום</span><h3 class="display">הליכה לים</h3><p>החוף במרחק הליכה, המים צלולים. למי שבא עם אופניים שכורים, יש גם לאן להמשיך.</p></div>
+        <article class="exp-card text-only">
+          <div class="exp-body"><span class="when">יום</span><h3 class="display">החוף, ואז מה שבא</h3><p>החוף הנקי במרחק הליכה, והמים רגועים גם לילדים. מי שרוצה עוד תנועה, יש השכרת אופניים ומתקני ספורט ימיים ממש בסביבה. ומי שלא מתחשק לבשל הערב, יש מסעדה במקום.</p></div>
         </article>
         <article class="exp-card">
           <figure class="exp-photo"><img src="img/terrace-daybed.jpg" srcset="img/terrace-daybed-sm.jpg 900w, img/terrace-daybed.jpg 1200w" sizes="(max-width:900px) 100vw, 33vw" loading="lazy" alt="מיטת יום לבנה במרפסת תחת פרגולה, אור שקיעה"></figure>
@@ -528,6 +525,11 @@
       <div class="rev-wrap">
         <div class="rev-num fade" data-reveal><b>4.8<span style="font-size:.38em;color:var(--bone-dim);">/5</span></b><span>Google · 40 ביקורות</span></div>
         <div class="rev-num fade" data-reveal><b>9.6<span style="font-size:.38em;color:var(--bone-dim);">/10</span></b><span>Booking.com · 29 ביקורות</span></div>
+        <div class="rev-quote fade" data-reveal>
+          <blockquote id="revQuote"></blockquote>
+          <cite id="revWho"></cite>
+          <div class="rev-dots" id="revDots"></div>
+        </div>
         <p class="rev-themes fade" data-reveal>מה שחוזר שוב ושוב בביקורות: <b>ניקיון</b>, <b>שקט</b>, <b>המרפסת</b>, הקרבה לים, והתשומת לב של שוש ועובד לכל פרט.</p>
       </div>
     </section>
@@ -601,7 +603,7 @@
   dIn.addEventListener('change', function(){ if (dOut.value <= dIn.value){ var d = new Date(dIn.value); d.setDate(d.getDate() + 1); dOut.value = iso(d); } updateCta(); });
   dOut.addEventListener('change', updateCta);
   document.getElementById('gMinus').addEventListener('click', function(){ guests = Math.max(1, guests - 1); gNum.textContent = guests; updateCta(); });
-  document.getElementById('gPlus').addEventListener('click', function(){ guests = Math.min(2, guests + 1); gNum.textContent = guests; updateCta(); });
+  document.getElementById('gPlus').addEventListener('click', function(){ guests = Math.min(4, guests + 1); gNum.textContent = guests; updateCta(); });
   function nights(){ var a = new Date(dIn.value), b = new Date(dOut.value); return Math.max(1, Math.round((b - a) / 86400000)); }
   function updateCta(){
     var n = nights();
@@ -616,7 +618,6 @@
     {src:'img/terrace-palm.jpg', alt:'המרפסת, בצל הדקל'},
     {src:'img/terrace-hammock.jpg', alt:'הערסל'},
     {src:'img/sea.jpg', alt:'החוף'},
-    {src:'img/detail-orchid.jpg', alt:'פרט קטן'},
     {src:'img/terrace-fields.jpg', alt:'המרפסת המזרחית, מול השדות'}
   ];
   var lb = document.getElementById('lightbox'), lbImg = document.getElementById('lbImg'), lbIdx = 0;
@@ -636,6 +637,28 @@
     if (e.key === 'ArrowLeft') stepLb(1);
     if (e.key === 'ArrowRight') stepLb(-1);
   });
+
+  /* ---- real guest quotes, translated from Booking.com reviews ---- */
+  var quotes = [
+    {text:'הדירה מעוצבת בטעם רב ובקפידה, עם המון צמחים וסחלבים בכל פינה.', who:'אורחת · Booking.com'},
+    {text:'מקום נקי ונעים, קרוב לחוף. שוש ועובד היו נהדרים ועזרו בכל דבר.', who:'אורח · Booking.com'},
+    {text:'נגיעות אישיות בכל מקום: פרחים טריים מהגינה באגרטל, ומשהו מתוק שחיכה לנו כשהגענו.', who:'אורחת · Booking.com'},
+    {text:'הכול היה נוח, שקט, מואר ונקי. עובד קיבל אותנו עם פירות ועוגה, ממליצים בחום.', who:'אורח · Booking.com'}
+  ];
+  var revQuote = document.getElementById('revQuote'), revWho = document.getElementById('revWho'), revDots = document.getElementById('revDots'), qIdx = 0, qTimer;
+  if (revQuote){
+    revDots.innerHTML = quotes.map(function(_, i){ return '<button type="button" aria-label="ביקורת ' + (i + 1) + '"></button>'; }).join('');
+    var dotEls = revDots.querySelectorAll('button');
+    function showQuote(i){
+      qIdx = i;
+      revQuote.textContent = '“' + quotes[i].text + '”';
+      revWho.textContent = quotes[i].who;
+      dotEls.forEach(function(d, j){ d.classList.toggle('on', j === i); });
+    }
+    dotEls.forEach(function(d, i){ d.addEventListener('click', function(){ showQuote(i); resetTimer(); }); });
+    function resetTimer(){ clearInterval(qTimer); if (!reduce) qTimer = setInterval(function(){ showQuote((qIdx + 1) % quotes.length); }, 6500); }
+    showQuote(0); resetTimer();
+  }
 
   /* ---- reveal on scroll ---- */
   var toReveal = document.querySelectorAll('[data-reveal]');
