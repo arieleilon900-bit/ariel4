@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<style>
+  :root{--bg:#f6f5f1;--fg:#1f2523;--muted:#5c6460;--line:#d6d2c8;--accent:#1f7a4d;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,'Segoe UI',sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px 16px;}
+  .box{max-width:460px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:24px 20px;}
+  h1{font-size:24px;margin-bottom:4px;}
+  p.sub{color:var(--muted);margin-bottom:18px;}
+  label{display:block;font-weight:bold;margin:14px 0 4px;font-size:15px;}
+  input,select,textarea{width:100%;font-size:17px;padding:11px 12px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--fg);font-family:inherit;}
+  input[type=tel]{direction:ltr;text-align:right;}
+  textarea{min-height:80px;resize:vertical;}
+  button{width:100%;margin-top:20px;background:var(--accent);color:#fff;border:0;border-radius:5px;padding:14px;font-size:18px;font-weight:bold;cursor:pointer;}
+  button:disabled{opacity:.6;}
+  .msg{margin-top:16px;font-size:16px;}
+  .err{color:#b3261e;}
+  .done{text-align:center;padding:20px 0;}
+  .done b{display:block;font-size:22px;margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="box" id="box">
+  <h1><?= business ?></h1>
+  <p class="sub">השאירו פרטים ונחזור אליכם עוד היום. תשובה ראשונה מגיעה לוואטסאפ תוך דקה.</p>
+  <form id="f">
+    <label for="name">שם</label>
+    <input id="name" name="name" required autocomplete="name">
+    <label for="phone">טלפון נייד</label>
+    <input id="phone" name="phone" type="tel" required inputmode="tel" autocomplete="tel" placeholder="050-0000000">
+    <label for="city">עיר</label>
+    <input id="city" name="city">
+    <label for="job">מה צריך?</label>
+    <select id="job" name="job">
+      <? for (var i = 0; i < jobTypes.length; i++) { ?>
+        <option><?= jobTypes[i] ?></option>
+      <? } ?>
+    </select>
+    <label for="notes">פרטים נוספים (לא חובה)</label>
+    <textarea id="notes" name="notes"></textarea>
+    <button id="btn" type="submit">שליחה</button>
+    <p class="msg" id="msg"></p>
+  </form>
+</div>
+<script>
+  var f = document.getElementById('f');
+  function val(id) { return document.getElementById(id).value; }
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('btn');
+    var msg = document.getElementById('msg');
+    btn.disabled = true; btn.textContent = 'שולח...'; msg.textContent = '';
+    google.script.run
+      .withSuccessHandler(function (res) {
+        if (res && res.ok) {
+          document.getElementById('box').innerHTML =
+            '<div class="done"><b>תודה, קיבלנו!</b>בדקו את הוואטסאפ, שלחנו לכם הודעה.</div>';
+        } else {
+          btn.disabled = false; btn.textContent = 'שליחה';
+          msg.className = 'msg err';
+          msg.textContent = (res && res.error) ? res.error + '. בדקו את המספר ונסו שוב.' : 'משהו השתבש. נסו שוב.';
+        }
+      })
+      .withFailureHandler(function () {
+        btn.disabled = false; btn.textContent = 'שליחה';
+        msg.className = 'msg err'; msg.textContent = 'משהו השתבש. נסו שוב בעוד דקה.';
+      })
+      .submitLead({
+        name: val('name'), phone: val('phone'), city: val('city'),
+        job: val('job'), notes: val('notes')
+      });
+  });
+</script>
+</body>
+</html>

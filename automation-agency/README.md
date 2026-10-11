@@ -11,7 +11,8 @@
 | [01-niche-and-offer.md](01-niche-and-offer.md) | קהל יעד, מה מוכרים, מחירים, החשבון לכמה אלפים בחודש | שניכם, ביום הראשון |
 | [02-seven-day-plan.md](02-seven-day-plan.md) | מה כל אחד עושה בכל יום, 90 דקות ביום | שניכם, כל בוקר |
 | [03-free-tools-setup.md](03-free-tools-setup.md) | כל הכלים החינמיים, איך פותחים חשבונות | הבונה |
-| [04-build-the-automations.md](04-build-the-automations.md) | הוראות בנייה צעד אחר צעד של 3 האוטומציות | הבונה |
+| [system/SETUP.md](system/SETUP.md) | **המערכת המוכנה:** קוד ל-Google Sheets + הוראות התקנה ב-20 דקות | הבונה, ביום 2 |
+| [04-build-the-automations.md](04-build-the-automations.md) | אותן אוטומציות ב-Make (חלופה), ומעבר לוואטסאפ הרשמי | הבונה |
 | [05-sales-scripts.md](05-sales-scripts.md) | תסריט טלפון, הודעות, ביקור בעסק, התנגדויות | המוכר |
 | [06-meeting-close-onboard.md](06-meeting-close-onboard.md) | פגישת דמו, סגירה, גבייה, הקמה אצל הלקוח | שניכם |
 | [templates/prospects.csv](templates/prospects.csv) | טבלת מעקב פניות (לייבא ל-Google Sheets) | המוכר |
