@@ -3,92 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>עונה ראשון | מענה לכל ליד תוך דקה, לקבלנים ובעלי מקצוע</title>
-<meta name="description" content="מערכת שעונה בוואטסאפ לכל פנייה תוך דקה, חוזרת לבד ללקוחות שקיבלו הצעת מחיר ומבקשת ביקורות בגוגל. לקבלני שיפוצים, אלומיניום, מטבחים ומיזוג.">
+<title>עונה ראשון | מערכת וואטסאפ למכוני לייזר וקוסמטיקה</title>
+<meta name="description" content="עונה לכל ליד בוואטסאפ תוך דקה כשאת בטיפול, שולחת תזכורות לפני תורים ומחזירה לקוחות לטיפול הבא בסדרה. למכוני לייזר והסרת שיער.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=IBM+Plex+Sans+Hebrew:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Assistant:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
+  /* Layout: hero with a phone mock of a lead arriving mid-treatment, then a treatment-card timeline, calculator, price */
   :root{
-    --paper:#f4f1ea;
-    --ink:#1d2321;
-    --muted:#5f6763;
-    --line:#d9d3c7;
-    --missed:#c8402f;
-    --wa:#1f7a4d;
+    --bg:#faf6f4;
+    --ink:#2a1f24;
+    --muted:#6f6166;
+    --line:#e6dbd8;
+    --plum:#7a2e52;
+    --rose:#e9c8cf;
     --card:#ffffff;
+    --wa:#1d7a4f;
+    --display:'Bellefair',Georgia,serif;
+    --body:'Assistant',Arial,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'IBM Plex Sans Hebrew',sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;font-size:17px;}
+  html,body{background:var(--bg);}
+  body{font-family:var(--body);color:var(--ink);line-height:1.7;font-size:18px;}
   a{color:inherit;}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 20px;}
-  .num{font-family:'IBM Plex Mono',monospace;}
-  h1,h2{font-family:'Frank Ruhl Libre',serif;line-height:1.15;}
+  .wrap{max-width:1060px;margin:0 auto;padding-inline:20px;}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+  h1,h2{font-family:var(--display);font-weight:400;line-height:1.15;text-wrap:balance;}
 
-  header{padding:18px 0;border-bottom:1px solid var(--line);}
-  header .wrap{display:flex;justify-content:space-between;align-items:center;}
-  .logo{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:26px;}
-  .logo span{color:var(--missed);}
-  .btn{display:inline-block;background:var(--wa);color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:5px;}
-  .btn.small{padding:8px 14px;font-size:15px;}
+  header{padding-block:18px;border-bottom:1px solid var(--line);}
+  header .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .logo{font-family:var(--display);font-size:28px;color:var(--plum);}
+  .btn{display:inline-block;background:var(--wa);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:5px;}
+  .btn.small{padding:8px 14px;font-size:16px;}
+  .btn:focus-visible{outline:3px solid var(--plum);outline-offset:2px;}
 
-  .hero{padding:64px 0 56px;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;}
-  .hero h1{font-size:clamp(36px,5.4vw,60px);font-weight:900;}
-  .hero p{margin:20px 0 28px;font-size:19px;color:var(--muted);max-width:30em;}
+  .hero{padding-block:60px 56px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;}
+  .hero h1{font-size:clamp(38px,5.6vw,64px);}
+  .hero h1 em{font-style:normal;color:var(--plum);}
+  .hero p{margin:20px 0 28px;font-size:20px;color:var(--muted);max-width:30em;}
 
-  .phone{background:var(--ink);border-radius:28px;padding:14px;max-width:320px;margin-inline:auto;}
-  .screen{background:#ece5dd;border-radius:18px;padding:16px 12px;min-height:400px;display:flex;flex-direction:column;gap:10px;font-size:14px;}
-  .notif{background:var(--card);border-radius:8px;padding:10px 12px;border-right:4px solid var(--missed);}
-  .notif b{color:var(--missed);}
-  .t{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);}
-  .bubble{background:#dcf8c6;border-radius:8px;padding:10px 12px;align-self:flex-start;max-width:88%;}
+  .phone{background:var(--ink);border-radius:30px;padding:14px;max-width:320px;margin-inline:auto;width:100%;}
+  .screen{background:#efe7e2;border-radius:20px;padding:16px 12px;display:flex;flex-direction:column;gap:10px;font-size:15px;line-height:1.5;}
+  .status{background:var(--rose);color:var(--plum);border-radius:6px;padding:8px 10px;font-weight:700;font-size:14px;}
+  .bubble{background:#dcf8c6;border-radius:8px;padding:9px 11px;align-self:flex-start;max-width:90%;}
   .bubble.in{background:var(--card);align-self:flex-end;}
+  .t{font-family:var(--mono);font-size:11px;color:var(--muted);display:block;margin-top:2px;}
   .gap{font-size:12px;color:var(--muted);text-align:center;}
 
-  .pain{background:var(--ink);color:var(--paper);padding:56px 0;}
-  .pain p{font-family:'Frank Ruhl Libre',serif;font-size:clamp(24px,3.4vw,36px);max-width:22em;line-height:1.4;}
-  .pain p em{font-style:normal;color:#f0a493;}
+  .quote{background:var(--plum);color:#fff;padding-block:56px;}
+  .quote p{font-family:var(--display);font-size:clamp(26px,3.6vw,40px);max-width:24em;line-height:1.35;}
 
-  .what{padding:72px 0;}
-  .what h2{font-size:clamp(28px,3.6vw,40px);margin-bottom:28px;}
-  .rows{border-top:2px solid var(--ink);}
-  .row{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:24px 0;border-bottom:1px solid var(--line);}
-  .row h3{font-size:19px;}
-  .row p{color:var(--muted);}
+  .series{padding-block:72px;}
+  .series h2{font-size:clamp(30px,4vw,44px);margin-bottom:8px;}
+  .series .sub{color:var(--muted);margin-bottom:32px;max-width:36em;}
+  .timeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--card);}
+  .step{padding:20px 18px;border-inline-start:1px solid var(--line);min-width:0;}
+  .step:first-child{border-inline-start:0;}
+  .step .when{font-family:var(--mono);font-size:13px;color:var(--plum);display:block;margin-bottom:6px;}
+  .step h3{font-size:18px;margin-bottom:4px;}
+  .step p{font-size:16px;color:var(--muted);}
 
   .calc{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:36px;margin:0 auto 72px;max-width:760px;}
-  .calc h2{font-size:30px;margin-bottom:6px;}
-  .calc .sub{color:var(--muted);margin-bottom:24px;}
-  .field{display:grid;grid-template-columns:1fr 140px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line);}
-  .field input{font:500 18px 'IBM Plex Mono',monospace;padding:8px 10px;border:1px solid var(--line);border-radius:4px;width:100%;text-align:left;direction:ltr;background:var(--paper);}
+  .calc h2{font-size:34px;margin-bottom:4px;}
+  .calc .sub{color:var(--muted);margin-bottom:22px;}
+  .field{display:grid;grid-template-columns:1fr 140px;gap:16px;align-items:center;padding-block:12px;border-bottom:1px dashed var(--line);}
+  .field input{font:500 18px var(--mono);padding:8px 10px;border:1px solid var(--line);border-radius:4px;width:100%;text-align:left;direction:ltr;background:var(--bg);color:var(--ink);}
+  .field input:focus-visible{outline:2px solid var(--plum);}
   .result{margin-top:24px;font-size:19px;}
-  .result .big{display:block;font-family:'IBM Plex Mono',monospace;font-size:clamp(36px,6vw,54px);color:var(--missed);font-weight:500;line-height:1.2;}
-  .result small{display:block;color:var(--muted);font-size:14px;margin-top:8px;}
+  .result .big{display:block;font-family:var(--mono);font-size:clamp(36px,6vw,54px);color:var(--plum);line-height:1.2;}
+  .result small{display:block;color:var(--muted);font-size:15px;margin-top:8px;}
 
-  .price{padding:0 0 72px;}
+  .price{padding-bottom:72px;}
   .price .box{border:2px solid var(--ink);border-radius:6px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:32px;}
-  .price h2{font-size:32px;}
-  .price .amount{font-family:'IBM Plex Mono',monospace;font-size:24px;margin:10px 0;}
-  .price .amount s{color:var(--muted);font-size:17px;}
-  .promise{background:#fbeae6;border-right:4px solid var(--missed);padding:16px 18px;border-radius:4px;}
+  .price h2{font-size:34px;}
+  .amount{font-family:var(--mono);font-size:24px;margin-block:8px;}
+  .amount s{color:var(--muted);font-size:17px;}
+  .promise{background:#f6e6ea;border-inline-start:4px solid var(--plum);padding:16px 18px;border-radius:4px;}
 
-  .faq{padding:0 0 72px;max-width:760px;}
-  .faq h2{font-size:30px;margin-bottom:16px;}
-  details{border-bottom:1px solid var(--line);padding:16px 0;}
+  .faq{padding-bottom:72px;max-width:760px;}
+  .faq h2{font-size:34px;margin-bottom:12px;}
+  details{border-bottom:1px solid var(--line);padding-block:16px;}
   summary{font-weight:700;cursor:pointer;}
   details p{color:var(--muted);margin-top:8px;}
 
-  .end{background:var(--wa);color:#fff;padding:56px 0;text-align:center;}
-  .end h2{font-size:clamp(28px,4vw,42px);margin-bottom:20px;}
-  .end .btn{background:#fff;color:var(--wa);font-size:19px;}
-  .phone-num{margin-top:16px;font-size:18px;}
-  footer{padding:24px 0;font-size:14px;color:var(--muted);}
+  .end{background:var(--ink);color:#fff;padding-block:56px;text-align:center;}
+  .end h2{font-size:clamp(30px,4vw,46px);margin-bottom:20px;}
+  .end .phone-num{margin-top:16px;font-size:18px;color:var(--rose);}
+  footer{padding-block:24px;font-size:15px;color:var(--muted);}
 
   @media (max-width:760px){
-    .hero{grid-template-columns:1fr;padding-top:40px;}
-    .row{grid-template-columns:1fr;gap:4px;}
+    .hero{grid-template-columns:1fr;padding-top:36px;}
     .field{grid-template-columns:1fr 110px;}
     .price .box{grid-template-columns:1fr;}
     .calc{padding:24px 18px;}
+    .step{border-inline-start:0;border-top:1px solid var(--line);}
+    .step:first-child{border-top:0;}
   }
 </style>
 </head>
@@ -96,76 +105,67 @@
 
 <header>
   <div class="wrap">
-    <div class="logo">עונה ראשון<span>.</span></div>
-    <a class="btn small" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%94%D7%9E%D7%A2%D7%A8%D7%9B%D7%AA">דברו איתנו בוואטסאפ</a>
+    <div class="logo">עונה ראשון</div>
+    <a class="btn small" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%9C%20%D7%94%D7%9E%D7%A2%D7%A8%D7%9B%D7%AA%20%D7%9C%D7%9E%D7%9B%D7%95%D7%9F">דברי איתנו בוואטסאפ</a>
   </div>
 </header>
 
 <main>
   <section class="wrap hero">
     <div>
-      <h1>אתה על הפיגום. הלקוח כבר מתקשר לקבלן הבא.</h1>
-      <p>אנחנו מתקינים לקבלנים ובעלי מקצוע מערכת שעונה בוואטסאפ לכל פנייה תוך דקה, בשם שלך, וחוזרת לבד ללקוחות שקיבלו הצעת מחיר ונעלמו.</p>
+      <h1>את באמצע טיפול. <em>הליד כבר קובעת במכון אחר.</em></h1>
+      <p>מערכת למכוני לייזר וקוסמטיקה: עונה לכל פנייה בוואטסאפ תוך דקה, בשמך, שולחת תזכורות לפני תורים, ומזכירה ללקוחות לחזור לטיפול הבא בסדרה.</p>
       <a class="btn" href="#calc">כמה זה עולה לך היום?</a>
     </div>
     <div class="phone" aria-hidden="true">
       <div class="screen">
-        <div class="notif"><b>שיחה שלא נענתה</b><br>דני כהן <span class="t">14:02</span></div>
-        <div class="bubble">היי דני, כאן יוסי משיפוצי יוסי. קיבלתי את הפנייה שלך לגבי שיפוץ מטבח. אני באמצע עבודה ואחזור אליך עד 18:00. אפשר לשלוח פה תמונות של המטבח 🙂 <span class="t">14:02</span></div>
-        <div class="bubble in">מעולה, שולח תמונות. תודה! <span class="t">14:05</span></div>
-        <div class="gap">5 ימים אחרי ההצעה</div>
-        <div class="bubble">היי דני, חוזר אליך לגבי ההצעה. אם המחיר או הלו״ז לא מתאימים, תגיד לי. בדרך כלל אפשר למצוא פתרון. <span class="t">10:00</span></div>
-        <div class="bubble in">בוא נדבר היום בערב 👍</div>
+        <div class="status">בטיפול · 40 דק׳</div>
+        <div class="bubble in">היי, ראיתי את המודעה. כמה עולה הסרת שיער לשפם ולסנטר? <span class="t">11:02</span></div>
+        <div class="bubble">היי נועה, כאן מיכל 💛 קיבלתי! אני באמצע טיפול ואחזור אלייך תוך שעה. מה נוח לך יותר, בוקר או אחר הצהריים? <span class="t">11:02</span></div>
+        <div class="bubble in">אחה״צ, תודה! <span class="t">11:04</span></div>
+        <div class="gap">6 שבועות אחרי הטיפול</div>
+        <div class="bubble">היי נועה, הגיע הזמן לטיפול הבא כדי לשמור על התוצאות 💛 לקבוע לך השבוע? <span class="t">10:00</span></div>
+        <div class="bubble in">כן, חמישי אחה״צ?</div>
       </div>
     </div>
   </section>
 
-  <section class="pain">
+  <section class="quote">
     <div class="wrap">
-      <p>לקוח שמשאיר פרטים אצל שלושה קבלנים סוגר בדרך כלל עם <em>הראשון שחזר אליו</em>. לא עם הזול, לא עם הכי טוב. עם הראשון.</p>
+      <p>לקוחה שמשאירה פרטים בשלושה מכונים קובעת בדרך כלל אצל זו שענתה לה ראשונה. ולקוחה שאף אחד לא הזכיר לה את הטיפול הבא, פשוט לא חוזרת.</p>
     </div>
   </section>
 
-  <section class="wrap what">
-    <h2>מה המערכת עושה בשבילך</h2>
-    <div class="rows">
-      <div class="row">
-        <h3>תוך דקה מכל פנייה</h3>
-        <p>מי שממלא טופס באתר או בפייסבוק מקבל ממך הודעת וואטסאפ מיד: קיבלתי, אחזור עד שעה מסוימת, אפשר לשלוח תמונות. אתה מקבל התראה עם כל הפרטים וקישור לשיחה איתו.</p>
-      </div>
-      <div class="row">
-        <h3>הצעות מחיר שלא נשכחות</h3>
-        <p>אתה מסמן "נשלחה הצעה" בטלפון. המערכת חוזרת ללקוח אחרי יומיים, אחרי חמישה ימים ואחרי עשרה. ברגע שהוא עונה, הוא אצלך בוואטסאפ.</p>
-      </div>
-      <div class="row">
-        <h3>ביקורות בגוגל</h3>
-        <p>סיימת עבודה, מסמנים "בוצע". למחרת הלקוח מקבל תודה וקישור ישיר לביקורת. יותר ביקורות, יותר שיחות ממפות גוגל.</p>
-      </div>
-      <div class="row">
-        <h3>הכול בגיליון אחד</h3>
-        <p>כל הלידים, ההצעות והסטטוסים בגיליון גוגל שנפתח בטלפון. שלך, על החשבון שלך. אם תעזוב, הכול נשאר אצלך.</p>
-      </div>
+  <section class="wrap series">
+    <h2>מה קורה עם כל לקוחה</h2>
+    <p class="sub">מהרגע שהיא משאירה פרטים ועד הטיפול האחרון בסדרה. את רק משנה סטטוס בגיליון מהטלפון.</p>
+    <div class="timeline">
+      <div class="step"><span class="when">דקה אחרי</span><h3>תשובה בוואטסאפ</h3><p>בשמך, גם כשאת בטיפול. את מקבלת התראה עם הפרטים.</p></div>
+      <div class="step"><span class="when">יום, 3 ימים, שבוע</span><h3>מעקב</h3><p>למי שעוד לא קבעה תור. שלוש הודעות, ואז עוצרים.</p></div>
+      <div class="step"><span class="when">יום לפני + שעתיים לפני</span><h3>תזכורת לתור</h3><p>פחות הברזות ופחות שעות ריקות ביומן.</p></div>
+      <div class="step"><span class="when">אחרי 6 שבועות</span><h3>הטיפול הבא</h3><p>"הגיע הזמן לטיפול הבא". כאן נמצא רוב הכסף שהולך לאיבוד.</p></div>
+      <div class="step"><span class="when">אחרי טיפול 3</span><h3>ביקורת בגוגל</h3><p>קישור ישיר. יותר ביקורות, יותר לקוחות חדשות.</p></div>
     </div>
   </section>
 
   <section class="wrap" id="calc">
     <div class="calc">
-      <h2>כמה כסף הולך לאיבוד אצלך?</h2>
-      <p class="sub">שלושה מספרים, בערך. אף אחד לא רואה אותם חוץ ממך.</p>
-      <label class="field">כמה פניות מגיעות אליך בחודש?
-        <input id="leads" type="number" inputmode="numeric" min="0" value="30">
+      <h2>כמה לקוחות הולכות לאיבוד אצלך?</h2>
+      <p class="sub">ארבעה מספרים, בערך. אף אחד לא רואה אותם חוץ ממך.</p>
+      <label class="field">כמה לידים נכנסים בחודש?
+        <input id="leads" type="number" inputmode="numeric" min="0" value="50">
       </label>
-      <label class="field">כמה אחוז מהן לא מקבלות תשובה באותה שעה?
-        <input id="missed" type="number" inputmode="numeric" min="0" max="100" value="30">
+      <label class="field">כמה אחוז מהם לא מקבלים תשובה תוך שעה?
+        <input id="missed" type="number" inputmode="numeric" min="0" max="100" value="40">
       </label>
-      <label class="field">כמה שווה עבודה ממוצעת אצלך (₪)?
-        <input id="deal" type="number" inputmode="numeric" min="0" value="20000">
+      <label class="field">כמה אחוז מהלידים קובעות בדרך כלל?
+        <input id="close" type="number" inputmode="numeric" min="0" max="100" value="25">
       </label>
-      <label class="field">כמה אחוז מהפניות נסגרות אצלך בדרך כלל?
-        <input id="close" type="number" inputmode="numeric" min="0" max="100" value="20">
+      <label class="field">כמה שווה לקוחה שמתחילה סדרה (₪)?
+        <input id="deal" type="number" inputmode="numeric" min="0" value="1500">
       </label>
       <p class="result">
-        בערך <span class="big" id="out">₪36,000</span> בחודש בעבודות שאולי הלכו לקבלן אחר.
+        בערך <span class="big" id="out">₪7,500</span> בחודש בלקוחות שאולי קבעו במכון אחר.
         <small id="explain"></small>
       </p>
     </div>
@@ -174,53 +174,52 @@
   <section class="wrap price">
     <div class="box">
       <div>
-        <h2>מחיר ללקוחות הראשונים</h2>
+        <h2>מחיר לשלושת המכונים הראשונים</h2>
         <p class="amount">הקמה <span class="num">₪990</span> <s>₪2,500</s></p>
         <p class="amount">חודשי <span class="num">₪390</span> <s>₪590</s></p>
-        <p>מחיר מייסדים לשלושת הלקוחות הראשונים, נעול לשנה. תחזוקה ושינויים כלולים. בלי התחייבות, מבטלים בהודעה.</p>
+        <p>נעול לשנה. תחזוקה ושינויים בנוסח כלולים. בלי התחייבות, מבטלים בהודעה.</p>
       </div>
       <div class="promise">
         <strong>ההבטחה שלנו</strong>
-        <p>אם אחרי 30 יום לא ראית לפחות ליד אחד שקיבל תשובה אוטומטית, הצעה אחת שחזרה לחיים, או ביקורת חדשה בגוגל, את החודש הבא אתה לא משלם, ואנחנו מפרקים הכול.</p>
+        <p>אם אחרי 30 יום לא חזרה אלייך לפחות לקוחה אחת שהייתה הולכת לאיבוד, את החודש הבא את לא משלמת, ואנחנו מפרקים הכול.</p>
       </div>
     </div>
   </section>
 
   <section class="wrap faq">
-    <h2>שאלות שבעלי מקצוע שואלים</h2>
-    <details><summary>הלקוחות ירגישו שזה רובוט?</summary><p>ההודעה יוצאת בשם שלך ובניסוח שאתה מאשר. היא אומרת את מה שהיית כותב אם היה לך רגע פנוי.</p></details>
-    <details><summary>אני צריך לדעת משהו בטכנולוגיה?</summary><p>לא. אתה משנה סטטוס בגיליון מהטלפון, וזהו. אנחנו מקימים ומתחזקים.</p></details>
+    <h2>שאלות שבעלות מכונים שואלות</h2>
+    <details><summary>הלקוחות ירגישו שזה רובוט?</summary><p>ההודעות יוצאות מהוואטסאפ שלך, בשמך ובניסוח שאת מאשרת. הן אומרות מה שהיית כותבת אם הייתה לך דקה פנויה.</p></details>
+    <details><summary>יש לי כבר מערכת תורים</summary><p>מצוין, זה משלים. מערכת תורים עובדת אחרי שהלקוחה קבעה. אנחנו דואגים שהיא תגיע לקבוע, תגיע לתור, ותחזור לטיפול הבא.</p></details>
+    <details><summary>מה אני צריכה לעשות?</summary><p>לשנות סטטוס בגיליון מהטלפון: "נקבע תור", "הגיעה", "לא הגיעה". את כל השאר אנחנו מקימים ומתחזקים.</p></details>
+    <details><summary>זה עובד עם הלידים מפייסבוק ואינסטגרם?</summary><p>כן. מחברים את טופס המודעה למערכת, וכל ליד חדש מקבל תשובה תוך דקה.</p></details>
     <details><summary>כמה זמן לוקחת ההקמה?</summary><p>שיחה של 45 דקות איתך, והמערכת באוויר תוך 48 שעות.</p></details>
-    <details><summary>יש עלויות נוספות?</summary><p>הודעות וואטסאפ רשמיות עולות אגורות בודדות להודעה, ומחויבות ישירות מ-Meta. אצל בעל מקצוע ממוצע זה כמה שקלים בחודש.</p></details>
   </section>
 
   <section class="end">
     <div class="wrap">
-      <h2>רוצה לראות את זה עם השם של העסק שלך?</h2>
-      <a class="btn" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A8%D7%90%D7%95%D7%AA%20%D7%93%D7%9E%D7%95">שלחו לנו וואטסאפ</a>
-      <p class="phone-num">או התקשרו: <span class="num">052-466-6175</span></p>
+      <h2>רוצה לראות את זה עם השם של המכון שלך?</h2>
+      <a class="btn" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A8%D7%90%D7%95%D7%AA%20%D7%93%D7%9E%D7%95">שלחי לנו וואטסאפ</a>
+      <p class="phone-num">או התקשרי: <span class="num">052-466-6175</span></p>
     </div>
   </section>
 </main>
 
 <footer>
-  <div class="wrap">עונה ראשון, אוטומציות לבעלי מקצוע. <span class="num">052-466-6175</span></div>
+  <div class="wrap">עונה ראשון, מערכות וואטסאפ למכוני לייזר וקוסמטיקה. <span class="num">052-466-6175</span></div>
 </footer>
 
 <script>
   const $ = id => document.getElementById(id);
   const nis = n => '₪' + Math.round(n).toLocaleString('he-IL');
+  const pct = id => Math.min(100, Math.max(0, +$(id).value || 0)) / 100;
   function calc(){
     const leads = Math.max(0, +$('leads').value || 0);
-    const missed = Math.min(100, Math.max(0, +$('missed').value || 0)) / 100;
-    const deal = Math.max(0, +$('deal').value || 0);
-    const close = Math.min(100, Math.max(0, +$('close').value || 0)) / 100;
-    const lost = leads * missed;
-    const value = lost * close * deal;
-    $('out').textContent = nis(value);
-    $('explain').textContent = `${lost.toFixed(1)} פניות בחודש לא מקבלות תשובה מהר. אם רק ${Math.round(close*100)}% מהן היו נסגרות, זה ${(lost*close).toFixed(1)} עבודות בחודש.`;
+    const lost = leads * pct('missed');
+    const clients = lost * pct('close');
+    $('out').textContent = nis(clients * Math.max(0, +$('deal').value || 0));
+    $('explain').textContent = `${lost.toFixed(0)} לידים בחודש לא מקבלים תשובה מהר. אם ${Math.round(pct('close')*100)}% מהן היו קובעות, זה ${clients.toFixed(1)} לקוחות בחודש. וזה עוד לפני הברזות ולקוחות שלא חזרו לטיפול הבא.`;
   }
-  ['leads','missed','deal','close'].forEach(id => $(id).addEventListener('input', calc));
+  ['leads','missed','close','deal'].forEach(id => $(id).addEventListener('input', calc));
   calc();
 </script>
 </body>

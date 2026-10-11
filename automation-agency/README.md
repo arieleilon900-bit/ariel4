@@ -5,6 +5,9 @@
 ## במשפט אחד
 אנחנו מתקינים לבעלי מקצוע מערכת שעונה לכל פנייה תוך דקה, רודפת אחרי הצעות מחיר שלא נסגרו ואוספת ביקורות בגוגל. בעל העסק מבין את זה בעשר שניות: **פחות לקוחות הולכים למתחרה.**
 
+## הנישה שבחרנו: מכוני לייזר וקוסמטיקה
+התחילו מ-[07-laser-clinics.md](07-laser-clinics.md) ומהרשימה [templates/leads-laser-clinics.csv](templates/leads-laser-clinics.csv). המערכת ב-`system/` מותאמת למכונים.
+
 ## סדר קריאה
 | קובץ | מה יש בו | מי קורא |
 |---|---|---|
@@ -13,8 +16,10 @@
 | [03-free-tools-setup.md](03-free-tools-setup.md) | כל הכלים החינמיים, איך פותחים חשבונות | הבונה |
 | [system/SETUP.md](system/SETUP.md) | **המערכת המוכנה:** קוד ל-Google Sheets + הוראות התקנה ב-20 דקות | הבונה, ביום 2 |
 | [04-build-the-automations.md](04-build-the-automations.md) | אותן אוטומציות ב-Make (חלופה), ומעבר לוואטסאפ הרשמי | הבונה |
+| [07-laser-clinics.md](07-laser-clinics.md) | **הנישה:** למה מכוני לייזר, תסריטים, התנגדויות, מחיר | שניכם, קודם כול |
 | [05-sales-scripts.md](05-sales-scripts.md) | תסריט טלפון, הודעות, ביקור בעסק, התנגדויות | המוכר |
 | [06-meeting-close-onboard.md](06-meeting-close-onboard.md) | פגישת דמו, סגירה, גבייה, הקמה אצל הלקוח | שניכם |
+| [templates/leads-laser-clinics.csv](templates/leads-laser-clinics.csv) | 70 מכוני לייזר מכל הארץ עם משפט פתיחה | המוכר |
 | [templates/prospects.csv](templates/prospects.csv) | טבלת מעקב פניות (לייבא ל-Google Sheets) | המוכר |
 | [templates/client-sheet.csv](templates/client-sheet.csv) | מבנה הגיליון שהאוטומציות עובדות עליו | הבונה |
 | [templates/client-agreement.md](templates/client-agreement.md) | הסכם שירות קצר לחתימה | שניכם |

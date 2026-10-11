@@ -4,7 +4,7 @@
 <base target="_top">
 <meta charset="UTF-8">
 <style>
-  :root{--bg:#f6f5f1;--fg:#1f2523;--muted:#5c6460;--line:#d6d2c8;--accent:#1f7a4d;--card:#ffffff;}
+  :root{--bg:#f6f5f1;--fg:#1f2523;--muted:#5c6460;--line:#d6d2c8;--accent:#8a3b5f;--card:#ffffff;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:Arial,'Segoe UI',sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;padding:24px 16px;}
   .box{max-width:460px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:24px 20px;}
@@ -25,7 +25,7 @@
 <body>
 <div class="box" id="box">
   <h1><?= business ?></h1>
-  <p class="sub">השאירו פרטים ונחזור אליכם עוד היום. תשובה ראשונה מגיעה לוואטסאפ תוך דקה.</p>
+  <p class="sub">השאירי פרטים ונחזור אלייך עוד היום. תשובה ראשונה מגיעה לוואטסאפ תוך דקה.</p>
   <form id="f">
     <label for="name">שם</label>
     <input id="name" name="name" required autocomplete="name">
@@ -33,7 +33,7 @@
     <input id="phone" name="phone" type="tel" required inputmode="tel" autocomplete="tel" placeholder="050-0000000">
     <label for="city">עיר</label>
     <input id="city" name="city">
-    <label for="job">מה צריך?</label>
+    <label for="job">איזה טיפול מעניין אותך?</label>
     <select id="job" name="job">
       <? for (var i = 0; i < jobTypes.length; i++) { ?>
         <option><?= jobTypes[i] ?></option>
@@ -57,7 +57,7 @@
       .withSuccessHandler(function (res) {
         if (res && res.ok) {
           document.getElementById('box').innerHTML =
-            '<div class="done"><b>תודה, קיבלנו!</b>בדקו את הוואטסאפ, שלחנו לכם הודעה.</div>';
+            '<div class="done"><b>תודה, קיבלנו!</b>בדקי את הוואטסאפ, שלחנו לך הודעה.</div>';
         } else {
           btn.disabled = false; btn.textContent = 'שליחה';
           msg.className = 'msg err';
