@@ -1,5 +1,5 @@
 /**
- * תפוס: מערכת "אף ליד לא נופל"
+ * עונה ראשון: מערכת "אף ליד לא נופל"
  * Google Sheets + Apps Script + Green-API (וואטסאפ)
  *
  * מה המערכת עושה:
@@ -56,7 +56,7 @@ var DEFAULT_SETTINGS = [
 
 function onOpen() {
   SpreadsheetApp.getUi()
-    .createMenu('תפוס')
+    .createMenu('עונה ראשון')
     .addItem('1. התקנה ראשונית', 'setup')
     .addItem('2. שליחת הודעת בדיקה לבעל העסק', 'testWhatsApp')
     .addItem('3. ליד לדוגמה (בדיקה מלאה)', 'testLead')
@@ -99,7 +99,7 @@ function setup() {
   ScriptApp.newTrigger('dailyFollowups').timeBased().everyDays(1).atHour(10)
     .inTimezone('Asia/Jerusalem').create();
 
-  safeAlert_('ההתקנה הושלמה.\n\nעכשיו מלאו את לשונית "הגדרות" (שם העסק, טלפון, פרטי Green-API), ואז בתפריט "תפוס" ← "שליחת הודעת בדיקה".');
+  safeAlert_('ההתקנה הושלמה.\n\nעכשיו מלאו את לשונית "הגדרות" (שם העסק, טלפון, פרטי Green-API), ואז בתפריט "עונה ראשון" ← "שליחת הודעת בדיקה".');
 }
 
 /* ---------- קליטת לידים ---------- */

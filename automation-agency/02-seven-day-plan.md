@@ -10,7 +10,7 @@
 
 ## יום 1: יסודות
 **הבונה (90 דק׳)**
-- [ ] 15 דק׳: Gmail חדש לעסק (למשל `tafus.automations@gmail.com`). כל החשבונות נפתחים עליו.
+- [ ] 15 דק׳: Gmail חדש לעסק (למשל `onerishon.il@gmail.com`). כל החשבונות נפתחים עליו.
 - [ ] 15 דק׳: חשבון Make חינמי ([make.com](https://www.make.com)), חשבון Tally חינמי ([tally.so](https://tally.so)).
 - [ ] 15 דק׳: חשבון Green-API חינמי ([green-api.com](https://green-api.com)) וחיבור הטלפון של אחד מכם ב-QR (רק לדמו).
 - [ ] 15 דק׳: ייבוא `templates/client-sheet.csv` ל-Google Sheets בשם "דמו - שיפוצים".
