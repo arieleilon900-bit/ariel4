@@ -8,24 +8,25 @@
  *  3. תור שנקבע ← תזכורת יום לפני ושעתיים לפני (פחות הברזות)
  *  4. לקוחה שלא הגיעה ← הודעה לקביעת תור חדש
  *  5. אחרי טיפול ← תזכורת לטיפול הבא בסדרה, כשמגיע הזמן
- *  6. אחרי הטיפול השלישי ← בקשת ביקורת בגוגל
+ *  6. בסוף הסדרה ← בקשת ביקורת בגוגל
+ *  7. כל יום ראשון ← דוח שבועי לבעלת המכון בוואטסאפ
  *
  * בעלת המכון רק משנה סטטוס ומועד תור בגיליון. השאר אוטומטי.
  * התקנה: ראו SETUP.md.
  */
 
 var LEADS_SHEET = 'לקוחות';
+var LOG_SHEET = 'יומן';
 var SETTINGS_SHEET = 'הגדרות';
 var TZ = 'Asia/Jerusalem';
 
 var HEADERS = ['תאריך', 'שם', 'טלפון', 'עיר', 'טיפול', 'הערות', 'מקור', 'סטטוס',
-  'מועד תור', 'טיפולים', 'מעקב הבא', 'שלב מעקב', 'תזכורות לתור', 'הודעת היעדרות', 'ביקורת נשלחה'];
+  'מועד תור', 'טיפולים', 'טיפולים בסדרה', 'מעקב הבא', 'שלב מעקב', 'תזכורות לתור', 'הודעת היעדרות', 'ביקורת נשלחה'];
 
 var STATUSES = ['חדשה', 'נקבע תור', 'הגיעה', 'לא הגיעה', 'בסדרה', 'סיימה', 'לא רלוונטי'];
 
 var LEAD_FOLLOWUP_GAPS = [1, 2, 4];   // יום אחרי הפנייה, עוד יומיים, עוד 4 ימים
 var NEXT_TREATMENT_NUDGE_GAP = 10;    // אם לא קבעה אחרי התזכורת הראשונה, עוד אחת אחרי 10 ימים
-var REVIEW_AFTER_TREATMENTS = 3;
 var SEND_FROM_HOUR = 9;               // הודעות מתוזמנות נשלחות רק בין 9:00 ל-20:00
 var SEND_UNTIL_HOUR = 20;
 
@@ -36,6 +37,7 @@ var DEFAULT_SETTINGS = [
   ['כתובת המכון', 'רחוב הדוגמה 1, תל אביב', 'מופיעה בתזכורות לתור'],
   ['זמן חזרה', 'תוך שעה', 'מה מבטיחים לליד חדש'],
   ['ימים בין טיפולים', '42', 'אחרי כמה ימים לשלוח תזכורת לטיפול הבא'],
+  ['טיפולים בסדרה', '8', 'ברירת מחדל. אפשר לשנות ללקוחה מסוימת בעמודה "טיפולים בסדרה"'],
   ['קישור לביקורת בגוגל', 'https://g.page/r/XXXX/review', 'מפרופיל העסק בגוגל ← "לקבלת ביקורות"'],
   ['סוגי טיפול', 'הסרת שיער בלייזר - פנים,הסרת שיער בלייזר - גוף,הסרת שיער בלייזר - גברים,טיפול פנים,אחר', 'מופרדים בפסיק, מופיעים בטופס'],
   ['GREEN_API_URL', 'https://XXXX.api.greenapi.com', 'apiUrl מהקונסולה של Green-API'],
@@ -72,8 +74,8 @@ var DEFAULT_SETTINGS = [
     'היי {שם}, רק מזכירה שכדאי לא לדלג על הטיפול הבא בסדרה. יש לי תורים פנויים בימים הקרובים, מתאים לך?',
     '10 ימים אחרי התזכורת הראשונה, אם לא נקבע תור'],
   ['בקשת ביקורת',
-    'היי {שם}, תודה שאת איתנו 💛 אם את מרוצה עד עכשיו, ביקורת קצרה בגוגל תעזור לנו מאוד: {ביקורת}',
-    'אחרי הטיפול השלישי']
+    'היי {שם}, סיימת את הסדרה! 💛 תודה שבחרת ב{עסק}. אם את מרוצה, ביקורת קצרה בגוגל תעזור לנו מאוד: {ביקורת}',
+    'נשלח כשהסדרה מסתיימת (סטטוס "סיימה")']
 ];
 
 /* ---------- תפריט ---------- */
@@ -85,6 +87,7 @@ function onOpen() {
     .addItem('2. שליחת הודעת בדיקה לבעלת העסק', 'testWhatsApp')
     .addItem('3. ליד לדוגמה (בדיקה מלאה)', 'testLead')
     .addItem('4. הרצת תזכורות ומעקבים עכשיו', 'runScheduler')
+    .addItem('5. שליחת הדוח השבועי עכשיו', 'weeklyReport')
     .addToUi();
 }
 
@@ -115,10 +118,15 @@ function setup() {
     settings.getRange(2, 2, DEFAULT_SETTINGS.length, 1).setWrap(true);
   }
 
+  logSheet_();
+
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === 'runScheduler') ScriptApp.deleteTrigger(t);
+    var fn = t.getHandlerFunction();
+    if (fn === 'runScheduler' || fn === 'weeklyReport') ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('runScheduler').timeBased().everyHours(1).create();
+  ScriptApp.newTrigger('weeklyReport').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(9)
+    .inTimezone(TZ).create();
 
   safeAlert_('ההתקנה הושלמה.\n\nעכשיו מלאו את לשונית "הגדרות" (שם המכון, טלפון, כתובת, פרטי Green-API), ואז בתפריט "עונה ראשון" ← "שליחת הודעת בדיקה".');
 }
@@ -213,6 +221,7 @@ function handleLead_(lead) {
     lock.releaseLock();
   }
 
+  log_('ליד חדש', fullName);
   var sentLead = sendWhatsApp(phone, fillTemplate(s['הודעה לליד חדש'], vars));
   var owner = normalizePhone(s['טלפון בעלת העסק']);
   var sentOwner = owner ? sendWhatsApp(owner, fillTemplate(s['התראה לבעלת העסק'], vars)) : false;
@@ -232,6 +241,7 @@ function runScheduler(now) {
   var hour = Number(Utilities.formatDate(now, TZ, 'H'));
   var daytime = hour >= SEND_FROM_HOUR && hour < SEND_UNTIL_HOUR;
   var interval = Number(s['ימים בין טיפולים']) || 42;
+  var defaultSeries = Number(s['טיפולים בסדרה']) || 8;
 
   function set(rowNum, name, value) { sheet.getRange(rowNum, col[name] + 1).setValue(value); }
 
@@ -241,7 +251,8 @@ function runScheduler(now) {
     var status = String(r[col['סטטוס']]).trim();
     var phone = normalizePhone(r[col['טלפון']]);
     if (!phone) continue;
-    var vars = baseVars_(s, r[col['שם']]);
+    var name = r[col['שם']];
+    var vars = baseVars_(s, name);
     vars['טיפול'] = r[col['טיפול']] || 'הטיפול';
     var stage = Number(r[col['שלב מעקב']]) || 0;
     var next = r[col['מעקב הבא']];
@@ -251,6 +262,7 @@ function runScheduler(now) {
       // לידה שעוד לא קבעה תור
       if (daytime && due && stage < 3) {
         if (sendWhatsApp(phone, fillTemplate(s['מעקב ליד ' + (stage + 1)], vars))) {
+          log_('מעקב ליד', name);
           set(rowNum, 'שלב מעקב', stage + 1);
           set(rowNum, 'מעקב הבא', stage + 1 < 3 ? addDays_(today, LEAD_FOLLOWUP_GAPS[stage + 1]) : 'הסתיים');
         }
@@ -264,44 +276,125 @@ function runScheduler(now) {
       var key = Utilities.formatDate(appt, TZ, 'yyyy-MM-dd HH:mm');
       var parts = String(r[col['תזכורות לתור']] || '').split('|');
       var sent = parts[0] === key ? Number(parts[1]) || 0 : 0;
+      if (parts[0] !== key) {
+        // תור חדש שבעלת המכון רשמה: סופרים אותו לדוח
+        log_('נקבע תור', name);
+        set(rowNum, 'תזכורות לתור', key + '|0');
+      }
       vars['שעה'] = Utilities.formatDate(appt, TZ, 'HH:mm');
       vars['מתי'] = whenLabel_(appt, now);
 
       if (sent === 0 && hoursLeft <= 26 && hoursLeft > 3 && daytime) {
-        if (sendWhatsApp(phone, fillTemplate(s['תזכורת לפני תור'], vars))) set(rowNum, 'תזכורות לתור', key + '|1');
+        if (sendWhatsApp(phone, fillTemplate(s['תזכורת לפני תור'], vars))) {
+          log_('תזכורת לתור', name);
+          set(rowNum, 'תזכורות לתור', key + '|1');
+        }
       } else if (sent < 2 && hoursLeft <= 2.5) {
-        if (sendWhatsApp(phone, fillTemplate(s['תזכורת שעתיים לפני'], vars))) set(rowNum, 'תזכורות לתור', key + '|2');
+        if (sendWhatsApp(phone, fillTemplate(s['תזכורת שעתיים לפני'], vars))) {
+          log_('תזכורת לתור', name);
+          set(rowNum, 'תזכורות לתור', key + '|2');
+        }
       }
 
     } else if (status === 'הגיעה') {
       // בעלת המכון סימנה שהטיפול בוצע: סופרים ומתזמנים את הטיפול הבא
       var count = (Number(r[col['טיפולים']]) || 0) + 1;
+      var seriesLen = Number(r[col['טיפולים בסדרה']]) || defaultSeries;
+      log_('הגיעה לטיפול', name);
       set(rowNum, 'טיפולים', count);
-      set(rowNum, 'סטטוס', 'בסדרה');
       set(rowNum, 'שלב מעקב', 0);
-      set(rowNum, 'מעקב הבא', addDays_(today, interval));
       set(rowNum, 'מועד תור', '');
       set(rowNum, 'תזכורות לתור', '');
-      // בקשת הביקורת (אחרי הטיפול השלישי) נשלחת בריצה הבאה, בשעות היום
+      if (count >= seriesLen) {
+        // זה היה הטיפול האחרון בסדרה: בקשת הביקורת יוצאת בריצה הבאה, בשעות היום
+        set(rowNum, 'סטטוס', 'סיימה');
+        set(rowNum, 'מעקב הבא', '');
+      } else {
+        set(rowNum, 'סטטוס', 'בסדרה');
+        set(rowNum, 'מעקב הבא', addDays_(today, interval));
+      }
 
     } else if (status === 'בסדרה') {
-      var treatments = Number(r[col['טיפולים']]) || 0;
-      if (treatments >= REVIEW_AFTER_TREATMENTS && !r[col['ביקורת נשלחה']] && daytime) {
-        if (sendWhatsApp(phone, fillTemplate(s['בקשת ביקורת'], vars))) set(rowNum, 'ביקורת נשלחה', new Date());
-      }
       if (daytime && due && stage < 2) {
         if (sendWhatsApp(phone, fillTemplate(s['טיפול הבא ' + (stage + 1)], vars))) {
+          log_('תזכורת לטיפול הבא', name);
           set(rowNum, 'שלב מעקב', stage + 1);
           set(rowNum, 'מעקב הבא', stage === 0 ? addDays_(today, NEXT_TREATMENT_NUDGE_GAP) : 'הסתיים');
         }
       }
 
+    } else if (status === 'סיימה') {
+      if (!r[col['ביקורת נשלחה']] && daytime) {
+        if (sendWhatsApp(phone, fillTemplate(s['בקשת ביקורת'], vars))) {
+          log_('בקשת ביקורת', name);
+          set(rowNum, 'ביקורת נשלחה', new Date());
+        }
+      }
+
     } else if (status === 'לא הגיעה') {
       if (!r[col['הודעת היעדרות']] && daytime) {
-        if (sendWhatsApp(phone, fillTemplate(s['לא הגיעה'], vars))) set(rowNum, 'הודעת היעדרות', new Date());
+        if (sendWhatsApp(phone, fillTemplate(s['לא הגיעה'], vars))) {
+          log_('לא הגיעה', name);
+          set(rowNum, 'הודעת היעדרות', new Date());
+        }
       }
     }
   }
+}
+
+/* ---------- דוח שבועי: כל יום ראשון ב-9:00 ---------- */
+
+function weeklyReport(now) {
+  now = now instanceof Date ? now : new Date();
+  var s = getSettings_();
+  var owner = normalizePhone(s['טלפון בעלת העסק']);
+  if (!owner) return false;
+  var since = new Date(now.getTime() - 7 * 86400000);
+
+  var counts = {};
+  logSheet_().getDataRange().getValues().slice(1).forEach(function (r) {
+    if (r[0] instanceof Date && r[0] >= since && r[0] <= now) counts[r[1]] = (counts[r[1]] || 0) + 1;
+  });
+  function c(k) { return counts[k] || 0; }
+
+  var inSeries = 0;
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LEADS_SHEET);
+  var data = sheet.getDataRange().getValues();
+  if (data.length > 1) {
+    var col = indexHeaders_(data[0]);
+    data.slice(1).forEach(function (r) {
+      var st = String(r[col['סטטוס']]).trim();
+      if (st === 'בסדרה' || st === 'נקבע תור') inSeries++;
+    });
+  }
+
+  var text = '📊 הסיכום השבועי של ' + (s['שם העסק'] || '') + '\n\n' +
+    'לידים חדשים: ' + c('ליד חדש') + (c('ליד חדש') ? ' (כולן קיבלו תשובה תוך דקה)' : '') + '\n' +
+    'תורים שנקבעו: ' + c('נקבע תור') + '\n' +
+    'טיפולים שבוצעו: ' + c('הגיעה לטיפול') + '\n' +
+    'לא הגיעו: ' + c('לא הגיעה') + '\n\n' +
+    'מה המערכת שלחה בשבילך:\n' +
+    'הודעות מעקב ללידים: ' + c('מעקב ליד') + '\n' +
+    'תזכורות לפני תור: ' + c('תזכורת לתור') + '\n' +
+    'תזכורות לטיפול הבא: ' + c('תזכורת לטיפול הבא') + '\n' +
+    'בקשות ביקורת בגוגל: ' + c('בקשת ביקורת') + '\n\n' +
+    'לקוחות פעילות בסדרה: ' + inSeries;
+  return sendWhatsApp(owner, text);
+}
+
+function logSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(LOG_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(LOG_SHEET);
+    sh.appendRow(['זמן', 'אירוע', 'שם']);
+    try { sh.setRightToLeft(true); sh.setFrozenRows(1); } catch (e) { }
+  }
+  return sh;
+}
+
+function log_(type, name) {
+  try { logSheet_().appendRow([new Date(), type, String(name || '')]); } catch (e) { console.warn('log failed: ' + e); }
 }
 
 /* ---------- וואטסאפ ---------- */
