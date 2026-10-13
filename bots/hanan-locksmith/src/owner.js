@@ -11,8 +11,9 @@ export const HELP = `פקודות (כותבים לבוט מהטלפון שלך):
 סיום 0541234567 ← העבודה הסתיימה (אחרי זה: בקשת ביקורת, המלצה, ותזכורת בעוד שנה)
 ביטול 0541234567 ← מבטל עבודה מתואמת
 לא רלוונטי 0541234567 ← סוגר את הפנייה בלי מעקב
-בוט 0541234567 ← מחזיר את השיחה לבוט
-חסום 0541234567 ← הבוט מתעלם מהמספר הזה
+בוט 0541234567 ← הבוט חוזר לענות למספר הזה
+שקט 0541234567 ← מישהו שאתה מכיר: הבוט לא יענה לו (ההודעות ממשיכות להגיע אליך כרגיל)
+חסום 0541234567 ← ספאם: הבוט מתעלם מהמספר הזה
 דוח ← הסיכום השבועי עכשיו
 עזרה ← הרשימה הזו`;
 
@@ -28,8 +29,8 @@ export function parseCommand(text) {
   if ((m = t.match(/^תור ([\d\-+]{9,16}) (\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?) (\d{1,2}:\d{2})(?: (.+))?$/))) {
     return { cmd: 'appt', phone: normalizePhone(m[1]), date: m[2], time: m[3], address: m[4] || '' };
   }
-  if ((m = t.match(/^(סיום|ביטול|בוט|חסום) ([\d\-+]{9,16})$/))) {
-    const map = { 'סיום': 'done', 'ביטול': 'cancel', 'בוט': 'bot', 'חסום': 'block' };
+  if ((m = t.match(/^(סיום|ביטול|בוט|חסום|שקט) ([\d\-+]{9,16})$/))) {
+    const map = { 'סיום': 'done', 'ביטול': 'cancel', 'בוט': 'bot', 'חסום': 'block', 'שקט': 'quiet' };
     return { cmd: map[m[1]], phone: normalizePhone(m[2]) };
   }
   return { cmd: 'unknown' };
@@ -95,7 +96,13 @@ export async function handleOwnerCommand(env, text, now = new Date()) {
       return sendToOwner(env, `✓ הפנייה של ${displayPhone(c.phone)} נסגרה, בלי מעקב.`, now);
     }
 
+    case 'quiet': {
+      await env.DB.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(c.phone, nowIso(now)).run();
+      return sendToOwner(env, `✓ ${displayPhone(c.phone)} סומן כמוכר. הבוט לא יענה לו. כדי להחזיר: בוט ${displayPhone(c.phone)}`, now);
+    }
+
     case 'bot': {
+      await env.DB.prepare('UPDATE customers SET known = 0, blocked = 0 WHERE phone = ?').bind(c.phone).run();
       const conv = await latestConv(env, c.phone);
       if (conv) await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
       return sendToOwner(env, `✓ הבוט חזר לטפל ב-${displayPhone(c.phone)}.`, now);

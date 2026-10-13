@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS customers (
   first_seen TEXT NOT NULL,
   last_inbound_at TEXT,             -- להחלטה אם אפשר לשלוח טקסט חופשי (חלון 24 שעות)
   jobs_count INTEGER NOT NULL DEFAULT 0,
-  blocked INTEGER NOT NULL DEFAULT 0
+  blocked INTEGER NOT NULL DEFAULT 0,
+  known INTEGER NOT NULL DEFAULT 0      -- 1 = מישהו שחנן כבר מדבר איתו: הבוט לא עונה לו
 );
 
 CREATE TABLE IF NOT EXISTS conversations (

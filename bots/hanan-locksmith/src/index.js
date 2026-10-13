@@ -2,7 +2,7 @@
 // GET /webhook  ← אימות של Meta בזמן החיבור
 // POST /webhook ← הודעות נכנסות מוואטסאפ
 // cron          ← תזכורות, מעקבים ודוח שבועי
-import { handleInbound, handleOwnerEcho } from './handler.js';
+import { handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
 import { verifySignature } from './whatsapp.js';
 
@@ -54,6 +54,11 @@ export async function processWebhook(env, body, now = new Date()) {
       // Coexistence: הודעות שחנן שולח מאפליקציית WhatsApp Business
       for (const echo of v.message_echoes || []) {
         await handleOwnerEcho(env, echo, now);
+      }
+      // Coexistence: סנכרון אנשי קשר והיסטוריה מהאפליקציה בזמן החיבור
+      if (['history', 'smb_app_state_sync'].includes(change.field)) {
+        const n = await importKnownContacts(env, v, now);
+        console.log(`imported ${n} known contacts from ${change.field}`);
       }
     }
   }

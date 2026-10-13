@@ -183,3 +183,37 @@ test('coexistence echo stops the bot', async () => {
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'תודה' } }, 'e2'), t0);
   assert.equal(aiRequests.length, n, 'bot does not answer after Hanan took over');
 });
+
+test('known contacts: bot stays silent', async () => {
+  sent.length = 0; aiRequests = [];
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  const FRIEND = '972521234567', OLD = '972531234567', NEWC = '972541111111';
+
+  // 1. סנכרון היסטוריה מהאפליקציה בזמן החיבור
+  await processWebhook(env, { entry: [{ changes: [{ field: 'history', value: { history: [{ threads: [{ id: OLD, messages: [{ from: OLD, id: 'h1' }] }] }] } }] }] }, t0);
+  // 2. חנן מסמן חבר כמוכר
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'שקט 052-1234567' } }, 'k1'), t0);
+  assert.ok(textsTo(OWNER).some((t) => t.includes('סומן כמוכר')));
+
+  await processWebhook(env, inbound(FRIEND, { type: 'text', text: { body: 'אחי מה נשמע' } }, 'k2'), t0);
+  await processWebhook(env, inbound(OLD, { type: 'text', text: { body: 'היי חנן' } }, 'k3'), t0);
+  assert.equal(aiRequests.length, 0, 'no AI for known contacts');
+  assert.equal(sent.filter((m) => m.to === FRIEND || m.to === OLD).length, 0, 'no bot reply to known contacts');
+
+  // 3. מישהו חדש מקבל את הבוט כרגיל
+  aiQueue = [ai({ reply: 'היי, מה קרה?' })];
+  await processWebhook(env, inbound(NEWC, { type: 'text', text: { body: 'ננעלתי' } }, 'k4'), t0);
+  assert.equal(aiRequests.length, 1);
+
+  // 4. חנן כותב בעצמו למישהו מהאפליקציה → מעכשיו הוא מוכר
+  await processWebhook(env, { entry: [{ changes: [{ value: { message_echoes: [{ from: '123', to: NEWC, type: 'text', text: { body: 'אני מטפל' } }] } }] }] }, t0);
+  await processWebhook(env, inbound(NEWC, { type: 'text', text: { body: 'תודה' } }, 'k5'), t0);
+  assert.equal(aiRequests.length, 1, 'silent after Hanan wrote to him');
+
+  // 5. "בוט" מחזיר את הבוט
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בוט 052-1234567' } }, 'k6'), t0);
+  aiQueue = [ai({ reply: 'היי!' })];
+  await processWebhook(env, inbound(FRIEND, { type: 'text', text: { body: 'ננעלתי' } }, 'k7'), t0);
+  assert.equal(aiRequests.length, 2);
+});

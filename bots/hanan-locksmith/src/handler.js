@@ -134,6 +134,13 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   const customer = await env.DB.prepare('SELECT * FROM customers WHERE phone = ?').bind(phone).first();
   if (customer?.blocked) return;
 
+  // אנשים שחנן כבר מדבר איתם (חברים, ספקים, לקוחות קבועים): הבוט שותק, וחנן רואה את ההודעה באפליקציה שלו
+  if (customer?.known) {
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'user', ?, ?, ?)").bind(msg.text?.body || `[${msg.type}]`, msg.id, nowIso(now)).run();
+    if (env.FORWARD_KNOWN === '1') await sendToOwner(env, `💬 ${displayPhone(phone)} (מוכר) כתב/ה: ${msg.text?.body || `[${msg.type}]`}`, now);
+    return;
+  }
+
   wa.markRead(env, msg.id).catch(() => {});
   const content = await extractContent(env, msg);
   if (content.voice) await logEvent(env, 'voice', phone, now);
@@ -198,6 +205,10 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
 export async function handleOwnerEcho(env, echo, now = new Date()) {
   const phone = echo.to;
   if (!phone) return;
+  // מי שחנן כתב לו בעצמו, מהאפליקציה, נחשב "מוכר" מעכשיו: הבוט לא יפנה אליו
+  if (env.KNOWN_ON_OWNER_MESSAGE !== '0') {
+    await env.DB.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(phone, nowIso(now)).run();
+  }
   const conv = await env.DB.prepare("SELECT * FROM conversations WHERE phone = ? AND state IN ('bot','handoff') ORDER BY id DESC LIMIT 1").bind(phone).first();
   if (conv && conv.state === 'bot') {
     await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ?")
@@ -209,3 +220,20 @@ export async function handleOwnerEcho(env, echo, now = new Date()) {
 }
 
 export { BUSINESS };
+
+// בזמן החיבור (Coexistence), Meta יכולים לשלוח את אנשי הקשר וההיסטוריה של חנן מהאפליקציה.
+// כל מספר שמופיע שם מסומן כ"מוכר", כדי שהבוט לא יפנה לאנשים שחנן כבר מדבר איתם.
+export async function importKnownContacts(env, value, now = new Date()) {
+  const phones = new Set();
+  const walk = (o, key = '') => {
+    if (Array.isArray(o)) return o.forEach((x) => walk(x, key));
+    if (o && typeof o === 'object') return Object.entries(o).forEach(([k, v]) => walk(v, k));
+    if (['wa_id', 'from', 'to', 'phone_number'].includes(key) && /^\d{11,13}$/.test(String(o))) phones.add(String(o));
+  };
+  walk(value);
+  phones.delete(String(env.OWNER_PHONE || ''));
+  for (const p of phones) {
+    await env.DB.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(p, nowIso(now)).run();
+  }
+  return phones.size;
+}
