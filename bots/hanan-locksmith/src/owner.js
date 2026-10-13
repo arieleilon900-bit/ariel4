@@ -2,7 +2,7 @@
 import { MESSAGES, TEMPLATES } from './config.js';
 import { appendRow } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
-import { aiRespond, forwardPhotosToOwner, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
+import { aiRespond, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
 import { deliverReceipt } from './receipts.js';
 import * as wa from './whatsapp.js';
@@ -22,6 +22,9 @@ export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ה
 שקט ← מישהו שאתה מכיר: הבוט לא יענה לו
 חסום ← ספאם: הבוט מתעלם מהמספר הזה
 דוח ← הסיכום השבועי עכשיו
+סטטוס ← מה קורה עכשיו: פניות היום, מחכים לך, הבוט פועל או בהפסקה
+עצור בוט ← הבוט מפסיק לענות ללקוחות, והכל מגיע ישר אליך
+הפעל בוט ← הבוט חוזר לעבוד
 עזרה ← הרשימה הזו
 
 אפשר גם בלי לענות על הודעה: כותבים את הטלפון אחרי הפקודה. למשל: סיום 0541234567`;
@@ -50,6 +53,9 @@ export function parseCommand(text) {
   const ph = (raw) => (raw == null ? null : normalizePhone(raw));
   if (/^(עזרה|help|פקודות)$/i.test(t)) return { cmd: 'help' };
   if (/^דוח$/.test(t)) return { cmd: 'report' };
+  if (/^סטטוס$/.test(t)) return { cmd: 'status' };
+  if (/^(עצור|עצור בוט|הפסק בוט)$/.test(t)) return { cmd: 'pause' };
+  if (/^(הפעל|הפעל בוט|המשך בוט)$/.test(t)) return { cmd: 'resume' };
   if (isAck(t)) return { cmd: 'ack' };
   let m;
   if ((m = t.match(new RegExp(`^לא רלוונטי(?: ([\\d\\-+ ]{9,16}))?$`)))) return { cmd: 'irrelevant', phone: ph(m[1]) };
@@ -138,7 +144,9 @@ async function sendReceiptFile(env, phone, fileId, filename, now) {
   }
 }
 
-export async function handleOwnerCommand(env, text, now = new Date(), msg = null) {
+export async function handleOwnerCommand(env, text, now = new Date(), msg = null, from = env.OWNER_PHONE) {
+  // אריאל (מנהל) מקבל את התשובות לטלפון שלו, לא של חנן
+  if (from && from !== env.OWNER_PHONE) env = { ...env, OWNER_PHONE: from };
   if (msg && msg.type === 'document') return handleOwnerFile(env, msg, now);
   if (msg && msg.type === 'image') return handleOwnerImage(env, msg, now);
   // רק טלפון, ויש קובץ שמחכה (חנן שלח קבלה בלי לציין לקוח)
@@ -170,7 +178,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     return sendToOwner(env, `לא הבנתי את "${t.slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
   }
 
-  const needsPhone = !['help', 'report', 'unknown'].includes(c.cmd);
+  const needsPhone = !['help', 'report', 'unknown', 'status', 'pause', 'resume'].includes(c.cmd);
   if (needsPhone && c.phone == null) {
     if (!quoted) return sendToOwner(env, 'על איזה לקוח? ענה (החלקה ימינה) על ההודעה שקיבלת עליו, או כתוב גם את הטלפון. למשל: סיום 0541234567', now);
     c.phone = quoted;
@@ -183,6 +191,33 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'report':
       return weeklyReport(env, now);
+
+    case 'pause':
+      await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('paused', '1') ON CONFLICT(key) DO UPDATE SET value = '1'").run();
+      await logEvent(env, 'paused', null, now);
+      return sendToOwner(env, '⏸ הבוט בהפסקה. הוא לא עונה ללקוחות, וכל הודעה מגיעה אליך. להחזיר: הפעל בוט', now);
+
+    case 'resume':
+      await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('paused', '0') ON CONFLICT(key) DO UPDATE SET value = '0'").run();
+      await logEvent(env, 'resumed', null, now);
+      return sendToOwner(env, '▶️ הבוט חזר לעבוד.', now);
+
+    case 'status': {
+      const dayStart = new Date(now.getTime() - 24 * 3600000).toISOString();
+      const leads = (await env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE type = 'lead' AND created_at >= ?").bind(dayStart).first())?.n || 0;
+      const waiting = (await env.DB.prepare("SELECT COUNT(*) AS n FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND handed_off_at >= ?").bind(dayStart).first())?.n || 0;
+      const talking = (await env.DB.prepare("SELECT COUNT(*) AS n FROM conversations WHERE state = 'bot' AND updated_at >= ?").bind(dayStart).first())?.n || 0;
+      const jobs = (await env.DB.prepare("SELECT COUNT(*) AS n FROM jobs WHERE status = 'open' AND scheduled_at >= ?").bind(nowIso(now)).first())?.n || 0;
+      const errors = (await env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE type IN ('ai_error','send_failed') AND created_at >= ?").bind(dayStart).first())?.n || 0;
+      return sendToOwner(env, [
+        (await isPaused(env)) ? '⏸ הבוט בהפסקה' : '▶️ הבוט פועל',
+        `פניות ב-24 השעות האחרונות: ${leads}`,
+        `הבוט מדבר עכשיו עם: ${talking}`,
+        `מחכים לך (עוד לא טיפלת): ${waiting}`,
+        `עבודות מתואמות קדימה: ${jobs}`,
+        errors ? `תקלות ב-24 שעות: ${errors}` : 'תקלות: אין',
+      ].join('\n'), now);
+    }
 
     case 'eta': {
       const min = c.minutes || 30;

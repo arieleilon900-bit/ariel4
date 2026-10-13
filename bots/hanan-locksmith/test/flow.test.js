@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  db.exec(readFileSync(new URL('../migrations/0001_init.sql', import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -650,4 +650,19 @@ test('review2: command parsing edge cases and helpers', async () => {
   assert.equal(util.normalizePhone('+1 415 555 1234'), '14155551234');
   assert.equal(util.normalizePhone('+972 54 1234567'), CUSTOMER);
   assert.equal(util.normalizePhone('100234567'), '');
+});
+
+test('control: pause/resume and status, from Hanan or from Ariel', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const ADMIN = '972524666175';
+  const env = { ...makeEnv(), ADMIN_PHONE: ADMIN };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  await processWebhook(env, inbound(ADMIN, { type: 'text', text: { body: 'עצור בוט' } }, 'c1'), t0);
+  assert.ok(lastSentTo(ADMIN).text.body.includes('בהפסקה'), 'answer goes to Ariel');
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי' } }, 'c2'), t0);
+  assert.equal(aiRequests.length, 0, 'no AI while paused');
+  assert.ok(sent.some((m) => m.to === OWNER && JSON.stringify(m).includes('ננעלתי')), 'forwarded to Hanan');
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'הפעל בוט' } }, 'c3'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סטטוס' } }, 'c4'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.includes('הבוט פועל'));
 });

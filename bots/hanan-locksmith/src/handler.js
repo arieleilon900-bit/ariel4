@@ -9,6 +9,11 @@ import { ownerHours } from './hours.js';
 
 const CONV_IDLE_HOURS = 72; // שיחה שלא זזה 3 ימים נחשבת סגורה, והודעה חדשה פותחת שיחה חדשה
 
+// הבוט בהפסקה ("עצור בוט"): לא עונה ללקוחות, וכל הודעה עוברת ישר לחנן
+export async function isPaused(env) {
+  return (await env.DB.prepare("SELECT value FROM settings WHERE key = 'paused'").first())?.value === '1';
+}
+
 export async function logEvent(env, type, phone, now = new Date()) {
   await env.DB.prepare('INSERT INTO events (type, phone, created_at) VALUES (?, ?, ?)').bind(type, phone || null, nowIso(now)).run();
 }
@@ -179,12 +184,12 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
      ON CONFLICT(phone) DO UPDATE SET last_inbound_at = excluded.last_inbound_at, name = COALESCE(customers.name, excluded.name)`,
   ).bind(phone, contactName || null, nowIso(now), nowIso(now)).run();
 
-  // פקודות מחנן
-  if (env.OWNER_PHONE && phone === env.OWNER_PHONE) {
+  // פקודות מחנן (ומאריאל: מנהל המערכת יכול לשלוח את אותן פקודות)
+  if ((env.OWNER_PHONE && phone === env.OWNER_PHONE) || (env.ADMIN_PHONE && phone === env.ADMIN_PHONE)) {
     const ownerText = msg.text?.body || msg.button?.text || msg.interactive?.button_reply?.title || '';
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'owner', ?, ?, ?)").bind(ownerText || `[${msg.type}]`, msg.id, nowIso(now)).run();
-    await flushOwnerOutbox(env, now);
-    await handleOwnerCommand(env, ownerText, now, msg);
+    if (phone === env.OWNER_PHONE) await flushOwnerOutbox(env, now);
+    await handleOwnerCommand(env, ownerText, now, msg, phone);
     return;
   }
 
@@ -225,8 +230,8 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   await env.DB.prepare('UPDATE conversations SET updated_at = ?, location = COALESCE(?, location) WHERE id = ?')
     .bind(nowIso(now), content.location || null, conv.id).run();
 
-  // אחרי ההעברה לחנן: הבוט לא מנהל שיחה, רק מעביר לחנן את מה שנכתב
-  if (conv.state === 'handoff') {
+  // אחרי ההעברה לחנן, או כשהבוט בהפסקה: הבוט לא מנהל שיחה, רק מעביר לחנן את מה שנכתב
+  if (conv.state === 'handoff' || await isPaused(env)) {
     await sendToOwner(env, `💬 ${customer?.name || ''} ${displayPhone(phone)} כתב/ה: ${content.text}`.trim(), now, phone);
     if (content.photoId) await forwardPhotosToOwner(env, [content.photoId], now, phone);
     const lastBot = await env.DB.prepare("SELECT text, created_at FROM messages WHERE conv_id = ? AND role = 'assistant' ORDER BY id DESC LIMIT 1").bind(conv.id).first();
