@@ -51,6 +51,7 @@ const { processWebhook } = await import('../src/index.js');
 const { runEvery15, weeklyReport } = await import('../src/cron.js');
 const { parseCommand } = await import('../src/owner.js');
 const util = await import('../src/util.js');
+const { MESSAGES } = await import('../src/config.js');
 
 const OWNER = '972503429998';
 const CUSTOMER = '972541234567';
@@ -278,4 +279,50 @@ test('owner reminders: morning agenda and an hour before each job', async () => 
   assert.ok(rem[0].includes('היום ב-11:00'));
   // והלקוח קיבל את שלו (שעתיים לפני)
   assert.ok(textsTo(CUSTOMER).some((t) => t.includes('11:00')));
+});
+
+test('nobody left hanging: customer nudge, partial handoff, owner nudges, done check', async () => {
+  sent.length = 0; aiRequests = [];
+  const env = makeEnv();
+  const at = (h, m = 0) => new Date(Date.UTC(2026, 9, 13, h - 3, m)); // שעון ישראל, יום שלישי
+  const C2 = '972547777777';
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'n0'), at(9));
+
+  // לקוח א' עונה פעם אחת ונעלם
+  aiQueue = [ai({ reply: 'מה הכתובת?', issue: 'נעול בחוץ', customer_name: 'משה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ' } }, 'n1'), at(10));
+  await runEvery15(env, at(10, 15));
+  assert.ok(!textsTo(CUSTOMER).includes(MESSAGES.customerNudge), 'not before 30 min');
+  await runEvery15(env, at(10, 30));
+  await runEvery15(env, at(10, 45));
+  assert.equal(textsTo(CUSTOMER).filter((t) => t === MESSAGES.customerNudge).length, 1, 'one nudge only');
+  // 3 שעות אחרי התזכורת: חנן מקבל את מה שיש
+  await runEvery15(env, at(13, 30));
+  assert.ok(textsTo(OWNER).some((t) => t.includes('התחיל לכתוב ולא סיים') && t.includes('נעול בחוץ')));
+
+  // חנן כותב "טופל" על לקוח א' → אין תזכורות עליו
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'טופל 054-1234567' } }, 'n3'), at(13, 40));
+  assert.ok(!textsTo(OWNER).some((t) => t.includes('עדיין לא חזרת') && t.includes('054-1234567')));
+
+  // לקוח ב' מגיע עד הסוף, חנן לא מגיב
+  aiQueue = [ai({ reply: 'מעביר לחנן', issue: 'צילינדר', address: 'הרצל 1', ready_for_handoff: true })];
+  await processWebhook(env, inbound(C2, { type: 'text', text: { body: 'צריך צילינדר בהרצל 1' } }, 'n2'), at(14));
+  const nudges = () => textsTo(OWNER).filter((t) => t.includes('עדיין לא חזרת')).length;
+  await runEvery15(env, at(14, 15));
+  assert.equal(nudges(), 0);
+  await runEvery15(env, at(14, 30));
+  assert.equal(nudges(), 1);
+  await runEvery15(env, at(15, 30));
+  assert.equal(nudges(), 2);
+  assert.ok(textsTo(C2).includes(MESSAGES.customerReassure), 'customer reassured on second nudge');
+  await runEvery15(env, at(17));
+  assert.equal(nudges(), 2, 'max two');
+  assert.ok(!textsTo(OWNER).some((t) => t.includes('עדיין לא חזרת') && t.includes('054-1234567')), 'no nudges after טופל');
+
+
+  // עבודה שעבר זמנה ולא סומנה
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0547777777 13/10/2026 16:00' } }, 'n4'), at(15, 40));
+  await runEvery15(env, at(19, 15));
+  await runEvery15(env, at(19, 30));
+  assert.equal(textsTo(OWNER).filter((t) => t.startsWith('מה קרה עם העבודה')).length, 1);
 });

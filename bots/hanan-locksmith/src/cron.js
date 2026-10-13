@@ -4,6 +4,7 @@ import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './ut
 import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
 import { deliverReceipt } from './receipts.js';
+import { runNudges } from './nudges.js';
 
 // הודעות מתוזמנות ללקוחות רק בין 08:00 ל-21:00, ולא בשבת
 function canMessageNow(now) {
@@ -16,6 +17,7 @@ export async function runEvery15(env, now = new Date()) {
   await appointmentReminders(env, now);
   await ownerAgenda(env, now);
   await ownerJobReminders(env, now);
+  await runNudges(env, now);
   await invoices(env, now);
   if (!canMessageNow(now)) return;
   await followups(env, now);

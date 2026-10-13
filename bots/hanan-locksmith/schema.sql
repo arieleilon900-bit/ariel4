@@ -24,7 +24,11 @@ CREATE TABLE IF NOT EXISTS conversations (
   location TEXT,                       -- קישור וויז אם הלקוח שלח מיקום
   handed_off_at TEXT,
   followup_at TEXT,                    -- מתי לשלוח מעקב ללקוח שלא סגר
-  followup_sent INTEGER NOT NULL DEFAULT 0
+  followup_sent INTEGER NOT NULL DEFAULT 0,
+  customer_nudges INTEGER NOT NULL DEFAULT 0,  -- כמה פעמים הזכרנו ללקוח שלא ענה (0 / 1 / 2 = הועבר לחנן חלקי)
+  owner_replied_at TEXT,                       -- מתי חנן טיפל (ענה מהאפליקציה או שלח פקודה על הלקוח)
+  owner_nudges INTEGER NOT NULL DEFAULT 0,     -- כמה תזכורות קיבל חנן על פנייה שלא טופלה
+  owner_nudged_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_conv_phone ON conversations(phone, state);
 
@@ -47,6 +51,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   scheduled_at TEXT,                   -- לעבודות מתואמות
   reminders_sent INTEGER NOT NULL DEFAULT 0,  -- 0 / 1 (יום לפני) / 2 (שעתיים לפני)
   owner_reminded INTEGER NOT NULL DEFAULT 0,  -- תזכורת לחנן לפני העבודה נשלחה
+  done_check_sent INTEGER NOT NULL DEFAULT 0, -- שאלנו את חנן אם סיים (עבודה שעבר זמנה ולא סומנה)
   status TEXT NOT NULL DEFAULT 'open', -- open | done | cancelled
   done_at TEXT,
   invoice_doc_id TEXT,

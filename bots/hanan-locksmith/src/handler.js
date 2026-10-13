@@ -83,7 +83,7 @@ async function getOrCreateConversation(env, phone, now) {
   return { conv: await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(id).first(), isNew: true };
 }
 
-function ownerSummary(conv, result, phone, now) {
+export function ownerSummary(conv, result, phone, now) {
   const lines = [
     result.urgent ? '🚨 פנייה דחופה!' : '🔔 פנייה חדשה',
     `שם: ${result.customer_name || '(לא נמסר)'}`,
@@ -99,7 +99,7 @@ function ownerSummary(conv, result, phone, now) {
   return lines.join('\n');
 }
 
-async function forwardPhotosToOwner(env, photoIds) {
+export async function forwardPhotosToOwner(env, photoIds) {
   for (const id of photoIds) {
     try {
       const media = await wa.downloadMedia(env, id);
@@ -214,12 +214,19 @@ export async function handleOwnerEcho(env, echo, now = new Date()) {
     await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ?")
       .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();
   }
+  if (conv) await markOwnerReplied(env, phone, now);
   if (conv) {
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner', ?, ?)").bind(conv.id, echo.text?.body || `[${echo.type}]`, nowIso(now)).run();
   }
 }
 
 export { BUSINESS };
+
+// חנן טיפל בלקוח (ענה מהאפליקציה או שלח פקודה עליו): מפסיקים להזכיר לו
+export async function markOwnerReplied(env, phone, now = new Date()) {
+  await env.DB.prepare("UPDATE conversations SET owner_replied_at = COALESCE(owner_replied_at, ?) WHERE id = (SELECT id FROM conversations WHERE phone = ? ORDER BY id DESC LIMIT 1)")
+    .bind(nowIso(now), phone).run();
+}
 
 // בזמן החיבור (Coexistence), Meta יכולים לשלוח את אנשי הקשר וההיסטוריה של חנן מהאפליקציה.
 // כל מספר שמופיע שם מסומן כ"מוכר", כדי שהבוט לא יפנה לאנשים שחנן כבר מדבר איתם.
