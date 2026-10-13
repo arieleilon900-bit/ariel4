@@ -239,6 +239,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(c.phone, conv?.id || null, conv?.issue || null, c.address || conv?.address || null, at.toISOString(), nowIso(now)).run();
       if (conv) await env.DB.prepare("UPDATE conversations SET followup_sent = 1 WHERE id = ?").bind(conv.id).run();
+      await sheetRow(env, c.phone, 'תור נקבע', whenLabel(at, now), now, c.address || conv?.address);
       return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.`, now);
     }
 
@@ -276,12 +277,14 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'cancel': {
       await env.DB.prepare("UPDATE jobs SET status = 'cancelled' WHERE phone = ? AND status = 'open'").bind(c.phone).run();
+      await sheetRow(env, c.phone, 'עבודה בוטלה', '', now);
       return sendToOwner(env, `✓ בוטלה העבודה של ${displayPhone(c.phone)}.`, now);
     }
 
     case 'irrelevant': {
       const conv = await latestConv(env, c.phone);
       if (conv) await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(conv.id).run();
+      await sheetRow(env, c.phone, 'לא רלוונטי', '', now);
       return sendToOwner(env, `✓ הפנייה של ${displayPhone(c.phone)} נסגרה, בלי מעקב.`, now);
     }
 
@@ -332,4 +335,11 @@ async function relayToCustomer(env, phone, text, now) {
     if (conv.state === 'bot') await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?) WHERE id = ?").bind(nowIso(now), conv.id).run();
   }
   return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}: "${String(text).slice(0, 60)}"` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
+}
+
+// שורה בטבלה: "מה היה בסוף" עם הלקוח
+async function sheetRow(env, phone, what, note, now, address = null) {
+  const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(phone).first();
+  const conv = await latestConv(env, phone);
+  await appendRow(env, [ilDateTimeLabel(now), what, cust?.name || '', displayPhone(phone), conv?.issue || '', address || conv?.address || '', '', note || '']);
 }

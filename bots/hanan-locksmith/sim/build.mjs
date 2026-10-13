@@ -1,0 +1,23 @@
+// בונה את דף הניסיון: node sim/build.mjs ← sim/dist/demo.html
+import { build } from 'esbuild';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const swap = {
+  name: 'sim-swap',
+  setup(b) {
+    // הבוט האמיתי מדבר עם Anthropic וגוגל; בדף הניסיון מחליפים את שני הקבצים האלה בלבד
+    b.onResolve({ filter: /^\.\/(ai|sheets)\.js$/ }, (args) => (args.importer.includes('/src/') ? { path: resolve(here, args.path) } : undefined));
+  },
+};
+const out = await build({
+  entryPoints: [resolve(here, 'entry.js')], bundle: true, format: 'iife', globalName: 'BotSim',
+  platform: 'browser', target: 'es2020', write: false, plugins: [swap], loader: { '.sql': 'text' }, legalComments: 'none',
+});
+const js = out.outputFiles[0].text.replace(/<\/script/gi, '<\\/script');
+const page = readFileSync(resolve(here, 'page.html'), 'utf8').replace('/*__BOT_BUNDLE__*/', () => js);
+mkdirSync(resolve(here, 'dist'), { recursive: true });
+writeFileSync(resolve(here, 'dist/demo.html'), page);
+console.log('sim/dist/demo.html', Math.round(page.length / 1024), 'KB');

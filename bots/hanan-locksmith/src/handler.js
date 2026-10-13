@@ -313,6 +313,7 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
   if (result.customer_done && !result.ready_for_handoff) {
     await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1, customer_nudges = 2 WHERE id = ?").bind(conv.id).run();
     await logEvent(env, 'customer_done', phone, now);
+    await appendRow(env, [ilDateTimeLabel(now), 'הלקוח ויתר', customer?.name || contactName || '', displayPhone(phone), result.issue || conv.issue || '', result.address || conv.address || '', '', result.summary_for_owner]);
     return;
   }
 
@@ -328,7 +329,11 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     const fresh = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
     const name = result.customer_name || customer?.name || contactName || '';
     await logEvent(env, result.urgent ? 'urgent' : 'handoff', phone, now);
-    await sendToOwner(env, ownerSummary(fresh, { ...result, customer_name: name }, phone, now), now, phone);
+    // הודעות קוליות: חנן מקבל את התמלול המלא, לא רק את הסיכום של ה-AI
+    const voices = (await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' AND text LIKE '[הודעה קולית]%' ORDER BY id").bind(conv.id).all()).results;
+    const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
+    const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now);
+    await sendToOwner(env, voiceText ? `${summaryText}\n\nמה הוא אמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
     await forwardPhotosToOwner(env, JSON.parse(fresh.photos || '[]'), now, phone);
     await appendRow(env, [
       ilDateTimeLabel(now), result.urgent ? 'פנייה דחופה' : 'פנייה חדשה', name,
