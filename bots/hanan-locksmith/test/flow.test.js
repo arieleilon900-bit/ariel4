@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -665,4 +665,21 @@ test('control: pause/resume and status, from Hanan or from Ariel', async () => {
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'הפעל בוט' } }, 'c3'), t0);
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סטטוס' } }, 'c4'), t0);
   assert.ok(lastSentTo(OWNER).text.body.includes('הבוט פועל'));
+});
+
+test('Hanan teaches the bot: למד / מה למדת / שכח, and it reaches the AI', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'למד החלפת צילינדר עולה 250-450 ש"ח כולל הגעה' } }, 'l1'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.startsWith('✓ למדתי (1)'));
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'למד: אני לא עובד בשבת' } }, 'l2'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'מה למדת' } }, 'l3'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.includes('2. אני לא עובד בשבת'));
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'שכח 2' } }, 'l4'), t0);
+  aiQueue = [ai({ reply: 'בין 250 ל-450 כולל הגעה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'כמה עולה צילינדר?' } }, 'l5'), t0);
+  const sys = JSON.stringify(aiRequests.at(-1).system);
+  assert.ok(sys.includes('250-450'), 'taught fact in prompt');
+  assert.ok(!sys.includes('לא עובד בשבת'), 'forgotten fact removed');
 });

@@ -11,12 +11,12 @@ function b64ToBlob(b64, mime) {
   return new Blob([bytes], { type: mime });
 }
 
-export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '' }) {
+export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '', knowledge = [] }) {
   const sample = env.SAMPLE;
   if (!sample) return fallbackResult('אין חיבור ל-Claude בדף הזה');
   const transcript = history.map((m) => `${m.role === 'assistant' ? 'הבוט' : 'הלקוח'}: ${m.text}`).join('\n');
   const fields = Object.entries(SCHEMA.properties).map(([k, v]) => `- ${k} (${v.type}${v.enum ? ': ' + v.enum.join('/') : ''})${v.description ? ': ' + v.description : ''}`).join('\n');
-  const input = `${buildSystemPrompt({ now, returningCustomer, profileName })}
+  const input = `${buildSystemPrompt({ now, returningCustomer, profileName, knowledge })}
 
 השיחה עד עכשיו (ההודעה האחרונה היא של הלקוח${image ? ', והוא צירף תמונה שמצורפת כאן' : ''}):
 ${transcript}

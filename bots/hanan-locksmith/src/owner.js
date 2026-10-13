@@ -21,6 +21,9 @@ export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ה
 בוט ← הבוט חוזר לענות ללקוח הזה
 שקט ← מישהו שאתה מכיר: הבוט לא יענה לו
 חסום ← ספאם: הבוט מתעלם מהמספר הזה
+למד החלפת צילינדר עולה 250-450 ₪ כולל הגעה ← הבוט יודע את זה מעכשיו ועונה ככה ללקוחות
+מה למדת ← רשימת כל מה שלימדת את הבוט
+שכח 3 ← מוחק את שורה 3 מהרשימה
 דוח ← הסיכום השבועי עכשיו
 סטטוס ← מה קורה עכשיו: פניות היום, מחכים לך, הבוט פועל או בהפסקה
 עצור בוט ← הבוט מפסיק לענות ללקוחות, והכל מגיע ישר אליך
@@ -51,9 +54,13 @@ export function parseCommand(text) {
   // טלפון עם רווחים אחרי פקודה של מילה אחת ("סיום 054 123 4567")
   if (/^(סיום|ביטול|בוט|חסום|שקט|טופל|תמונות) [\d+]/.test(t)) t = t.replace(/(\+?\d[\d\- ]{7,15}\d)$/, (m) => m.replace(/ /g, ''));
   const ph = (raw) => (raw == null ? null : normalizePhone(raw));
+  let m0;
   if (/^(עזרה|help|פקודות)$/i.test(t)) return { cmd: 'help' };
   if (/^דוח$/.test(t)) return { cmd: 'report' };
   if (/^סטטוס$/.test(t)) return { cmd: 'status' };
+  if ((m0 = String(text || '').trim().match(/^(?:למד|תלמד)[:\s]+([\s\S]{3,})$/))) return { cmd: 'learn', fact: m0[1].trim() };
+  if (/^(מה למדת|מה אתה יודע|רשימה)$/.test(t)) return { cmd: 'knowledge' };
+  if ((m0 = t.match(/^שכח (\d{1,3})$/))) return { cmd: 'forget', n: +m0[1] };
   if (/^(עצור|עצור בוט|הפסק בוט)$/.test(t)) return { cmd: 'pause' };
   if (/^(הפעל|הפעל בוט|המשך בוט)$/.test(t)) return { cmd: 'resume' };
   if (isAck(t)) return { cmd: 'ack' };
@@ -178,7 +185,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     return sendToOwner(env, `לא הבנתי את "${t.slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
   }
 
-  const needsPhone = !['help', 'report', 'unknown', 'status', 'pause', 'resume'].includes(c.cmd);
+  const needsPhone = !['help', 'report', 'unknown', 'status', 'pause', 'resume', 'learn', 'knowledge', 'forget'].includes(c.cmd);
   if (needsPhone && c.phone == null) {
     if (!quoted) return sendToOwner(env, 'על איזה לקוח? ענה (החלקה ימינה) על ההודעה שקיבלת עליו, או כתוב גם את הטלפון. למשל: סיום 0541234567', now);
     c.phone = quoted;
@@ -191,6 +198,27 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'report':
       return weeklyReport(env, now);
+
+    case 'learn': {
+      const fact = c.fact.slice(0, 500);
+      await env.DB.prepare('INSERT INTO knowledge (text, created_at) VALUES (?, ?)').bind(fact, nowIso(now)).run();
+      const n = (await env.DB.prepare('SELECT COUNT(*) AS n FROM knowledge').first())?.n || 1;
+      return sendToOwner(env, `✓ למדתי (${n}): ${fact}\nמעכשיו אני עונה ככה ללקוחות. לבטל: שכח ${n}`, now);
+    }
+
+    case 'knowledge': {
+      const rows = (await env.DB.prepare('SELECT text FROM knowledge ORDER BY id').all()).results;
+      if (!rows.length) return sendToOwner(env, 'עוד לא לימדת אותי כלום. כתוב למשל: למד אני לא עובד בשבת, חוזר במוצאי שבת', now);
+      return sendToOwner(env, `מה שלימדת אותי:\n${rows.map((r, i) => `${i + 1}. ${r.text}`).join('\n')}\n\nלמחוק: שכח ומספר. למשל: שכח 2`, now);
+    }
+
+    case 'forget': {
+      const rows = (await env.DB.prepare('SELECT id, text FROM knowledge ORDER BY id').all()).results;
+      const row = rows[c.n - 1];
+      if (!row) return sendToOwner(env, `אין שורה ${c.n}. כתוב "מה למדת" לרשימה.`, now);
+      await env.DB.prepare('DELETE FROM knowledge WHERE id = ?').bind(row.id).run();
+      return sendToOwner(env, `✓ שכחתי: ${row.text}`, now);
+    }
 
     case 'pause':
       await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('paused', '1') ON CONFLICT(key) DO UPDATE SET value = '1'").run();
@@ -334,7 +362,10 @@ async function relayToCustomer(env, phone, text, now) {
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner', ?, ?)").bind(conv.id, text, nowIso(now)).run();
     if (conv.state === 'bot') await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?) WHERE id = ?").bind(nowIso(now), conv.id).run();
   }
-  return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}: "${String(text).slice(0, 60)}"` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
+  const tip = '\nאם זו תשובה שתמיד נכונה, כתוב "למד" ואחריה את התשובה, והבוט יענה ככה בעצמו.';
+  const learned = (await env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE type = 'relay'").first())?.n || 0;
+  await logEvent(env, 'relay', phone, now);
+  return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}: "${String(text).slice(0, 60)}"${learned < 3 ? tip : ''}` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
 }
 
 // שורה בטבלה: "מה היה בסוף" עם הלקוח

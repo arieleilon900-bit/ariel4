@@ -22,7 +22,18 @@ export const SCHEMA = {
   },
 };
 
-export function buildSystemPrompt({ now = new Date(), returningCustomer = null, profileName = '' } = {}) {
+// מה שחנן לימד את הבוט מהוואטסאפ ("למד ..."), ומה שהוגדר מראש: סגנון, תשובות קבועות, דוגמאות
+function hananSection(b, knowledge) {
+  const parts = [];
+  if (b.voice?.length) parts.push(`איך חנן מדבר (כתוב בדיוק בסגנון הזה, כאילו חנן כותב):\n${b.voice.map((v) => `- ${v}`).join('\n')}`);
+  if (b.faq?.length) parts.push(`התשובות של חנן לשאלות שחוזרות. כשהלקוח שואל אחת מהן, ענה את התשובה של חנן כמעט מילה במילה:\n${b.faq.map((f) => `- שאלה: ${f.q}\n  חנן עונה: ${f.a}`).join('\n')}`);
+  if (knowledge?.length) parts.push(`דברים שחנן לימד אותך. הם גוברים על ההוראות הכלליות (מחירים, סגנון, מה לענות), אבל לא על הטיפול במקרים דחופים:\n${knowledge.map((k) => `- ${k}`).join('\n')}`);
+  if (b.examples?.length) parts.push(`דוגמאות משיחות אמיתיות של חנן עם לקוחות. חקה את הטון והאורך, לא את הפרטים:\n${b.examples.map((e) => `לקוח: ${e.customer}\nחנן: ${e.hanan}`).join('\n\n')}`);
+  if (!parts.length) return '';
+  return `\n===== חנן =====\n${parts.join('\n\n')}\n===== סוף =====\n`;
+}
+
+export function buildSystemPrompt({ now = new Date(), returningCustomer = null, profileName = '', knowledge = [] } = {}) {
   const b = BUSINESS;
   const open = isOpen(b.hours, now);
   const shabbat = b.shabbat?.enabled && isShabbat(now);
@@ -57,6 +68,8 @@ ${returningCustomer ? `זה לקוח חוזר${returningCustomer.name ? ` בשם
 ${b.botGender === 'female' ? 'דבר על עצמך בלשון נקבה.' : 'דבר על עצמך בלשון זכר.'}
 ${profileName ? `השם של הלקוח בפרופיל הוואטסאפ: ${profileName} (אולי כינוי, אל תניח שזה השם האמיתי).` : ''}
 סגנון: עברית פשוטה ואנושית, הודעות קצרות (1-3 משפטים), בלי רשימות ובלי ניסוחים רשמיים. אם הלקוח כותב בערבית, רוסית או אנגלית, ענה בשפה שלו.
+שאלה שאין לך עליה תשובה מחנן (מחיר מסוים, אחריות, אמצעי תשלום, משהו טכני): אל תמציא. תגיד שתבדוק עם חנן, וכתוב את השאלה בסיכום לחנן (summary_for_owner).
+${hananSection(b, knowledge)}
 אם שואלים אם אתה בוט: תגיד בכנות שאתה העוזר הדיגיטלי של חנן, ושחנן מקבל את כל הפרטים.
 ספאם, פרסומות, מכירות, הודעות שלא קשורות לשירות: category=spam, reply ריק.
 זמן נוכחי בישראל: ${ilDateTimeLabel(now)}.`;

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>איך חנן עונה ללקוחות</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: single-column questionnaire grouped in fieldsets; one send button that composes a WhatsApp message */
+:root{--bg:#f5f4f1;--fg:#1e2326;--muted:#5d666c;--line:#d9d6cf;--accent:#1f5e46;--card:#fff;--onaccent:#fff;--body:'Assistant',Arial,sans-serif;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6;}
+.page{direction:rtl;max-width:640px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;}
+h1{font-size:clamp(26px,6vw,34px);line-height:1.2;text-wrap:balance;}
+.lead{color:var(--muted);margin:8px 0 18px;}
+fieldset{border:1px solid var(--line);border-radius:6px;background:var(--card);padding:6px 16px 14px;margin:0 0 16px;}
+legend{font-weight:700;padding:0 6px;font-size:18px;}
+.q{display:grid;gap:4px;margin-top:12px;}
+.q span{font-weight:600;}
+input,textarea{font:16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;resize:vertical;box-sizing:border-box;}
+input[type=tel]{direction:ltr;text-align:right;}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.note{font-size:15px;color:var(--muted);margin:4px 0 14px;}
+button{font:700 18px var(--body);background:var(--accent);color:var(--onaccent);border:0;border-radius:6px;padding:13px 18px;width:100%;cursor:pointer;}
+.alt{margin-top:10px;background:transparent;color:var(--fg);border:1px solid var(--line);font-size:16px;}
+#msg{min-height:1.4em;margin-top:8px;font-size:15px;color:var(--muted);}
+</style>
+</head>
+<body style="margin:0">
+<div class="page" dir="rtl" lang="he">
+<h1>איך אתה עונה ללקוחות?</h1>
+<p class="lead">כדי שהבוט יענה בדיוק כמוך. תכתוב כל תשובה כמו שאתה כותב ללקוח בוואטסאפ, באותן מילים. מה שלא תמלא, הבוט לא ימציא: הוא יגיד ללקוח שהוא בודק איתך.</p><p class="lead"><b>עוד דבר שעוזר מאוד:</b> לשלוח לאריאל 10-20 שיחות אמיתיות שלך עם לקוחות. בוואטסאפ ביזנס: נכנסים לשיחה ← שלוש נקודות ← עוד ← ייצוא צ'אט ← בלי מדיה ← שולחים לאריאל.</p>
+<fieldset><legend>איך אתה מדבר</legend><label class="q" for="hello"><span>לקוח כותב &quot;היי&quot; בפעם הראשונה. מה אתה עונה לו?</span><textarea id="hello" rows="2" placeholder="כתוב בדיוק כמו שאתה כותב בוואטסאפ"></textarea></label><label class="q" for="words"><span>מילים או משפטים שאתה תמיד אומר ללקוחות</span><textarea id="words" rows="2" placeholder="למשל: אחי, בשמחה, אין בעיה, תשלח תמונה"></textarea></label><label class="q" for="bye"><span>איך אתה מסיים שיחה, או אחרי עבודה?</span><textarea id="bye" rows="2" placeholder=""></textarea></label></fieldset><fieldset><legend>מחירים (מה לענות כששואלים &quot;כמה זה עולה&quot;)</legend><label class="q" for="p_door"><span>פריצת דלת</span><textarea id="p_door" rows="2" placeholder="למשל: מ-350, תלוי בדלת. או: אני נותן מחיר רק אחרי תמונה"></textarea></label><label class="q" for="p_cyl"><span>החלפת צילינדר</span><textarea id="p_cyl" rows="2" placeholder=""></textarea></label><label class="q" for="p_car"><span>פריצת רכב / מפתח לרכב</span><textarea id="p_car" rows="2" placeholder=""></textarea></label><label class="q" for="p_safe"><span>כספת</span><textarea id="p_safe" rows="2" placeholder=""></textarea></label><label class="q" for="p_extra"><span>יש תוספת לילה, שבת או חג? כמה?</span><textarea id="p_extra" rows="2" placeholder=""></textarea></label><label class="q" for="p_haggle"><span>לקוח מתמקח על המחיר. מה אתה עונה?</span><textarea id="p_haggle" rows="2" placeholder=""></textarea></label></fieldset><fieldset><legend>שאלות שחוזרות</legend><label class="q" for="eta"><span>&quot;כמה זמן לוקח לך להגיע?&quot;</span><textarea id="eta" rows="2" placeholder=""></textarea></label><label class="q" for="now"><span>&quot;אתה עובד עכשיו?&quot; (בלילה, בשבת)</span><textarea id="now" rows="2" placeholder=""></textarea></label><label class="q" for="area"><span>&quot;אתה מגיע ל...&quot; עיר רחוקה. מה אתה עונה?</span><textarea id="area" rows="2" placeholder=""></textarea></label><label class="q" for="pay"><span>&quot;איך משלמים? יש חשבונית?&quot;</span><textarea id="pay" rows="2" placeholder="למשל: מזומן, ביט, אשראי. קבלה בוואטסאפ"></textarea></label><label class="q" for="warranty"><span>&quot;יש אחריות?&quot;</span><textarea id="warranty" rows="2" placeholder=""></textarea></label><label class="q" for="tomorrow"><span>&quot;אפשר מחר בבוקר?&quot;</span><textarea id="tomorrow" rows="2" placeholder=""></textarea></label><label class="q" for="more"><span>עוד שאלות שלקוחות שואלים הרבה, והתשובה שלך לכל אחת</span><textarea id="more" rows="5" placeholder="שאלה, ואז התשובה שלך. כמה שיותר"></textarea></label></fieldset><fieldset><legend>מה אסור</legend><label class="q" for="never"><span>דברים שהבוט אף פעם לא אומר</span><textarea id="never" rows="3" placeholder="למשל: לא להבטיח מחיר סופי, לא להגיד &quot;תוך 10 דקות&quot;"></textarea></label></fieldset>
+<p class="note">הלחיצה פותחת וואטסאפ עם כל התשובות מוכנות לשליחה לאריאל (052-466-6175).</p>
+<button type="button" id="send">שליחת התשובות בוואטסאפ</button>
+<button type="button" class="alt" id="copy">העתקת התשובות</button>
+<p id="msg" aria-live="polite"></p>
+</div>
+<script>
+(function(){
+  var ORDER = [["hello", "לקוח כותב \"היי\" בפעם הראשונה. מה אתה עונה לו?"], ["words", "מילים או משפטים שאתה תמיד אומר ללקוחות"], ["bye", "איך אתה מסיים שיחה, או אחרי עבודה?"], ["p_door", "פריצת דלת"], ["p_cyl", "החלפת צילינדר"], ["p_car", "פריצת רכב / מפתח לרכב"], ["p_safe", "כספת"], ["p_extra", "יש תוספת לילה, שבת או חג? כמה?"], ["p_haggle", "לקוח מתמקח על המחיר. מה אתה עונה?"], ["eta", "\"כמה זמן לוקח לך להגיע?\""], ["now", "\"אתה עובד עכשיו?\" (בלילה, בשבת)"], ["area", "\"אתה מגיע ל...\" עיר רחוקה. מה אתה עונה?"], ["pay", "\"איך משלמים? יש חשבונית?\""], ["warranty", "\"יש אחריות?\""], ["tomorrow", "\"אפשר מחר בבוקר?\""], ["more", "עוד שאלות שלקוחות שואלים הרבה, והתשובה שלך לכל אחת"], ["never", "דברים שהבוט אף פעם לא אומר"]];
+  function text(){
+    var out = ['איך חנן עונה ללקוחות:',''];
+    ORDER.forEach(function(q, i){ var v = document.getElementById(q[0]).value.trim(); out.push((i+1)+'. '+q[1]); out.push(v ? v : '(לא נענה)'); out.push(''); });
+    return out.join('\n');
+  }
+  function save(){ try { var d={}; ORDER.forEach(function(q){ d[q[0]]=document.getElementById(q[0]).value; }); localStorage.setItem('hananAnswers', JSON.stringify(d)); } catch(e){} }
+  try { var d = JSON.parse(localStorage.getItem('hananAnswers')||'{}'); ORDER.forEach(function(q){ if (d[q[0]]) document.getElementById(q[0]).value = d[q[0]]; }); } catch(e){}
+  document.querySelector('.page').addEventListener('input', save);
+  document.getElementById('send').addEventListener('click', function(){
+    window.location.href = 'https://wa.me/972524666175?text=' + encodeURIComponent(text());
+  });
+  document.getElementById('copy').addEventListener('click', function(){
+    var t = text(), m = document.getElementById('msg');
+    try { navigator.clipboard.writeText(t).then(function(){ m.textContent = 'הועתק. עכשיו אפשר להדביק בוואטסאפ.'; }, function(){ m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }); }
+    catch(e) { m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }
+  });
+})();
+</script>
+</body>
+</html>

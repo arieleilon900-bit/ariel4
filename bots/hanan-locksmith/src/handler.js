@@ -267,7 +267,8 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
   // שיחה עם ה-AI
   const history = (await env.DB.prepare("SELECT role, text FROM messages WHERE conv_id = ? AND role IN ('user','assistant') ORDER BY id DESC LIMIT 30").bind(conv.id).all()).results.reverse();
   const returning = customer && customer.jobs_count > 0 ? customer : null;
-  const result = await runTurn(env, { history, image, now, returningCustomer: returning, profileName: contactName || customer?.name || '' });
+  const knowledge = (await env.DB.prepare('SELECT text FROM knowledge ORDER BY id').all()).results.map((r) => r.text);
+  const result = await runTurn(env, { history, image, now, returningCustomer: returning, profileName: contactName || customer?.name || '', knowledge });
   if (result.failed) await reportAiFailure(env, phone, result.summary_for_owner, now);
 
   // בזמן שה-AI חשב, הלקוח כתב עוד הודעה: היא תקבל תשובה על הכל ביחד

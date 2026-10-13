@@ -147,6 +147,7 @@ td.long{white-space:normal;min-width:140px}
         <li>כחנן: לחץ על הסיכום ואז כתוב "בדרך 20" או "תור מחר 10:00".</li>
         <li>קפוץ בזמן: "+30 דקות" בלי לענות. חנן מקבל תזכורת. "למחר ב-08:00": רשימת העבודות ותזכורות ללקוח.</li>
         <li>כחנן: לחץ על הסיכום ואז "סיום", וקפוץ 3 שעות: הלקוח מקבל בקשת ביקורת. בלילה ובשבת הבוט לא שולח ללקוחות, אז אם השעון בלילה, קפוץ "למחר ב-08:00".</li>
+        <li>ללמד את הבוט: כחנן כתוב "למד החלפת צילינדר עולה 250-450 ש״ח כולל הגעה". אחר כך כלקוח שאל "כמה עולה צילינדר?", והבוט עונה בתשובה של חנן.</li>
         <li>נסה גם: "יש ילד נעול באוטו!", הודעה באנגלית, "הסר", או "עצור בוט".</li>
       </ol>
       <h2>יומן</h2>
@@ -272,7 +273,7 @@ td.long{white-space:normal;min-width:140px}
 
   function chips(box, list, fn) { for (const t of list) { const b = document.createElement('button'); b.textContent = t; b.onclick = () => fn(t); box.append(b); } }
   chips($('cchips'), ['היי, ננעלתי מחוץ לבית', 'יש ילד נעול באוטו!', 'כמה עולה להחליף צילינדר?', 'Hi, I am locked out', 'הסר'], (t) => { $('cinput').value = t; $('cinput').focus(); });
-  chips($('ochips'), ['בדרך 20', 'תור מחר 10:00', 'טופל', 'סיום', 'עזרה', 'סטטוס', 'עצור בוט', 'הפעל בוט', 'דוח'], (t) => { $('oinput').value = t; $('oinput').focus(); });
+  chips($('ochips'), ['בדרך 20', 'תור מחר 10:00', 'טופל', 'סיום', 'למד החלפת צילינדר עולה 250-450 ש"ח כולל הגעה', 'מה למדת', 'עזרה', 'סטטוס', 'עצור בוט', 'הפעל בוט'], (t) => { $('oinput').value = t; $('oinput').focus(); });
 
   // ---------- שעון ----------
   function showClock() { $('clock').innerHTML = ''; const b = document.createElement('b'); b.textContent = 'השעה אצל הבוט: '; $('clock').append(b, document.createTextNode(BotSim.ilDateTimeLabel(simNow))); }

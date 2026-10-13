@@ -5,6 +5,7 @@ import { runEvery15, weeklyReport } from '../src/cron.js';
 import { ilDateTimeLabel, ilParts, displayPhone, parseIlDateTime } from '../src/util.js';
 import init1 from '../migrations/0001_init.sql';
 import init2 from '../migrations/0002_settings.sql';
+import init3 from '../migrations/0003_knowledge.sql';
 
 export { processWebhook, runEvery15, weeklyReport, ilDateTimeLabel, ilParts, displayPhone, parseIlDateTime };
 
@@ -14,6 +15,7 @@ export function makeD1(SQL) {
   const db = new SQL.Database();
   db.exec(init1);
   db.exec(init2);
+  db.exec(init3);
   return {
     raw: db,
     prepare(sql) {
