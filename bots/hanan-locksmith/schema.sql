@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   address TEXT,
   scheduled_at TEXT,                   -- לעבודות מתואמות
   reminders_sent INTEGER NOT NULL DEFAULT 0,  -- 0 / 1 (יום לפני) / 2 (שעתיים לפני)
+  owner_reminded INTEGER NOT NULL DEFAULT 0,  -- תזכורת לחנן לפני העבודה נשלחה
   status TEXT NOT NULL DEFAULT 'open', -- open | done | cancelled
   done_at TEXT,
   invoice_doc_id TEXT,

@@ -41,6 +41,9 @@ export const TIMING = {
   yearlyAfterDays: 365,        // תזכורת שנתית
   reminderDayBeforeHours: 24,
   reminderTwoHoursBefore: 2,
+  // תזכורות לחנן
+  ownerAgendaHour: 7,          // בשעה הזו כל בוקר: רשימת העבודות של היום (0 = כבוי)
+  ownerReminderMinutes: 60,    // כמה דקות לפני כל עבודה חנן מקבל תזכורת (0 = כבוי)
 };
 
 // הודעות קבועות (טקסט חופשי, נשלח רק בתוך חלון 24 שעות מההודעה האחרונה של הלקוח)

@@ -249,3 +249,33 @@ test('receipts: Hanan forwards a PDF or a link → customer gets it, job closes,
   assert.equal(tpl.template.name, 'invoice_v1');
   assert.equal(tpl.template.components[0].parameters[0].document.link, 'https://example.com/r.pdf');
 });
+
+test('owner reminders: morning agenda and an hour before each job', async () => {
+  sent.length = 0; aiRequests = [];
+  const env = makeEnv();
+  // יום שלישי 13/10/2026, 06:00 בישראל (03:00 UTC)
+  const t0 = new Date('2026-10-13T03:00:00Z');
+  aiQueue = [ai({ reply: 'מה הכתובת?', customer_name: 'דני' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צריך להחליף צילינדר' } }, 'o1'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 13/10/2026 11:00 הרצל 5 חולון' } }, 'o2'), t0);
+  assert.ok(textsTo(OWNER).some((t) => t.includes('תזכורת בבוקר ושעה לפני')));
+
+  // 07:00 בבוקר: רשימת העבודות, פעם אחת בלבד
+  const t7 = new Date('2026-10-13T04:00:00Z');
+  await runEvery15(env, t7);
+  await runEvery15(env, new Date(t7.getTime() + 10 * 60000));
+  const agendas = textsTo(OWNER).filter((t) => t.includes('העבודות שלך היום'));
+  assert.equal(agendas.length, 1);
+  assert.ok(agendas[0].includes('הרצל 5 חולון') && agendas[0].includes('waze.com'));
+
+  // 09:45: עוד לא; 10:00: שעה לפני → תזכורת לחנן, פעם אחת
+  await runEvery15(env, new Date('2026-10-13T06:30:00Z'));
+  assert.equal(textsTo(OWNER).filter((t) => t.startsWith('תזכורת: עבודה')).length, 0);
+  await runEvery15(env, new Date('2026-10-13T07:00:00Z'));
+  await runEvery15(env, new Date('2026-10-13T07:15:00Z'));
+  const rem = textsTo(OWNER).filter((t) => t.startsWith('תזכורת: עבודה'));
+  assert.equal(rem.length, 1);
+  assert.ok(rem[0].includes('היום ב-11:00'));
+  // והלקוח קיבל את שלו (שעתיים לפני)
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('11:00')));
+});

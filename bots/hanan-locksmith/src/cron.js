@@ -1,6 +1,6 @@
 // משימות מתוזמנות: כל 15 דקות (תזכורות, מעקבים, ביקורות, קבלות), וכל יום ראשון (דוח שבועי).
 import { MESSAGES, TEMPLATES, TIMING } from './config.js';
-import { ilParts, ilTime, nowIso, whenLabel, displayPhone } from './util.js';
+import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
 import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
 import { deliverReceipt } from './receipts.js';
@@ -14,6 +14,8 @@ function canMessageNow(now) {
 
 export async function runEvery15(env, now = new Date()) {
   await appointmentReminders(env, now);
+  await ownerAgenda(env, now);
+  await ownerJobReminders(env, now);
   await invoices(env, now);
   if (!canMessageNow(now)) return;
   await followups(env, now);
@@ -37,6 +39,45 @@ async function appointmentReminders(env, now) {
       const r = await sendToCustomer(env, j.phone, MESSAGES.reminderTwoHours(time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
     }
+  }
+}
+
+// שורה על עבודה, בשביל ההודעות לחנן
+async function jobLine(env, j, now) {
+  const c = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(j.phone).first();
+  const at = new Date(j.scheduled_at);
+  return [
+    `${whenLabel(at, now)}: ${c?.name || 'לקוח'} ${displayPhone(j.phone)}`,
+    j.issue ? `תקלה: ${j.issue}` : '',
+    j.address ? `כתובת: ${j.address}` : '',
+    j.address ? `ניווט: ${wazeLink({ address: j.address })}` : '',
+  ].filter(Boolean).join('\n');
+}
+
+// כל בוקר: העבודות של היום (חוץ משבת, ורק אם יש עבודות)
+async function ownerAgenda(env, now) {
+  const p = ilParts(now);
+  if (!TIMING.ownerAgendaHour || p.dow === 6 || +p.hh !== TIMING.ownerAgendaHour) return;
+  const sent = await env.DB.prepare("SELECT 1 FROM events WHERE type = 'agenda' AND created_at >= ?").bind(new Date(now.getTime() - 20 * 3600000).toISOString()).first();
+  if (sent) return;
+  const end = new Date(now.getTime() + 18 * 3600000).toISOString();
+  const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'open' AND scheduled_at IS NOT NULL AND scheduled_at >= ? AND scheduled_at <= ? ORDER BY scheduled_at").bind(nowIso(now), end).all()).results
+    .filter((j) => ilParts(new Date(j.scheduled_at)).d === p.d);
+  await logEvent(env, 'agenda', null, now);
+  if (!jobs.length) return;
+  const lines = [];
+  for (const j of jobs) lines.push(await jobLine(env, j, now));
+  await sendToOwner(env, `בוקר טוב! העבודות שלך היום (${jobs.length}):\n\n${lines.join('\n\n')}`, now);
+}
+
+// תזכורת לחנן לפני כל עבודה מתואמת
+async function ownerJobReminders(env, now) {
+  if (!TIMING.ownerReminderMinutes) return;
+  const until = new Date(now.getTime() + (TIMING.ownerReminderMinutes + 15) * 60000).toISOString();
+  const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'open' AND owner_reminded = 0 AND scheduled_at IS NOT NULL AND scheduled_at > ? AND scheduled_at <= ?").bind(nowIso(now), until).all()).results;
+  for (const j of jobs) {
+    await env.DB.prepare('UPDATE jobs SET owner_reminded = 1 WHERE id = ?').bind(j.id).run();
+    await sendToOwner(env, `תזכורת: עבודה ${await jobLine(env, j, now)}`, now);
   }
 }
 
