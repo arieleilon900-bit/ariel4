@@ -122,7 +122,14 @@ test('lead → questions → handoff → owner commands → reminders → review
   sent.length = 0;
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 0541234567 15' } }, 'o1'), t0);
   assert.ok(textsTo(CUSTOMER)[0].includes('15 דקות'));
-  assert.ok(textsTo(OWNER)[0].startsWith('✓'));
+  // ברגע שחנן כותב, הוא מקבל במלואם את הסיכום והתמונה שהגיעו קודם בקיצור
+  assert.ok(textsTo(OWNER)[0].includes('פנייה חדשה') && textsTo(OWNER)[0].includes('הרצל 5 חולון'));
+  assert.ok(sent.some((m) => m.to === OWNER && m.type === 'image'));
+  assert.ok(textsTo(OWNER).some((t) => t.startsWith('✓')));
+  // ופעם אחת בלבד
+  const n = sent.length;
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תודה' } }, 'o1b'), t0);
+  assert.equal(sent.length, n);
 
   // 6. חנן קובע עבודה מתואמת למחר 14:30
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 15/10/2026 14:30 הרצל 5 חולון' } }, 'o2'), t0);
@@ -231,7 +238,12 @@ test('receipts: Hanan forwards a PDF or a link → customer gets it, job closes,
 
   // 1. PDF בלי טלפון בכיתוב → חנן מקבל הסבר
   await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf1', filename: 'r.pdf', caption: 'קבלה' } }, 'r2'), t0);
-  assert.ok(textsTo(OWNER).some((t) => t.includes('לא ידעתי של איזה לקוח')));
+  assert.ok(textsTo(OWNER).some((t) => t.includes('של איזה לקוח הקבלה')));
+  // חנן שולח את הטלפון בהודעה נפרדת → הקבלה יוצאת ללקוח
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: '054-1234567' } }, 'r2b'), t0);
+  assert.ok(sent.some((m) => m.to === CUSTOMER && m.type === 'document'));
+  sent.length = 0;
+  env.DB.raw.exec("UPDATE jobs SET invoice_sent_at = NULL, status = 'open', done_at = NULL");
 
   // 2. PDF עם טלפון → נשלח ללקוח כמסמך (בתוך 24 שעות)
   await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf1', filename: 'r.pdf', caption: '054-1234567' } }, 'r3'), t0);

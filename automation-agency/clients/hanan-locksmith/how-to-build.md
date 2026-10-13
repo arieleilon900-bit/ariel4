@@ -8,7 +8,7 @@
 ## למה לא N8N
 | | N8N | מה שבנינו (Cloudflare) |
 |---|---|---|
-| עלות שרת | בערך 20 דולר בחודש, או שרת שאתה מתחזק | 0 (התוכנית החינמית מספיקה) |
+| עלות שרת | בערך 20 דולר בחודש, או שרת שאתה מתחזק | 5 דולר בחודש |
 | שיחה עם זיכרון, תמונות, הקלטות, תזכורות | אפשרי, אבל עשרות "קופסאות" שנשברות | כבר כתוב ובדוק |
 | העתקה ללקוח הבא | לבנות שוב או לשכפל ידנית | משנים קובץ הגדרות אחד |
 
@@ -24,8 +24,8 @@
 | חשבון | בשביל מה | עלות |
 |---|---|---|
 | GitHub | הקוד (כבר יש לך) | 0 |
-| Cloudflare | השרת ומסד הנתונים | 0 |
-| Anthropic | ה-AI שמנהל את השיחה | לפי שימוש, טוענים 10 דולר מראש ושמים תקרה |
+| Cloudflare | השרת ומסד הנתונים | 5 דולר לחודש (Workers Paid). בתוכנית החינמית מותר רק 10 אלפיות שנייה חישוב להודעה, והודעות עם תמונות עלולות לעבור את זה |
+| Anthropic | ה-AI שמנהל את השיחה | לפי שימוש. הערכה: 10-20 דולר לחודש ל-90 פניות. טוענים 10 דולר מראש ושמים תקרה |
 | Meta (פייסבוק שלך) | וואטסאפ API | שיחות שהלקוח פותח: חינם. תבניות (תזכורות, ביקורות): אגורות להודעה |
 | Google Cloud | כתיבה לגיליון | 0 |
 | ספק Coexistence | רק בשלב האחרון, מעבר למספר האמיתי | בערך 170 ₪ לחודש (ראה שלב 9) |
@@ -36,10 +36,11 @@
 
 ## שלב 1: Cloudflare, השרת (15 דקות)
 1. נרשמים: https://dash.cloudflare.com/sign-up
-2. בתפריט משמאל: **Workers & Pages**. אם הוא מבקש לבחור subdomain, בוחרים שם קצר (למשל `onerishon`). הכתובת של הבוט תהיה `hanan-locksmith-bot.onerishon.workers.dev`.
-3. **Account ID:** באותו מסך, בצד ימין, יש `Account ID`. מעתיקים.
-4. **מסד נתונים:** בתפריט **Storage & Databases** ← **D1 SQL Database** ← **Create** ← שם: `hanan-bot` ← Create. מעתיקים את ה-**Database ID**.
-5. **טוקן להעלאה:** למעלה מימין, האייקון של הפרופיל ← **My Profile** ← **API Tokens** ← **Create Token** ← ליד **Edit Cloudflare Workers** לוחצים **Use template**.
+2. **שדרוג ל-Workers Paid (5 דולר לחודש):** בתפריט **Workers & Pages** ← **Plans** ← **Workers Paid** ← Purchase. בלי זה הבוט עלול להיתקע על הודעות עם תמונות.
+3. בתפריט משמאל: **Workers & Pages**. אם הוא מבקש לבחור subdomain, בוחרים שם קצר (למשל `onerishon`). הכתובת של הבוט תהיה `hanan-locksmith-bot.onerishon.workers.dev`.
+4. **Account ID:** באותו מסך, בצד ימין, יש `Account ID`. מעתיקים.
+5. **מסד נתונים:** בתפריט **Storage & Databases** ← **D1 SQL Database** ← **Create** ← שם: `hanan-bot` ← Create. מעתיקים את ה-**Database ID**.
+6. **טוקן להעלאה:** למעלה מימין, האייקון של הפרופיל ← **My Profile** ← **API Tokens** ← **Create Token** ← ליד **Edit Cloudflare Workers** לוחצים **Use template**.
    - ב-Permissions לוחצים **+ Add more** ומוסיפים: `Account` ← `D1` ← `Edit`.
    - Account Resources: בוחרים את החשבון שלך.
    - **Continue to summary** ← **Create Token** ← מעתיקים את הטוקן. הוא מוצג פעם אחת בלבד.
@@ -49,10 +50,12 @@
 ## שלב 2: GitHub Secrets, המקום של הסודות (5 דקות)
 1. נכנסים ל-https://github.com/arieleilon900-bit/ariel4/settings/secrets/actions
 2. **New repository secret**, פעמיים:
-   - שם `CLOUDFLARE_API_TOKEN`, ערך: הטוקן משלב 1.5
-   - שם `CLOUDFLARE_ACCOUNT_ID`, ערך: ה-Account ID משלב 1.3
+   - שם `CLOUDFLARE_API_TOKEN`, ערך: הטוקן משלב 1.6
+   - שם `CLOUDFLARE_ACCOUNT_ID`, ערך: ה-Account ID משלב 1.4
 
-ברגע שאני מכניס את ה-Database ID לקוד, הבוט עולה לשרת לבד. בודקים: פותחים בדפדפן `https://hanan-locksmith-bot.<השם שלך>.workers.dev/health`, וצריך להופיע `ok`.
+ברגע שאני מכניס את ה-Database ID לקוד, הבוט עולה לשרת לבד. בודקים: פותחים בדפדפן `https://hanan-locksmith-bot.<השם שלך>.workers.dev/health`.
+- בהתחלה יופיע `not ready` ורשימה של מה שחסר (רק שמות, בלי סיסמאות). כל שלב שתסיים יוריד משהו מהרשימה.
+- כשהכל מוכן יופיע `ok`.
 (את ההעלאות רואים כאן: https://github.com/arieleilon900-bit/ariel4/actions, וירוק אומר שעבר.)
 
 ## שלב 3: Anthropic, ה-AI (10 דקות)
@@ -137,6 +140,9 @@
 - [ ] שולחים `דוח` ← מגיע סיכום
 
 משהו לא עובד? שולחים לי צילום מסך של ההרצה ב-https://github.com/arieleilon900-bit/ariel4/actions, או מה קרה, ואני מתקן.
+
+## אחרי הבדיקה: לשלוח לחנן את המדריך שלו
+ההודעה מוכנה ב-`hanan-guide.md` (באותה תיקייה). מעתיקים ושולחים לו כמו שזה.
 
 ## שלב 9: מעבר למספר האמיתי של חנן (050-3429998)
 כדי שחנן ימשיך לעבוד באפליקציית WhatsApp Business **וגם** הבוט יעבוד על אותו מספר, Meta דורשים חיבור דרך "Tech Provider" או ספק מורשה (BSP). זה נקרא Coexistence. לפי Meta, החיבור עובר דרך מסך הרשמה של הספק: חנן מקליד את המספר, מקבל קוד באפליקציה, מאשר, ובוחר אם לשתף היסטוריה ([התיעוד של Meta](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboarding-business-app-users)).

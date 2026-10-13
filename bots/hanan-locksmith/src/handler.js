@@ -26,14 +26,34 @@ export async function sendToCustomer(env, phone, text, template = null, now = ne
 export async function sendToOwner(env, text, now = new Date(), about = null, to = env.OWNER_PHONE) {
   if (!to) return { ok: false };
   const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(to).first();
-  const r = inServiceWindow(c?.last_inbound_at, now)
+  const open = inServiceWindow(c?.last_inbound_at, now);
+  const r = open
     ? await wa.sendText(env, to, text)
     : await wa.sendTemplate(env, to, TEMPLATES.ownerAlert, [templateText(text)]);
+  // נשלח בקיצור: שומרים את ההודעה המלאה לחנן, לרגע שהוא כותב לבוט או לוחץ "קיבלתי"
+  if (!open && to === env.OWNER_PHONE) {
+    await env.DB.prepare('INSERT INTO owner_outbox (text, about, created_at) VALUES (?, ?, ?)').bind(text, about, nowIso(now)).run();
+  }
   const wamid = r.data?.messages?.[0]?.id;
   if (about && wamid) {
     await env.DB.prepare('INSERT OR REPLACE INTO owner_refs (wamid, phone, created_at) VALUES (?, ?, ?)').bind(wamid, about, nowIso(now)).run();
   }
   return r;
+}
+
+// חנן כתב לבוט (או לחץ "קיבלתי"): שולחים לו במלואן את ההודעות והתמונות שהגיעו אליו בקיצור
+export async function flushOwnerOutbox(env, now = new Date()) {
+  const items = (await env.DB.prepare('SELECT * FROM owner_outbox WHERE sent = 0 AND created_at >= ? ORDER BY id LIMIT 8')
+    .bind(new Date(now.getTime() - 48 * 3600000).toISOString()).all()).results;
+  for (const it of items) {
+    await env.DB.prepare('UPDATE owner_outbox SET sent = 1 WHERE id = ?').bind(it.id).run();
+    if (it.text) {
+      const r = await wa.sendText(env, env.OWNER_PHONE, it.text);
+      const wamid = r.data?.messages?.[0]?.id;
+      if (it.about && wamid) await env.DB.prepare('INSERT OR REPLACE INTO owner_refs (wamid, phone, created_at) VALUES (?, ?, ?)').bind(wamid, it.about, nowIso(now)).run();
+    }
+    if (it.media) await forwardPhotosToOwner(env, JSON.parse(it.media).slice(0, 3), now, it.about);
+  }
 }
 
 // משתנה בתבנית: וואטסאפ לא מרשים ירידות שורה, טאבים או יותר מ-4 רווחים ברצף
@@ -112,7 +132,13 @@ export async function forwardPhotosToOwner(env, photoIds, now = new Date(), abou
   // תמונה אפשר לשלוח רק בתוך 24 שעות מההודעה האחרונה של חנן לבוט. אחרת: מסבירים לו איך לקבל אותן
   const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(env.OWNER_PHONE).first();
   if (!inServiceWindow(c?.last_inbound_at, now)) {
-    if (about) await sendToOwner(env, `הלקוח ${displayPhone(about)} שלח ${photoIds.length === 1 ? 'תמונה' : `${photoIds.length} תמונות`}. כדי לראות: כתוב לי תמונות ${displayPhone(about)}`, now, about);
+    await env.DB.prepare('INSERT INTO owner_outbox (about, media, created_at) VALUES (?, ?, ?)').bind(about, JSON.stringify(photoIds), nowIso(now)).run();
+    if (about) {
+      const what = photoIds.length === 1 ? 'תמונה' : `${photoIds.length} תמונות`;
+      const r = await wa.sendTemplate(env, env.OWNER_PHONE, TEMPLATES.ownerAlert, [templateText(`הלקוח ${displayPhone(about)} שלח ${what}. אפשר גם לכתוב לי: תמונות ${displayPhone(about)}`)]);
+      const wamid = r.data?.messages?.[0]?.id;
+      if (wamid) await env.DB.prepare('INSERT OR REPLACE INTO owner_refs (wamid, phone, created_at) VALUES (?, ?, ?)').bind(wamid, about, nowIso(now)).run();
+    }
     return;
   }
   for (const id of photoIds) {
@@ -152,6 +178,7 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   if (env.OWNER_PHONE && phone === env.OWNER_PHONE) {
     const ownerText = msg.text?.body || msg.button?.text || msg.interactive?.button_reply?.title || '';
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'owner', ?, ?, ?)").bind(ownerText || `[${msg.type}]`, msg.id, nowIso(now)).run();
+    await flushOwnerOutbox(env, now);
     await handleOwnerCommand(env, ownerText, now, msg);
     return;
   }
@@ -167,8 +194,9 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   }
 
   // הסרה מרשימת התפוצה: לא שולחים לו יותר תזכורות, מעקבים, ביקורות והמלצות
-  if (msg.type === 'text' && OPT_OUT.test(msg.text?.body || '')) {
-    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'user', ?, ?, ?)").bind(msg.text.body, msg.id, nowIso(now)).run();
+  const optText = msg.type === 'text' ? msg.text?.body : msg.type === 'button' ? msg.button?.text : '';
+  if (optText && (OPT_OUT.test(optText) || (msg.type === 'button' && /stop|הפסק|הסר/i.test(optText)))) {
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'user', ?, ?, ?)").bind(optText, msg.id, nowIso(now)).run();
     await env.DB.prepare('UPDATE customers SET opted_out = 1 WHERE phone = ?').bind(phone).run();
     await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE phone = ? AND state IN ('bot','handoff')").bind(phone).run();
     await wa.sendText(env, phone, MESSAGES.optedOut);

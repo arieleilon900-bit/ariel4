@@ -81,3 +81,22 @@ CREATE TABLE IF NOT EXISTS owner_refs (
   phone TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+-- הודעות לחנן שנשלחו כתבנית מקוצרת (כי הוא לא כתב לבוט ב-24 שעות). כשהוא כותב או לוחץ "קיבלתי", הוא מקבל אותן במלואן, עם התמונות
+CREATE TABLE IF NOT EXISTS owner_outbox (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  text TEXT,
+  about TEXT,                          -- הטלפון של הלקוח שההודעה עוסקת בו
+  media TEXT,                          -- JSON: מזהי תמונות של הלקוח
+  created_at TEXT NOT NULL,
+  sent INTEGER NOT NULL DEFAULT 0
+);
+
+-- קובץ (קבלה) שחנן שלח בלי לציין לקוח: מחכה שהוא ישלח את הטלפון
+CREATE TABLE IF NOT EXISTS owner_pending_file (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  media_id TEXT NOT NULL,
+  filename TEXT,
+  created_at TEXT NOT NULL,
+  used INTEGER NOT NULL DEFAULT 0
+);

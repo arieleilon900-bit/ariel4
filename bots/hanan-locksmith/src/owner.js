@@ -62,25 +62,42 @@ async function latestConv(env, phone) {
   return env.DB.prepare('SELECT * FROM conversations WHERE phone = ? ORDER BY id DESC LIMIT 1').bind(phone).first();
 }
 
-// חנן מעביר לבוט קובץ (PDF של קבלה) עם הטלפון של הלקוח בכיתוב
+// חנן מעביר לבוט קובץ (PDF של קבלה): הלקוח לפי הכיתוב, לפי הציטוט, או לפי הטלפון שישלח מיד אחרי
 async function handleOwnerFile(env, msg, now) {
   const file = msg.document || msg.image;
   const phone = normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]) || await contextPhone(env, msg);
-  if (!phone) return sendToOwner(env, 'קיבלתי קובץ, אבל לא ידעתי של איזה לקוח. שלח שוב בתשובה (החלקה ימינה) על ההודעה של הלקוח, או כתוב את הטלפון שלו בכיתוב של הקובץ.', now);
+  if (!phone) {
+    await env.DB.prepare('INSERT INTO owner_pending_file (media_id, filename, created_at) VALUES (?, ?, ?)').bind(file.id, msg.document?.filename || null, nowIso(now)).run();
+    return sendToOwner(env, 'קיבלתי את הקובץ. של איזה לקוח הקבלה? שלח לי את הטלפון שלו (למשל 0541234567).', now);
+  }
+  return sendReceiptFile(env, phone, file.id, msg.document?.filename, now);
+}
+
+async function sendReceiptFile(env, phone, fileId, filename, now) {
   try {
-    const media = await wa.downloadMedia(env, file.id);
+    const media = await wa.downloadMedia(env, fileId);
     const mediaId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
     await markOwnerReplied(env, phone, now);
-    const r = await deliverReceipt(env, phone, mediaId, { filename: msg.document?.filename || 'קבלה.pdf', now });
-    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)} והעבודה סומנה כגמורה. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now);
+    const r = await deliverReceipt(env, phone, mediaId, { filename: filename || 'קבלה.pdf', now });
+    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)} והעבודה סומנה כגמורה. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
   } catch (err) {
     console.error('owner receipt failed', err);
-    return sendToOwner(env, `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now);
+    return sendToOwner(env, `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
   }
 }
 
 export async function handleOwnerCommand(env, text, now = new Date(), msg = null) {
   if (msg && (msg.type === 'document' || msg.type === 'image')) return handleOwnerFile(env, msg, now);
+  // רק טלפון, ויש קובץ שמחכה (חנן שלח קבלה בלי לציין לקוח)
+  const onlyPhone = /^\s*\+?\d[\d\- ]{7,14}\d\s*$/.test(text || '') ? normalizePhone(text) : '';
+  if (onlyPhone) {
+    const pending = await env.DB.prepare('SELECT * FROM owner_pending_file WHERE used = 0 AND created_at >= ? ORDER BY id DESC LIMIT 1').bind(new Date(now.getTime() - 2 * 3600000).toISOString()).first();
+    if (pending) {
+      await env.DB.prepare('UPDATE owner_pending_file SET used = 1 WHERE id = ?').bind(pending.id).run();
+      return sendReceiptFile(env, onlyPhone, pending.media_id, pending.filename, now);
+    }
+  }
+
   const c = parseCommand(text);
   if (!c || c.cmd === 'ack') return;
   if (c.phone === '') return sendToOwner(env, 'לא הבנתי את מספר הטלפון. כתוב למשל: סיום 0541234567', now);
