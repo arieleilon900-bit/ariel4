@@ -127,7 +127,7 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   // פקודות מחנן
   if (env.OWNER_PHONE && phone === env.OWNER_PHONE) {
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'owner', ?, ?, ?)").bind(msg.text?.body || `[${msg.type}]`, msg.id, nowIso(now)).run();
-    await handleOwnerCommand(env, msg.text?.body || '', now);
+    await handleOwnerCommand(env, msg.text?.body || '', now, msg);
     return;
   }
 

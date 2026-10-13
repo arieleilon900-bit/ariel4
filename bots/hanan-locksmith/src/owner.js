@@ -4,10 +4,13 @@ import { appendRow } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
 import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
+import { deliverReceipt } from './receipts.js';
+import * as wa from './whatsapp.js';
 
 export const HELP = `פקודות (כותבים לבוט מהטלפון שלך):
 בדרך 0541234567 20 ← שולח ללקוח שאתה בדרך, הגעה בעוד כ-20 דקות
 תור 0541234567 17/10 14:30 הרצל 5 חולון ← קובע עבודה + תזכורות ללקוח
+קבלה: מעבירים לבוט את ה-PDF מיש חשבונית, ובכיתוב כותבים את הטלפון של הלקוח ← הבוט שולח לו את הקבלה וסוגר את העבודה
 סיום 0541234567 ← העבודה הסתיימה (אחרי זה: בקשת ביקורת, המלצה, ותזכורת בעוד שנה)
 ביטול 0541234567 ← מבטל עבודה מתואמת
 לא רלוונטי 0541234567 ← סוגר את הפנייה בלי מעקב
@@ -29,6 +32,7 @@ export function parseCommand(text) {
   if ((m = t.match(/^תור ([\d\-+]{9,16}) (\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?) (\d{1,2}:\d{2})(?: (.+))?$/))) {
     return { cmd: 'appt', phone: normalizePhone(m[1]), date: m[2], time: m[3], address: m[4] || '' };
   }
+  if ((m = t.match(/^קבלה ([\d\-+]{9,16}) (https?:\/\/\S+)$/))) return { cmd: 'receipt', phone: normalizePhone(m[1]), link: m[2] };
   if ((m = t.match(/^(סיום|ביטול|בוט|חסום|שקט) ([\d\-+]{9,16})$/))) {
     const map = { 'סיום': 'done', 'ביטול': 'cancel', 'בוט': 'bot', 'חסום': 'block', 'שקט': 'quiet' };
     return { cmd: map[m[1]], phone: normalizePhone(m[2]) };
@@ -40,7 +44,24 @@ async function latestConv(env, phone) {
   return env.DB.prepare('SELECT * FROM conversations WHERE phone = ? ORDER BY id DESC LIMIT 1').bind(phone).first();
 }
 
-export async function handleOwnerCommand(env, text, now = new Date()) {
+// חנן מעביר לבוט קובץ (PDF של קבלה) עם הטלפון של הלקוח בכיתוב
+async function handleOwnerFile(env, msg, now) {
+  const file = msg.document || msg.image;
+  const phone = normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]);
+  if (!phone) return sendToOwner(env, 'קיבלתי קובץ, אבל לא ראיתי טלפון של לקוח. שלח שוב, ובכיתוב של הקובץ כתוב את הטלפון שלו (למשל 0541234567).', now);
+  try {
+    const media = await wa.downloadMedia(env, file.id);
+    const mediaId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
+    const r = await deliverReceipt(env, phone, mediaId, { filename: msg.document?.filename || 'קבלה.pdf', now });
+    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)} והעבודה סומנה כגמורה. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now);
+  } catch (err) {
+    console.error('owner receipt failed', err);
+    return sendToOwner(env, `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now);
+  }
+}
+
+export async function handleOwnerCommand(env, text, now = new Date(), msg = null) {
+  if (msg && (msg.type === 'document' || msg.type === 'image')) return handleOwnerFile(env, msg, now);
   const c = parseCommand(text);
   if (!c) return;
   if (c.phone === '') return sendToOwner(env, 'לא הבנתי את מספר הטלפון. כתוב למשל: סיום 0541234567', now);
@@ -83,6 +104,11 @@ export async function handleOwnerCommand(env, text, now = new Date()) {
       const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(c.phone).first();
       await appendRow(env, [ilDateTimeLabel(now), 'עבודה הסתיימה', cust?.name || '', displayPhone(c.phone), job.issue || '', job.address || '', '', '']);
       return sendToOwner(env, `✓ סומן כגמור: ${displayPhone(c.phone)}. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.`, now);
+    }
+
+    case 'receipt': {
+      const r = await deliverReceipt(env, c.phone, c.link, { now });
+      return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(c.phone)} והעבודה סומנה כגמורה.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(c.phone)}.`, now);
     }
 
     case 'cancel': {

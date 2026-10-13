@@ -217,3 +217,35 @@ test('known contacts: bot stays silent', async () => {
   await processWebhook(env, inbound(FRIEND, { type: 'text', text: { body: 'ננעלתי' } }, 'k7'), t0);
   assert.equal(aiRequests.length, 2);
 });
+
+test('receipts: Hanan forwards a PDF or a link → customer gets it, job closes, review follows', async () => {
+  sent.length = 0; aiRequests = [];
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי' } }, 'r1'), t0);
+
+  // 1. PDF בלי טלפון בכיתוב → חנן מקבל הסבר
+  await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf1', filename: 'r.pdf', caption: 'קבלה' } }, 'r2'), t0);
+  assert.ok(textsTo(OWNER).some((t) => t.includes('לא ראיתי טלפון')));
+
+  // 2. PDF עם טלפון → נשלח ללקוח כמסמך (בתוך 24 שעות)
+  await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf1', filename: 'r.pdf', caption: '054-1234567' } }, 'r3'), t0);
+  const doc = sent.find((m) => m.to === CUSTOMER && m.type === 'document');
+  assert.equal(doc.document.id, 'uploaded-media');
+  assert.ok(textsTo(OWNER).some((t) => t.includes('הקבלה נשלחה')));
+  const job = env.DB.raw.prepare('SELECT * FROM jobs WHERE phone = ?').get(CUSTOMER);
+  assert.equal(job.status, 'done');
+  assert.ok(job.invoice_sent_at);
+
+  // 3. ביקורת אחרי 3 שעות
+  await runEvery15(env, new Date(t0.getTime() + 3.5 * 3600000));
+  assert.ok(sent.some((m) => m.to === CUSTOMER && (m.text?.body || '').includes('g.page')));
+
+  // 4. קבלה לפי קישור ללקוח ישן (מחוץ לחלון) → תבנית עם PDF
+  const OLDC = '972549999999';
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'קבלה 0549999999 https://example.com/r.pdf' } }, 'r4'), t0);
+  const tpl = sent.find((m) => m.to === OLDC);
+  assert.equal(tpl.template.name, 'invoice_v1');
+  assert.equal(tpl.template.components[0].parameters[0].document.link, 'https://example.com/r.pdf');
+});

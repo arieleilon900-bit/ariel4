@@ -3,7 +3,7 @@ import { MESSAGES, TEMPLATES, TIMING } from './config.js';
 import { ilParts, ilTime, nowIso, whenLabel, displayPhone } from './util.js';
 import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
-import * as wa from './whatsapp.js';
+import { deliverReceipt } from './receipts.js';
 
 // הודעות מתוזמנות ללקוחות רק בין 08:00 ל-21:00, ולא בשבת
 function canMessageNow(now) {
@@ -91,20 +91,7 @@ async function invoices(env, now) {
   for (const d of docs) {
     const seen = await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(String(d.id)).first();
     if (seen || !d.phone || !d.pdfUrl) continue;
-    const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(d.phone).first();
-    const recent = c?.last_inbound_at && (now.getTime() - new Date(c.last_inbound_at).getTime()) < 23.5 * 3600000;
-    const r = recent
-      ? await wa.sendDocument(env, d.phone, d.pdfUrl, 'קבלה.pdf', MESSAGES.invoice)
-      : await wa.sendTemplate(env, d.phone, TEMPLATES.invoice, [], d.pdfUrl, 'קבלה.pdf');
-    let job = await env.DB.prepare("SELECT * FROM jobs WHERE phone = ? AND status IN ('open','done') AND invoice_doc_id IS NULL ORDER BY id DESC LIMIT 1").bind(d.phone).first();
-    if (!job) {
-      const res = await env.DB.prepare("INSERT INTO jobs (phone, status, done_at, created_at) VALUES (?, 'done', ?, ?)").bind(d.phone, nowIso(now), nowIso(now)).run();
-      job = { id: res.meta?.last_row_id, status: 'done' };
-      await env.DB.prepare('UPDATE customers SET jobs_count = jobs_count + 1 WHERE phone = ?').bind(d.phone).run();
-    }
-    await env.DB.prepare("UPDATE jobs SET invoice_doc_id = ?, invoice_sent_at = ?, status = 'done', done_at = COALESCE(done_at, ?) WHERE id = ?")
-      .bind(String(d.id), nowIso(now), nowIso(now), job.id).run();
-    if (r.ok) await logEvent(env, 'invoice', d.phone, now);
+    await deliverReceipt(env, d.phone, d.pdfUrl, { docId: String(d.id), now });
   }
 }
 

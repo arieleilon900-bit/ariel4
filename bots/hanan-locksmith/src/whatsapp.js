@@ -23,11 +23,14 @@ export function sendText(env, to, text) {
   });
 }
 
-// תבנית מאושרת. params = מחרוזות למשתנים {{1}}, {{2}}...; documentLink = PDF בכותרת (לקבלות)
-export function sendTemplate(env, to, name, params = [], documentLink = null, filename = 'receipt.pdf') {
+// מסמך לפי קישור (https://...) או לפי מזהה מדיה שהועלה ל-Meta
+const docRef = (doc, filename) => (/^https?:\/\//.test(doc) ? { link: doc, filename } : { id: doc, filename });
+
+// תבנית מאושרת. params = מחרוזות למשתנים {{1}}, {{2}}...; doc = PDF בכותרת (לקבלות): קישור או מזהה מדיה
+export function sendTemplate(env, to, name, params = [], doc = null, filename = 'receipt.pdf') {
   const components = [];
-  if (documentLink) {
-    components.push({ type: 'header', parameters: [{ type: 'document', document: { link: documentLink, filename } }] });
+  if (doc) {
+    components.push({ type: 'header', parameters: [{ type: 'document', document: docRef(doc, filename) }] });
   }
   if (params.length) {
     components.push({ type: 'body', parameters: params.map((p) => ({ type: 'text', text: String(p).slice(0, 1000) })) });
@@ -38,10 +41,10 @@ export function sendTemplate(env, to, name, params = [], documentLink = null, fi
   });
 }
 
-export function sendDocument(env, to, link, filename, caption) {
+export function sendDocument(env, to, doc, filename, caption) {
   return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
     messaging_product: 'whatsapp', to, type: 'document',
-    document: { link, filename, caption },
+    document: { ...docRef(doc, filename), caption },
   });
 }
 
