@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>טופס מילוי שאלות לבוט</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: single-column questionnaire grouped in fieldsets; one send button that composes a WhatsApp message */
+:root{--bg:#f5f4f1;--fg:#1e2326;--muted:#5d666c;--line:#d9d6cf;--accent:#1f5e46;--card:#fff;--onaccent:#fff;--body:'Assistant',Arial,sans-serif;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6;}
+.page{direction:rtl;max-width:640px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;}
+h1{font-size:clamp(26px,6vw,34px);line-height:1.2;text-wrap:balance;}
+.lead{color:var(--muted);margin:8px 0 18px;}
+fieldset{border:1px solid var(--line);border-radius:6px;background:var(--card);padding:6px 16px 14px;margin:0 0 16px;}
+legend{font-weight:700;padding:0 6px;font-size:18px;}
+.q{display:grid;gap:4px;margin-top:12px;}
+.q span{font-weight:600;}
+input,textarea{font:16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;resize:vertical;box-sizing:border-box;}
+input[type=tel]{direction:ltr;text-align:right;}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.note{font-size:15px;color:var(--muted);margin:4px 0 14px;}
+button{font:700 18px var(--body);background:var(--accent);color:var(--onaccent);border:0;border-radius:6px;padding:13px 18px;width:100%;cursor:pointer;}
+.alt{margin-top:10px;background:transparent;color:var(--fg);border:1px solid var(--line);font-size:16px;}
+#msg{min-height:1.4em;margin-top:8px;font-size:15px;color:var(--muted);}
+</style>
+</head>
+<body style="margin:0">
+<div class="page" dir="rtl" lang="he">
+<h1>הבוט של חנן המנעולן: כמה שאלות</h1>
+<p class="lead">כדי שהבוט ידבר בדיוק כמוך. אפשר לענות בקצרה, ולדלג על מה שלא בטוח. את החיבור לחשבונות (Meta ויש חשבונית) נעשה יחד בשיחה קצרה.</p>
+<fieldset><legend>איך הבוט מדבר</legend><label class="q" for="name"><span>בשם מי הבוט עונה?</span><input id="name" type="text" placeholder="למשל: כאן חנן המנעולן"></label><label class="q" for="langs"><span>באילו שפות פונים אליך לקוחות?</span><input id="langs" type="text" placeholder="עברית, ערבית, רוסית, אנגלית..."></label><label class="q" for="style"><span>יש משפט או סגנון שאתה תמיד אומר ללקוחות?</span><textarea id="style" rows="3" placeholder=""></textarea></label></fieldset><fieldset><legend>העבודה</legend><label class="q" for="jobs"><span>אילו סוגי עבודות אתה עושה?</span><textarea id="jobs" rows="3" placeholder="פריצת דלת, החלפת צילינדר, פריצת רכב, כספות, דלתות פלדה..."></textarea></label><label class="q" for="areas"><span>באילו אזורים וערים אתה עובד?</span><textarea id="areas" rows="3" placeholder=""></textarea></label><label class="q" for="hours"><span>שעות עבודה</span><input id="hours" type="text" placeholder="24/7, או שעות שהבוט אומר: חנן יחזור אליך בבוקר"></label><label class="q" for="urgent"><span>מתי הבוט מעביר אליך מיד, בלי שאלות?</span><textarea id="urgent" rows="3" placeholder="למשל: ילד נעול ברכב או בבית, גז על האש"></textarea></label><label class="q" for="prices"><span>האם הבוט יכול לתת מחיר או טווח מחיר?</span><textarea id="prices" rows="3" placeholder="או תמיד: חנן ייתן מחיר אחרי שיראה את התמונה"></textarea></label><label class="q" for="never"><span>דברים שהבוט אסור לו להגיד או להבטיח</span><textarea id="never" rows="3" placeholder=""></textarea></label></fieldset><fieldset><legend>ההעברה אליך</legend><label class="q" for="notify"><span>לאיזה מספר לשלוח לך את סיכום הפנייה?</span><input id="notify" type="tel" placeholder="05X-XXXXXXX" inputmode="tel"></label><label class="q" for="summary"><span>מה חשוב לך לראות בסיכום, ובאיזה סדר?</span><textarea id="summary" rows="3" placeholder=""></textarea></label></fieldset><fieldset><legend>קבלות (יש חשבונית)</legend><label class="q" for="doc"><span>איזה מסמך אתה מפיק?</span><input id="doc" type="text" placeholder="קבלה / חשבונית מס / חשבונית מס-קבלה"></label><label class="q" for="pay"><span>אמצעי תשלום של הלקוחות</span><input id="pay" type="text" placeholder="מזומן, ביט, אשראי, העברה"></label><label class="q" for="docfields"><span>מה צריך להופיע במסמך?</span><input id="docfields" type="text" placeholder="רק שם, או גם ת.ז./ח.פ. ללקוחות עסקיים"></label></fieldset>
+<p class="note">הלחיצה פותחת וואטסאפ עם כל התשובות מוכנות לשליחה לאריאל (052-466-6175).</p>
+<button type="button" id="send">שליחת התשובות בוואטסאפ</button>
+<button type="button" class="alt" id="copy">העתקת התשובות</button>
+<p id="msg" aria-live="polite"></p>
+</div>
+<script>
+(function(){
+  var ORDER = [["name", "בשם מי הבוט עונה?"], ["langs", "באילו שפות פונים אליך לקוחות?"], ["style", "יש משפט או סגנון שאתה תמיד אומר ללקוחות?"], ["jobs", "אילו סוגי עבודות אתה עושה?"], ["areas", "באילו אזורים וערים אתה עובד?"], ["hours", "שעות עבודה"], ["urgent", "מתי הבוט מעביר אליך מיד, בלי שאלות?"], ["prices", "האם הבוט יכול לתת מחיר או טווח מחיר?"], ["never", "דברים שהבוט אסור לו להגיד או להבטיח"], ["notify", "לאיזה מספר לשלוח לך את סיכום הפנייה?"], ["summary", "מה חשוב לך לראות בסיכום, ובאיזה סדר?"], ["doc", "איזה מסמך אתה מפיק?"], ["pay", "אמצעי תשלום של הלקוחות"], ["docfields", "מה צריך להופיע במסמך?"]];
+  function text(){
+    var out = ['תשובות לשאלון האפיון של הבוט (חנן המנעולן):',''];
+    ORDER.forEach(function(q, i){ var v = document.getElementById(q[0]).value.trim(); out.push((i+1)+'. '+q[1]); out.push(v ? v : '(לא נענה)'); out.push(''); });
+    return out.join('\n');
+  }
+  function save(){ try { var d={}; ORDER.forEach(function(q){ d[q[0]]=document.getElementById(q[0]).value; }); localStorage.setItem('hananForm', JSON.stringify(d)); } catch(e){} }
+  try { var d = JSON.parse(localStorage.getItem('hananForm')||'{}'); ORDER.forEach(function(q){ if (d[q[0]]) document.getElementById(q[0]).value = d[q[0]]; }); } catch(e){}
+  document.querySelector('.page').addEventListener('input', save);
+  document.getElementById('send').addEventListener('click', function(){
+    window.location.href = 'https://wa.me/972524666175?text=' + encodeURIComponent(text());
+  });
+  document.getElementById('copy').addEventListener('click', function(){
+    var t = text(), m = document.getElementById('msg');
+    try { navigator.clipboard.writeText(t).then(function(){ m.textContent = 'הועתק. עכשיו אפשר להדביק בוואטסאפ.'; }, function(){ m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }); }
+    catch(e) { m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }
+  });
+})();
+</script>
+</body>
+</html>
