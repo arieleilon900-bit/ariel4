@@ -1,0 +1,103 @@
+// WhatsApp Cloud API (Meta): שליחה, קבלת מדיה, ובדיקת חתימה.
+
+const graph = (env) => `https://graph.facebook.com/${env.GRAPH_VERSION || 'v24.0'}`;
+
+async function call(env, path, body) {
+  const res = await fetch(`${graph(env)}/${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.WA_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    console.error('WhatsApp API error', res.status, JSON.stringify(data));
+    return { ok: false, status: res.status, data };
+  }
+  return { ok: true, data };
+}
+
+export function sendText(env, to, text) {
+  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+    messaging_product: 'whatsapp', to, type: 'text',
+    text: { body: String(text).slice(0, 4000), preview_url: true },
+  });
+}
+
+// תבנית מאושרת. params = מחרוזות למשתנים {{1}}, {{2}}...; documentLink = PDF בכותרת (לקבלות)
+export function sendTemplate(env, to, name, params = [], documentLink = null, filename = 'receipt.pdf') {
+  const components = [];
+  if (documentLink) {
+    components.push({ type: 'header', parameters: [{ type: 'document', document: { link: documentLink, filename } }] });
+  }
+  if (params.length) {
+    components.push({ type: 'body', parameters: params.map((p) => ({ type: 'text', text: String(p).slice(0, 1000) })) });
+  }
+  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+    messaging_product: 'whatsapp', to, type: 'template',
+    template: { name, language: { code: env.TEMPLATE_LANG || 'he' }, components },
+  });
+}
+
+export function sendDocument(env, to, link, filename, caption) {
+  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+    messaging_product: 'whatsapp', to, type: 'document',
+    document: { link, filename, caption },
+  });
+}
+
+export function sendImageById(env, to, mediaId, caption) {
+  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+    messaging_product: 'whatsapp', to, type: 'image', image: { id: mediaId, caption },
+  });
+}
+
+export function markRead(env, messageId) {
+  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+    messaging_product: 'whatsapp', status: 'read', message_id: messageId,
+  });
+}
+
+// מורידים מדיה שלקוח שלח (תמונה / הקלטה)
+export async function downloadMedia(env, mediaId) {
+  const meta = await fetch(`${graph(env)}/${mediaId}`, { headers: { Authorization: `Bearer ${env.WA_TOKEN}` } });
+  if (!meta.ok) throw new Error(`media meta ${meta.status}`);
+  const info = await meta.json();
+  const file = await fetch(info.url, { headers: { Authorization: `Bearer ${env.WA_TOKEN}` } });
+  if (!file.ok) throw new Error(`media download ${file.status}`);
+  return { bytes: new Uint8Array(await file.arrayBuffer()), mime: info.mime_type || 'application/octet-stream' };
+}
+
+// מעלים מדיה מחדש כדי לשלוח אותה לחנן (מזהה מדיה של הודעה נכנסת לא תמיד אפשר לשלוח הלאה)
+export async function uploadMedia(env, bytes, mime) {
+  const form = new FormData();
+  form.append('messaging_product', 'whatsapp');
+  form.append('type', mime);
+  form.append('file', new Blob([bytes], { type: mime }), 'file');
+  const res = await fetch(`${graph(env)}/${env.WA_PHONE_NUMBER_ID}/media`, {
+    method: 'POST', headers: { Authorization: `Bearer ${env.WA_TOKEN}` }, body: form,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`media upload ${res.status} ${JSON.stringify(data)}`);
+  return data.id;
+}
+
+// בדיקת חתימת Meta (X-Hub-Signature-256) כדי שרק Meta יוכלו לשלוח לשרת
+export async function verifySignature(appSecret, rawBody, header) {
+  if (!appSecret) return true; // אם לא הוגדר סוד, לא בודקים (רק בשלב בדיקות)
+  if (!header || !header.startsWith('sha256=')) return false;
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(appSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(rawBody));
+  const hex = [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  const expected = header.slice(7);
+  if (hex.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
+export function toBase64(bytes) {
+  let bin = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  return btoa(bin);
+}

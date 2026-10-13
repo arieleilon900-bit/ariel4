@@ -1,0 +1,138 @@
+// משימות מתוזמנות: כל 15 דקות (תזכורות, מעקבים, ביקורות, קבלות), וכל יום ראשון (דוח שבועי).
+import { MESSAGES, TEMPLATES, TIMING } from './config.js';
+import { ilParts, ilTime, nowIso, whenLabel, displayPhone } from './util.js';
+import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
+import { fetchNewDocuments } from './yesh.js';
+import * as wa from './whatsapp.js';
+
+// הודעות מתוזמנות ללקוחות רק בין 08:00 ל-21:00, ולא בשבת
+function canMessageNow(now) {
+  const p = ilParts(now);
+  const hh = +p.hh;
+  return p.dow !== 6 && hh >= 8 && hh < 21;
+}
+
+export async function runEvery15(env, now = new Date()) {
+  await appointmentReminders(env, now);
+  await invoices(env, now);
+  if (!canMessageNow(now)) return;
+  await followups(env, now);
+  await reviews(env, now);
+  await referrals(env, now);
+  await yearly(env, now);
+}
+
+async function appointmentReminders(env, now) {
+  const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'open' AND scheduled_at IS NOT NULL AND reminders_sent < 2").all()).results;
+  for (const j of jobs) {
+    const at = new Date(j.scheduled_at);
+    const hoursLeft = (at.getTime() - now.getTime()) / 3600000;
+    if (hoursLeft <= 0) continue;
+    if (j.reminders_sent === 0 && hoursLeft <= TIMING.reminderDayBeforeHours && hoursLeft > 3 && canMessageNow(now)) {
+      const when = whenLabel(at, now);
+      const r = await sendToCustomer(env, j.phone, MESSAGES.reminderDayBefore(when, j.address), { name: TEMPLATES.reminderDayBefore, params: [when, j.address || '-'] }, now);
+      if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
+    } else if (hoursLeft <= TIMING.reminderTwoHoursBefore + 0.25) {
+      const time = ilTime(at);
+      const r = await sendToCustomer(env, j.phone, MESSAGES.reminderTwoHours(time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
+      if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
+    }
+  }
+}
+
+async function followups(env, now) {
+  const convs = (await env.DB.prepare(
+    "SELECT * FROM conversations WHERE state = 'handoff' AND followup_sent = 0 AND followup_at IS NOT NULL AND followup_at <= ?",
+  ).bind(nowIso(now)).all()).results;
+  for (const c of convs) {
+    const job = await env.DB.prepare('SELECT 1 FROM jobs WHERE phone = ? AND created_at >= ?').bind(c.phone, c.started_at).first();
+    await env.DB.prepare('UPDATE conversations SET followup_sent = 1 WHERE id = ?').bind(c.id).run();
+    if (job) continue; // כבר נפתחה עבודה, אין צורך במעקב
+    const r = await sendToCustomer(env, c.phone, MESSAGES.followup, { name: TEMPLATES.followup }, now);
+    if (r.ok) await logEvent(env, 'followup', c.phone, now);
+  }
+}
+
+async function reviews(env, now) {
+  if (!env.REVIEW_LINK) return;
+  const cutoff = new Date(now.getTime() - TIMING.reviewAfterHours * 3600000).toISOString();
+  const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND review_sent_at IS NULL AND done_at <= ?").bind(cutoff).all()).results;
+  for (const j of jobs) {
+    const r = await sendToCustomer(env, j.phone, MESSAGES.review(env.REVIEW_LINK), { name: TEMPLATES.review, params: [env.REVIEW_LINK] }, now);
+    await env.DB.prepare('UPDATE jobs SET review_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
+    if (r.ok) await logEvent(env, 'review', j.phone, now);
+  }
+}
+
+async function referrals(env, now) {
+  const cutoff = new Date(now.getTime() - TIMING.referralAfterDays * 86400000).toISOString();
+  const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND review_sent_at IS NOT NULL AND referral_sent_at IS NULL AND review_sent_at <= ?").bind(cutoff).all()).results;
+  for (const j of jobs) {
+    const r = await sendToCustomer(env, j.phone, MESSAGES.referral, { name: TEMPLATES.referral }, now);
+    await env.DB.prepare('UPDATE jobs SET referral_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
+    if (r.ok) await logEvent(env, 'referral', j.phone, now);
+  }
+}
+
+async function yearly(env, now) {
+  const cutoff = new Date(now.getTime() - TIMING.yearlyAfterDays * 86400000).toISOString();
+  const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND yearly_sent_at IS NULL AND done_at <= ?").bind(cutoff).all()).results;
+  for (const j of jobs) {
+    const r = await sendToCustomer(env, j.phone, MESSAGES.yearly, { name: TEMPLATES.yearly }, now);
+    await env.DB.prepare('UPDATE jobs SET yearly_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
+    if (r.ok) await logEvent(env, 'yearly', j.phone, now);
+  }
+}
+
+// קבלות מיש חשבונית: כל מסמך חדש נשלח ללקוח, והעבודה מסומנת כגמורה (מה שמפעיל בקשת ביקורת)
+async function invoices(env, now) {
+  const since = new Date(now.getTime() - 24 * 3600000).toISOString();
+  const docs = await fetchNewDocuments(env, since);
+  for (const d of docs) {
+    const seen = await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(String(d.id)).first();
+    if (seen || !d.phone || !d.pdfUrl) continue;
+    const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(d.phone).first();
+    const recent = c?.last_inbound_at && (now.getTime() - new Date(c.last_inbound_at).getTime()) < 23.5 * 3600000;
+    const r = recent
+      ? await wa.sendDocument(env, d.phone, d.pdfUrl, 'קבלה.pdf', MESSAGES.invoice)
+      : await wa.sendTemplate(env, d.phone, TEMPLATES.invoice, [], d.pdfUrl, 'קבלה.pdf');
+    let job = await env.DB.prepare("SELECT * FROM jobs WHERE phone = ? AND status IN ('open','done') AND invoice_doc_id IS NULL ORDER BY id DESC LIMIT 1").bind(d.phone).first();
+    if (!job) {
+      const res = await env.DB.prepare("INSERT INTO jobs (phone, status, done_at, created_at) VALUES (?, 'done', ?, ?)").bind(d.phone, nowIso(now), nowIso(now)).run();
+      job = { id: res.meta?.last_row_id, status: 'done' };
+      await env.DB.prepare('UPDATE customers SET jobs_count = jobs_count + 1 WHERE phone = ?').bind(d.phone).run();
+    }
+    await env.DB.prepare("UPDATE jobs SET invoice_doc_id = ?, invoice_sent_at = ?, status = 'done', done_at = COALESCE(done_at, ?) WHERE id = ?")
+      .bind(String(d.id), nowIso(now), nowIso(now), job.id).run();
+    if (r.ok) await logEvent(env, 'invoice', d.phone, now);
+  }
+}
+
+export async function weeklyReport(env, now = new Date()) {
+  const since = new Date(now.getTime() - 7 * 86400000).toISOString();
+  const rows = (await env.DB.prepare('SELECT type, COUNT(*) AS n FROM events WHERE created_at >= ? GROUP BY type').bind(since).all()).results;
+  const n = Object.fromEntries(rows.map((r) => [r.type, r.n]));
+  const c = (k) => n[k] || 0;
+  const done = await env.DB.prepare("SELECT COUNT(*) AS n FROM jobs WHERE status = 'done' AND done_at >= ?").bind(since).first();
+  const text = [
+    '📊 הסיכום השבועי',
+    '',
+    `פניות חדשות: ${c('lead')}`,
+    `הועברו אליך: ${c('handoff') + c('urgent')} (מתוכן דחופות: ${c('urgent')})`,
+    `עבודות שהסתיימו: ${done?.n || 0}`,
+    `קבלות שנשלחו: ${c('invoice')}`,
+    '',
+    'מה הבוט עשה בשבילך:',
+    `הודעות "בדרך": ${c('eta')}`,
+    `תזכורות לעבודות מתואמות: ${c('reminder')}`,
+    `מעקבים ללקוחות שלא סגרו: ${c('followup')}`,
+    `בקשות ביקורת: ${c('review')}`,
+    `בקשות המלצה: ${c('referral')}`,
+    `תזכורות שנתיות: ${c('yearly')}`,
+    `הודעות קוליות שתומללו: ${c('voice')}`,
+    `ספאם שסונן: ${c('spam')}`,
+  ].join('\n');
+  return sendToOwner(env, text, now);
+}
+
+export { displayPhone };

@@ -1,0 +1,37 @@
+name = "hanan-locksmith-bot"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# כל 15 דקות: תזכורות, מעקבים, ביקורות. כל יום ראשון 06:00 UTC (09:00 בישראל): דוח שבועי.
+[triggers]
+crons = ["*/15 * * * *", "0 6 * * 0"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hanan-bot"
+database_id = "REPLACE_WITH_DATABASE_ID"
+
+# תמלול הודעות קוליות
+[ai]
+binding = "AI"
+
+[vars]
+# מספר הבדיקה של Meta בהתחלה, ואחר כך המספר האמיתי
+WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
+# הטלפון של חנן לקבלת סיכומים ופקודות (פורמט בינלאומי, בלי +)
+OWNER_PHONE = "972503429998"
+# ID של גיליון הלקוחות בגוגל (ריק = בלי גיליון)
+SHEET_ID = ""
+# קישור לכתיבת ביקורת בגוגל
+REVIEW_LINK = ""
+# שמות התבניות המאושרות ב-WhatsApp Manager (להודעות מחוץ לחלון 24 שעות)
+TEMPLATE_LANG = "he"
+
+# סודות (לא כאן! מכניסים עם: wrangler secret put <NAME>)
+# WA_TOKEN            טוקן קבוע של System User ב-Meta
+# WA_VERIFY_TOKEN     מחרוזת שאתם ממציאים, לאימות ה-Webhook
+# WA_APP_SECRET       App Secret של האפליקציה ב-Meta (לבדיקת חתימה)
+# ANTHROPIC_API_KEY   מפתח Claude
+# GOOGLE_SA_JSON      כל התוכן של קובץ ה-JSON של ה-Service Account
+# YESH_API_KEY        מפתח ה-API של יש חשבונית (בשלב הקבלות)
