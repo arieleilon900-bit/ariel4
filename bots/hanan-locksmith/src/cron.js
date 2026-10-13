@@ -35,11 +35,18 @@ async function appointmentReminders(env, now) {
     const at = new Date(j.scheduled_at);
     const hoursLeft = (at.getTime() - now.getTime()) / 3600000;
     if (hoursLeft <= 0) continue;
+    // עבודה שנקבעה לאותו יום (פחות מ-12 שעות מראש): אין צורך בתזכורת "יום לפני"
+    if (j.reminders_sent === 0 && (new Date(j.scheduled_at).getTime() - new Date(j.created_at).getTime()) < 12 * 3600000) {
+      await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run();
+      j.reminders_sent = 1;
+    }
     if (j.reminders_sent === 0 && hoursLeft <= TIMING.reminderDayBeforeHours && hoursLeft > 3 && canMessageNow(now)) {
       const when = whenLabel(at, now);
       const r = await sendToCustomer(env, j.phone, MESSAGES.reminderDayBefore(when, j.address), { name: TEMPLATES.reminderDayBefore, params: [when, j.address || '-'] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
     } else if (hoursLeft <= TIMING.reminderTwoHoursBefore + 0.25) {
+      // לא בלילה ולא בשבת: אם זה יוצא אז, מוותרים על התזכורת הזו
+      if (!canMessageNow(now)) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); continue; }
       const time = ilTime(at);
       const r = await sendToCustomer(env, j.phone, MESSAGES.reminderTwoHours(time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
@@ -93,6 +100,10 @@ async function followups(env, now) {
   for (const c of convs) {
     const job = await env.DB.prepare('SELECT 1 FROM jobs WHERE phone = ? AND created_at >= ?').bind(c.phone, c.started_at).first();
     await env.DB.prepare('UPDATE conversations SET followup_sent = 1 WHERE id = ?').bind(c.id).run();
+    // חנן כבר דיבר איתו (ענה מהאפליקציה, כתב "טופל" או פקודה אחרת): לא שולחים "עדיין צריך עזרה?"
+    if (c.owner_replied_at) continue;
+    const known = await env.DB.prepare('SELECT known FROM customers WHERE phone = ?').bind(c.phone).first();
+    if (known?.known) continue;
     if (job || await optedOut(env, c.phone)) continue; // כבר נפתחה עבודה, אין צורך במעקב
     const r = await sendToCustomer(env, c.phone, MESSAGES.followup, { name: TEMPLATES.followup }, now);
     if (r.ok) await logEvent(env, 'followup', c.phone, now);

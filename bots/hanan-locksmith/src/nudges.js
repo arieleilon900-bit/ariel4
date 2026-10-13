@@ -14,38 +14,50 @@ export async function runNudges(env, now = new Date()) {
   await doneChecks(env, now);
 }
 
-// 1. לקוח שהפסיק לענות באמצע השיחה עם הבוט
+// 1. לקוח שהפסיק לענות באמצע השיחה עם הבוט, או שיחה שנתקעה (הבוט לא הספיק לענות)
 async function customerNudges(env, now) {
   const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'bot' AND customer_nudges < 2 AND updated_at >= ?")
-    .bind(new Date(now.getTime() - 23 * 3600000).toISOString()).all()).results;
+    .bind(new Date(now.getTime() - 7 * 86400000).toISOString()).all()).results;
   for (const conv of convs) {
     const last = await env.DB.prepare("SELECT role, created_at FROM messages WHERE conv_id = ? AND role IN ('user','assistant') ORDER BY id DESC LIMIT 1").bind(conv.id).first();
-    if (!last || last.role !== 'assistant') continue; // הלקוח כתב אחרון, אין למה להזכיר
+    if (!last) continue;
     const age = minutesSince(last.created_at, now);
 
-    if (conv.customer_nudges === 0 && age >= TIMING.customerNudgeMinutes && customerHours(now)) {
-      const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first();
-      if (!inServiceWindow(c?.last_inbound_at, now)) continue;
+    // הלקוח כתב אחרון ולא קיבל תשובה כבר 5 דקות: הבוט נתקע (למשל תקלה ב-AI). מעבירים לחנן מיד
+    if (last.role === 'user') {
+      if (age >= 5) await partialHandoff(env, conv, now, 'הבוט לא הצליח לענות ללקוח. כדאי לחזור אליו ישירות');
+      continue;
+    }
+
+    const canNudge = conv.customer_nudges === 0 && customerHours(now) && inServiceWindow(
+      (await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first())?.last_inbound_at, now);
+    if (canNudge && age >= TIMING.customerNudgeMinutes) {
       const r = await wa.sendText(env, conv.phone, MESSAGES.customerNudge);
       await env.DB.prepare('UPDATE conversations SET customer_nudges = 1 WHERE id = ?').bind(conv.id).run();
       if (r.ok) {
         await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, MESSAGES.customerNudge, nowIso(now)).run();
         await logEvent(env, 'customer_nudge', conv.phone, now);
       }
-    } else if (conv.customer_nudges === 1 && age >= TIMING.customerGiveUpHours * 60) {
-      // גם אחרי התזכורת לא ענה: חנן מקבל את מה שיש, כדי שיוכל להתקשר בעצמו
-      const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(conv.phone).first();
-      const lastUser = await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' ORDER BY id DESC LIMIT 1").bind(conv.id).first();
-      await env.DB.prepare("UPDATE conversations SET customer_nudges = 2, state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ?")
-        .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();
-      const summary = ownerSummary(conv, { customer_name: cust?.name || '', summary_for_owner: lastUser?.text ? `ההודעה האחרונה שלו: ${lastUser.text}` : '' }, conv.phone, now)
-        .replace('🔔 פנייה חדשה', '⚠️ לקוח התחיל לכתוב ולא סיים. שווה להתקשר אליו');
-      await sendToOwner(env, summary, now, conv.phone);
-      await forwardPhotosToOwner(env, JSON.parse(conv.photos || '[]'), now, conv.phone);
-      await logEvent(env, 'partial', conv.phone, now);
-      await appendRow(env, [ilDateTimeLabel(now), 'פנייה חלקית', cust?.name || '', displayPhone(conv.phone), conv.issue || '', conv.address || '', '', 'הלקוח הפסיק לענות']);
+      continue;
     }
+    // גם אחרי התזכורת לא ענה, או שלא היה אפשר להזכיר לו (לילה, שבת, עברו 24 שעות): חנן מקבל את מה שיש
+    const giveUp = conv.customer_nudges === 1 ? age >= TIMING.customerGiveUpHours * 60 : age >= (TIMING.customerGiveUpHours + 3) * 60;
+    if (giveUp && ownerHours(now)) await partialHandoff(env, conv, now);
   }
+}
+
+async function partialHandoff(env, conv, now, title = 'לקוח התחיל לכתוב ולא סיים. שווה להתקשר אליו') {
+  const moved = await env.DB.prepare("UPDATE conversations SET customer_nudges = 2, state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ? AND state = 'bot'")
+    .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();
+  if (!moved.meta?.changes) return;
+  const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(conv.phone).first();
+  const lastUser = await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' ORDER BY id DESC LIMIT 1").bind(conv.id).first();
+  const summary = ownerSummary(conv, { customer_name: cust?.name || '', urgent: !!conv.urgent, summary_for_owner: lastUser?.text ? `ההודעה האחרונה שלו: ${lastUser.text}` : '' }, conv.phone, now)
+    .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, `⚠️ ${title}`);
+  await sendToOwner(env, summary, now, conv.phone);
+  await forwardPhotosToOwner(env, JSON.parse(conv.photos || '[]'), now, conv.phone);
+  await logEvent(env, 'partial', conv.phone, now);
+  await appendRow(env, [ilDateTimeLabel(now), 'פנייה חלקית', cust?.name || '', displayPhone(conv.phone), conv.issue || '', conv.address || '', conv.urgent ? 'כן' : '', 'הלקוח הפסיק לענות']);
 }
 
 // 2. חנן קיבל פנייה ועוד לא טיפל בה

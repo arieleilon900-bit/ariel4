@@ -9,8 +9,9 @@ export function normalizePhone(raw) {
   if (d.startsWith('00972')) d = d.slice(2);
   if (d.startsWith('972')) d = d.slice(3);
   if (d.startsWith('0')) d = d.slice(1);
-  if (d.length < 8 || d.length > 9) return '';
-  return '972' + d;
+  // רק מספרים ישראליים אמיתיים: נייד 05X / 07X (9 ספרות), נייח 02/03/04/08/09 (8 ספרות)
+  const ok = (d.length === 9 && /^[57]/.test(d)) || (d.length === 8 && /^[23489]/.test(d));
+  return ok ? '972' + d : '';
 }
 
 // 972541234567 ← 054-1234567 (לתצוגה)
@@ -78,6 +79,11 @@ export function parseIlDateTime(dateStr, timeStr, now = new Date()) {
   if (y < 100) y += 2000;
   const mo = +dm[2], d = +dm[1], hh = +tm[1], mi = +tm[2];
   if (mo < 1 || mo > 12 || d < 1 || d > 31 || hh > 23 || mi > 59) return null;
+  // 31/2 וכדומה: תאריך שלא קיים
+  const check = new Date(Date.UTC(y, mo - 1, d));
+  if (check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) return null;
+  // בלי שנה, ותאריך שכבר עבר (למשל 2/1 שנכתב בדצמבר): השנה הבאה
+  if (!dm[3] && Date.UTC(y, mo - 1, d) < Date.UTC(n.y, n.m - 1, n.d)) y += 1;
   // מחשבים את הפרש השעון של ישראל באותו רגע (חורף/קיץ)
   const guess = new Date(Date.UTC(y, mo - 1, d, hh, mi));
   const p = ilParts(guess);

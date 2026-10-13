@@ -11,6 +11,7 @@ crons = ["*/15 * * * *", "0 6 * * 0"]
 binding = "DB"
 database_name = "hanan-bot"
 database_id = "REPLACE_WITH_DATABASE_ID"
+migrations_dir = "migrations"
 
 # תמלול הודעות קוליות
 [ai]

@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  db.exec(readFileSync(new URL('../schema.sql', import.meta.url), 'utf8'));
+  db.exec(readFileSync(new URL('../migrations/0001_init.sql', import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -455,4 +455,112 @@ test('customer says never mind: conversation closes, no nudges', async () => {
   await runEvery15(env, at(14));
   assert.ok(!textsTo(CUSTOMER).includes(MESSAGES.customerNudge));
   assert.equal(env.DB.raw.prepare('SELECT state FROM conversations').get().state, 'closed');
+});
+
+// ---------- ממצאי הבודק החיצוני ----------
+test('review: message during a slow AI turn is not lost (urgent wins)', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  // ה-AI של ההודעה הראשונה "איטי": בזמן שהוא חושב, מגיעה הודעה שנייה
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const origFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async (url, init) => {
+    if (String(url).includes('api.anthropic.com') && ++calls === 1) await gate;
+    return origFetch(url, init);
+  };
+  try {
+    // התשובה הראשונה שחוזרת שייכת להודעה השנייה (הראשונה תקועה), והיא רואה את כל ההיסטוריה
+    aiQueue = [
+      ai({ reply: 'מעביר לחנן מיד!', issue: 'תינוק נעול בבית', address: 'הרצל 5', urgent: true, ready_for_handoff: true }),
+      ai({ reply: 'מעביר לחנן', issue: 'נעול', address: 'הרצל 5', ready_for_handoff: true }),
+    ];
+    const first = processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הרצל 5 חולון' } }, 'x1'), t0);
+    await new Promise((r) => setTimeout(r, 20));
+    const second = processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'יש תינוק בפנים!!' } }, 'x2'), t0);
+    await new Promise((r) => setTimeout(r, 20));
+    release();
+    await Promise.all([first, second]);
+  } finally { globalThis.fetch = origFetch; }
+  const conv = env.DB.raw.prepare('SELECT * FROM conversations').get();
+  assert.equal(conv.urgent, 1, 'urgent recorded');
+  assert.equal(textsTo(CUSTOMER).length, 1, 'customer gets one answer');
+  assert.ok(aiRequests.some((r) => JSON.stringify(r).includes('יש תינוק בפנים') && JSON.stringify(r).includes('הרצל 5 חולון')), 'the answering turn saw both messages');
+  const toOwner = sent.filter((m) => m.to === OWNER);
+  assert.equal(toOwner.length, 1, 'one summary');
+  assert.ok(JSON.stringify(toOwner[0]).includes('דחופה'));
+});
+
+test('review: Friday-evening partial lead reaches Hanan on Sunday; stuck turn is swept', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const fri = new Date('2026-10-16T17:45:00Z'); // שישי 20:45
+  aiQueue = [ai({ reply: 'מה הכתובת?', issue: 'דלת תקועה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הדלת תקועה' } }, 'y1'), fri);
+  for (let h = 1; h <= 33; h += 1) await runEvery15(env, new Date(fri.getTime() + h * 3600000)); // עד ראשון 06:45
+  assert.equal(sent.filter((m) => m.to === OWNER).length, 0, 'nothing on Shabbat');
+  await runEvery15(env, new Date('2026-10-18T05:00:00Z')); // ראשון 08:00
+  assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('דלת תקועה'));
+
+  // תור "תקוע": הלקוח כתב, הבוט לא ענה (למשל התהליך נקטע) → אחרי 5 דקות לחנן
+  const C3 = '972548888888';
+  env.DB.raw.prepare("INSERT INTO customers (phone, first_seen, last_inbound_at) VALUES (?, ?, ?)").run(C3, '2026-10-18T05:00:00Z', '2026-10-18T05:00:00Z');
+  const id = Number(env.DB.raw.prepare("INSERT INTO conversations (phone, started_at, updated_at) VALUES (?, ?, ?)").run(C3, '2026-10-18T05:00:00Z', '2026-10-18T05:00:00Z').lastInsertRowid);
+  env.DB.raw.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'user', 'ננעלתי', ?)").run(id, '2026-10-18T05:00:00Z');
+  await runEvery15(env, new Date('2026-10-18T05:15:00Z'));
+  assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('054-8888888'));
+});
+
+test('review: follow-up skipped after Hanan answered; owner images are not receipts; caption number not trusted over quote', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'z0'), t0);
+  aiQueue = [ai({ reply: 'מעביר', issue: 'צילינדר', address: 'הרצל 5', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צילינדר, הרצל 5' } }, 'z1'), t0);
+  const summary = lastSentTo(OWNER);
+  // חנן עונה מהאפליקציה (echo)
+  await processWebhook(env, { entry: [{ changes: [{ value: { message_echoes: [{ from: '123', to: CUSTOMER, type: 'text', text: { body: 'מגיע' } }] } }] }] }, t0);
+  await runEvery15(env, new Date(t0.getTime() + 26 * 3600000));
+  assert.ok(!sent.some((m) => m.to === CUSTOMER && m.template?.name === 'followup_v1'), 'no "still need help?"');
+
+  // תמונה מחנן בציטוט: נשלחת ללקוח כתמונה, לא כקבלה, והעבודה לא נסגרת
+  await processWebhook(env, inbound(OWNER, { type: 'image', image: { id: 'p1', caption: '250 ש"ח' }, context: { id: wamidOf(summary) } }, 'z2'), t0);
+  assert.ok(sent.some((m) => m.to === CUSTOMER && m.type === 'image'));
+  assert.ok(!sent.some((m) => m.to === CUSTOMER && m.type === 'document'));
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM jobs").get().n, 0);
+
+  // קבלה עם "מספר קבלה" בכיתוב, בציטוט: הולכת ללקוח שבציטוט
+  await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf7', filename: 'r.pdf', mime_type: 'application/pdf', caption: 'קבלה מס 100234567' }, context: { id: wamidOf(summary) } }, 'z3'), t0);
+  assert.ok(sent.some((m) => m.to === CUSTOMER && m.type === 'document'));
+  assert.ok(!sent.some((m) => m.to === '972100234567'));
+
+  // "👍👍" בציטוט: לא נשלח ללקוח
+  const n = sent.filter((m) => m.to === CUSTOMER).length;
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: '👍👍' }, context: { id: wamidOf(summary) } }, 'z4'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סבבה תודה' }, context: { id: wamidOf(summary) } }, 'z5'), t0);
+  assert.equal(sent.filter((m) => m.to === CUSTOMER).length, n);
+  // "סיים" עם שגיאה → מתפרש כסיום
+  assert.equal(parseCommand('סיים.').cmd, 'done');
+  assert.equal(parseCommand('סיום 054 123 4567').phone, CUSTOMER);
+});
+
+test('review: no 2h reminder at night, no day-before for same-day jobs, no past appointments', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T05:00:00Z'); // 08:00
+  aiQueue = [ai({ reply: 'היי, מה קרה?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'r0'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 15/10/2026 06:30' } }, 'r1'), t0);
+  await runEvery15(env, new Date('2026-10-15T01:15:00Z')); // 04:15
+  assert.ok(!sent.some((m) => m.to === CUSTOMER && (m.template?.name === 'appt_today_v1' || (m.text?.body || '').includes('06:30'))), 'no reminder at 04:15');
+
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 14/10/2026 13:00' } }, 'r2'), t0);
+  await runEvery15(env, new Date('2026-10-14T05:15:00Z'));
+  assert.ok(!textsTo(CUSTOMER).some((t) => t.startsWith('תזכורת: חנן מגיע אליך')), 'no day-before for same-day job');
+
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 13/10/2026 10:00' } }, 'r3'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.includes('כבר עברו'));
 });

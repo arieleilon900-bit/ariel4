@@ -5,6 +5,9 @@
 **הדרך הקלה (בלי טרמינל):** `automation-agency/clients/hanan-locksmith/how-to-build.md`. ההעלאה לשרת קורית לבד דרך GitHub Actions. המדריך כאן הוא הדרך הידנית.
 **כלל:** מפתחות וסיסמאות לא שולחים בצ׳אט. מכניסים אותם רק עם `wrangler secret put`.
 
+## חשוב: תוכנית Workers Paid
+בתוכנית החינמית של Cloudflare מותר 10 אלפיות שנייה חישוב לכל הודעה ו-50 קריאות החוצה. הודעה עם תמונה עוברת את זה, והבוט ייתקע. משדרגים ל-**Workers Paid** (5 דולר לחודש): Workers & Pages ← Plans.
+
 ## מה צריך לפני שמתחילים
 - [ ] Node.js ו-Git מותקנים, ו-`wrangler login` בוצע.
 - [ ] מפתח API של Anthropic.
@@ -27,7 +30,7 @@ npx wrangler d1 create hanan-bot
 ```
 הפקודה מדפיסה `database_id`. פותחים את `wrangler.toml` ומחליפים את `REPLACE_WITH_DATABASE_ID` במספר הזה. ואז:
 ```
-npx wrangler d1 execute hanan-bot --remote --file=schema.sql
+npx wrangler d1 migrations apply hanan-bot --remote
 ```
 
 ## שלב 3: ההגדרות ב-`wrangler.toml`
@@ -92,6 +95,8 @@ https://developers.facebook.com/apps ← האפליקציה ← **WhatsApp ← C
 הבוט שולח ללקוח את הקבלה, מסמן את העבודה כגמורה, ואחרי 3 שעות שולח בקשת ביקורת.
 אפשר גם בטקסט: `קבלה 0541234567 https://קישור-ל-PDF`.
 כשיגיע התיעוד של ה-API מיש חשבונית, ממלאים את `src/yesh.js` ומוסיפים את `YESH_API_KEY` ו-`YESH_API_URL`, והקבלות יישלחו לבד.
+
+**בדיקה מקומית (`npm run dev`):** בלי `WA_APP_SECRET` השרת דוחה כל הודעה, כדי שאף אחד לא יתחזה ל-Meta. לבדיקה מקומית בלבד: `ALLOW_UNSIGNED=1` בקובץ `.dev.vars`.
 
 **לראות מה קורה בשרת בזמן אמת:**
 ```

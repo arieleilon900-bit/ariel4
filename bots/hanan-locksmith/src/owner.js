@@ -27,16 +27,28 @@ export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ה
 אפשר גם בלי לענות על הודעה: כותבים את הטלפון אחרי הפקודה. למשל: סיום 0541234567`;
 
 const PHONE = String.raw`(\+?\d[\d\-]{7,15})`;
-const ACK = /^(קיבלתי|תודה|תודה רבה|אוקי|אוקיי|אוקיי תודה|סבבה|בסדר|מעולה|👍|🙏|ok|okay)[.!]*$/i;
+const ACK_WORDS = /^(קיבלתי|תודה|רבה|אוקי|אוקיי|אוק|סבבה|בסדר|מעולה|יופי|אחלה|טוב|ok|okay|thanks|thx|כן|לא)$/i;
+// אישור קצר ("סבבה תודה", "👍👍"): לא פקודה ולא הודעה ללקוח
+function isAck(t) {
+  const words = t.replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return true; // רק אימוג'י או סימנים
+  return words.length <= 3 && words.every((w) => ACK_WORDS.test(w));
+}
+// שגיאות כתיב נפוצות בפקודות
+const ALIASES = { 'סיים': 'סיום', 'סיימתי': 'סיום', 'גמרתי': 'סיום', 'בטל': 'ביטול', 'טיפלתי': 'טופל', 'תמונה': 'תמונות', 'חסימה': 'חסום' };
 
 // מפרק פקודה לחלקים. phone: null = לא נכתב טלפון (אולי יש ציטוט), '' = טלפון לא תקין
 export function parseCommand(text) {
-  const t = String(text || '').trim().replace(/\s+/g, ' ');
+  let t = String(text || '').trim().replace(/\s+/g, ' ').replace(/[.!?,׳"]+$/u, '').trim();
   if (!t) return null;
+  const first = t.split(' ')[0];
+  if (ALIASES[first]) t = ALIASES[first] + t.slice(first.length);
+  // טלפון עם רווחים אחרי פקודה של מילה אחת ("סיום 054 123 4567")
+  if (/^(סיום|ביטול|בוט|חסום|שקט|טופל|תמונות) [\d+]/.test(t)) t = t.replace(/(\+?\d[\d\- ]{7,15}\d)$/, (m) => m.replace(/ /g, ''));
   const ph = (raw) => (raw == null ? null : normalizePhone(raw));
   if (/^(עזרה|help|פקודות)$/i.test(t)) return { cmd: 'help' };
   if (/^דוח$/.test(t)) return { cmd: 'report' };
-  if (ACK.test(t)) return { cmd: 'ack' };
+  if (isAck(t)) return { cmd: 'ack' };
   let m;
   if ((m = t.match(new RegExp(`^לא רלוונטי(?: ([\\d\\-+ ]{9,16}))?$`)))) return { cmd: 'irrelevant', phone: ph(m[1]) };
   if ((m = t.match(new RegExp(`^בדרך(?: ${PHONE})?(?: (\\d{1,3}))?(?: דק(?:ות|׳|')?)?$`)))) return { cmd: 'eta', phone: ph(m[1]), minutes: m[2] ? +m[2] : null };
@@ -64,13 +76,36 @@ async function latestConv(env, phone) {
 
 // חנן מעביר לבוט קובץ (PDF של קבלה): הלקוח לפי הכיתוב, לפי הציטוט, או לפי הטלפון שישלח מיד אחרי
 async function handleOwnerFile(env, msg, now) {
-  const file = msg.document || msg.image;
-  const phone = normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]) || await contextPhone(env, msg);
+  const file = msg.document;
+  if (!/pdf/i.test(file.mime_type || '') && !/\.pdf$/i.test(file.filename || '')) {
+    return sendToOwner(env, 'קיבלתי קובץ, אבל רק PDF של קבלה נשלח ללקוח אוטומטית. את השאר שלח ללקוח מהטלפון שלך.', now);
+  }
+  const phone = await contextPhone(env, msg) || normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]);
   if (!phone) {
     await env.DB.prepare('INSERT INTO owner_pending_file (media_id, filename, created_at) VALUES (?, ?, ?)').bind(file.id, msg.document?.filename || null, nowIso(now)).run();
     return sendToOwner(env, 'קיבלתי את הקובץ. של איזה לקוח הקבלה? שלח לי את הטלפון שלו (למשל 0541234567).', now);
   }
   return sendReceiptFile(env, phone, file.id, msg.document?.filename, now);
+}
+
+// חנן שלח תמונה: בתשובה על לקוח → נשלחת ללקוח כתמונה (לא כקבלה)
+async function handleOwnerImage(env, msg, now) {
+  const phone = await contextPhone(env, msg);
+  if (!phone) return sendToOwner(env, 'קיבלתי תמונה. כדי לשלוח אותה ללקוח, שלח אותה בתשובה (החלקה ימינה) על ההודעה שלו.', now);
+  const cust = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(phone).first();
+  if (!inServiceWindow(cust?.last_inbound_at, now)) {
+    return sendToOwner(env, `הלקוח ${displayPhone(phone)} לא כתב ב-24 השעות האחרונות, ווואטסאפ לא מאפשר לשלוח לו תמונה. שלח לו מהטלפון שלך.`, now, phone);
+  }
+  try {
+    const media = await wa.downloadMedia(env, msg.image.id);
+    const id = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
+    const r = await wa.sendImageById(env, phone, id, msg.image.caption || '');
+    await markOwnerReplied(env, phone, now);
+    return sendToOwner(env, r.ok ? `✓ התמונה נשלחה ל-${displayPhone(phone)}.` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
+  } catch (err) {
+    console.error('owner image relay failed', err);
+    return sendToOwner(env, `לא הצלחתי לשלוח את התמונה ל-${displayPhone(phone)}.`, now, phone);
+  }
 }
 
 async function sendReceiptFile(env, phone, fileId, filename, now) {
@@ -87,7 +122,8 @@ async function sendReceiptFile(env, phone, fileId, filename, now) {
 }
 
 export async function handleOwnerCommand(env, text, now = new Date(), msg = null) {
-  if (msg && (msg.type === 'document' || msg.type === 'image')) return handleOwnerFile(env, msg, now);
+  if (msg && msg.type === 'document') return handleOwnerFile(env, msg, now);
+  if (msg && msg.type === 'image') return handleOwnerImage(env, msg, now);
   // רק טלפון, ויש קובץ שמחכה (חנן שלח קבלה בלי לציין לקוח)
   const onlyPhone = /^\s*\+?\d[\d\- ]{7,14}\d\s*$/.test(text || '') ? normalizePhone(text) : '';
   if (onlyPhone) {
@@ -103,8 +139,12 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
   if (c.phone === '') return sendToOwner(env, 'לא הבנתי את מספר הטלפון. כתוב למשל: סיום 0541234567', now);
   const quoted = await contextPhone(env, msg);
 
-  // טקסט חופשי בתשובה על הודעה של לקוח: נשלח ללקוח
-  if (c.cmd === 'unknown' && quoted) return relayToCustomer(env, quoted, text, now);
+  // טקסט חופשי בתשובה על הודעה של לקוח: נשלח ללקוח (רק משפט אמיתי, לא מילה בודדת שאולי היא פקודה עם שגיאה)
+  if (c.cmd === 'unknown' && quoted) {
+    const words = String(text).trim().split(/\s+/).length;
+    if (words >= 2 && /\p{L}/u.test(text)) return relayToCustomer(env, quoted, text, now);
+    return sendToOwner(env, `לא הבנתי את "${String(text).slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
+  }
 
   const needsPhone = !['help', 'report', 'unknown'].includes(c.cmd);
   if (needsPhone && c.phone == null) {
@@ -129,7 +169,8 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'appt': {
       const at = parseIlDateTime(c.date, c.time, now);
-      if (!at) return sendToOwner(env, 'לא הבנתי את התאריך או השעה. כתוב למשל: תור 0541234567 17/10 14:30', now);
+      if (!at) return sendToOwner(env, 'לא הבנתי את התאריך או השעה. כתוב למשל: תור 17/10 14:30', now);
+      if (at.getTime() < now.getTime()) return sendToOwner(env, `התאריך והשעה כבר עברו (${whenLabel(at, now)}). כתוב שוב עם תאריך עתידי.`, now);
       const conv = await latestConv(env, c.phone);
       await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(c.phone, conv?.id || null, conv?.issue || null, c.address || conv?.address || null, at.toISOString(), nowIso(now)).run();
@@ -215,5 +256,5 @@ async function relayToCustomer(env, phone, text, now) {
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner', ?, ?)").bind(conv.id, text, nowIso(now)).run();
     if (conv.state === 'bot') await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?) WHERE id = ?").bind(nowIso(now), conv.id).run();
   }
-  return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}.` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
+  return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}: "${String(text).slice(0, 60)}"` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
 }

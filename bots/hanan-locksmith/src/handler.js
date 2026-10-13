@@ -5,6 +5,7 @@ import { appendRow } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, inServiceWindow, nowIso, wazeLink, addHours } from './util.js';
 import * as wa from './whatsapp.js';
 import { handleOwnerCommand } from './owner.js';
+import { ownerHours } from './hours.js';
 
 const CONV_IDLE_HOURS = 72; // שיחה שלא זזה 3 ימים נחשבת סגורה, והודעה חדשה פותחת שיחה חדשה
 
@@ -43,7 +44,7 @@ export async function sendToOwner(env, text, now = new Date(), about = null, to 
 
 // חנן כתב לבוט (או לחץ "קיבלתי"): שולחים לו במלואן את ההודעות והתמונות שהגיעו אליו בקיצור
 export async function flushOwnerOutbox(env, now = new Date()) {
-  const items = (await env.DB.prepare('SELECT * FROM owner_outbox WHERE sent = 0 AND created_at >= ? ORDER BY id LIMIT 8')
+  const items = (await env.DB.prepare('SELECT * FROM owner_outbox WHERE sent = 0 AND created_at >= ? ORDER BY id LIMIT 5')
     .bind(new Date(now.getTime() - 48 * 3600000).toISOString()).all()).results;
   for (const it of items) {
     await env.DB.prepare('UPDATE owner_outbox SET sent = 1 WHERE id = ?').bind(it.id).run();
@@ -52,13 +53,13 @@ export async function flushOwnerOutbox(env, now = new Date()) {
       const wamid = r.data?.messages?.[0]?.id;
       if (it.about && wamid) await env.DB.prepare('INSERT OR REPLACE INTO owner_refs (wamid, phone, created_at) VALUES (?, ?, ?)').bind(wamid, it.about, nowIso(now)).run();
     }
-    if (it.media) await forwardPhotosToOwner(env, JSON.parse(it.media).slice(0, 3), now, it.about);
+    if (it.media) await forwardPhotosToOwner(env, JSON.parse(it.media).slice(0, 2), now, it.about);
   }
 }
 
 // משתנה בתבנית: וואטסאפ לא מרשים ירידות שורה, טאבים או יותר מ-4 רווחים ברצף
 export function templateText(text) {
-  return String(text).replace(/[\t\r]+/g, ' ').replace(/\n+/g, ' | ').replace(/ {4,}/g, '   ').trim().slice(0, 1000);
+  return String(text).replace(/[\t\r]+/g, ' ').replace(/\n+/g, ' | ').replace(/ {4,}/g, '   ').trim().slice(0, 850);
 }
 
 async function extractContent(env, msg) {
@@ -204,6 +205,17 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     return;
   }
 
+  // לקוח שביקש הסרה וחזר לכתוב: חזר להיות לקוח רגיל
+  if (customer?.opted_out) await env.DB.prepare('UPDATE customers SET opted_out = 0 WHERE phone = ?').bind(phone).run();
+
+  // 13: מי שסומן כספאם ב-24 השעות האחרונות: לא מבזבזים עליו שיחה עם ה-AI
+  const spamRecently = await env.DB.prepare("SELECT 1 FROM conversations WHERE phone = ? AND state = 'spam' AND updated_at >= ?")
+    .bind(phone, new Date(now.getTime() - 24 * 3600000).toISOString()).first();
+  if (spamRecently) {
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'user', ?, ?, ?)").bind(msg.text?.body || `[${msg.type}]`, msg.id, nowIso(now)).run();
+    return;
+  }
+
   wa.markRead(env, msg.id).catch(() => {});
   const content = await extractContent(env, msg);
   if (content.voice) await logEvent(env, 'voice', phone, now);
@@ -255,13 +267,26 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   const result = await runTurn(env, { history, image, now, returningCustomer: returning, profileName: contactName || customer?.name || '' });
   if (result.failed) await reportAiFailure(env, phone, result.summary_for_owner, now);
 
-  // בזמן שה-AI חשב, חנן אולי כבר ענה ללקוח מהאפליקציה: לא עונים במקומו
+  // בזמן שה-AI חשב, הלקוח כתב עוד הודעה: היא תקבל תשובה על הכל ביחד
+  const newest = await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'user'").bind(conv.id).first();
+  if (newest?.id !== myId) return;
+
+  // בזמן שה-AI חשב, השיחה עברה לחנן (הודעה קודמת, או שחנן ענה מהאפליקציה): ההודעה הזו עוברת אליו
   const state = (await env.DB.prepare('SELECT state FROM conversations WHERE id = ?').bind(conv.id).first())?.state;
-  if (state !== 'bot') return;
+  if (state !== 'bot') {
+    if (state === 'handoff') {
+      await sendToOwner(env, `${result.urgent ? '🚨 דחוף! ' : ''}💬 ${customer?.name || ''} ${displayPhone(phone)} כתב/ה: ${content.text}`.trim(), now, phone);
+      if (content.photoId) await forwardPhotosToOwner(env, [content.photoId], now, phone);
+      if (result.urgent) await env.DB.prepare('UPDATE conversations SET urgent = 1 WHERE id = ?').bind(conv.id).run();
+    }
+    return;
+  }
 
   if (result.category === 'spam') {
-    await env.DB.prepare("UPDATE conversations SET state = 'spam' WHERE id = ?").bind(conv.id).run();
+    await env.DB.prepare("UPDATE conversations SET state = 'spam', updated_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
     await logEvent(env, 'spam', phone, now);
+    // שורה קצרה לחנן, למקרה שה-AI טעה (בשעות סבירות בלבד)
+    if (ownerHours(now)) await sendToOwner(env, `סיננתי כספאם הודעה מ-${displayPhone(phone)}: "${String(content.text).slice(0, 120)}". אם זה לקוח, ענה על ההודעה הזו: בוט`, now, phone);
     return;
   }
 
@@ -285,7 +310,11 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     // רק פעם אחת: אם שתי הודעות הגיעו ביחד, רק אחת מעבירה לחנן
     const moved = await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ? AND state = 'bot'")
       .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();
-    if (!moved.meta?.changes) return;
+    if (!moved.meta?.changes) {
+      // תור אחר כבר העביר לחנן: לפחות ההודעה הזו מגיעה אליו
+      await sendToOwner(env, `${result.urgent ? '🚨 דחוף! ' : ''}💬 ${displayPhone(phone)} כתב/ה: ${content.text}`, now, phone);
+      return;
+    }
     const fresh = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
     const name = result.customer_name || customer?.name || contactName || '';
     await logEvent(env, result.urgent ? 'urgent' : 'handoff', phone, now);
@@ -311,15 +340,27 @@ async function imageForAi(env, mediaId) {
   }
 }
 
-// ה-AI לא עבד: הלקוח עובר לחנן (זה כבר קורה), ואריאל מקבל התראה, לכל היותר פעם ב-6 שעות
-async function reportAiFailure(env, phone, reason, now) {
-  await logEvent(env, 'ai_error', phone, now);
+// הודעה שלא נמסרה: נרשם בדוח, ואריאל מקבל התראה (לכל היותר פעם ב-6 שעות)
+export async function handleFailedStatus(env, st, now = new Date()) {
+  const err = st.errors?.[0] || {};
+  console.error('message not delivered', st.recipient_id, err.code, err.title);
+  await logEvent(env, 'send_failed', st.recipient_id, now);
+  await adminAlert(env, `הודעה ל-${displayPhone(st.recipient_id)} לא נמסרה (${err.code || ''} ${err.title || ''}).`.replace(/\s+\)/, ')'), now);
+}
+
+async function adminAlert(env, text, now) {
   const admin = env.ADMIN_PHONE;
   if (!admin) return;
   const recent = await env.DB.prepare("SELECT 1 FROM events WHERE type = 'admin_alert' AND created_at >= ?").bind(new Date(now.getTime() - 6 * 3600000).toISOString()).first();
   if (recent) return;
   await logEvent(env, 'admin_alert', null, now);
-  await sendToOwner(env, `תקלה בבוט של ${BUSINESS.shortName}: ${reason}. הלקוח הועבר לחנן. כדאי לבדוק את הלוגים (wrangler tail) ואת הקרדיט ב-Anthropic.`, now, null, admin);
+  await sendToOwner(env, `תקלה בבוט של ${BUSINESS.shortName}: ${text} כדאי לבדוק (npx wrangler tail).`, now, null, admin);
+}
+
+// ה-AI לא עבד: הלקוח עובר לחנן (זה כבר קורה), ואריאל מקבל התראה, לכל היותר פעם ב-6 שעות
+async function reportAiFailure(env, phone, reason, now) {
+  await logEvent(env, 'ai_error', phone, now);
+  await adminAlert(env, `${reason}. הלקוח הועבר לחנן. לבדוק גם את הקרדיט ב-Anthropic.`, now);
 }
 
 // חנן ענה ללקוח מהאפליקציה (Coexistence): הבוט מפסיק לנהל את השיחה הזו

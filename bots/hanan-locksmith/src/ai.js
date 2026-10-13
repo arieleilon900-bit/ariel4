@@ -67,10 +67,10 @@ ${profileName ? `השם של הלקוח בפרופיל הוואטסאפ: ${profi
 // history: [{role:'user'|'assistant', text}] כבר כולל את ההודעה האחרונה של הלקוח
 // image: {base64, mime} של תמונה שהגיעה בהודעה האחרונה (אופציונלי)
 // הזמן שמותר לשיחה עם ה-AI: Cloudflare נותנים לעיבוד ברקע 30 שניות בסך הכל
-const AI_TIMEOUT_MS = 13000;
+const AI_TIMEOUT_MS = 10000;
 
 export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '' }) {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: AI_TIMEOUT_MS, maxRetries: 1 });
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: AI_TIMEOUT_MS, maxRetries: 0 });
   const messages = [];
   for (const m of history) {
     const role = m.role === 'assistant' ? 'assistant' : 'user';
