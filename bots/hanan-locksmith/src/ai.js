@@ -1,7 +1,7 @@
 // השיחה עם הלקוח: Claude מקבל את ההיסטוריה ומחזיר תשובה + מה נאסף עד עכשיו (JSON מובנה).
 import Anthropic from '@anthropic-ai/sdk';
 import { BUSINESS } from './config.js';
-import { isOpen, ilDateTimeLabel } from './util.js';
+import { isOpen, isShabbat, ilDateTimeLabel } from './util.js';
 
 export const MODEL = 'claude-opus-5-5';
 
@@ -23,9 +23,10 @@ const SCHEMA = {
   },
 };
 
-export function buildSystemPrompt({ now = new Date(), returningCustomer = null } = {}) {
+export function buildSystemPrompt({ now = new Date(), returningCustomer = null, profileName = '' } = {}) {
   const b = BUSINESS;
   const open = isOpen(b.hours, now);
+  const shabbat = b.shabbat?.enabled && isShabbat(now);
   return `אתה המוקדן הדיגיטלי של "${b.name}", מנעולן. אתה עונה ללקוחות בוואטסאפ בשם העסק. בעל העסק הוא ${b.ownerName}.
 
 התפקיד שלך: לאסוף את הפרטים שחנן צריך כדי לחזור ללקוח ולצאת לעבודה, ולהעביר אליו. אתה לא מתאם זמנים ולא סוגר מחירים. את זה עושה חנן.
@@ -41,12 +42,14 @@ export function buildSystemPrompt({ now = new Date(), returningCustomer = null }
 מקרים דחופים: ${b.urgentExamples.join('; ')}. במקרה כזה: urgent=true, ready_for_handoff=true מיד, בלי לחכות לשאר הפרטים. בתשובה: חנן מקבל את זה עכשיו, ואם יש סכנת חיים, להתקשר גם למד"א 101 או למשטרה 100.
 
 שירותים: ${b.services.join(', ')}.
-אזורי שירות: ${b.areas}.
+אזורי שירות: ${b.areas}.${b.outOfAreaMessage ? ` אם הלקוח מחוץ לאזור: ${b.outOfAreaMessage}` : ''}
 ${b.priceGuidance ? `מחירים: ${b.priceGuidance}` : 'מחירים: אל תיתן מחיר בכלל. תגיד שחנן ייתן מחיר אחרי שיראה את התמונה או את המקום.'}
 אסור: ${b.neverSay.join('; ')}.
-${open ? '' : `עכשיו מחוץ לשעות העבודה. אסוף את הפרטים כרגיל, ותגיד ללקוח ש${b.afterHoursMessage}.`}
+${shabbat ? `עכשיו שבת. ${b.shabbat.message}` : open ? '' : `עכשיו מחוץ לשעות העבודה. אסוף את הפרטים כרגיל, ותגיד ללקוח ש${b.afterHoursMessage}.`}
 ${returningCustomer ? `זה לקוח חוזר${returningCustomer.name ? ` בשם ${returningCustomer.name}` : ''} (עבודות קודמות: ${returningCustomer.jobs_count}). פנה אליו בחום${returningCustomer.name ? ' בשמו' : ''}.` : ''}
 
+${b.botGender === 'female' ? 'דבר על עצמך בלשון נקבה.' : 'דבר על עצמך בלשון זכר.'}
+${profileName ? `השם של הלקוח בפרופיל הוואטסאפ: ${profileName} (אולי כינוי, אל תניח שזה השם האמיתי).` : ''}
 סגנון: עברית פשוטה ואנושית, הודעות קצרות (1-3 משפטים), בלי רשימות ובלי ניסוחים רשמיים. אם הלקוח כותב בערבית, רוסית או אנגלית, ענה בשפה שלו.
 אם שואלים אם אתה בוט: תגיד בכנות שאתה העוזר הדיגיטלי של חנן, ושחנן מקבל את כל הפרטים.
 ספאם, פרסומות, מכירות, הודעות שלא קשורות לשירות: category=spam, reply ריק.
@@ -55,8 +58,11 @@ ${returningCustomer ? `זה לקוח חוזר${returningCustomer.name ? ` בשם
 
 // history: [{role:'user'|'assistant', text}] כבר כולל את ההודעה האחרונה של הלקוח
 // image: {base64, mime} של תמונה שהגיעה בהודעה האחרונה (אופציונלי)
-export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null }) {
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+// הזמן שמותר לשיחה עם ה-AI: Cloudflare נותנים לעיבוד ברקע 30 שניות בסך הכל
+const AI_TIMEOUT_MS = 13000;
+
+export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '' }) {
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: AI_TIMEOUT_MS, maxRetries: 1 });
   const messages = [];
   for (const m of history) {
     const role = m.role === 'assistant' ? 'assistant' : 'user';
@@ -76,21 +82,23 @@ export async function runTurn(env, { history, image = null, now = new Date(), re
   try {
     const response = await client.beta.messages.create({
       model: env.CLAUDE_MODEL || MODEL,
-      max_tokens: 4000,
+      max_tokens: 8000,
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      system: buildSystemPrompt({ now, returningCustomer }),
+      system: buildSystemPrompt({ now, returningCustomer, profileName }),
       messages,
-      output_config: { format: { type: 'json_schema', schema: SCHEMA } },
+      // שיחת קבלת פנייה קצרה: חשיבה קלה מספיקה, ועונה מהר יותר
+      output_config: { effort: env.CLAUDE_EFFORT || 'low', format: { type: 'json_schema', schema: SCHEMA } },
     });
     if (response.stop_reason === 'refusal') return fallbackResult('refusal');
+    if (response.stop_reason === 'max_tokens') return fallbackResult('max_tokens');
     const text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
     return normalize(JSON.parse(text));
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) console.error('Claude rate limited');
     else if (err instanceof Anthropic.APIError) console.error(`Claude API error ${err.status}: ${err.message}`);
     else console.error('Claude turn failed', err);
-    return fallbackResult('error');
+    return fallbackResult(err instanceof Anthropic.APIError ? `error ${err.status ?? ''}`.trim() : 'error');
   }
 }
 
@@ -101,6 +109,7 @@ function fallbackResult(reason) {
     language: 'he', category: 'service', urgent: false, urgent_reason: '',
     customer_name: '', issue: '', address: '', ready_for_handoff: true,
     summary_for_owner: `הבוט לא הצליח לנהל את השיחה (${reason}). כדאי לחזור ללקוח ישירות.`,
+    failed: true,
   };
 }
 

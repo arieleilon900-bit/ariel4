@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS customers (
   last_inbound_at TEXT,             -- להחלטה אם אפשר לשלוח טקסט חופשי (חלון 24 שעות)
   jobs_count INTEGER NOT NULL DEFAULT 0,
   blocked INTEGER NOT NULL DEFAULT 0,
-  known INTEGER NOT NULL DEFAULT 0      -- 1 = מישהו שחנן כבר מדבר איתו: הבוט לא עונה לו
+  known INTEGER NOT NULL DEFAULT 0,     -- 1 = מישהו שחנן כבר מדבר איתו: הבוט לא עונה לו
+  opted_out INTEGER NOT NULL DEFAULT 0  -- 1 = ביקש "הסר": לא שולחים לו תזכורות, מעקבים, ביקורות והמלצות
 );
 
 CREATE TABLE IF NOT EXISTS conversations (
@@ -31,6 +32,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   owner_nudged_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_conv_phone ON conversations(phone, state);
+-- לכל לקוח לכל היותר שיחה פתוחה אחת (גם כשכמה הודעות מגיעות באותו רגע)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_conv_one_open ON conversations(phone) WHERE state IN ('bot', 'handoff');
 
 CREATE TABLE IF NOT EXISTS messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,6 +41,7 @@ CREATE TABLE IF NOT EXISTS messages (
   role TEXT NOT NULL,                  -- user | assistant | owner
   text TEXT NOT NULL,
   wa_id TEXT UNIQUE,                   -- למניעת עיבוד כפול של אותה הודעה
+  media_id TEXT,                       -- תמונה שהלקוח שלח בהודעה הזו
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conv_id, id);
@@ -70,3 +74,10 @@ CREATE TABLE IF NOT EXISTS events (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_events_time ON events(created_at);
+
+-- הודעות שהבוט שלח לחנן על לקוח מסוים: כשחנן עונה (ציטוט) על הודעה כזו, הבוט יודע על מי מדובר
+CREATE TABLE IF NOT EXISTS owner_refs (
+  wamid TEXT PRIMARY KEY,
+  phone TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);

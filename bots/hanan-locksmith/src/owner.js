@@ -1,44 +1,61 @@
 // פקודות שחנן שולח לבוט בוואטסאפ, מהמספר שמוגדר ב-OWNER_PHONE.
 import { MESSAGES, TEMPLATES } from './config.js';
 import { appendRow } from './sheets.js';
-import { displayPhone, ilDateTimeLabel, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
-import { logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
+import { displayPhone, ilDateTimeLabel, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
+import { forwardPhotosToOwner, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
 import { deliverReceipt } from './receipts.js';
 import * as wa from './whatsapp.js';
 
-export const HELP = `פקודות (כותבים לבוט מהטלפון שלך):
-בדרך 0541234567 20 ← שולח ללקוח שאתה בדרך, הגעה בעוד כ-20 דקות
-תור 0541234567 17/10 14:30 הרצל 5 חולון ← קובע עבודה + תזכורות ללקוח
-קבלה: מעבירים לבוט את ה-PDF מיש חשבונית, ובכיתוב כותבים את הטלפון של הלקוח ← הבוט שולח לו את הקבלה וסוגר את העבודה
-טופל 0541234567 ← טיפלת בפנייה (למשל התקשרת אליו), והבוט מפסיק להזכיר לך
-סיום 0541234567 ← העבודה הסתיימה (אחרי זה: בקשת ביקורת, המלצה, ותזכורת בעוד שנה)
-ביטול 0541234567 ← מבטל עבודה מתואמת
-לא רלוונטי 0541234567 ← סוגר את הפנייה בלי מעקב
-בוט 0541234567 ← הבוט חוזר לענות למספר הזה
-שקט 0541234567 ← מישהו שאתה מכיר: הבוט לא יענה לו (ההודעות ממשיכות להגיע אליך כרגיל)
-חסום 0541234567 ← ספאם: הבוט מתעלם מהמספר הזה
-דוח ← הסיכום השבועי עכשיו
-עזרה ← הרשימה הזו`;
+export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ההודעה שקיבלת על הלקוח, וכותבים רק את הפקודה. בלי טלפון.
+טקסט רגיל בתשובה כזו נשלח ללקוח כמו שהוא.
 
-// מפרק פקודה לחלקים. מחזיר null אם זו לא פקודה מוכרת.
+בדרך 20 ← שולח ללקוח שאתה בדרך, הגעה בעוד כ-20 דקות
+תור 17/10 14:30 הרצל 5 חולון ← קובע עבודה + תזכורות ללקוח ולך
+קבלה ← מעבירים לבוט את ה-PDF מיש חשבונית (בתשובה על הלקוח, או עם הטלפון שלו בכיתוב)
+טופל ← טיפלת (למשל התקשרת), והבוט מפסיק להזכיר לך
+סיום ← העבודה הסתיימה (אחרי זה: בקשת ביקורת, המלצה, ותזכורת בעוד שנה)
+ביטול ← מבטל עבודה מתואמת
+לא רלוונטי ← סוגר את הפנייה בלי מעקב
+תמונות ← שולח לך את התמונות שהלקוח שלח
+בוט ← הבוט חוזר לענות ללקוח הזה
+שקט ← מישהו שאתה מכיר: הבוט לא יענה לו
+חסום ← ספאם: הבוט מתעלם מהמספר הזה
+דוח ← הסיכום השבועי עכשיו
+עזרה ← הרשימה הזו
+
+אפשר גם בלי לענות על הודעה: כותבים את הטלפון אחרי הפקודה. למשל: סיום 0541234567`;
+
+const PHONE = String.raw`(\+?\d[\d\-]{7,15})`;
+const ACK = /^(קיבלתי|תודה|תודה רבה|אוקי|אוקיי|אוקיי תודה|סבבה|בסדר|מעולה|👍|🙏|ok|okay)[.!]*$/i;
+
+// מפרק פקודה לחלקים. phone: null = לא נכתב טלפון (אולי יש ציטוט), '' = טלפון לא תקין
 export function parseCommand(text) {
   const t = String(text || '').trim().replace(/\s+/g, ' ');
   if (!t) return null;
-  if (/^(עזרה|help)$/i.test(t)) return { cmd: 'help' };
+  const ph = (raw) => (raw == null ? null : normalizePhone(raw));
+  if (/^(עזרה|help|פקודות)$/i.test(t)) return { cmd: 'help' };
   if (/^דוח$/.test(t)) return { cmd: 'report' };
+  if (ACK.test(t)) return { cmd: 'ack' };
   let m;
-  if ((m = t.match(/^לא רלוונטי ([\d\-+ ]{9,16})$/))) return { cmd: 'irrelevant', phone: normalizePhone(m[1]) };
-  if ((m = t.match(/^בדרך ([\d\-+]{9,16})(?: (\d{1,3}))?$/))) return { cmd: 'eta', phone: normalizePhone(m[1]), minutes: m[2] ? +m[2] : null };
-  if ((m = t.match(/^תור ([\d\-+]{9,16}) (\d{1,2}[./]\d{1,2}(?:[./]\d{2,4})?) (\d{1,2}:\d{2})(?: (.+))?$/))) {
-    return { cmd: 'appt', phone: normalizePhone(m[1]), date: m[2], time: m[3], address: m[4] || '' };
+  if ((m = t.match(new RegExp(`^לא רלוונטי(?: ([\\d\\-+ ]{9,16}))?$`)))) return { cmd: 'irrelevant', phone: ph(m[1]) };
+  if ((m = t.match(new RegExp(`^בדרך(?: ${PHONE})?(?: (\\d{1,3}))?(?: דק(?:ות|׳|')?)?$`)))) return { cmd: 'eta', phone: ph(m[1]), minutes: m[2] ? +m[2] : null };
+  if ((m = t.match(new RegExp(`^תור(?: ${PHONE})? (\\d{1,2}[./]\\d{1,2}(?:[./]\\d{2,4})?) (?:ב-?)?(\\d{1,2}:\\d{2})(?: (.+))?$`)))) {
+    return { cmd: 'appt', phone: ph(m[1]), date: m[2], time: m[3], address: m[4] || '' };
   }
-  if ((m = t.match(/^קבלה ([\d\-+]{9,16}) (https?:\/\/\S+)$/))) return { cmd: 'receipt', phone: normalizePhone(m[1]), link: m[2] };
-  if ((m = t.match(/^(סיום|ביטול|בוט|חסום|שקט|טופל) ([\d\-+]{9,16})$/))) {
-    const map = { 'סיום': 'done', 'ביטול': 'cancel', 'בוט': 'bot', 'חסום': 'block', 'שקט': 'quiet', 'טופל': 'handled' };
-    return { cmd: map[m[1]], phone: normalizePhone(m[2]) };
+  if ((m = t.match(new RegExp(`^קבלה(?: ${PHONE})? (https?:\\/\\/\\S+)$`)))) return { cmd: 'receipt', phone: ph(m[1]), link: m[2] };
+  if ((m = t.match(new RegExp(`^(סיום|ביטול|בוט|חסום|שקט|טופל|תמונות)(?: ${PHONE})?$`)))) {
+    const map = { 'סיום': 'done', 'ביטול': 'cancel', 'בוט': 'bot', 'חסום': 'block', 'שקט': 'quiet', 'טופל': 'handled', 'תמונות': 'photos' };
+    return { cmd: map[m[1]], phone: ph(m[2]) };
   }
   return { cmd: 'unknown' };
+}
+
+// על איזה לקוח חנן מדבר: לפי ההודעה שהוא ענה עליה (ציטוט)
+async function contextPhone(env, msg) {
+  const id = msg?.context?.id;
+  if (!id) return null;
+  return (await env.DB.prepare('SELECT phone FROM owner_refs WHERE wamid = ?').bind(id).first())?.phone || null;
 }
 
 async function latestConv(env, phone) {
@@ -48,8 +65,8 @@ async function latestConv(env, phone) {
 // חנן מעביר לבוט קובץ (PDF של קבלה) עם הטלפון של הלקוח בכיתוב
 async function handleOwnerFile(env, msg, now) {
   const file = msg.document || msg.image;
-  const phone = normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]);
-  if (!phone) return sendToOwner(env, 'קיבלתי קובץ, אבל לא ראיתי טלפון של לקוח. שלח שוב, ובכיתוב של הקובץ כתוב את הטלפון שלו (למשל 0541234567).', now);
+  const phone = normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]) || await contextPhone(env, msg);
+  if (!phone) return sendToOwner(env, 'קיבלתי קובץ, אבל לא ידעתי של איזה לקוח. שלח שוב בתשובה (החלקה ימינה) על ההודעה של הלקוח, או כתוב את הטלפון שלו בכיתוב של הקובץ.', now);
   try {
     const media = await wa.downloadMedia(env, file.id);
     const mediaId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
@@ -65,8 +82,18 @@ async function handleOwnerFile(env, msg, now) {
 export async function handleOwnerCommand(env, text, now = new Date(), msg = null) {
   if (msg && (msg.type === 'document' || msg.type === 'image')) return handleOwnerFile(env, msg, now);
   const c = parseCommand(text);
-  if (!c) return;
+  if (!c || c.cmd === 'ack') return;
   if (c.phone === '') return sendToOwner(env, 'לא הבנתי את מספר הטלפון. כתוב למשל: סיום 0541234567', now);
+  const quoted = await contextPhone(env, msg);
+
+  // טקסט חופשי בתשובה על הודעה של לקוח: נשלח ללקוח
+  if (c.cmd === 'unknown' && quoted) return relayToCustomer(env, quoted, text, now);
+
+  const needsPhone = !['help', 'report', 'unknown'].includes(c.cmd);
+  if (needsPhone && c.phone == null) {
+    if (!quoted) return sendToOwner(env, 'על איזה לקוח? ענה (החלקה ימינה) על ההודעה שקיבלת עליו, או כתוב גם את הטלפון. למשל: סיום 0541234567', now);
+    c.phone = quoted;
+  }
   if (c.phone && c.cmd !== 'bot') await markOwnerReplied(env, c.phone, now);
 
   switch (c.cmd) {
@@ -114,6 +141,14 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(c.phone)} והעבודה סומנה כגמורה.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(c.phone)}.`, now);
     }
 
+    case 'photos': {
+      const conv = await latestConv(env, c.phone);
+      const photos = JSON.parse(conv?.photos || '[]');
+      if (!photos.length) return sendToOwner(env, `אין תמונות מ-${displayPhone(c.phone)}.`, now);
+      await forwardPhotosToOwner(env, photos, now, c.phone);
+      return;
+    }
+
     case 'handled':
       return sendToOwner(env, `✓ סומן שטיפלת ב-${displayPhone(c.phone)}.`, now);
 
@@ -148,4 +183,20 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     default:
       return sendToOwner(env, `לא הכרתי את הפקודה. כתוב "עזרה" לרשימת הפקודות.`, now);
   }
+}
+
+// חנן ענה בציטוט על הודעה של לקוח, בטקסט רגיל: שולחים את זה ללקוח
+async function relayToCustomer(env, phone, text, now) {
+  await markOwnerReplied(env, phone, now);
+  const cust = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(phone).first();
+  if (!inServiceWindow(cust?.last_inbound_at, now)) {
+    return sendToOwner(env, `הלקוח ${displayPhone(phone)} לא כתב ב-24 השעות האחרונות, ווואטסאפ לא מאפשר לשלוח לו הודעה חופשית. אפשר להתקשר אליו, או לשלוח לו מהטלפון שלך.`, now, phone);
+  }
+  const r = await wa.sendText(env, phone, text);
+  const conv = await latestConv(env, phone);
+  if (conv) {
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner', ?, ?)").bind(conv.id, text, nowIso(now)).run();
+    if (conv.state === 'bot') await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?) WHERE id = ?").bind(nowIso(now), conv.id).run();
+  }
+  return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}.` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
 }

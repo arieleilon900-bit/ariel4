@@ -28,6 +28,7 @@ function makeD1() {
 const sent = [];           // הודעות שנשלחו ב-WhatsApp
 let aiQueue = [];          // תשובות שה-AI "יחזיר" לפי הסדר
 let aiRequests = [];
+let outSeq = 0;
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
   if (url.includes('api.anthropic.com')) {
@@ -39,7 +40,7 @@ globalThis.fetch = async (url, init = {}) => {
     }), { status: 200, headers: { 'content-type': 'application/json', 'request-id': 'req_test' } });
   }
   if (url.includes('graph.facebook.com')) {
-    if (url.endsWith('/messages')) { sent.push(JSON.parse(init.body)); return Response.json({ messages: [{ id: 'wamid.out' }] }); }
+    if (url.endsWith('/messages')) { sent.push(JSON.parse(init.body)); return Response.json({ messages: [{ id: `wamid.out${++outSeq}` }] }); }
     if (url.endsWith('/media')) return Response.json({ id: 'uploaded-media' });
     return Response.json({ url: 'https://lookaside.example/media', mime_type: 'image/jpeg' });
   }
@@ -58,7 +59,7 @@ const CUSTOMER = '972541234567';
 function makeEnv() {
   return {
     DB: makeD1(), WA_TOKEN: 't', WA_PHONE_NUMBER_ID: '123', OWNER_PHONE: OWNER, ANTHROPIC_API_KEY: 'k',
-    REVIEW_LINK: 'https://g.page/r/test/review', TEMPLATE_LANG: 'he',
+    REVIEW_LINK: 'https://g.page/r/test/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '0',
     AI: { run: async () => ({ text: 'ננעלתי בחוץ ברחוב הרצל' }) },
   };
 }
@@ -105,7 +106,9 @@ test('lead → questions → handoff → owner commands → reminders → review
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הרצל 5 חולון' } }, 'w3'), t0);
   const ownerMsgs = sent.filter((m) => m.to === OWNER);
   assert.ok(ownerMsgs.some((m) => m.type === 'template' && m.template.name === 'owner_alert_v1'), 'owner alert via template (owner outside window)');
-  assert.ok(ownerMsgs.some((m) => m.type === 'image'), 'photo forwarded to owner');
+  // חנן לא כתב לבוט ב-24 שעות: אי אפשר לשלוח לו תמונה, אז הוא מקבל הסבר איך לבקש אותה
+  assert.ok(!ownerMsgs.some((m) => m.type === 'image'));
+  assert.ok(ownerMsgs.some((m) => m.template?.components?.[0]?.parameters?.[0]?.text.includes('תמונות 054-1234567')));
   const conv = env.DB.raw.prepare('SELECT * FROM conversations').get();
   assert.equal(conv.state, 'handoff');
 
@@ -228,7 +231,7 @@ test('receipts: Hanan forwards a PDF or a link → customer gets it, job closes,
 
   // 1. PDF בלי טלפון בכיתוב → חנן מקבל הסבר
   await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf1', filename: 'r.pdf', caption: 'קבלה' } }, 'r2'), t0);
-  assert.ok(textsTo(OWNER).some((t) => t.includes('לא ראיתי טלפון')));
+  assert.ok(textsTo(OWNER).some((t) => t.includes('לא ידעתי של איזה לקוח')));
 
   // 2. PDF עם טלפון → נשלח ללקוח כמסמך (בתוך 24 שעות)
   await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdf1', filename: 'r.pdf', caption: '054-1234567' } }, 'r3'), t0);
@@ -325,4 +328,106 @@ test('nobody left hanging: customer nudge, partial handoff, owner nudges, done c
   await runEvery15(env, at(19, 15));
   await runEvery15(env, at(19, 30));
   assert.equal(textsTo(OWNER).filter((t) => t.startsWith('מה קרה עם העבודה')).length, 1);
+});
+
+// ---------- בעיות שתוקנו ----------
+const lastSentTo = (to) => sent.filter((m) => m.to === to).at(-1);
+const wamidOf = (m) => `wamid.out${sent.indexOf(m) + 1}`;
+
+test('burst: three messages at once get one answer, and one summary to Hanan', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = { ...makeEnv(), BURST_WAIT_MS: '30' };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'קיבלתי, מעביר לחנן', issue: 'ננעל', address: 'הרצל 5', ready_for_handoff: true })];
+  const burst = { entry: [{ changes: [{ value: { contacts: [{ wa_id: CUSTOMER, profile: { name: 'דני' } }], messages: [
+    { from: CUSTOMER, id: 'b1', type: 'text', text: { body: 'היי' } },
+    { from: CUSTOMER, id: 'b2', type: 'text', text: { body: 'ננעלתי בחוץ' } },
+    { from: CUSTOMER, id: 'b3', type: 'text', text: { body: 'הרצל 5 חולון' } },
+  ] } }] }] };
+  await processWebhook(env, burst, t0);
+  assert.equal(aiRequests.length, 1, 'one AI call');
+  assert.ok(JSON.stringify(aiRequests[0].messages).includes('ננעלתי בחוץ'));
+  assert.equal(textsTo(CUSTOMER).length, 1, 'one reply');
+  assert.equal(sent.filter((m) => m.to === OWNER).length, 1, 'one summary');
+});
+
+test('Hanan answers by quoting: commands without phone, free text goes to customer, acks are silent', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'q0'), t0);
+  aiQueue = [ai({ reply: 'מעביר לחנן', issue: 'צילינדר', address: 'הרצל 5', ready_for_handoff: true, customer_name: 'דני' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צריך צילינדר, הרצל 5' } }, 'q1'), t0);
+  const summary = lastSentTo(OWNER);
+  assert.ok(summary.text.body.includes('פנייה חדשה'));
+
+  // "בדרך 15" בציטוט על הסיכום
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 15' }, context: { id: wamidOf(summary) } }, 'q2'), t0);
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('15 דקות')));
+
+  // טקסט חופשי בציטוט → ללקוח
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'אני מגיע עם הכלים, תחכה ליד הדלת' }, context: { id: wamidOf(summary) } }, 'q3'), t0);
+  assert.equal(lastSentTo(CUSTOMER).text.body, 'אני מגיע עם הכלים, תחכה ליד הדלת');
+
+  // "תודה" → שקט
+  const before = sent.length;
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תודה' } }, 'q4'), t0);
+  assert.equal(sent.length, before);
+
+  // פקודה בלי טלפון ובלי ציטוט → שאלה על איזה לקוח
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום' } }, 'q5'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.includes('על איזה לקוח'));
+
+  // "סיום" בציטוט → העבודה נסגרה
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום' }, context: { id: wamidOf(summary) } }, 'q6'), t0);
+  assert.equal(env.DB.raw.prepare("SELECT status FROM jobs WHERE phone = ?").get(CUSTOMER).status, 'done');
+
+  // לקוח שלא כתב 24 שעות: חנן מקבל הסבר במקום שליחה
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עוד משהו?' }, context: { id: wamidOf(summary) } }, 'q7'), new Date(t0.getTime() + 25 * 3600000));
+  assert.ok(lastSentTo(OWNER).text.body.includes('לא כתב ב-24 השעות'));
+});
+
+test('opt-out, reactions, photos on request', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+
+  // לייק על הודעה: לא עושים כלום
+  await processWebhook(env, inbound(CUSTOMER, { type: 'reaction', reaction: { emoji: '👍' } }, 'o0'), t0);
+  assert.equal(aiRequests.length, 0);
+  assert.equal(sent.length, 0);
+
+  // תמונה + כתובת → חנן (שכתב לבוט היום) מקבל את התמונה, ואפשר לבקש שוב עם "תמונות"
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'o1'), t0);
+  aiQueue = [ai({ reply: 'מה הכתובת?' }), ai({ reply: 'מעביר', issue: 'דלת', address: 'הרצל 5', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'image', image: { id: 'img9' } }, 'o2'), t0);
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הרצל 5' } }, 'o3'), t0);
+  assert.equal(sent.filter((m) => m.to === OWNER && m.type === 'image').length, 1);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תמונות 0541234567' } }, 'o4'), t0);
+  assert.equal(sent.filter((m) => m.to === OWNER && m.type === 'image').length, 2);
+
+  // "הסר" → מאשרים, ואחרי עבודה לא נשלחת בקשת ביקורת
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הסר' } }, 'o5'), t0);
+  assert.equal(lastSentTo(CUSTOMER).text.body, MESSAGES.optedOut);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום 0541234567' } }, 'o6'), t0);
+  await runEvery15(env, new Date(t0.getTime() + 4 * 3600000));
+  assert.ok(!textsTo(CUSTOMER).some((t) => t.includes('g.page')), 'no review after opt-out');
+});
+
+test('Shabbat mode and health check', async () => {
+  const { BUSINESS } = await import('../src/config.js');
+  const { buildSystemPrompt } = await import('../src/ai.js');
+  const { healthText } = await import('../src/index.js');
+  const friNight = new Date('2026-10-16T17:00:00Z'); // שישי 20:00
+  assert.ok(!buildSystemPrompt({ now: friNight }).includes('עכשיו שבת'));
+  BUSINESS.shabbat.enabled = true;
+  try {
+    assert.ok(buildSystemPrompt({ now: friNight }).includes('עכשיו שבת'));
+    assert.ok(!buildSystemPrompt({ now: new Date('2026-10-17T17:30:00Z') }).includes('עכשיו שבת'), 'after havdalah');
+  } finally { BUSINESS.shabbat.enabled = false; }
+
+  assert.ok(healthText(makeEnv()).startsWith('not ready'), 'missing secrets reported');
+  const full = { ...makeEnv(), WA_VERIFY_TOKEN: 'v', WA_APP_SECRET: 's' };
+  assert.ok(healthText(full).startsWith('ok'));
+  assert.ok(!healthText(full).includes('t'.repeat(0) + full.WA_TOKEN + 'x'), 'never prints values');
 });
