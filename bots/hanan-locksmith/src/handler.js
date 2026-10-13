@@ -44,10 +44,14 @@ export async function sendToOwner(env, text, now = new Date(), about = null, to 
 
 // חנן כתב לבוט (או לחץ "קיבלתי"): שולחים לו במלואן את ההודעות והתמונות שהגיעו אליו בקיצור
 export async function flushOwnerOutbox(env, now = new Date()) {
-  const items = (await env.DB.prepare('SELECT * FROM owner_outbox WHERE sent = 0 AND created_at >= ? ORDER BY id LIMIT 5')
+  const all = (await env.DB.prepare('SELECT * FROM owner_outbox WHERE sent = 0 AND created_at >= ? ORDER BY id DESC')
     .bind(new Date(now.getTime() - 48 * 3600000).toISOString()).all()).results;
+  if (!all.length) return;
+  await env.DB.prepare('UPDATE owner_outbox SET sent = 1 WHERE sent = 0').run();
+  // החדשות קודם (פנייה דחופה של עכשיו חשובה יותר מאתמול). לכל היותר 5, כדי לא לעבור את המגבלות של השרת
+  const items = all.slice(0, 5).reverse();
+  if (all.length > 5) await wa.sendText(env, env.OWNER_PHONE, `יש עוד ${all.length - 5} הודעות ישנות יותר. הנה ה-5 האחרונות:`);
   for (const it of items) {
-    await env.DB.prepare('UPDATE owner_outbox SET sent = 1 WHERE id = ?').bind(it.id).run();
     if (it.text) {
       const r = await wa.sendText(env, env.OWNER_PHONE, it.text);
       const wamid = r.data?.messages?.[0]?.id;
@@ -205,17 +209,6 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     return;
   }
 
-  // לקוח שביקש הסרה וחזר לכתוב: חזר להיות לקוח רגיל
-  if (customer?.opted_out) await env.DB.prepare('UPDATE customers SET opted_out = 0 WHERE phone = ?').bind(phone).run();
-
-  // 13: מי שסומן כספאם ב-24 השעות האחרונות: לא מבזבזים עליו שיחה עם ה-AI
-  const spamRecently = await env.DB.prepare("SELECT 1 FROM conversations WHERE phone = ? AND state = 'spam' AND updated_at >= ?")
-    .bind(phone, new Date(now.getTime() - 24 * 3600000).toISOString()).first();
-  if (spamRecently) {
-    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'user', ?, ?, ?)").bind(msg.text?.body || `[${msg.type}]`, msg.id, nowIso(now)).run();
-    return;
-  }
-
   wa.markRead(env, msg.id).catch(() => {});
   const content = await extractContent(env, msg);
   if (content.voice) await logEvent(env, 'voice', phone, now);
@@ -253,6 +246,11 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     if (latest?.id !== myId) return;
   }
 
+  await aiRespond(env, { conv, phone, customer, contactName, myId, content, now });
+}
+
+// ה-AI עונה ללקוח על כל מה שכתב עד עכשיו (myId = ההודעה האחרונה שלו)
+export async function aiRespond(env, { conv, phone, customer, contactName = '', myId, content, now = new Date() }) {
   // תמונה שנשלחה ברצף הזה (אם לא בהודעה הנוכחית): ה-AI רואה גם אותה
   let image = content.image || null;
   if (!image) {
@@ -285,9 +283,16 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   if (result.category === 'spam') {
     await env.DB.prepare("UPDATE conversations SET state = 'spam', updated_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
     await logEvent(env, 'spam', phone, now);
-    // שורה קצרה לחנן, למקרה שה-AI טעה (בשעות סבירות בלבד)
-    if (ownerHours(now)) await sendToOwner(env, `סיננתי כספאם הודעה מ-${displayPhone(phone)}: "${String(content.text).slice(0, 120)}". אם זה לקוח, ענה על ההודעה הזו: בוט`, now, phone);
+    // חנן תמיד יודע, למקרה שה-AI טעה. בלילה ובשבת: ההודעה מחכה לו ומגיעה כשהוא כותב לבוט
+    const note = `סיננתי כספאם הודעה מ-${displayPhone(phone)}: "${String(content.text).slice(0, 120)}". אם זה לקוח, ענה על ההודעה הזו: בוט`;
+    if (ownerHours(now)) await sendToOwner(env, note, now, phone);
+    else await env.DB.prepare('INSERT INTO owner_outbox (text, about, created_at) VALUES (?, ?, ?)').bind(note, phone, nowIso(now)).run();
     return;
+  }
+
+  // לקוח שביקש הסרה וחזר עם פנייה אמיתית: חוזר להיות לקוח רגיל (תודה או אישור לא מספיקים)
+  if (customer?.opted_out && result.category === 'service' && (result.issue || result.ready_for_handoff) && !result.customer_done) {
+    await env.DB.prepare('UPDATE customers SET opted_out = 0 WHERE phone = ?').bind(phone).run();
   }
 
   if (result.reply) {

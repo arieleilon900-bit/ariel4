@@ -19,6 +19,10 @@ async function customerNudges(env, now) {
   const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'bot' AND customer_nudges < 2 AND updated_at >= ?")
     .bind(new Date(now.getTime() - 7 * 86400000).toISOString()).all()).results;
   for (const conv of convs) {
+    // חנן כבר מטפל, או שהמספר חסום / מוכר / ביקש הסרה: לא נוגעים
+    if (conv.owner_replied_at) continue;
+    const cust = await env.DB.prepare('SELECT blocked, known, opted_out FROM customers WHERE phone = ?').bind(conv.phone).first();
+    if (cust?.blocked || cust?.known) continue;
     const last = await env.DB.prepare("SELECT role, created_at FROM messages WHERE conv_id = ? AND role IN ('user','assistant') ORDER BY id DESC LIMIT 1").bind(conv.id).first();
     if (!last) continue;
     const age = minutesSince(last.created_at, now);
@@ -29,7 +33,7 @@ async function customerNudges(env, now) {
       continue;
     }
 
-    const canNudge = conv.customer_nudges === 0 && customerHours(now) && inServiceWindow(
+    const canNudge = conv.customer_nudges === 0 && !cust?.opted_out && customerHours(now) && inServiceWindow(
       (await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first())?.last_inbound_at, now);
     if (canNudge && age >= TIMING.customerNudgeMinutes) {
       const r = await wa.sendText(env, conv.phone, MESSAGES.customerNudge);

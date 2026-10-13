@@ -564,3 +564,90 @@ test('review: no 2h reminder at night, no day-before for same-day jobs, no past 
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 13/10/2026 10:00' } }, 'r3'), t0);
   assert.ok(lastSentTo(OWNER).text.body.includes('כבר עברו'));
 });
+
+// ---------- סבב בדיקה שני ----------
+test('review2: night spam misfire reaches Hanan; "בוט" makes the bot answer', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const night = new Date('2026-10-13T21:30:00Z'); // 00:30
+  aiQueue = [ai({ category: 'spam' }), ai({ reply: 'מה הכתובת?', issue: 'ננעל עם תינוק בבית', urgent: true, ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 's1'), night);
+  assert.equal(sent.filter((m) => m.to === OWNER).length, 0, 'no ping at 00:30');
+  // ההודעה הבאה כבר לא נזרקת: ה-AI בודק אותה מחדש
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ עם תינוק בבית! הרצל 5' } }, 's2'), new Date(night.getTime() + 3 * 60000));
+  assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('דחופה'));
+
+  // ובבוקר, כשחנן כותב, הוא מקבל את שורת הספאם, ויכול לכתוב "בוט" בתשובה עליה
+  const C4 = '972546666666';
+  aiQueue = [ai({ category: 'spam' })];
+  await processWebhook(env, inbound(C4, { type: 'text', text: { body: 'שלום' } }, 's3'), night);
+  const morning = new Date('2026-10-14T05:00:00Z');
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 's4'), morning);
+  const note = sent.find((m) => m.to === OWNER && (m.text?.body || '').includes('סיננתי כספאם') && m.text.body.includes('054-6666666'));
+  assert.ok(note, 'spam note delivered in the morning');
+  aiQueue = [ai({ reply: 'היי! במה אפשר לעזור?' })];
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בוט' }, context: { id: wamidOf(note) } }, 's5'), morning);
+  assert.equal(lastSentTo(C4).text.body, 'היי! במה אפשר לעזור?');
+  await runEvery15(env, new Date(morning.getTime() + 15 * 60000));
+  assert.ok(!textsTo(OWNER).some((t) => t.includes('הבוט לא הצליח לענות')), 'no false stuck alert');
+});
+
+test('review2: receipts FIFO, caption vs quote, opt-out sticks on "תודה", quiet closes', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  const A = '972541111111', B = '972542222222';
+  for (const [p, id] of [[A, 'f1'], [B, 'f2']]) {
+    aiQueue = [ai({ reply: 'מה הכתובת?' })];
+    await processWebhook(env, inbound(p, { type: 'text', text: { body: 'היי' } }, id), t0);
+  }
+  await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdfA', filename: 'a.pdf', mime_type: 'application/pdf' } }, 'f3'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdfB', filename: 'b.pdf', mime_type: 'application/pdf' } }, 'f4'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: '054-1111111' } }, 'f5'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: '054-2222222' } }, 'f6'), t0);
+  assert.equal(sent.find((m) => m.to === A && m.type === 'document').document.filename, 'a.pdf');
+  assert.equal(sent.find((m) => m.to === B && m.type === 'document').document.filename, 'b.pdf');
+
+  // "הסר" ואז "תודה": נשאר מוסר, בלי "עדיין צריך עזרה?"
+  aiQueue = [ai({ reply: 'בשמחה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הסר' } }, 'f7'), t0);
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'תודה' } }, 'f8'), t0);
+  assert.equal(env.DB.raw.prepare('SELECT opted_out FROM customers WHERE phone = ?').get(CUSTOMER).opted_out, 1);
+  await runEvery15(env, new Date(t0.getTime() + 45 * 60000));
+  assert.ok(!textsTo(CUSTOMER).includes(MESSAGES.customerNudge));
+
+  // "שקט" על מספר באמצע שיחה: נסגר, בלי תזכורות ובלי התראה לחנן
+  const Q = '972543333333';
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await processWebhook(env, inbound(Q, { type: 'text', text: { body: 'אחי' } }, 'f9'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'שקט 054-3333333' } }, 'f10'), t0);
+  for (let h = 1; h <= 8; h++) await runEvery15(env, new Date(t0.getTime() + h * 3600000));
+  assert.equal(sent.filter((m) => m.to === Q).length, 1, 'only the first bot reply');
+  assert.ok(!textsTo(OWNER).some((t) => t.includes('054-3333333') && t.includes('לא סיים')));
+});
+
+test('review2: command parsing edge cases and helpers', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-13T08:00:00Z');
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'e0'), t0);
+  aiQueue = [ai({ reply: 'מעביר', issue: 'דלת', address: 'הרצל 5', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'דלת, הרצל 5' } }, 'e1'), t0);
+  const summary = lastSentTo(OWNER);
+  const ctx = { context: { id: wamidOf(summary) } };
+
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור מחר בשעה 14:30' }, ...ctx }, 'e2'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.includes('מחר ב-14:30'));
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 12/10 14:30' }, ...ctx }, 'e3'), t0);
+  assert.ok(lastSentTo(OWNER).text.body.includes('כבר עברו'));
+  // פקודה שלא הבנו בציטוט: לא נשלחת ללקוח
+  const n = sent.filter((m) => m.to === CUSTOMER).length;
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך בעוד רבע שעה' }, ...ctx }, 'e4'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'כן' }, ...ctx }, 'e5'), t0);
+  assert.equal(sent.filter((m) => m.to === CUSTOMER).length, n);
+  assert.ok(lastSentTo(OWNER).text.body.includes('לא נשלח'));
+
+  assert.equal(util.normalizePhone('+1 415 555 1234'), '14155551234');
+  assert.equal(util.normalizePhone('+972 54 1234567'), CUSTOMER);
+  assert.equal(util.normalizePhone('100234567'), '');
+});

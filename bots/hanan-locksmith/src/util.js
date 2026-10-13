@@ -4,8 +4,14 @@ export const TZ = 'Asia/Jerusalem';
 
 // 054-123-4567 / +972 54 1234567 / 972541234567 ← 972541234567
 export function normalizePhone(raw) {
-  let d = String(raw ?? '').replace(/\D/g, '');
+  const str = String(raw ?? '').trim();
+  let d = str.replace(/\D/g, '');
   if (!d) return '';
+  // מספר מחו"ל (+1, +44, +970...): כמו שהוא, בלי ה-+
+  if (/^(\+|00)/.test(str) && !/^(\+|00)972/.test(str)) {
+    if (d.startsWith('00')) d = d.slice(2);
+    return d.length >= 10 && d.length <= 15 ? d : '';
+  }
   if (d.startsWith('00972')) d = d.slice(2);
   if (d.startsWith('972')) d = d.slice(3);
   if (d.startsWith('0')) d = d.slice(1);
@@ -66,7 +72,7 @@ export function whenLabel(target, now = new Date()) {
   if (diff === 0) return `היום ב-${time}`;
   if (diff === 1) return `מחר ב-${time}`;
   const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-  return `ביום ${days[t.dow]} ${t.d}/${t.m} ב-${time}`;
+  return `ביום ${days[t.dow]} ${t.d}/${t.m}${t.y !== n.y ? `/${t.y}` : ''} ב-${time}`;
 }
 
 // ממיר "17/10 14:30" או "17/10/2026 14:30" לתאריך UTC, לפי שעון ישראל
@@ -82,8 +88,9 @@ export function parseIlDateTime(dateStr, timeStr, now = new Date()) {
   // 31/2 וכדומה: תאריך שלא קיים
   const check = new Date(Date.UTC(y, mo - 1, d));
   if (check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) return null;
-  // בלי שנה, ותאריך שכבר עבר (למשל 2/1 שנכתב בדצמבר): השנה הבאה
-  if (!dm[3] && Date.UTC(y, mo - 1, d) < Date.UTC(n.y, n.m - 1, n.d)) y += 1;
+  // בלי שנה, ותאריך שעבר לפני יותר מחודשיים (למשל 2/1 שנכתב בדצמבר): השנה הבאה.
+  // תאריך שעבר לא מזמן (12/10 שנכתב ב-13/10) נשאר, ויידחה כ"כבר עבר"
+  if (!dm[3] && Date.UTC(y, mo - 1, d) < Date.UTC(n.y, n.m - 1, n.d) - 60 * 86400000) y += 1;
   // מחשבים את הפרש השעון של ישראל באותו רגע (חורף/קיץ)
   const guess = new Date(Date.UTC(y, mo - 1, d, hh, mi));
   const p = ilParts(guess);

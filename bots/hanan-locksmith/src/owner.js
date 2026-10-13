@@ -1,8 +1,8 @@
 // פקודות שחנן שולח לבוט בוואטסאפ, מהמספר שמוגדר ב-OWNER_PHONE.
 import { MESSAGES, TEMPLATES } from './config.js';
 import { appendRow } from './sheets.js';
-import { displayPhone, ilDateTimeLabel, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
-import { forwardPhotosToOwner, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
+import { displayPhone, ilDateTimeLabel, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
+import { aiRespond, forwardPhotosToOwner, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
 import { deliverReceipt } from './receipts.js';
 import * as wa from './whatsapp.js';
@@ -27,6 +27,8 @@ export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ה
 אפשר גם בלי לענות על הודעה: כותבים את הטלפון אחרי הפקודה. למשל: סיום 0541234567`;
 
 const PHONE = String.raw`(\+?\d[\d\-]{7,15})`;
+// מילים שפותחות פקודה: טקסט שמתחיל בהן לא נשלח ללקוח גם אם לא הבנו אותו
+const COMMAND_START = /^(בדרך|תור|סיום|ביטול|טופל|קבלה|תמונות|בוט|חסום|שקט|לא רלוונטי|דוח|עזרה)(\s|$)/;
 const ACK_WORDS = /^(קיבלתי|תודה|רבה|אוקי|אוקיי|אוק|סבבה|בסדר|מעולה|יופי|אחלה|טוב|ok|okay|thanks|thx|כן|לא)$/i;
 // אישור קצר ("סבבה תודה", "👍👍"): לא פקודה ולא הודעה ללקוח
 function isAck(t) {
@@ -52,7 +54,7 @@ export function parseCommand(text) {
   let m;
   if ((m = t.match(new RegExp(`^לא רלוונטי(?: ([\\d\\-+ ]{9,16}))?$`)))) return { cmd: 'irrelevant', phone: ph(m[1]) };
   if ((m = t.match(new RegExp(`^בדרך(?: ${PHONE})?(?: (\\d{1,3}))?(?: דק(?:ות|׳|')?)?$`)))) return { cmd: 'eta', phone: ph(m[1]), minutes: m[2] ? +m[2] : null };
-  if ((m = t.match(new RegExp(`^תור(?: ${PHONE})? (\\d{1,2}[./]\\d{1,2}(?:[./]\\d{2,4})?) (?:ב-?)?(\\d{1,2}:\\d{2})(?: (.+))?$`)))) {
+  if ((m = t.match(new RegExp(`^תור(?: ${PHONE})? (היום|מחר|\\d{1,2}[./]\\d{1,2}(?:[./]\\d{2,4})?) (?:בשעה |ב-?)?(\\d{1,2}:\\d{2})(?: (.+))?$`)))) {
     return { cmd: 'appt', phone: ph(m[1]), date: m[2], time: m[3], address: m[4] || '' };
   }
   if ((m = t.match(new RegExp(`^קבלה(?: ${PHONE})? (https?:\\/\\/\\S+)$`)))) return { cmd: 'receipt', phone: ph(m[1]), link: m[2] };
@@ -80,10 +82,20 @@ async function handleOwnerFile(env, msg, now) {
   if (!/pdf/i.test(file.mime_type || '') && !/\.pdf$/i.test(file.filename || '')) {
     return sendToOwner(env, 'קיבלתי קובץ, אבל רק PDF של קבלה נשלח ללקוח אוטומטית. את השאר שלח ללקוח מהטלפון שלך.', now);
   }
-  const phone = await contextPhone(env, msg) || normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]);
+  const quoted = await contextPhone(env, msg);
+  const captioned = normalizePhone((String(file.caption || '').match(/\+?\d[\d\- ]{7,14}\d/) || [''])[0]);
+  // ציטוט של לקוח אחד וטלפון של לקוח אחר בכיתוב: לא מנחשים, שואלים
+  const phone = quoted && captioned && quoted !== captioned ? '' : (captioned || quoted);
+  if (quoted && captioned && quoted !== captioned) {
+    await env.DB.prepare('INSERT INTO owner_pending_file (media_id, filename, created_at) VALUES (?, ?, ?)').bind(file.id, msg.document?.filename || null, nowIso(now)).run();
+    return sendToOwner(env, `הקבלה בתשובה על ${displayPhone(quoted)}, אבל בכיתוב כתוב ${displayPhone(captioned)}. למי לשלוח? שלח לי את הטלפון.`, now);
+  }
   if (!phone) {
     await env.DB.prepare('INSERT INTO owner_pending_file (media_id, filename, created_at) VALUES (?, ?, ?)').bind(file.id, msg.document?.filename || null, nowIso(now)).run();
-    return sendToOwner(env, 'קיבלתי את הקובץ. של איזה לקוח הקבלה? שלח לי את הטלפון שלו (למשל 0541234567).', now);
+    const waiting = (await env.DB.prepare('SELECT COUNT(*) AS n FROM owner_pending_file WHERE used = 0 AND created_at >= ?').bind(new Date(now.getTime() - 2 * 3600000).toISOString()).first())?.n || 1;
+    return sendToOwner(env, waiting > 1
+      ? `קיבלתי את הקובץ "${msg.document?.filename || 'קבלה'}". יש ${waiting} קבלות שמחכות לטלפון. שלח טלפונים לפי הסדר שבו שלחת את הקבצים, אחד בכל הודעה.`
+      : 'קיבלתי את הקובץ. של איזה לקוח הקבלה? שלח לי את הטלפון שלו (למשל 0541234567).', now);
   }
   return sendReceiptFile(env, phone, file.id, msg.document?.filename, now);
 }
@@ -101,6 +113,11 @@ async function handleOwnerImage(env, msg, now) {
     const id = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
     const r = await wa.sendImageById(env, phone, id, msg.image.caption || '');
     await markOwnerReplied(env, phone, now);
+    const conv = await latestConv(env, phone);
+    if (conv) {
+      await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner', ?, ?)").bind(conv.id, `[תמונה מחנן] ${msg.image.caption || ''}`.trim(), nowIso(now)).run();
+      if (conv.state === 'bot') await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?) WHERE id = ?").bind(nowIso(now), conv.id).run();
+    }
     return sendToOwner(env, r.ok ? `✓ התמונה נשלחה ל-${displayPhone(phone)}.` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
   } catch (err) {
     console.error('owner image relay failed', err);
@@ -114,7 +131,7 @@ async function sendReceiptFile(env, phone, fileId, filename, now) {
     const mediaId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
     await markOwnerReplied(env, phone, now);
     const r = await deliverReceipt(env, phone, mediaId, { filename: filename || 'קבלה.pdf', now });
-    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)} והעבודה סומנה כגמורה. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
+    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)}${filename ? ` (${filename})` : ''} והעבודה סומנה כגמורה. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
   } catch (err) {
     console.error('owner receipt failed', err);
     return sendToOwner(env, `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
@@ -127,7 +144,8 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
   // רק טלפון, ויש קובץ שמחכה (חנן שלח קבלה בלי לציין לקוח)
   const onlyPhone = /^\s*\+?\d[\d\- ]{7,14}\d\s*$/.test(text || '') ? normalizePhone(text) : '';
   if (onlyPhone) {
-    const pending = await env.DB.prepare('SELECT * FROM owner_pending_file WHERE used = 0 AND created_at >= ? ORDER BY id DESC LIMIT 1').bind(new Date(now.getTime() - 2 * 3600000).toISOString()).first();
+    // לפי הסדר: הקובץ הראשון שנשלח מקבל את הטלפון הראשון
+    const pending = await env.DB.prepare('SELECT * FROM owner_pending_file WHERE used = 0 AND created_at >= ? ORDER BY id ASC LIMIT 1').bind(new Date(now.getTime() - 2 * 3600000).toISOString()).first();
     if (pending) {
       await env.DB.prepare('UPDATE owner_pending_file SET used = 1 WHERE id = ?').bind(pending.id).run();
       return sendReceiptFile(env, onlyPhone, pending.media_id, pending.filename, now);
@@ -135,15 +153,21 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
   }
 
   const c = parseCommand(text);
-  if (!c || c.cmd === 'ack') return;
-  if (c.phone === '') return sendToOwner(env, 'לא הבנתי את מספר הטלפון. כתוב למשל: סיום 0541234567', now);
+  if (!c) return;
   const quoted = await contextPhone(env, msg);
+  if (c.cmd === 'ack') {
+    // לחיצה על "קיבלתי" או "תודה" סתם: שקט. אבל "כן"/"בסדר" בתשובה על לקוח: אומרים לחנן שזה לא נשלח
+    if (quoted && msg?.type === 'text') return sendToOwner(env, `"${String(text).slice(0, 30)}" לא נשלח ל-${displayPhone(quoted)}. אם רצית לשלוח לו, כתוב משפט מלא.`, now, quoted);
+    return;
+  }
+  if (c.phone === '') return sendToOwner(env, 'לא הבנתי את מספר הטלפון. כתוב למשל: סיום 0541234567', now);
 
-  // טקסט חופשי בתשובה על הודעה של לקוח: נשלח ללקוח (רק משפט אמיתי, לא מילה בודדת שאולי היא פקודה עם שגיאה)
+  // טקסט חופשי בתשובה על הודעה של לקוח: נשלח ללקוח. אבל לא פקודה שלא הבנו, ולא מילה בודדת
   if (c.cmd === 'unknown' && quoted) {
-    const words = String(text).trim().split(/\s+/).length;
-    if (words >= 2 && /\p{L}/u.test(text)) return relayToCustomer(env, quoted, text, now);
-    return sendToOwner(env, `לא הבנתי את "${String(text).slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
+    const t = String(text).trim();
+    if (COMMAND_START.test(t)) return sendToOwner(env, `לא הבנתי את הפקודה "${t.slice(0, 40)}", ולא שלחתי אותה ללקוח. דוגמאות: בדרך 20 / תור 17/10 14:30 / תור מחר 9:00 / סיום. כתוב "עזרה" לרשימה.`, now, quoted);
+    if (t.split(/\s+/).length >= 2 && /\p{L}/u.test(t)) return relayToCustomer(env, quoted, text, now);
+    return sendToOwner(env, `לא הבנתי את "${t.slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
   }
 
   const needsPhone = !['help', 'report', 'unknown'].includes(c.cmd);
@@ -168,7 +192,12 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     }
 
     case 'appt': {
-      const at = parseIlDateTime(c.date, c.time, now);
+      let dateStr = c.date;
+      if (c.date === 'היום' || c.date === 'מחר') {
+        const p = ilParts(c.date === 'מחר' ? new Date(now.getTime() + 86400000) : now);
+        dateStr = `${p.d}/${p.m}/${p.y}`;
+      }
+      const at = parseIlDateTime(dateStr, c.time, now);
       if (!at) return sendToOwner(env, 'לא הבנתי את התאריך או השעה. כתוב למשל: תור 17/10 14:30', now);
       if (at.getTime() < now.getTime()) return sendToOwner(env, `התאריך והשעה כבר עברו (${whenLabel(at, now)}). כתוב שוב עם תאריך עתידי.`, now);
       const conv = await latestConv(env, c.phone);
@@ -223,18 +252,29 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'quiet': {
       await env.DB.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(c.phone, nowIso(now)).run();
+      await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE phone = ? AND state IN ('bot','handoff')").bind(c.phone).run();
       return sendToOwner(env, `✓ ${displayPhone(c.phone)} סומן כמוכר. הבוט לא יענה לו. כדי להחזיר: בוט ${displayPhone(c.phone)}`, now);
     }
 
     case 'bot': {
       await env.DB.prepare('UPDATE customers SET known = 0, blocked = 0 WHERE phone = ?').bind(c.phone).run();
       const conv = await latestConv(env, c.phone);
-      if (conv) await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
-      return sendToOwner(env, `✓ הבוט חזר לטפל ב-${displayPhone(c.phone)}.`, now);
+      await sendToOwner(env, `✓ הבוט חזר לטפל ב-${displayPhone(c.phone)}.`, now);
+      if (!conv) return;
+      await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ?, owner_replied_at = NULL, customer_nudges = 0, owner_nudges = 0 WHERE id = ?").bind(nowIso(now), conv.id).run();
+      // הלקוח כתב ולא קיבל תשובה (למשל סומן בטעות כספאם): הבוט עונה לו עכשיו
+      const last = await env.DB.prepare("SELECT id, role, text FROM messages WHERE conv_id = ? AND role IN ('user','assistant','owner') ORDER BY id DESC LIMIT 1").bind(conv.id).first();
+      if (last?.role === 'user') {
+        const customer = await env.DB.prepare('SELECT * FROM customers WHERE phone = ?').bind(c.phone).first();
+        const fresh = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
+        await aiRespond(env, { conv: fresh, phone: c.phone, customer, myId: last.id, content: { text: last.text }, now });
+      }
+      return;
     }
 
     case 'block': {
       await env.DB.prepare('INSERT INTO customers (phone, first_seen, blocked) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET blocked = 1').bind(c.phone, nowIso(now)).run();
+      await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE phone = ? AND state IN ('bot','handoff')").bind(c.phone).run();
       return sendToOwner(env, `✓ המספר ${displayPhone(c.phone)} חסום. הבוט יתעלם ממנו.`, now);
     }
 
