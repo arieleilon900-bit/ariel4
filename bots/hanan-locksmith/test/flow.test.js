@@ -64,7 +64,7 @@ function makeEnv() {
   };
 }
 const inbound = (from, msg, id) => ({ entry: [{ changes: [{ value: { contacts: [{ wa_id: from, profile: { name: 'דני' } }], messages: [{ from, id, ...msg }] } }] }] });
-const ai = (o) => ({ reply: '', language: 'he', category: 'service', urgent: false, urgent_reason: '', customer_name: '', issue: '', address: '', ready_for_handoff: false, summary_for_owner: '', ...o });
+const ai = (o) => ({ reply: '', language: 'he', category: 'service', urgent: false, urgent_reason: '', customer_name: '', issue: '', address: '', ready_for_handoff: false, customer_done: false, summary_for_owner: '', ...o });
 const textsTo = (to) => sent.filter((m) => m.to === to).map((m) => m.text?.body || `[${m.type}${m.template ? ':' + m.template.name : ''}]`);
 
 test('util', () => {
@@ -442,4 +442,17 @@ test('Shabbat mode and health check', async () => {
   const full = { ...makeEnv(), WA_VERIFY_TOKEN: 'v', WA_APP_SECRET: 's' };
   assert.ok(healthText(full).startsWith('ok'));
   assert.ok(!healthText(full).includes('t'.repeat(0) + full.WA_TOKEN + 'x'), 'never prints values');
+});
+
+test('customer says never mind: conversation closes, no nudges', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const at = (h, m = 0) => new Date(Date.UTC(2026, 9, 13, h - 3, m));
+  aiQueue = [ai({ reply: 'מה הכתובת?' }), ai({ reply: 'מעולה, שמחים שהסתדר. אפשר לכתוב שוב בכל זמן.', customer_done: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי' } }, 'd1'), at(10));
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'עזוב, אשתי הגיעה עם מפתח' } }, 'd2'), at(10, 5));
+  await runEvery15(env, at(11));
+  await runEvery15(env, at(14));
+  assert.ok(!textsTo(CUSTOMER).includes(MESSAGES.customerNudge));
+  assert.equal(env.DB.raw.prepare('SELECT state FROM conversations').get().state, 'closed');
 });

@@ -274,6 +274,13 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   await env.DB.prepare('UPDATE conversations SET issue = COALESCE(NULLIF(?, \'\'), issue), address = COALESCE(NULLIF(?, \'\'), address), urgent = MAX(urgent, ?) WHERE id = ?')
     .bind(result.issue, result.address, result.urgent ? 1 : 0, conv.id).run();
 
+  // הלקוח כבר לא צריך: סוגרים בלי תזכורות ובלי מעקב
+  if (result.customer_done && !result.ready_for_handoff) {
+    await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1, customer_nudges = 2 WHERE id = ?").bind(conv.id).run();
+    await logEvent(env, 'customer_done', phone, now);
+    return;
+  }
+
   if (result.ready_for_handoff) {
     // רק פעם אחת: אם שתי הודעות הגיעו ביחד, רק אחת מעבירה לחנן
     const moved = await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ? AND state = 'bot'")

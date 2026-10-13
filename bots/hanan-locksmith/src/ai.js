@@ -8,7 +8,7 @@ export const MODEL = 'claude-opus-5-5';
 const SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['reply', 'language', 'category', 'urgent', 'urgent_reason', 'customer_name', 'issue', 'address', 'ready_for_handoff', 'summary_for_owner'],
+  required: ['reply', 'language', 'category', 'urgent', 'urgent_reason', 'customer_name', 'issue', 'address', 'ready_for_handoff', 'customer_done', 'summary_for_owner'],
   properties: {
     reply: { type: 'string', description: 'ההודעה שתישלח ללקוח בוואטסאפ. ריק אם category=spam.' },
     language: { type: 'string', description: 'שפת הלקוח: he / ar / ru / en' },
@@ -19,6 +19,7 @@ const SCHEMA = {
     issue: { type: 'string', description: 'תיאור התקלה בקצרה בעברית, אחרת ריק' },
     address: { type: 'string', description: 'כתובת מלאה: רחוב, מספר, עיר. ריק אם עדיין לא נמסרה' },
     ready_for_handoff: { type: 'boolean' },
+    customer_done: { type: 'boolean', description: 'true אם הלקוח אמר שכבר לא צריך (הסתדר, מצא מישהו אחר, טעות במספר)' },
     summary_for_owner: { type: 'string', description: 'סיכום של 1-2 שורות בעברית לחנן' },
   },
 };
@@ -36,6 +37,13 @@ export function buildSystemPrompt({ now = new Date(), returningCustomer = null, 
 2. תמונה של הדלת או המנעול. בקש פעם אחת. אם הלקוח לא יכול לשלוח, ממשיכים בלי.
 3. כתובת מדויקת: רחוב, מספר בית ועיר. אפשר גם לשלוח מיקום בוואטסאפ.
 שם הלקוח: אם הוא אמר אותו, שמור. לא חובה לשאול.
+ברכב: במקום תמונה של המנעול, בקש יצרן, דגם ושנה (למשל "מאזדה 3 2018"), ואם המפתח בפנים.
+
+מקרים מיוחדים:
+- הלקוח מבקש לדבר עם חנן או עם בן אדם: ready_for_handoff=true מיד, עם מה שיש.
+- הלקוח שואל מתי מגיעים או כמה זמן: אל תבטיח זמן. תגיד שחנן יעדכן אותו ישירות.
+- הלקוח אומר שכבר לא צריך (הסתדר, מצא מישהו אחר, טעות): customer_done=true, תשובה קצרה ונעימה, ושיכול לכתוב שוב בכל זמן.
+- שירות שחנן לא עושה, או שאלה שלא קשורה למנעולן (ספק, הצעת עבודה): category=other, ready_for_handoff=true, וסיכום קצר לחנן.
 
 כשיש תקלה וכתובת (ובקשת תמונה כבר נשלחה): ready_for_handoff=true, והתשובה ללקוח: שהפרטים הועברו לחנן והוא יחזור אליו בהקדם.
 
@@ -107,7 +115,7 @@ function fallbackResult(reason) {
   return {
     reply: 'קיבלנו את ההודעה שלך, חנן יחזור אליך בהקדם 🙏',
     language: 'he', category: 'service', urgent: false, urgent_reason: '',
-    customer_name: '', issue: '', address: '', ready_for_handoff: true,
+    customer_name: '', issue: '', address: '', ready_for_handoff: true, customer_done: false,
     summary_for_owner: `הבוט לא הצליח לנהל את השיחה (${reason}). כדאי לחזור ללקוח ישירות.`,
     failed: true,
   };
@@ -124,6 +132,7 @@ function normalize(r) {
     issue: String(r.issue || ''),
     address: String(r.address || ''),
     ready_for_handoff: !!r.ready_for_handoff,
+    customer_done: !!r.customer_done,
     summary_for_owner: String(r.summary_for_owner || ''),
   };
 }
