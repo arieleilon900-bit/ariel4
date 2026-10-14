@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -999,4 +999,24 @@ test('language: an English-speaking customer gets the fixed messages in English;
   await processWebhook(env, inbound('972547777777', { type: 'text', text: { body: ' ?! ' } }, 'l5'), t0);
   assert.equal(sent.length, n);
   assert.equal(aiRequests.length, ai0);
+});
+
+test('built-in customer table: one row per lead with live status, link via "טבלה", CSV export, protected', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', WORKER_URL: 'https://bot.example' };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'ננעל בחוץ', address: 'הרצל 5 חולון', customer_name: 'דני', ready_for_handoff: true, summary_for_owner: 'מחכה ליד הדלת' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ הרצל 5 חולון' } }, 'tb1'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום 0541234567' } }, 'tb2'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'טבלה' } }, 'tb3'), t0);
+  const link = textsTo(OWNER).join('\n').match(/https:\/\/bot\.example\/table\?k=\w+/)?.[0];
+  assert.ok(link, 'owner gets the table link');
+  const page = await worker.fetch(new Request(link), env, { waitUntil() {} });
+  const html = await page.text();
+  assert.equal(page.status, 200);
+  assert.ok(html.includes('דני') && html.includes('עבודה הסתיימה') && html.includes('054-1234567') && html.includes('מחכה ליד הדלת'));
+  const csv = await (await worker.fetch(new Request(`${link}&format=csv`), env, { waitUntil() {} })).text();
+  assert.ok(csv.includes('עבודה הסתיימה'));
+  assert.equal((await worker.fetch(new Request('https://bot.example/table?k=nope'), env, { waitUntil() {} })).status, 403);
 });

@@ -4,7 +4,7 @@ import { displayPhone, ilParts } from './util.js';
 
 export const sheetHeaders = () => ['תאריך פנייה', 'סטטוס', 'שם', 'טלפון', BUSINESS.issueLabel || 'תקלה', 'כתובת', 'דחוף', 'הערות', 'מה קרה', 'מזהה'];
 
-const stamp = (d) => { const p = ilParts(d); return `${p.d}/${p.m}/${p.y} ${p.hh}:${p.mm}`; };
+export const stamp = (d) => { const p = ilParts(d); return `${p.d}/${p.m}/${p.y} ${p.hh}:${p.mm}`; };
 
 // הפנייה האחרונה של הלקוח והשם שלו, מהמסד
 export async function leadContext(env, phone) {

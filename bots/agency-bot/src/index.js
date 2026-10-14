@@ -4,9 +4,11 @@
 // cron          ← תזכורות, מעקבים ודוח שבועי
 import { handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
-import { runSetup } from './setup.js';
+import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isUltra, verifySignature } from './whatsapp.js';
 import { ultraToMeta } from './ultramsg.js';
+import { renderTable, tableKey } from './table.js';
+import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
 
 // השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
@@ -22,7 +24,25 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/' || url.pathname === '/health') {
+      if (isUltra(env)) {
+        const w = await ensureUltraWebhook(env, url.origin).catch((e) => `error: ${e.message}`);
+        return new Response(`${healthText(env)}\nUltraMsg: ${w === 'skip' ? 'not configured' : String(w).startsWith('error') ? w : 'connected'}`, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      }
       return new Response(healthText(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
+
+    // טבלת הלקוחות (הקישור נשלח לחנן כשהוא כותב לבוט "טבלה")
+    if (url.pathname === '/table' && request.method === 'GET') {
+      const k = await tableKey(env);
+      if (!k || !safeEqual(url.searchParams.get('k') || '', k)) return new Response('forbidden', { status: 403 });
+      return renderTable(env, url);
+    }
+
+    // בדיקה עצמית אחרי כל העלאה: המוח האמיתי עונה על שיחה לדוגמה (בלי לשלוח כלום לאף אחד)
+    if (url.pathname === '/admin/selftest' && request.method === 'GET') {
+      const key = url.searchParams.get('key') || '';
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, env.WA_VERIFY_TOKEN)) return new Response('forbidden', { status: 403 });
+      return new Response(await selfTest(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     // הגדרה ובדיקה אוטומטית (רק עם מילת הסוד)
@@ -76,10 +96,32 @@ export default {
   async scheduled(event, env, ctx) {
     const now = new Date(event.scheduledTime || Date.now());
     setWindowAlwaysOpen(isUltra(env));
+    if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
     if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));
   },
 };
+
+async function selfTest(env) {
+  const out = [];
+  const cases = [
+    { name: 'עברית', text: 'היי ננעלתי מחוץ לבית', lang: 'he' },
+    { name: 'אנגלית', text: "Hi, I'm locked out of my apartment", lang: 'en' },
+  ];
+  for (const c of cases) {
+    const t = Date.now();
+    const r = await runTurn(env, { history: [{ role: 'user', text: c.text }], now: new Date() });
+    const problems = [];
+    if (r.failed) problems.push(`המוח לא ענה: ${r.summary_for_owner}`);
+    if (!r.reply) problems.push('תשובה ריקה');
+    if (c.lang && r.language !== c.lang) problems.push(`שפה ${r.language} במקום ${c.lang}`);
+    if (c.urgent && !r.urgent) problems.push('לא זיהה דחוף');
+    out.push(`${problems.length ? 'FAIL' : 'OK'} ${c.name} (${Date.now() - t}ms): ${problems.join('; ') || r.reply}`);
+  }
+  await env.DB.prepare('SELECT COUNT(*) FROM conversations').first();
+  out.push('OK מסד הנתונים');
+  return out.join('\n');
+}
 
 // מה חסר בהגדרות (רק שמות, אף פעם לא ערכים)
 export function healthText(env) {

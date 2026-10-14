@@ -1,6 +1,6 @@
 // רישום לטבלת גוגל (Google Sheets) עם Service Account. אם SHEET_ID ריק, לא עושה כלום.
 
-import { buildLeadRow, leadContext, sheetHeaders } from './leadrow.js';
+import { buildLeadRow, leadContext, sheetHeaders, stamp } from './leadrow.js';
 
 let cachedToken = null; // { token, exp }
 
@@ -63,6 +63,8 @@ export { getAccessToken };
 // פנייה בטבלה: יוצר שורה חדשה, או מעדכן את השורה הקיימת של אותה פנייה.
 // fields: { status, name, issue, address, urgent, note }. שדה ריק לא מוחק את מה שכבר כתוב.
 export async function upsertLead(env, phone, fields, now = new Date()) {
+  // קודם הטבלה של הבוט עצמו (תמיד), ואז גוגל שיטס (אם מחובר)
+  await saveLeadStatus(env, phone, fields, now).catch((e) => console.error('lead status', e));
   if (!env.SHEET_ID || !env.GOOGLE_SA_JSON) return false;
   try {
     const { conv, cust, key } = await leadContext(env, phone);
@@ -83,4 +85,12 @@ export async function upsertLead(env, phone, fields, now = new Date()) {
     console.error('sheets error', err);
     return false;
   }
+}
+
+// הסטטוס של הפנייה במסד של הבוט: מזה נבנית טבלת הלקוחות (/table)
+export async function saveLeadStatus(env, phone, fields, now = new Date()) {
+  const conv = await env.DB.prepare('SELECT id FROM conversations WHERE phone = ? ORDER BY id DESC LIMIT 1').bind(phone).first();
+  if (!conv) return;
+  await env.DB.prepare("UPDATE conversations SET lead_status = ?, lead_log = COALESCE(lead_log || ' | ', '') || ?, lead_note = COALESCE(NULLIF(?, ''), lead_note) WHERE id = ?")
+    .bind(fields.status || null, `${stamp(now)} ${fields.status || ''}`.trim(), fields.note || '', conv.id).run();
 }

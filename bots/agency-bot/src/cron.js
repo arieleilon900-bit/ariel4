@@ -7,6 +7,7 @@ import { deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
 import { runNudges } from './nudges.js';
 import { upsertLead } from './sheets.js';
+import { tableLink } from './table.js';
 import { setWindowAlwaysOpen } from './util.js';
 import { isUltra } from './whatsapp.js';
 
@@ -217,7 +218,7 @@ export async function weeklyReport(env, now = new Date()) {
     `ספאם שסונן: ${c('spam')}`,
     c('opt_out') ? `ביקשו הסרה: ${c('opt_out')}` : null,
     c('ai_error') ? `\nתקלות בבוט (הלקוחות הועברו אליך): ${c('ai_error')}` : null,
-    env.SHEET_ID ? `\nכל הלקוחות בטבלה: https://docs.google.com/spreadsheets/d/${env.SHEET_ID}` : null,
+    env.SHEET_ID ? `\nכל הלקוחות בטבלה: https://docs.google.com/spreadsheets/d/${env.SHEET_ID}` : (await tableLink(env)) ? `\nכל הלקוחות בטבלה: ${await tableLink(env)}` : null,
   ].filter((l) => l !== null).join('\n');
   return sendToOwner(env, text, now);
 }
