@@ -92,7 +92,7 @@ jobs:
         run: |
           url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
           if [ -z "$url" ] || [ -z "$WA_VERIFY_TOKEN" ]; then echo "::notice::WORKER_URL or WA_VERIFY_TOKEN missing, skipping self-test"; exit 0; fi
-          sleep 5
+          sleep 20
           key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
           out=$(curl -s -m 90 -G "$url/admin/selftest" --data-urlencode "key=$key")
           echo "$out"
