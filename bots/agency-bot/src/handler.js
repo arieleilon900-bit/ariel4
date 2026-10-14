@@ -5,6 +5,7 @@ import { upsertLead } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, inServiceWindow, nowIso, wazeLink, addHours } from './util.js';
 import * as wa from './whatsapp.js';
 import { handleOwnerCommand } from './owner.js';
+import { tableLink } from './table.js';
 import { ownerHours } from './hours.js';
 
 const CONV_IDLE_HOURS = 72; // שיחה שלא זזה 3 ימים נחשבת סגורה, והודעה חדשה פותחת שיחה חדשה
@@ -360,7 +361,8 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     // הודעות קוליות: חנן מקבל את התמלול המלא, לא רק את הסיכום של ה-AI
     const voices = (await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' AND text LIKE '[הודעה קולית]%' ORDER BY id").bind(conv.id).all()).results;
     const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
-    const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now);
+    const table = await tableLink(env);
+    const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
     await sendToOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
     await forwardPhotosToOwner(env, JSON.parse(fresh.photos || '[]'), now, phone);
     await upsertLead(env, phone, { status: result.urgent ? `דחוף, הועבר ל${BUSINESS.ownerName}` : `הועבר ל${BUSINESS.ownerName}`, name, issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
