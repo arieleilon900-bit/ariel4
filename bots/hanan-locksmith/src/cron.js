@@ -6,6 +6,7 @@ import { fetchNewDocuments } from './yesh.js';
 import { deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
 import { runNudges } from './nudges.js';
+import { upsertLead } from './sheets.js';
 
 // לקוח שכתב "הסר" לא מקבל הודעות יזומות
 async function optedOut(env, phone) {
@@ -106,12 +107,11 @@ async function followups(env, now) {
     if (known?.known) continue;
     if (job || await optedOut(env, c.phone)) continue; // כבר נפתחה עבודה, אין צורך במעקב
     const r = await sendToCustomer(env, c.phone, MESSAGES.followup, { name: TEMPLATES.followup }, now);
-    if (r.ok) await logEvent(env, 'followup', c.phone, now);
+    if (r.ok) { await logEvent(env, 'followup', c.phone, now); await upsertLead(env, c.phone, { status: 'נשלחה הודעת מעקב' }, now); }
   }
 }
 
 async function reviews(env, now) {
-  if (!env.REVIEW_LINK) return;
   const cutoff = new Date(now.getTime() - TIMING.reviewAfterHours * 3600000).toISOString();
   const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND review_sent_at IS NULL AND done_at <= ?").bind(cutoff).all()).results;
   for (const j of jobs) {
@@ -121,9 +121,15 @@ async function reviews(env, now) {
       await env.DB.prepare('UPDATE jobs SET review_sent_at = ?, referral_sent_at = ? WHERE id = ?').bind(nowIso(now), nowIso(now), j.id).run();
       continue;
     }
+    // אין עדיין קישור לביקורות, או שהעבודה נגמרה מזמן (הקישור נוסף מאוחר): מדלגים על הביקורת, וההמלצה ממשיכה כרגיל
+    if (!env.REVIEW_LINK || j.done_at < new Date(now.getTime() - 3 * 86400000).toISOString()) {
+      await env.DB.prepare('UPDATE jobs SET review_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
+      await logEvent(env, 'review_skipped', j.phone, now);
+      continue;
+    }
     const r = await sendToCustomer(env, j.phone, MESSAGES.review(env.REVIEW_LINK), { name: TEMPLATES.review, params: [env.REVIEW_LINK] }, now);
     await env.DB.prepare('UPDATE jobs SET review_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
-    if (r.ok) await logEvent(env, 'review', j.phone, now);
+    if (r.ok) { await logEvent(env, 'review', j.phone, now); await upsertLead(env, j.phone, { status: 'עבודה הסתיימה, נשלחה בקשת ביקורת' }, now); }
   }
 }
 
@@ -205,6 +211,7 @@ export async function weeklyReport(env, now = new Date()) {
     `ספאם שסונן: ${c('spam')}`,
     c('opt_out') ? `ביקשו הסרה: ${c('opt_out')}` : null,
     c('ai_error') ? `\nתקלות בבוט (הלקוחות הועברו אליך): ${c('ai_error')}` : null,
+    env.SHEET_ID ? `\nכל הלקוחות בטבלה: https://docs.google.com/spreadsheets/d/${env.SHEET_ID}` : null,
   ].filter((l) => l !== null).join('\n');
   return sendToOwner(env, text, now);
 }

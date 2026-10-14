@@ -3,8 +3,7 @@
 import { MESSAGES, TEMPLATES } from './config.js';
 import { inServiceWindow, nowIso } from './util.js';
 import { logEvent } from './handler.js';
-import { appendRow } from './sheets.js';
-import { displayPhone, ilDateTimeLabel } from './util.js';
+import { upsertLead } from './sheets.js';
 import * as wa from './whatsapp.js';
 
 // doc = קישור ל-PDF או מזהה מדיה; docId = מזהה המסמך ביש חשבונית (אם יש), כדי לא לשלוח פעמיים
@@ -26,7 +25,6 @@ export async function deliverReceipt(env, phone, doc, { docId = null, filename =
     .bind(docId, nowIso(now), nowIso(now), job.id).run();
   await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE phone = ? AND state IN ('bot','handoff')").bind(phone).run();
   if (r.ok) await logEvent(env, 'invoice', phone, now);
-  const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(phone).first();
-  await appendRow(env, [ilDateTimeLabel(now), r.ok ? 'קבלה נשלחה, עבודה הסתיימה' : 'קבלה לא נשלחה (תקלה)', cust?.name || '', displayPhone(phone), job.issue || '', job.address || '', '', docId ? `מסמך ${docId}` : '']);
+  await upsertLead(env, phone, { status: r.ok ? 'קבלה נשלחה, עבודה הסתיימה' : 'קבלה לא נשלחה (תקלה)', issue: job.issue, address: job.address, note: docId ? `מסמך ${docId}` : '' }, now);
   return r;
 }

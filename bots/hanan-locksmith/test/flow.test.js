@@ -30,6 +30,7 @@ let aiQueue = [];          // תשובות שה-AI "יחזיר" לפי הסדר
 let aiRequests = [];
 let outSeq = 0;
 let yeshQueue = [], yeshRequests = [];
+const sheet = [];        // גיליון הגוגל המדומה
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
   if (url.includes('api.anthropic.com')) {
@@ -46,6 +47,15 @@ globalThis.fetch = async (url, init = {}) => {
     return Response.json({ url: 'https://lookaside.example/media', mime_type: 'image/jpeg' });
   }
   if (url.includes('lookaside.example')) return new Response(new Uint8Array([1, 2, 3]), { status: 200 });
+  if (url.startsWith('https://oauth2.googleapis.com/token')) return Response.json({ access_token: 'g', expires_in: 3600 });
+  if (url.startsWith('https://sheets.googleapis.com/')) {
+    const range = decodeURIComponent(url.split('/values/')[1].split('?')[0]);
+    if (!init.method) return Response.json({ values: range === 'A1:J1' ? sheet.slice(0, 1) : sheet });
+    const row = JSON.parse(init.body).values[0];
+    if (range.endsWith(':append')) sheet.push(row);
+    else sheet[Number(range.match(/^A(\d+)/)[1]) - 1] = row;
+    return Response.json({});
+  }
   if (url.includes('api.yeshinvoice.co.il')) { yeshRequests.push({ url, auth: init.headers.Authorization, body: JSON.parse(init.body) }); return Response.json(yeshQueue.shift() || { Success: true, ReturnValue: [], totalpage: 1 }); }
   throw new Error('unexpected fetch ' + url);
 };
@@ -821,4 +831,39 @@ test('receipts off (the default for Hanan): no Yesh polling, PDFs are plain file
     assert.equal(d.document.filename, 'מחירון.pdf');
     assert.equal(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM jobs WHERE status = 'done'").get().n, 0, 'a file does not close the job');
   } finally { FEATURES.receipts = true; }
+});
+
+test('customer table: one row per lead, status updated to the end; no review link → referral still goes out', async () => {
+  sent.length = 0; sheet.length = 0;
+  const { generateKeyPairSync } = await import('node:crypto');
+  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const env = { ...makeEnv(), SHEET_ID: 'S', GOOGLE_SA_JSON: JSON.stringify({ client_email: 'bot@x.iam', private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }) }), REVIEW_LINK: '' };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'ננעל בחוץ', address: 'הרצל 5 חולון', customer_name: 'דני', ready_for_handoff: true, summary_for_owner: 'מחכה ליד הדלת' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ, הרצל 5 חולון' } }, 'sh1'), t0);
+  assert.equal(sheet[0][0], 'תאריך פנייה', 'header row written');
+  assert.equal(sheet.length, 2);
+  assert.equal(sheet[1][1], 'הועבר לחנן');
+  assert.equal(sheet[1][2], 'דני');
+  assert.equal(sheet[1][3], '054-1234567');
+  assert.equal(sheet[1][5], 'הרצל 5 חולון');
+
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 0541234567 20' } }, 'sh2'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום 0541234567' } }, 'sh3'), new Date('2026-10-14T10:00:00Z'));
+  assert.equal(sheet.length, 2, 'same row, not a new one');
+  assert.equal(sheet[1][1], 'עבודה הסתיימה');
+  assert.match(sheet[1][8], /הועבר לחנן \| .*חנן בדרך .* \| .*עבודה הסתיימה/);
+
+  // אין קישור לביקורות: מדלגים על הביקורת, וההמלצה עדיין יוצאת אחרי שבוע
+  sent.length = 0;
+  await runEvery15(env, new Date('2026-10-14T14:00:00Z'));
+  assert.ok(!sent.some((m) => m.template?.name === 'review_request_v1'));
+  await runEvery15(env, new Date('2026-10-22T09:00:00Z'));
+  assert.ok(sent.some((m) => m.to === CUSTOMER && m.template?.name === 'referral_v1'), 'referral without review link');
+
+  // פנייה חדשה של אותו לקוח, חודש אחרי: שורה חדשה
+  aiQueue = [ai({ reply: 'העברתי', issue: 'החלפת צילינדר', address: 'הרצל 5 חולון', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צריך להחליף צילינדר' } }, 'sh4'), new Date('2026-11-15T08:00:00Z'));
+  assert.equal(sheet.length, 3);
+  assert.equal(sheet[2][4], 'החלפת צילינדר');
 });
