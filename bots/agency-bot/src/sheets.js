@@ -1,5 +1,7 @@
 // רישום לטבלת גוגל (Google Sheets) עם Service Account. אם SHEET_ID ריק, לא עושה כלום.
 
+import { buildLeadRow, leadContext, sheetHeaders } from './leadrow.js';
+
 let cachedToken = null; // { token, exp }
 
 function b64url(input) {
@@ -34,18 +36,21 @@ async function getAccessToken(env) {
   return cachedToken.token;
 }
 
-export const SHEET_HEADERS = ['תאריך', 'מה קרה', 'שם', 'טלפון', 'תקלה', 'כתובת', 'דחוף', 'הערות'];
+// טבלת הלקוחות: שורה אחת לכל פנייה, והסטטוס שלה מתעדכן עד הסוף (פנייה ← הועבר לחנן ← תור ← הסתיים).
+// עמודה J מזהה את הפנייה, כדי שהעדכון ימצא את השורה גם אם חנן מיין או סינן את הטבלה.
 let headerChecked = false;
+
+const sheetBase = (env) => `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values`;
 
 // גיליון ריק: כותבים שורת כותרות לפני השורה הראשונה
 export async function ensureHeader(env, token) {
-  const base = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values`;
-  const res = await fetch(`${base}/${encodeURIComponent('A1:H1')}`, { headers: { Authorization: `Bearer ${token}` } });
+  const base = sheetBase(env);
+  const res = await fetch(`${base}/${encodeURIComponent('A1:J1')}`, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error(`sheets read ${res.status} ${await res.text()}`);
   const data = await res.json();
   if (!data.values?.[0]?.length) {
-    const w = await fetch(`${base}/${encodeURIComponent('A1:H1')}?valueInputOption=RAW`, {
-      method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [SHEET_HEADERS] }),
+    const w = await fetch(`${base}/${encodeURIComponent('A1:J1')}?valueInputOption=RAW`, {
+      method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [sheetHeaders()] }),
     });
     if (!w.ok) throw new Error(`sheets header ${w.status} ${await w.text()}`);
     return 'created';
@@ -55,18 +60,24 @@ export async function ensureHeader(env, token) {
 
 export { getAccessToken };
 
-// שורה בגיליון. עמודות: תאריך | מה קרה | שם | טלפון | תקלה | כתובת | דחוף | הערות
-export async function appendRow(env, values) {
+// פנייה בטבלה: יוצר שורה חדשה, או מעדכן את השורה הקיימת של אותה פנייה.
+// fields: { status, name, issue, address, urgent, note }. שדה ריק לא מוחק את מה שכבר כתוב.
+export async function upsertLead(env, phone, fields, now = new Date()) {
   if (!env.SHEET_ID || !env.GOOGLE_SA_JSON) return false;
   try {
+    const { conv, cust, key } = await leadContext(env, phone);
     const token = await getAccessToken(env);
     if (!headerChecked) { await ensureHeader(env, token).catch((e) => console.error('sheet header', e)); headerChecked = true; }
-    const range = encodeURIComponent('A:H');
-    const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-      { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [values] }) },
-    );
-    if (!res.ok) console.error('sheets append failed', res.status, await res.text());
+    const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+    const read = await fetch(`${sheetBase(env)}/${encodeURIComponent('A:J')}`, { headers: auth });
+    if (!read.ok) throw new Error(`sheets read ${read.status} ${await read.text()}`);
+    const rows = (await read.json()).values || [];
+    const idx = rows.findIndex((r) => r[9] === key);
+    const row = buildLeadRow({ old: idx >= 0 ? rows[idx] : [], fields, conv, cust, phone, key, now });
+    const res = idx >= 0
+      ? await fetch(`${sheetBase(env)}/${encodeURIComponent(`A${idx + 1}:J${idx + 1}`)}?valueInputOption=RAW`, { method: 'PUT', headers: auth, body: JSON.stringify({ values: [row] }) })
+      : await fetch(`${sheetBase(env)}/${encodeURIComponent('A:J')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, { method: 'POST', headers: auth, body: JSON.stringify({ values: [row] }) });
+    if (!res.ok) console.error('sheets write failed', res.status, await res.text());
     return res.ok;
   } catch (err) {
     console.error('sheets error', err);

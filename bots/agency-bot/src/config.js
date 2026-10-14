@@ -90,7 +90,8 @@ const DEFAULT_BUSINESS = {
   name: '', shortName: '', ownerName: '', ownerGender: 'male', trade: 'בעל מקצוע', issueLabel: 'תקלה', needsAddress: true, competitor: 'מישהו אחר',
   services: [], areas: 'כל הארץ', outOfAreaMessage: '', botGender: 'male',
   shabbat: { enabled: false, message: 'בעל העסק שומר שבת ויחזור אליך במוצאי שבת. אסוף את הפרטים כרגיל.' },
-  hours: null, afterHoursMessage: 'נחזור אליך בבוקר', priceGuidance: null,
+  // עד שבעל העסק עונה בטופס: כל יום 07:00-22:00. דחוף מגיע אליו מיד גם בלילה
+  hours: { days: [0, 1, 2, 3, 4, 5, 6], from: '07:00', to: '22:00' }, afterHoursMessage: 'נחזור אליך בבוקר. אם זה דחוף, תכתוב לי ואני מעביר מיד', priceGuidance: null,
   intake: {
     steps: ['מה הבעיה או מה הלקוח צריך.', 'תמונה, אם זה עוזר להבין. בקש פעם אחת. אם הלקוח לא יכול לשלוח, ממשיכים בלי.', 'כתובת מדויקת: רחוב, מספר בית ועיר. אפשר גם לשלוח מיקום בוואטסאפ.'],
     extraRules: [],

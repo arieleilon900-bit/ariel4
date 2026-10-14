@@ -1,7 +1,7 @@
 // פקודות שחנן שולח לבוט בוואטסאפ, מהמספר שמוגדר ב-OWNER_PHONE.
 import { BUSINESS, FEATURES, MESSAGES, TEMPLATES } from './config.js';
-import { appendRow } from './sheets.js';
-import { displayPhone, ilDateTimeLabel, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
+import { upsertLead } from './sheets.js';
+import { displayPhone, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
 import { aiRespond, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
 import { deliverReceipt } from './receipts.js';
@@ -252,6 +252,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       const min = c.minutes || 30;
       const r = await sendToCustomer(env, c.phone, MESSAGES.eta(min), { name: TEMPLATES.eta, params: [String(min)] }, now);
       await logEvent(env, 'eta', c.phone, now);
+      if (r.ok) await upsertLead(env, c.phone, { status: `${BUSINESS.ownerName} בדרך (כ-${min} דק׳)` }, now);
       return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(c.phone)} שאתה בדרך (כ-${min} דק׳).` : `לא הצלחתי לשלוח ל-${displayPhone(c.phone)}.`, now);
     }
 
@@ -268,7 +269,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
         .bind(c.phone, conv?.id || null, conv?.issue || null, c.address || conv?.address || null, at.toISOString(), nowIso(now)).run();
       if (conv) await env.DB.prepare("UPDATE conversations SET followup_sent = 1 WHERE id = ?").bind(conv.id).run();
-      await sheetRow(env, c.phone, 'תור נקבע', whenLabel(at, now), now, c.address || conv?.address);
+      await upsertLead(env, c.phone, { status: `תור נקבע: ${whenLabel(at, now)}`, address: c.address }, now);
       return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.`, now);
     }
 
@@ -283,8 +284,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       await env.DB.prepare("UPDATE jobs SET status = 'done', done_at = ? WHERE id = ?").bind(nowIso(now), job.id).run();
       await env.DB.prepare('UPDATE customers SET jobs_count = jobs_count + 1 WHERE phone = ?').bind(c.phone).run();
       if (conv) await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(conv.id).run();
-      const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(c.phone).first();
-      await appendRow(env, [ilDateTimeLabel(now), 'עבודה הסתיימה', cust?.name || '', displayPhone(c.phone), job.issue || '', job.address || '', '', '']);
+      await upsertLead(env, c.phone, { status: 'עבודה הסתיימה', issue: job.issue, address: job.address }, now);
       return sendToOwner(env, `✓ סומן כגמור: ${displayPhone(c.phone)}. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.`, now);
     }
 
@@ -303,18 +303,19 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     }
 
     case 'handled':
+      await upsertLead(env, c.phone, { status: `${BUSINESS.ownerName} טיפל${BUSINESS.ownerGender === 'female' ? 'ה' : ''}` }, now);
       return sendToOwner(env, `✓ סומן שטיפלת ב-${displayPhone(c.phone)}.`, now);
 
     case 'cancel': {
       await env.DB.prepare("UPDATE jobs SET status = 'cancelled' WHERE phone = ? AND status = 'open'").bind(c.phone).run();
-      await sheetRow(env, c.phone, 'עבודה בוטלה', '', now);
+      await upsertLead(env, c.phone, { status: 'עבודה בוטלה' }, now);
       return sendToOwner(env, `✓ בוטלה העבודה של ${displayPhone(c.phone)}.`, now);
     }
 
     case 'irrelevant': {
       const conv = await latestConv(env, c.phone);
       if (conv) await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(conv.id).run();
-      await sheetRow(env, c.phone, 'לא רלוונטי', '', now);
+      await upsertLead(env, c.phone, { status: 'לא רלוונטי' }, now);
       return sendToOwner(env, `✓ הפנייה של ${displayPhone(c.phone)} נסגרה, בלי מעקב.`, now);
     }
 
@@ -368,13 +369,6 @@ async function relayToCustomer(env, phone, text, now) {
   const learned = (await env.DB.prepare("SELECT COUNT(*) AS n FROM events WHERE type = 'relay'").first())?.n || 0;
   await logEvent(env, 'relay', phone, now);
   return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(phone)}: "${String(text).slice(0, 60)}"${learned < 3 ? tip : ''}` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
-}
-
-// שורה בטבלה: "מה היה בסוף" עם הלקוח
-async function sheetRow(env, phone, what, note, now, address = null) {
-  const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(phone).first();
-  const conv = await latestConv(env, phone);
-  await appendRow(env, [ilDateTimeLabel(now), what, cust?.name || '', displayPhone(phone), conv?.issue || '', address || conv?.address || '', '', note || '']);
 }
 
 // קבצים (כשהקבלות כבויות): קובץ בתשובה על לקוח נשלח אליו כמו שהוא

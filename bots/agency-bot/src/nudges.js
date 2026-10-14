@@ -1,7 +1,7 @@
 // מי שלא עונה: לקוח שהפסיק לענות באמצע, חנן שלא טיפל בפנייה, ועבודה שעבר זמנה ולא סומנה.
 import { BUSINESS, FEATURES, MESSAGES, TIMING } from './config.js';
-import { appendRow } from './sheets.js';
-import { addHours, displayPhone, ilDateTimeLabel, inServiceWindow, nowIso } from './util.js';
+import { upsertLead } from './sheets.js';
+import { addHours, displayPhone, inServiceWindow, nowIso } from './util.js';
 import { customerHours, ownerHours, restNow } from './hours.js';
 import { forwardPhotosToOwner, logEvent, ownerSummary, sendToOwner } from './handler.js';
 import * as wa from './whatsapp.js';
@@ -61,7 +61,7 @@ async function partialHandoff(env, conv, now, title = 'לקוח התחיל לכ�
   await sendToOwner(env, summary, now, conv.phone);
   await forwardPhotosToOwner(env, JSON.parse(conv.photos || '[]'), now, conv.phone);
   await logEvent(env, 'partial', conv.phone, now);
-  await appendRow(env, [ilDateTimeLabel(now), 'פנייה חלקית', cust?.name || '', displayPhone(conv.phone), conv.issue || '', conv.address || '', conv.urgent ? 'כן' : '', 'הלקוח הפסיק לענות']);
+  await upsertLead(env, conv.phone, { status: `פנייה חלקית, הועבר ל${BUSINESS.ownerName}`, note: 'הלקוח הפסיק לענות באמצע' }, now);
 }
 
 // 2. חנן קיבל פנייה ועוד לא טיפל בה

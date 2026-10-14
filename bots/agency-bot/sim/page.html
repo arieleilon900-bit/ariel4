@@ -142,7 +142,7 @@ td.long{white-space:normal;min-width:140px}
   <div class="lower">
     <section class="panel">
       <h2>הטבלה של העסק</h2>
-      <div class="scroll"><table><thead><tr><th>מתי</th><th>מה</th><th>שם</th><th>טלפון</th><th>פנייה</th><th>כתובת</th><th>דחוף</th><th>הערות</th></tr></thead><tbody id="sheet"><tr><td colspan="8" class="long">כאן יופיעו הפניות והעבודות, כמו בגיליון הגוגל של העסק.</td></tr></tbody></table></div>
+      <div class="scroll"><table><thead><tr><th>תאריך פנייה</th><th>סטטוס</th><th>שם</th><th>טלפון</th><th>פנייה</th><th>כתובת</th><th>דחוף</th><th>הערות</th><th>מה קרה</th></tr></thead><tbody id="sheet"><tr><td colspan="9" class="long">כאן יופיעו הפניות והעבודות, כמו בגיליון הגוגל של העסק.</td></tr></tbody></table></div>
     </section>
     <section class="panel">
       <h2>מה כדאי לנסות</h2>
@@ -329,11 +329,12 @@ td.long{white-space:normal;min-width:140px}
       REVIEW_LINK: 'https://g.page/r/hanan-locksmith/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '1500',
       SHEET_ID: 'sim', GOOGLE_SA_JSON: 'sim',
       AI: { run: async () => ({ text: voiceText }) },
-      onSheetRow: (v) => {
+      onSheetRow: (v, key) => {
         const tb = $('sheet'); if (tb.dataset.filled !== '1') { tb.textContent = ''; tb.dataset.filled = '1'; }
-        const tr = document.createElement('tr');
-        v.forEach((x, i) => { const td = document.createElement('td'); td.textContent = x; if (i >= 4) td.className = 'long'; tr.append(td); });
-        tb.prepend(tr);
+        let tr = tb.querySelector(`tr[data-key="${key}"]`);
+        if (!tr) { tr = document.createElement('tr'); tr.dataset.key = key; tb.prepend(tr); }
+        tr.textContent = '';
+        v.slice(0, 9).forEach((x, i) => { const td = document.createElement('td'); td.textContent = x; if (i >= 4) td.className = 'long'; tr.append(td); });
       },
       onAiStart: () => { aiBusy++; renderCustomer(); },
       onAiEnd: () => { aiBusy = Math.max(0, aiBusy - 1); renderCustomer(); },

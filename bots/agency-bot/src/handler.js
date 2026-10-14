@@ -1,7 +1,7 @@
 // טיפול בהודעה נכנסת מלקוח, ובהודעות שחנן שולח מהאפליקציה (Coexistence).
 import { runTurn } from './ai.js';
 import { BUSINESS, MESSAGES, TEMPLATES, TIMING } from './config.js';
-import { appendRow } from './sheets.js';
+import { upsertLead } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, inServiceWindow, nowIso, wazeLink, addHours } from './util.js';
 import * as wa from './whatsapp.js';
 import { handleOwnerCommand } from './owner.js';
@@ -315,7 +315,7 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
   if (result.customer_done && !result.ready_for_handoff) {
     await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1, customer_nudges = 2 WHERE id = ?").bind(conv.id).run();
     await logEvent(env, 'customer_done', phone, now);
-    await appendRow(env, [ilDateTimeLabel(now), 'הלקוח ויתר', customer?.name || contactName || '', displayPhone(phone), result.issue || conv.issue || '', result.address || conv.address || '', '', result.summary_for_owner]);
+    await upsertLead(env, phone, { status: 'הלקוח ויתר', name: customer?.name || contactName || '', issue: result.issue, address: result.address, note: result.summary_for_owner }, now);
     return;
   }
 
@@ -337,10 +337,7 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now);
     await sendToOwner(env, voiceText ? `${summaryText}\n\nמה הוא אמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
     await forwardPhotosToOwner(env, JSON.parse(fresh.photos || '[]'), now, phone);
-    await appendRow(env, [
-      ilDateTimeLabel(now), result.urgent ? 'פנייה דחופה' : 'פנייה חדשה', name,
-      displayPhone(phone), result.issue || fresh.issue || '', result.address || fresh.address || '', result.urgent ? 'כן' : '', result.summary_for_owner,
-    ]);
+    await upsertLead(env, phone, { status: result.urgent ? `דחוף, הועבר ל${BUSINESS.ownerName}` : `הועבר ל${BUSINESS.ownerName}`, name, issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
   }
 }
 
