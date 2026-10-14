@@ -21,16 +21,36 @@ const canMessageNow = customerHours;
 
 export async function runEvery15(env, now = new Date()) {
   setWindowAlwaysOpen(isUltra(env));
-  await appointmentReminders(env, now);
-  await ownerAgenda(env, now);
-  await ownerJobReminders(env, now);
-  await runNudges(env, now);
-  await invoices(env, now);
+  // כל שלב בנפרד: תקלה באחד (למשל רשת) לא עוצרת את השאר
+  const step = async (name, fn) => { try { await fn(env, now); } catch (err) { console.error(`cron ${name} failed`, err); } };
+  await step('appointments', appointmentReminders);
+  await step('agenda', ownerAgenda);
+  await step('owner job reminders', ownerJobReminders);
+  await step('nudges', runNudges);
+  await step('invoices', invoices);
+  await step('owner retry', retryOwnerOutbox);
+  await step('cleanup', cleanup);
   if (!canMessageNow(now)) return;
-  await followups(env, now);
-  await reviews(env, now);
-  await referrals(env, now);
-  await yearly(env, now);
+  await step('followups', followups);
+  await step('reviews', reviews);
+  await step('referrals', referrals);
+  await step('yearly', yearly);
+}
+
+// הודעה לחנן שלא נשלחה (UltraMsg לא מחובר, תקלה ברשת): מנסים שוב כל 15 דקות, עד 12 שעות
+async function retryOwnerOutbox(env, now) {
+  if (!isUltra(env)) return; // ב-Meta ההודעות מחכות לחנן עד שהוא כותב לבוט
+  const pending = (await env.DB.prepare("SELECT * FROM owner_outbox WHERE sent = 0 AND failed = 1 AND created_at >= ? ORDER BY id LIMIT 5").bind(new Date(now.getTime() - 12 * 3600000).toISOString()).all()).results;
+  for (const it of pending) {
+    const r = await sendToOwner(env, it.text, now, it.about, env.OWNER_PHONE, { retry: true });
+    if (r.ok) await env.DB.prepare('UPDATE owner_outbox SET sent = 1 WHERE id = ?').bind(it.id).run();
+    else break;
+  }
+}
+
+// ניקיון: רישומי שליחה ישנים של UltraMsg
+async function cleanup(env, now) {
+  await env.DB.prepare('DELETE FROM ultra_sent WHERE created_at < ?').bind(new Date(now.getTime() - 3 * 86400000).toISOString()).run();
 }
 
 async function appointmentReminders(env, now) {
@@ -45,15 +65,18 @@ async function appointmentReminders(env, now) {
       await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run();
       j.reminders_sent = 1;
     }
-    if (j.reminders_sent === 0 && hoursLeft <= TIMING.reminderDayBeforeHours && hoursLeft > 3 && canMessageNow(now)) {
+    // "יום לפני" שנופל בשבת או בלילה (למשל עבודה ביום ראשון בבוקר): נשלח מוקדם יותר, בשעה האחרונה שמותר
+    const dayBeforeWindow = canMessageNow(new Date(at.getTime() - TIMING.reminderDayBeforeHours * 3600000)) ? TIMING.reminderDayBeforeHours : 40;
+    if (j.reminders_sent === 0 && hoursLeft <= dayBeforeWindow && hoursLeft > 3 && canMessageNow(now)) {
       const when = whenLabel(at, now);
       const lang = await customerLang(env, j.phone);
       const p = ilParts(at);
       const r = await sendToCustomer(env, j.phone, tmsg(lang, 'reminderDayBefore', lang === 'he' ? when : `${p.d}/${p.m} ${p.hh}:${p.mm}`, j.address), { name: TEMPLATES.reminderDayBefore, params: [when, j.address || '-'] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
     } else if (hoursLeft <= TIMING.reminderTwoHoursBefore + 0.25) {
-      // לא בלילה ולא בשבת: אם זה יוצא אז, מוותרים על התזכורת הזו
-      if (!canMessageNow(now)) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); continue; }
+      // לא בלילה ולא בשבת. תזכורת לעבודה של הבוקר מותרת כבר מ-07:00, אחרת היא לא הייתה יוצאת אף פעם
+      const hh = +ilParts(now).hh;
+      if (restNow(now) || hh < 7 || hh >= 21) continue;
       const time = ilTime(at);
       const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'reminderTwoHours', time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }

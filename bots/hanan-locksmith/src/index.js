@@ -26,7 +26,7 @@ export default {
 
     if (url.pathname === '/' || url.pathname === '/health') {
       if (isUltra(env)) {
-        const w = await ensureUltraWebhook(env, url.origin).catch((e) => `error: ${e.message}`);
+        const w = await ensureUltraWebhook(env, env.WORKER_URL || url.origin).catch((e) => `error: ${e.message}`);
         return new Response(`${healthText(env)}\nUltraMsg: ${w === 'skip' ? 'not configured' : String(w).startsWith('error') ? w : 'connected'}`, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
       }
       return new Response(healthText(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });

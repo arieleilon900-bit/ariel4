@@ -8,7 +8,7 @@ export const MODEL = 'claude-opus-5-5';
 // history: [{role:'user'|'assistant', text}] כבר כולל את ההודעה האחרונה של הלקוח
 // image: {base64, mime} של תמונה שהגיעה בהודעה האחרונה (אופציונלי)
 // הזמן שמותר לשיחה עם ה-AI: Cloudflare נותנים לעיבוד ברקע 30 שניות בסך הכל
-const AI_TIMEOUT_MS = 10000;
+const AI_TIMEOUT_MS = 18000;
 
 export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '', knowledge = [], afterHandoff = false }) {
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: AI_TIMEOUT_MS, maxRetries: 0 });

@@ -35,13 +35,17 @@ export async function sendToCustomer(env, phone, text, template = null, now = ne
 
 // הודעה לחנן (למספר שהוגדר ב-OWNER_PHONE).
 // about = הטלפון של הלקוח שההודעה עוסקת בו: אם חנן עונה (ציטוט) על ההודעה הזו, הבוט יודע על איזה לקוח מדובר
-export async function sendToOwner(env, text, now = new Date(), about = null, to = env.OWNER_PHONE) {
+export async function sendToOwner(env, text, now = new Date(), about = null, to = env.OWNER_PHONE, opts = {}) {
   if (!to) return { ok: false };
   const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(to).first();
   const open = inServiceWindow(c?.last_inbound_at, now);
   const r = open
     ? await wa.sendText(env, to, text)
     : await wa.sendTemplate(env, to, TEMPLATES.ownerAlert, [templateText(text)]);
+  // לא נשלח (UltraMsg לא מחובר וכו'): נשמר, וה-cron מנסה שוב כל 15 דקות
+  if (!r.ok && wa.isUltra(env) && to === env.OWNER_PHONE && !opts.retry) {
+    await env.DB.prepare('INSERT INTO owner_outbox (text, about, created_at, failed) VALUES (?, ?, ?, 1)').bind(text, about, nowIso(now)).run();
+  }
   // נשלח בקיצור: שומרים את ההודעה המלאה לחנן, לרגע שהוא כותב לבוט או לוחץ "קיבלתי"
   if (!open && to === env.OWNER_PHONE) {
     await env.DB.prepare('INSERT INTO owner_outbox (text, about, created_at) VALUES (?, ?, ?)').bind(text, about, nowIso(now)).run();
@@ -50,7 +54,15 @@ export async function sendToOwner(env, text, now = new Date(), about = null, to 
   if (about && wamid) {
     await env.DB.prepare('INSERT OR REPLACE INTO owner_refs (wamid, phone, created_at) VALUES (?, ?, ?)').bind(wamid, about, nowIso(now)).run();
   }
+  if (about) await rememberRef(env, text, about, now);
   return r;
+}
+
+// UltraMsg: כשחנן עונה (ציטוט) על הודעה, מקבלים את הטקסט שלה ולא את המזהה. לכן זוכרים גם לפי הטקסט
+export const refKey = (text) => `b:${String(text || '').replace(/\s+/g, ' ').trim().slice(0, 120)}`;
+export async function rememberRef(env, text, about, now = new Date()) {
+  if (!text || !about) return;
+  await env.DB.prepare('INSERT OR REPLACE INTO owner_refs (wamid, phone, created_at) VALUES (?, ?, ?)').bind(refKey(text), about, nowIso(now)).run();
 }
 
 // חנן כתב לבוט (או לחץ "קיבלתי"): שולחים לו במלואן את ההודעות והתמונות שהגיעו אליו בקיצור
@@ -163,20 +175,23 @@ export async function forwardPhotosToOwner(env, photoIds, now = new Date(), abou
   for (const id of photoIds) {
     try {
       const isVideo = String(id).startsWith('video:');
+      // הטלפון של הלקוח בכיתוב: אם חנן עונה על התמונה, הבוט יודע למי
+      const caption = `${isVideo ? 'סרטון' : 'תמונה'} מהלקוח${about ? ` ${displayPhone(about)} · wa.me/${about}` : ''}`;
+      if (about) await rememberRef(env, caption, about, now);
       const realId = isVideo ? String(id).slice(6) : id;
       // UltraMsg: הקובץ כבר בקישור, שולחים אותו ישר בלי להוריד
       if (wa.isUltra(env)) {
-        await (isVideo ? wa.sendVideoById(env, env.OWNER_PHONE, realId, 'סרטון מהלקוח') : wa.sendImageById(env, env.OWNER_PHONE, realId, 'תמונה מהלקוח'));
+        await (isVideo ? wa.sendVideoById(env, env.OWNER_PHONE, realId, caption) : wa.sendImageById(env, env.OWNER_PHONE, realId, caption));
         continue;
       }
       const media = await wa.downloadMedia(env, realId);
       if (isVideo) {
         const vid = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
-        await wa.sendVideoById(env, env.OWNER_PHONE, vid, 'סרטון מהלקוח');
+        await wa.sendVideoById(env, env.OWNER_PHONE, vid, caption);
         continue;
       }
       const newId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
-      await wa.sendImageById(env, env.OWNER_PHONE, newId, 'תמונה מהלקוח');
+      await wa.sendImageById(env, env.OWNER_PHONE, newId, caption);
     } catch (err) {
       console.error('forward photo failed', err);
     }
@@ -244,8 +259,11 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
   const content = await extractContent(env, msg);
   if (content.voice) await logEvent(env, 'voice', phone, now);
 
+  // מספר שסומן כספאם ביממה האחרונה: ההודעה עדיין נבדקת (אולי ה-AI טעה), אבל לא נספרת כפנייה חדשה
+  const recentSpam = await env.DB.prepare("SELECT 1 FROM conversations WHERE phone = ? AND state = 'spam' AND updated_at >= ? LIMIT 1")
+    .bind(phone, new Date(now.getTime() - 24 * 3600000).toISOString()).first();
   const { conv, isNew } = await getOrCreateConversation(env, phone, now);
-  if (isNew) await logEvent(env, 'lead', phone, now);
+  if (isNew && !recentSpam) await logEvent(env, 'lead', phone, now);
 
   const ins = await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, media_id, created_at) VALUES (?, 'user', ?, ?, ?, ?)")
     .bind(conv.id, content.text, msg.id, content.photoId || null, nowIso(now)).run();
@@ -272,6 +290,14 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
       await wa.sendText(env, phone, waitingText);
       await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, waitingText, nowIso(now)).run();
     }
+    return;
+  }
+
+  // הגנה מלולאה (למשל מענה אוטומטי של הלקוח שעונה לבוט שוב ושוב): יותר מ-12 תשובות של הבוט בשעה → עוצרים ומעבירים לחנן
+  const botReplies = (await env.DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE conv_id = ? AND role = 'assistant' AND created_at >= ?").bind(conv.id, new Date(now.getTime() - 3600000).toISOString()).first())?.n || 0;
+  if (botReplies >= 12) {
+    const moved = await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?), owner_replied_at = COALESCE(owner_replied_at, ?) WHERE id = ? AND state IN ('bot','handoff')").bind(nowIso(now), nowIso(now), conv.id).run();
+    if (moved.meta?.changes) await sendToOwner(env, `⚠️ השיחה עם ${displayPhone(phone)} ארוכה מדי (אולי מענה אוטומטי). הבוט הפסיק לענות לו. אם זה לקוח אמיתי, כדאי לחזור אליו. וואטסאפ: https://wa.me/${phone}`, now, phone);
     return;
   }
 
@@ -324,7 +350,10 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
 
   if (result.category === 'spam') {
     await env.DB.prepare("UPDATE conversations SET state = 'spam', updated_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
+    // הודעה אחת לחנן ביממה על כל מספר ספאם, לא אחת על כל הודעה
+    const notified = await env.DB.prepare("SELECT 1 FROM events WHERE type = 'spam' AND phone = ? AND created_at >= ?").bind(phone, new Date(now.getTime() - 24 * 3600000).toISOString()).first();
     await logEvent(env, 'spam', phone, now);
+    if (notified) return;
     // חנן תמיד יודע, למקרה שה-AI טעה. בלילה ובשבת: ההודעה מחכה לו ומגיעה כשהוא כותב לבוט
     const note = `סיננתי כספאם הודעה מ-${displayPhone(phone)}: "${String(content.text).slice(0, 120)}". אם זה לקוח, ענה על ההודעה הזו: בוט`;
     if (ownerHours(now)) await sendToOwner(env, note, now, phone);
@@ -338,8 +367,9 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
   }
 
   if (result.reply) {
-    await wa.sendText(env, phone, result.reply);
-    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, result.reply, nowIso(now)).run();
+    // נשמר רק אם נשלח: אחרת ה-cron רואה שהלקוח לא קיבל תשובה ומעביר לחנן
+    const sentReply = await wa.sendText(env, phone, result.reply);
+    if (sentReply.ok) await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, result.reply, nowIso(now)).run();
   }
   if (result.customer_name) await env.DB.prepare('UPDATE customers SET name = ? WHERE phone = ?').bind(result.customer_name, phone).run();
   if (result.language) await env.DB.prepare('UPDATE customers SET lang = ? WHERE phone = ?').bind(result.language, phone).run();
@@ -373,44 +403,48 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
     await sendToOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
     await forwardPhotosToOwner(env, JSON.parse(fresh.photos || '[]'), now, phone);
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(conv.id, nowIso(now)).run();
     await upsertLead(env, phone, { status: result.urgent ? 'דחוף, הועבר לחנן' : 'הועבר לחנן', name, issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
   }
 }
 
-// הלקוח כותב אחרי שהפנייה כבר אצל חנן (וחנן עוד לא ענה): הבוט עונה לו, וחנן מקבל עדכון אחד רק כשיש משהו חדש
+// הלקוח כותב אחרי שהפנייה כבר אצל חנן (וחנן עוד לא ענה): הבוט ממשיך את השיחה בעצמו,
+// וחנן מקבל סיכום מעודכן אחד רק כשהבוט סיים לאסוף את מה שהשתנה (או מיד, אם זה דחוף). לא הודעה על כל הודעה
 async function afterHandoffTurn(env, { conv, phone, customer, contactName, content, result, lastBotBefore, now }) {
-  const fresh = await env.DB.prepare('SELECT state, owner_replied_at, urgent FROM conversations WHERE id = ?').bind(conv.id).first();
+  const fresh = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
   if (fresh?.state !== 'handoff') return;
-  const name = customer?.name || contactName || '';
-  const who = `${name} ${displayPhone(phone)}`.trim();
-  // תמונות וסרטונים שהגיעו ברצף הזה
-  const media = (await env.DB.prepare("SELECT media_id FROM messages WHERE conv_id = ? AND role = 'user' AND media_id IS NOT NULL AND id > ? ORDER BY id").bind(conv.id, lastBotBefore).all()).results.map((r) => r.media_id);
+  const name = result.customer_name || customer?.name || contactName || '';
   // ה-AI לא ענה: לא משאירים את הלקוח בלי כלום, וחנן מקבל את ההודעה כמו שהיא
   if (result.failed) {
-    await sendToOwner(env, `💬 ${who} כתב/ה: ${content.text}`, now, phone);
-    if (media.length) await forwardPhotosToOwner(env, media, now, phone);
+    await sendToOwner(env, `💬 ${`${name} ${displayPhone(phone)}`.trim()} כתב/ה: ${content.text}`, now, phone);
+    if (content.photoId) await forwardPhotosToOwner(env, [content.photoId], now, phone);
     return;
   }
   // חנן ענה בזמן שה-AI חשב: הוא מטפל
   if (fresh.owner_replied_at && (wa.isUltra(env) || wa.is360(env))) return;
   if (result.reply) {
-    await wa.sendText(env, phone, result.reply);
-    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, result.reply, nowIso(now)).run();
+    const sentReply = await wa.sendText(env, phone, result.reply);
+    if (sentReply.ok) await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, result.reply, nowIso(now)).run();
   }
   if (result.customer_name) await env.DB.prepare('UPDATE customers SET name = ? WHERE phone = ?').bind(result.customer_name, phone).run();
   await env.DB.prepare('UPDATE conversations SET issue = COALESCE(NULLIF(?, \'\'), issue), address = COALESCE(NULLIF(?, \'\'), address), urgent = MAX(urgent, ?) WHERE id = ?')
     .bind(result.issue, result.address, result.urgent ? 1 : 0, conv.id).run();
   const becameUrgent = result.urgent && !fresh.urgent;
-  let update = String(result.summary_for_owner || '').trim();
-  if (result.customer_done) update = update || 'הלקוח כתב שכבר לא צריך.';
-  if (becameUrgent) update = `🚨 דחוף! ${update || content.text}`;
-  if (!update && !media.length) return; // "תודה", "אוקיי", "כמה זמן?": הבוט ענה, חנן לא צריך הודעה נוספת
-  const what = media.length ? (media.some((m) => String(m).startsWith('video:')) ? 'שלח/ה עוד קבצים' : `שלח/ה ${media.length === 1 ? 'עוד תמונה' : `עוד ${media.length} תמונות`}`) : '';
-  await sendToOwner(env, `📝 עדכון מ-${who}: ${update || what}`, now, phone);
+  if (!result.ready_for_handoff && !becameUrgent && !result.customer_done) return; // עדיין אוסף פרטים, או סתם תודה
+  // סיכום אחד מעודכן, עם כל התמונות שהגיעו מאז הסיכום הקודם
+  const lastUpdate = (await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'owner_update'").bind(conv.id).first())?.id || 0;
+  const media = (await env.DB.prepare("SELECT media_id FROM messages WHERE conv_id = ? AND role = 'user' AND media_id IS NOT NULL AND id > ? ORDER BY id").bind(conv.id, lastUpdate).all()).results.map((r) => r.media_id);
+  const updated = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
+  const body = ownerSummary(updated, { ...result, customer_name: name, summary_for_owner: result.summary_for_owner || (result.customer_done ? 'הלקוח כתב שכבר לא צריך.' : '') }, phone, now)
+    .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, becameUrgent ? '🚨 עדכון דחוף לפנייה' : (result.customer_done ? '❎ הלקוח ביטל' : '🔄 עדכון לפנייה'));
+  await sendToOwner(env, body, now, phone);
+  await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(conv.id, nowIso(now)).run();
   if (media.length) await forwardPhotosToOwner(env, media, now, phone);
   if (result.customer_done) {
     await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(conv.id).run();
     await upsertLead(env, phone, { status: 'הלקוח ויתר' }, now);
+  } else {
+    await upsertLead(env, phone, { status: becameUrgent ? 'דחוף, הועבר לחנן' : 'עודכן לחנן', issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
   }
 }
 
@@ -454,11 +488,12 @@ async function reportAiFailure(env, phone, reason, now) {
 export async function handleOwnerEcho(env, echo, now = new Date()) {
   const phone = echo.to;
   if (!phone) return;
-  // מי שחנן כתב לו בעצמו, מהאפליקציה, נחשב "מוכר" מעכשיו: הבוט לא יפנה אליו
-  if (env.KNOWN_ON_OWNER_MESSAGE !== '0') {
+  const conv = await env.DB.prepare("SELECT * FROM conversations WHERE phone = ? AND state IN ('bot','handoff') ORDER BY id DESC LIMIT 1").bind(phone).first();
+  // מי שחנן כתב לו בעצמו, ואין איתו פנייה פתוחה (חבר, ספק, לקוח קבוע): נחשב "מוכר", והבוט לא יפנה אליו.
+  // לקוח עם פנייה פתוחה לא הופך ל"מוכר": חנן פשוט לוקח את השיחה הזו
+  if (env.KNOWN_ON_OWNER_MESSAGE !== '0' && !conv) {
     await env.DB.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(phone, nowIso(now)).run();
   }
-  const conv = await env.DB.prepare("SELECT * FROM conversations WHERE phone = ? AND state IN ('bot','handoff') ORDER BY id DESC LIMIT 1").bind(phone).first();
   if (conv && conv.state === 'bot') {
     await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ?")
       .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();

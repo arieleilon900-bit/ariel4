@@ -2,7 +2,7 @@
 import { FEATURES, MESSAGES, TEMPLATES, msg as tmsg } from './config.js';
 import { upsertLead } from './sheets.js';
 import { displayPhone, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
-import { aiRespond, customerLang, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
+import { aiRespond, customerLang, forwardPhotosToOwner, refKey, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
 import { tableLink } from './table.js';
 import { deliverReceipt } from './receipts.js';
@@ -86,9 +86,16 @@ async function contextPhone(env, msg) {
   const id = msg?.context?.id;
   const ref = id ? (await env.DB.prepare('SELECT phone FROM owner_refs WHERE wamid = ?').bind(id).first())?.phone : null;
   if (ref) return ref;
-  // UltraMsg: המזהה של ההודעה המצוטטת לא תמיד ידוע, אבל הטקסט שלה כן. לוקחים את הטלפון של הלקוח מתוכו
-  const m = String(msg?.context?.body || '').match(/(?:\+?972[-\s]?|0)5\d[-\s]?\d{3}[-\s]?\d{4}/);
-  return m ? normalizePhone(m[0]) : null;
+  // UltraMsg: מגיע הטקסט של ההודעה המצוטטת, לא המזהה שלה
+  const body = String(msg?.context?.body || '');
+  if (!body) return null;
+  const byText = (await env.DB.prepare('SELECT phone FROM owner_refs WHERE wamid = ?').bind(refKey(body)).first())?.phone;
+  if (byText) return byText;
+  // גיבוי: רק מקומות שבהם הבוט עצמו כותב את הטלפון של הלקוח (קישור וואטסאפ, או שורת "טלפון:"), לא כל מספר שמופיע בטקסט
+  const wa = body.match(/wa\.me\/(\d{9,15})/);
+  if (wa) return wa[1];
+  const line = body.match(/טלפון:\s*([+\d][\d\-\s]{7,16}\d)/);
+  return line ? normalizePhone(line[1]) : null;
 }
 
 async function latestConv(env, phone) {
@@ -343,8 +350,9 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       await env.DB.prepare('UPDATE customers SET known = 0, blocked = 0 WHERE phone = ?').bind(c.phone).run();
       const conv = await latestConv(env, c.phone);
       await sendToOwner(env, `✓ הבוט חזר לטפל ב-${displayPhone(c.phone)}.`, now);
-      if (!conv) return;
-      await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ?, owner_replied_at = NULL, customer_nudges = 0, owner_nudges = 0 WHERE id = ?").bind(nowIso(now), conv.id).run();
+      // פותחים מחדש רק שיחה מהימים האחרונים (למשל הודעה שסומנה בטעות כספאם). שיחה ישנה: הלקוח פשוט יקבל מענה כשיכתוב שוב
+      if (!conv || (now.getTime() - new Date(conv.updated_at).getTime()) > 72 * 3600000 || !['spam', 'handoff', 'bot'].includes(conv.state)) return;
+      await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ?, owner_replied_at = NULL, customer_nudges = 2, owner_nudges = 0 WHERE id = ?").bind(nowIso(now), conv.id).run();
       // הלקוח כתב ולא קיבל תשובה (למשל סומן בטעות כספאם): הבוט עונה לו עכשיו
       const last = await env.DB.prepare("SELECT id, role, text FROM messages WHERE conv_id = ? AND role IN ('user','assistant','owner') ORDER BY id DESC LIMIT 1").bind(conv.id).first();
       if (last?.role === 'user') {

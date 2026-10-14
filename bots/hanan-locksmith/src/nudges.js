@@ -3,13 +3,16 @@ import { BUSINESS, FEATURES, MESSAGES, TIMING, msg as tmsg } from './config.js';
 import { upsertLead } from './sheets.js';
 import { addHours, displayPhone, inServiceWindow, nowIso } from './util.js';
 import { customerHours, ownerHours, restNow } from './hours.js';
-import { customerLang, forwardPhotosToOwner, logEvent, ownerSummary, sendToOwner } from './handler.js';
+import { customerLang, forwardPhotosToOwner, isPaused, logEvent, ownerSummary, sendToOwner } from './handler.js';
 import * as wa from './whatsapp.js';
 
 const minutesSince = (iso, now) => (now.getTime() - new Date(iso).getTime()) / 60000;
 
 export async function runNudges(env, now = new Date()) {
+  // הבוט בהפסקה ("עצור בוט"): חנן מטפל בהכל בעצמו, אז אין תזכורות ללקוחות ולא אליו
+  if (await isPaused(env)) return;
   await customerNudges(env, now);
+  await unfinishedUpdates(env, now);
   await ownerNudges(env, now);
   await doneChecks(env, now);
 }
@@ -65,10 +68,37 @@ async function partialHandoff(env, conv, now, title = 'לקוח התחיל לכ�
   await upsertLead(env, conv.phone, { status: 'פנייה חלקית, הועבר לחנן', note: 'הלקוח הפסיק לענות באמצע' }, now);
 }
 
+// 1ב. אחרי ההעברה הלקוח התחיל להוסיף פרטים (הבוט שאל שאלה), ונעלם באמצע: אחרי 30 דקות חנן מקבל את מה שנאסף
+async function unfinishedUpdates(env, now) {
+  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND handed_off_at >= ?")
+    .bind(new Date(now.getTime() - 72 * 3600000).toISOString()).all()).results;
+  for (const conv of convs) {
+    const lastUpd = (await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'owner_update'").bind(conv.id).first())?.id;
+    if (!lastUpd) continue;
+    const newer = (await env.DB.prepare("SELECT role, text, media_id, created_at FROM messages WHERE conv_id = ? AND role IN ('user','assistant') AND id > ? ORDER BY id").bind(conv.id, lastUpd).all()).results;
+    const users = newer.filter((m) => m.role === 'user');
+    const lastBot = newer.filter((m) => m.role === 'assistant').at(-1);
+    // רק כשהבוט באמצע איסוף (שאל שאלה). "תודה" / "אוקיי" לא מגיעים לחנן
+    if (!users.length || !lastBot || !/\?\s*$/.test(lastBot.text || '')) continue;
+    if (minutesSince(newer.at(-1).created_at, now) < 30) continue;
+    if (!conv.urgent && !ownerHours(now)) continue;
+    const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(conv.phone).first();
+    const text = [
+      `🔄 ${cust?.name || 'הלקוח'} ${displayPhone(conv.phone)} התחיל/ה להוסיף פרטים לפנייה ולא סיים/ה:`,
+      ...users.slice(-6).map((m) => `• ${m.text}`),
+      `וואטסאפ ללקוח: https://wa.me/${conv.phone}`,
+    ].join('\n');
+    await sendToOwner(env, text, now, conv.phone);
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(conv.id, nowIso(now)).run();
+    const media = users.map((m) => m.media_id).filter(Boolean);
+    if (media.length) await forwardPhotosToOwner(env, media, now, conv.phone);
+  }
+}
+
 // 2. חנן קיבל פנייה ועוד לא טיפל בה
 async function ownerNudges(env, now) {
   const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND owner_nudges < 2 AND handed_off_at >= ?")
-    .bind(new Date(now.getTime() - 24 * 3600000).toISOString()).all()).results;
+    .bind(new Date(now.getTime() - 72 * 3600000).toISOString()).all()).results; // 72 שעות: פנייה מליל שישי מקבלת תזכורת ביום ראשון
   for (const conv of convs) {
     if (restNow(now) && BUSINESS.shabbat?.enabled) continue; // שומר שבת: לא מזכירים, גם לא דחוף
     if (!conv.urgent && !ownerHours(now)) continue;

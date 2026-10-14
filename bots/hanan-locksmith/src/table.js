@@ -35,7 +35,8 @@ export async function renderTable(env, url) {
   const list = await rows(env);
   if (url.searchParams.get('format') === 'csv') {
     const head = ['תאריך פנייה', 'סטטוס', 'שם', 'טלפון', 'תקלה', 'כתובת', 'דחוף', 'הערות', 'מה קרה'];
-    const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    // תא שמתחיל ב-= + - @ נפתח באקסל כנוסחה: מוסיפים ' לפניו
+    const q = (v) => { let t = String(v ?? ''); if (/^[=+\-@]/.test(t)) t = `'${t}`; return `"${t.replace(/"/g, '""')}"`; };
     const lines = [head.map(q).join(',')].concat(list.map((r) => [day(r.started_at), r.lead_status || fallbackStatus(r.state), r.cname, displayPhone(r.phone), r.issue, r.address, r.urgent ? 'כן' : '', r.lead_note, r.lead_log].map(q).join(',')));
     return new Response(`﻿${lines.join('\r\n')}`, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="customers.csv"' } });
   }
