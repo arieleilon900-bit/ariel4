@@ -21,6 +21,8 @@ binding = "AI"
 WA_PROVIDER = "meta"
 # UltraMsg: מספר ה-Instance (לא סוד). הטוקן: סוד בשם <PREFIX>_ULTRAMSG_TOKEN
 ULTRAMSG_INSTANCE = ""
+# מצב בדיקה: הבוט עונה רק למספרים האלה (ולבעל העסק). ריק = עונה לכולם
+TEST_PHONES = ""
 WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
 WABA_ID = ""
 META_APP_ID = ""

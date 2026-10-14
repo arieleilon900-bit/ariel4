@@ -47,6 +47,9 @@ globalThis.fetch = async (url, init = {}) => {
     return Response.json({ url: 'https://lookaside.example/media', mime_type: 'image/jpeg' });
   }
   if (url.includes('lookaside.example')) return new Response(new Uint8Array([1, 2, 3]), { status: 200 });
+  if (url.includes('api.ultramsg.com/instance1/contacts')) return Response.json([{ id: '972509999999@c.us', name: 'אמא', isMyContact: true }, { id: '972508888888@c.us', name: '', isMyContact: false }, { id: '120@g.us', name: 'קבוצה' }]);
+  if (url.includes('api.ultramsg.com/instance1/instance/status')) return Response.json({ status: { accountStatus: { status: 'authenticated' } } });
+  if (url.includes('api.ultramsg.com/instance1/instance/settings')) return Response.json(init.method === 'POST' ? { changed: true } : { webhook_url: 'https://bot.example/webhook?key=secret', webhook_message_create: 'true' });
   if (url.startsWith('https://api.ultramsg.com/')) {
     const b = JSON.parse(init.body);
     const type = url.split('/messages/')[1];
@@ -931,4 +934,23 @@ test('UltraMsg: customer → handoff, Hanan commands, Hanan answering from his p
   sent.length = 0;
   await runEvery15(env, new Date(Date.now() + 8 * 86400000));
   assert.ok(sent.filter((m) => m.to === CUSTOMER).every((m) => m.type === 'text'));
+});
+
+test('UltraMsg setup: saved contacts become known (bot stays quiet with family); test mode answers only listed phones', async () => {
+  sent.length = 0;
+  const { runSetup } = await import('../src/setup.js');
+  const env = { ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', WA_VERIFY_TOKEN: 'secret', ANTHROPIC_API_KEY: '' };
+  const text = await runSetup(env, { origin: 'https://bot.example' });
+  assert.match(text, /המספר מחובר/);
+  assert.match(text, /1 אנשי קשר שמורים/);
+  assert.equal(env.DB.raw.prepare("SELECT known FROM customers WHERE phone = '972509999999'").get().known, 1);
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM customers WHERE phone = '972508888888'").get().n, 0);
+
+  // מצב בדיקה
+  const t = { ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', TEST_PHONES: CUSTOMER };
+  aiQueue = [ai({ reply: 'היי' })];
+  await processWebhook(t, inbound('972507777777', { type: 'text', text: { body: 'שלום' } }, 't1'), new Date());
+  assert.equal(sent.length, 0, 'stranger ignored in test mode');
+  await processWebhook(t, inbound(CUSTOMER, { type: 'text', text: { body: 'שלום' } }, 't2'), new Date());
+  assert.deepEqual(textsTo(CUSTOMER), ['היי']);
 });

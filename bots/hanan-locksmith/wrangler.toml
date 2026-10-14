@@ -23,6 +23,8 @@ binding = "AI"
 WA_PROVIDER = "meta"
 # UltraMsg: מספר ה-Instance (לא סוד). הטוקן נכנס כסוד ULTRAMSG_TOKEN
 ULTRAMSG_INSTANCE = ""
+# מצב בדיקה: הבוט עונה רק למספרים האלה (ולחנן). ריק = עונה לכולם
+TEST_PHONES = ""
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
 WABA_ID = ""
 META_APP_ID = ""

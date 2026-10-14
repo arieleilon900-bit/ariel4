@@ -174,6 +174,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export async function handleInbound(env, msg, contactName, now = new Date()) {
   const phone = msg.from;
   if (IGNORED_TYPES.has(msg.type)) return;
+  // מצב בדיקה (TEST_PHONES = רשימת מספרים מופרדת בפסיקים): הבוט עונה רק להם ולחנן, וכל השאר לא מקבלים כלום
+  if (env.TEST_PHONES && phone !== env.OWNER_PHONE && phone !== env.ADMIN_PHONE
+    && !String(env.TEST_PHONES).split(',').map((p) => p.trim()).includes(phone)) return;
 
   // הודעה שכבר טופלה (Meta לפעמים שולחים פעמיים)
   const dup = await env.DB.prepare('SELECT 1 FROM messages WHERE wa_id = ?').bind(msg.id).first();

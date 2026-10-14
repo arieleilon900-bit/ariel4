@@ -58,6 +58,21 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
         String(cur.webhook_url || '').startsWith(`${origin}/webhook`) ? ok('UltraMsg: ההודעות מגיעות לשרת') : bad(`UltraMsg: ההודעות מגיעות ל-${cur.webhook_url || 'שום מקום'}, לא לשרת הזה`);
         String(cur.webhook_message_create) === 'true' ? ok('UltraMsg: הבוט רואה כשחנן עונה מהטלפון') : warn('UltraMsg: webhook_message_create כבוי, הבוט לא יידע כשחנן עונה בעצמו');
       });
+      // אנשי הקשר השמורים בטלפון (משפחה, חברים, ספקים): הבוט לא עונה להם. בזמן בדיקה (TEST_PHONES) לא מייבאים
+      if (env.TEST_PHONES) warn(`מצב בדיקה: הבוט עונה רק ל-${env.TEST_PHONES} ולחנן. כשעוברים ללקוחות אמיתיים מוחקים את TEST_PHONES`);
+      else if (!checkOnly) await step('אנשי קשר', async () => {
+        const list = await j(await fetch(`${U}/contacts?token=${encodeURIComponent(env.ULTRAMSG_TOKEN)}`));
+        const arr = Array.isArray(list) ? list : list.contacts || list.data || [];
+        const saved = arr.filter((c) => /@c\.us$/.test(String(c.id || '')) && (c.isMyContact === true || (c.isMyContact === undefined && c.name)));
+        let n = 0;
+        for (const c of saved) {
+          const p = String(c.id).split('@')[0];
+          if (!/^\d{9,15}$/.test(p) || p === env.OWNER_PHONE || p === env.ADMIN_PHONE) continue;
+          await env.DB.prepare('INSERT INTO customers (phone, name, first_seen, known) VALUES (?, ?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(p, c.name || null, new Date().toISOString()).run();
+          n++;
+        }
+        ok(`אנשי קשר: ${n} אנשי קשר שמורים בטלפון סומנו כמוכרים. הבוט לא יענה להם (אפשר להחזיר אחד: בוט <טלפון>)`);
+      });
     }
   } else if (is360(env)) {
     if (!env.D360_API_KEY) bad('360dialog: חסר D360_API_KEY');
