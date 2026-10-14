@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -136,11 +136,12 @@ test('lead → questions → handoff → owner commands → reminders → review
   const conv = env.DB.raw.prepare('SELECT * FROM conversations').get();
   assert.equal(conv.state, 'handoff');
 
-  // 4. אחרי ההעברה: הלקוח כותב שוב → מועבר לחנן, בלי AI
-  const before = aiRequests.length;
+  // 4. אחרי ההעברה, בעל העסק עוד לא ענה: הבוט עונה ללקוח, ובעל העסק לא מקבל הודעה על "כמה זמן?"
+  const ownerBefore = sent.filter((m) => m.to === OWNER).length;
+  aiQueue = [ai({ reply: 'הפרטים אצלו, הוא יחזור אליך בהקדם', summary_for_owner: '' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'עוד כמה זמן?' } }, 'w4'), t0);
-  assert.equal(aiRequests.length, before);
-  assert.ok(textsTo(CUSTOMER).includes(MESSAGES.waitingForOwner));
+  assert.ok(textsTo(CUSTOMER).includes('הפרטים אצלו, הוא יחזור אליך בהקדם'));
+  assert.equal(sent.filter((m) => m.to === OWNER).length, ownerBefore, 'no extra message to the owner');
 
   // 5. חנן: "בדרך"  (חנן כותב לבוט → נפתח לו חלון, אז התשובות אליו בטקסט חופשי)
   sent.length = 0;
@@ -581,8 +582,13 @@ test('review: no 2h reminder at night, no day-before for same-day jobs, no past 
   await runEvery15(env, new Date('2026-10-15T01:15:00Z')); // 04:15
   assert.ok(!sent.some((m) => m.to === CUSTOMER && (m.template?.name === 'appt_today_v1' || (m.text?.body || '').includes('06:30'))), 'no reminder at 04:15');
 
-  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 14/10/2026 13:00' } }, 'r2'), t0);
-  await runEvery15(env, new Date('2026-10-14T05:15:00Z'));
+  // עבודה לאותו יום: בלי "יום לפני" (סביבה נפרדת, כדי שלא נחזור אחורה בזמן)
+  sent.length = 0;
+  const env2 = makeEnv();
+  aiQueue = [ai({ reply: 'היי, מה קרה?' })];
+  await processWebhook(env2, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'r0b'), t0);
+  await processWebhook(env2, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 14/10/2026 13:00' } }, 'r2'), t0);
+  await runEvery15(env2, new Date('2026-10-14T05:15:00Z'));
   assert.ok(!textsTo(CUSTOMER).some((t) => t.startsWith('תזכורת: חנן מגיע אליך')), 'no day-before for same-day job');
 
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 13/10/2026 10:00' } }, 'r3'), t0);
@@ -989,8 +995,6 @@ test('language: an English-speaking customer gets the fixed messages in English;
   const t0 = new Date('2026-10-14T08:00:00Z');
   aiQueue = [ai({ reply: 'Got it, I passed it to Hanan', language: 'en', issue: 'locked out', address: '5 Herzl St Holon', ready_for_handoff: true })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: "Hi, I'm locked out, 5 Herzl St Holon" } }, 'l1'), t0);
-  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'how long?' } }, 'l2'), t0);
-  assert.ok(textsTo(CUSTOMER).includes("I passed this on to יוסי too. He'll get back to you shortly."));
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 0541234567 20' } }, 'l3'), t0);
   assert.ok(textsTo(CUSTOMER).some((t) => t.includes('about 20 minutes')));
 
@@ -1064,4 +1068,157 @@ test('table "טופל" button: marks the job done like the WhatsApp command, rev
   assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('סומן כגמור'), 'owner gets the same confirmation as on WhatsApp');
   const after = await (await worker.fetch(new Request(`https://bot.example/table?k=${k}`), env, { waitUntil() {} })).text();
   assert.ok(after.includes('עבודה הסתיימה') && !after.includes('name="act" value="done"'), 'no button once done');
+});
+
+test('after handoff (UltraMsg): Hanan already answered → bot silent, nothing forwarded; before he answers a photo comes as one update', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', WA_VERIFY_TOKEN: 'secret' };
+  const waits = [];
+  const post = async (payload) => { await worker.fetch(new Request('https://bot.example/webhook?key=secret', { method: 'POST', body: JSON.stringify(payload) }), env, { waitUntil: (p) => waits.push(p) }); await Promise.all(waits.splice(0)); };
+  const C = '972543333333';
+  const recv = (data) => ({ event_type: 'message_received', data: { from: `${C}@c.us`, fromMe: false, time: 1, ...data } });
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'ננעל', address: 'הרצל 1', ready_for_handoff: true })];
+  await post(recv({ id: 'h1', type: 'chat', body: 'ננעלתי בחוץ הרצל 1' }));
+  // לפני שחנן ענה: תמונה של התקלה → סיכום מעודכן אחד לחנן + התמונה
+  sent.length = 0;
+  aiQueue = [ai({ reply: 'תודה, העברתי', ready_for_handoff: true, summary_for_owner: 'הלקוח שלח תמונה של הדלת' })];
+  await post(recv({ id: 'h2', type: 'image', body: '', media: 'https://ultra-media.example/x.jpg' }));
+  const toOwner = sent.filter((m) => m.to === OWNER);
+  assert.equal(toOwner.filter((m) => m.type === 'text').length, 1, 'one update');
+  assert.ok(toOwner.some((m) => m.type === 'image'));
+  // חנן עונה מהטלפון
+  await post({ event_type: 'message_create', data: { id: 'e1', from: '972500000000@c.us', to: `${C}@c.us`, fromMe: true, type: 'chat', body: 'אני בדרך אליך' } });
+  sent.length = 0;
+  const aiBefore = aiRequests.length;
+  await post(recv({ id: 'h3', type: 'chat', body: 'מעולה תודה' }));
+  assert.equal(sent.length, 0, 'bot silent, Hanan sees it in his app');
+  assert.equal(aiRequests.length, aiBefore);
+});
+
+test('review3 (deep review fixes): late echo, quote resolution, photo quote, pause, spam once, Sunday reminders', async () => {
+  const { default: worker } = await import('../src/index.js');
+  const mk = () => ({ ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', WA_VERIFY_TOKEN: 'secret' });
+  const waits = [];
+  const post = async (env, payload) => { await worker.fetch(new Request('https://bot.example/webhook?key=secret', { method: 'POST', body: JSON.stringify(payload) }), env, { waitUntil: (p) => waits.push(p) }); await Promise.all(waits.splice(0)); };
+  const recv = (from, data) => ({ event_type: 'message_received', data: { from: `${from}@c.us`, fromMe: false, time: 1, ...data } });
+
+  // 1. הודעה של הבוט שחוזרת מ-UltraMsg באיחור (אחרי 20 דקות) לא נחשבת כאילו חנן ענה
+  sent.length = 0;
+  let env = mk();
+  aiQueue = [ai({ reply: 'היי, מה קרה?' })];
+  await post(env, recv(CUSTOMER, { id: 'x1', type: 'chat', body: 'היי' }));
+  env.DB.raw.prepare("UPDATE ultra_sent SET created_at = ?").run(new Date(Date.now() - 20 * 60000).toISOString());
+  await post(env, { event_type: 'message_create', data: { id: 'x2', from: '972500000000@c.us', to: `${CUSTOMER}@c.us`, fromMe: true, type: 'chat', body: 'היי, מה קרה?' } });
+  const c1 = env.DB.raw.prepare('SELECT state, owner_replied_at FROM conversations').get();
+  assert.equal(c1.state, 'bot'); assert.equal(c1.owner_replied_at, null);
+  assert.equal(env.DB.raw.prepare('SELECT known FROM customers WHERE phone = ?').get(CUSTOMER).known, 0);
+
+  // 2. ציטוט: שם עם מספר טלפון לא מבלבל; תשובה על הודעת העזרה לא נשלחת למספר הדוגמה
+  sent.length = 0;
+  env = mk();
+  const C = '972549999999';
+  aiQueue = [ai({ reply: 'העברתי', customer_name: 'יוסי 050-7654321', issue: 'ננעל', address: 'הרצל 1', ready_for_handoff: true })];
+  await post(env, recv(C, { id: 'q1', type: 'chat', body: 'ננעלתי הרצל 1' }));
+  const summary = sent.find((m) => m.to === OWNER && m.type === 'text').text.body;
+  // 3. תשובה (ציטוט) על תמונה שהועברה לחנן מגיעה ללקוח הנכון
+  sent.length = 0;
+  aiQueue = [ai({ reply: 'תודה', ready_for_handoff: true, summary_for_owner: 'שלח תמונה' })];
+  await post(env, recv(C, { id: 'q5', type: 'image', body: '', media: 'https://ultra-media.example/p.jpg' }));
+  const photo = sent.find((m) => m.to === OWNER && m.type === 'image');
+  assert.ok(photo && photo.ultra.caption.includes('054-9999999'));
+  sent.length = 0;
+  await post(env, recv(OWNER, { id: 'q6', type: 'chat', body: 'רואה, זה צילינדר רגיל', quotedMsg: { id: 'ph', body: photo.ultra.caption } }));
+  assert.ok(sent.some((m) => m.to === C && m.text?.body === 'רואה, זה צילינדר רגיל'));
+
+  sent.length = 0;
+  await post(env, recv(OWNER, { id: 'q2', type: 'chat', body: 'אני מגיע תוך רבע שעה', quotedMsg: { id: 'zz', body: summary } }));
+  assert.ok(sent.some((m) => m.to === C), 'goes to the customer');
+  assert.ok(!sent.some((m) => m.to === '972507654321'), 'not to the number inside the name');
+  await post(env, recv(OWNER, { id: 'q3', type: 'chat', body: 'עזרה' }));
+  const help = sent.filter((m) => m.to === OWNER).at(-1).text.body;
+  sent.length = 0;
+  await post(env, recv(OWNER, { id: 'q4', type: 'chat', body: 'סיום', quotedMsg: { id: 'h', body: help } }));
+  assert.ok(!sent.some((m) => m.to === '972541234567'), 'example number in help is never used');
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM jobs WHERE phone = '972541234567'").get().n, 0);
+
+  // 4. "עצור בוט": אין תזכורות ללקוחות ולא לחנן
+  sent.length = 0;
+  env = mk();
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await post(env, recv(CUSTOMER, { id: 'p1', type: 'chat', body: 'ננעלתי' }));
+  await post(env, recv(OWNER, { id: 'p2', type: 'chat', body: 'עצור בוט' }));
+  sent.length = 0;
+  await runEvery15(env, new Date(Date.now() + 45 * 60000));
+  await runEvery15(env, new Date(Date.now() + 5 * 3600000));
+  assert.equal(sent.filter((m) => m.to === CUSTOMER).length, 0, 'no customer nudge while paused');
+
+  // 5. ספאם חוזר: הודעה אחת לחנן, לא אחת על כל הודעה
+  sent.length = 0;
+  env = mk();
+  const S = '972547777777';
+  const day = new Date('2026-10-14T08:00:00Z');
+  for (let i = 0; i < 3; i++) {
+    aiQueue = [ai({ category: 'spam' })];
+    await processWebhook(env, inbound(S, { type: 'text', text: { body: `מבצע מטורף ${i}` } }, `sp${i}`), new Date(day.getTime() + i * 120000));
+  }
+  assert.equal(sent.filter((m) => m.to === OWNER && (m.text?.body || '').includes('סיננתי')).length, 1);
+
+  // 6. עבודה ביום ראשון 09:30: תזכורת "יום לפני" יוצאת ביום שישי, ותזכורת הבוקר כבר מ-07:00
+  sent.length = 0;
+  env = mk();
+  const thu = new Date('2026-10-15T08:00:00Z'); // חמישי 11:00
+  aiQueue = [ai({ reply: 'היי' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'sun0'), thu);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 18/10/2026 09:30' } }, 'sun1'), thu);
+  sent.length = 0;
+  await runEvery15(env, new Date('2026-10-16T15:00:00Z')); // שישי 18:00
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('תזכורת')), 'day-before sent on Friday evening');
+  sent.length = 0;
+  await runEvery15(env, new Date('2026-10-18T04:15:00Z')); // ראשון 07:15
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('09:30')), 'morning reminder from 07:00');
+});
+
+test('after handoff: a new request is collected quietly, then ONE updated summary (not an update per message)', async () => {
+  sent.length = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'פריצת רכב טיגואן', address: 'חלום יוסף 326 תקוע', customer_name: 'חנה', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הרכב נעול' } }, 'n1'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סטטוס' } }, 'n0'), t0); // חנן כתב לבוט: נפתח לו חלון, אז ההודעות אליו מלאות
+  const base = sent.filter((m) => m.to === OWNER).length;
+  aiQueue = [ai({ reply: 'הבנתי, זה במקום הרכב או בנוסף?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'עכשיו גם ננעלתי מחוץ לבית' } }, 'n2'), t0);
+  aiQueue = [ai({ reply: 'אפשר תמונה של הדלת?', issue: 'נעול מחוץ לבית' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'במקום' } }, 'n3'), t0);
+  assert.equal(sent.filter((m) => m.to === OWNER).length, base, 'nothing to Hanan while the bot is still collecting');
+  aiQueue = [ai({ reply: 'תודה, העברתי לחנן', issue: 'נעול מחוץ לבית (פריצת דלת), במקום הרכב', ready_for_handoff: true, summary_for_owner: 'עכשיו צריך פריצת דלת לבית במקום הרכב. דלת כהה, צירים מימין' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'image', image: { id: 'door1', caption: '' } }, 'n4'), t0);
+  const updates = sent.filter((m) => m.to === OWNER).slice(base);
+  const texts = updates.filter((m) => m.type !== 'image');
+  assert.equal(texts.length, 1, 'exactly one updated summary');
+  assert.match(JSON.stringify(texts[0]), /עדכון לפנייה/);
+  assert.match(JSON.stringify(texts[0]), /פריצת דלת/);
+});
+
+test('after handoff: customer stops in the middle of new details → Hanan gets what was collected after 30 min, once; "תודה" never reaches him', async () => {
+  sent.length = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'רכב', address: 'הרצל 1', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הרכב נעול הרצל 1' } }, 'u1'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סטטוס' } }, 'u0'), t0);
+  aiQueue = [ai({ reply: 'בשמחה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'תודה' } }, 'u2'), t0);
+  const base = sent.filter((m) => m.to === OWNER).length;
+  await runEvery15(env, new Date(t0.getTime() + 45 * 60000));
+  assert.equal(sent.filter((m) => m.to === OWNER && /התחיל\/ה להוסיף/.test(m.text?.body || '')).length, 0, 'thanks never reaches Hanan');
+  const t1 = new Date(t0.getTime() + 60 * 60000);
+  aiQueue = [ai({ reply: 'גם הבית? מה הכתובת של הבית?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'גם ננעלתי מחוץ לבית' } }, 'u3'), t1);
+  await runEvery15(env, new Date(t1.getTime() + 35 * 60000));
+  await runEvery15(env, new Date(t1.getTime() + 50 * 60000));
+  const partial = sent.filter((m) => m.to === OWNER && /התחיל\/ה להוסיף/.test(m.text?.body || ''));
+  assert.equal(partial.length, 1, 'one partial update');
+  assert.match(partial[0].text.body, /גם ננעלתי מחוץ לבית/);
 });

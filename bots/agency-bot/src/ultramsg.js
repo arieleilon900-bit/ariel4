@@ -25,13 +25,17 @@ function toMetaMessage(d) {
     }
     case 'revoked': case 'e2e_notification': case 'notification_template': case 'gp2': case 'call_log':
       return { ...msg, type: 'system' };
-    default: return { ...msg, type: d.type || 'unsupported' };
+    // מדבקות, אנשי קשר, סוגים לא מוכרים: לא עונים עליהם
+    default: return { ...msg, type: 'unsupported' };
   }
 }
 
 // גוף ה-webhook של UltraMsg ← גוף במבנה של Meta (או null אם אין מה לעשות איתו)
 export async function ultraToMeta(env, payload, now = new Date()) {
   const d = payload?.data || {};
+  // רק מה-Instance שלנו
+  const inst = String(env.ULTRAMSG_INSTANCE || '').replace(/\D/g, '');
+  if (inst && payload?.instanceId != null && String(payload.instanceId).replace(/\D/g, '') !== inst) return null;
   const ev = payload?.event_type;
   if (ev === 'message_received' && !d.fromMe) {
     if (!isPrivate(d.from)) return null; // קבוצות וסטטוסים: לא עונים
@@ -43,8 +47,9 @@ export async function ultraToMeta(env, payload, now = new Date()) {
     const body = String(d.body || '').trim();
     // להשוואה עם מה שהבוט שלח: בלי הבדלים של רווחים וירידות שורה
     const flat = body.replace(/\s+/g, ' ').trim();
-    // הבוט שלח את זה? (נרשם בשליחה, ב-15 הדקות האחרונות)
-    const since = new Date(now.getTime() - 15 * 60000).toISOString();
+    // הבוט שלח את זה? (נרשם בשליחה)
+    // UltraMsg שומרים הודעות בתור כשהטלפון לא מחובר, אז ההודעה יכולה לחזור אלינו גם אחרי שעות
+    const since = new Date(now.getTime() - 48 * 3600000).toISOString();
     const mine = d.type === 'chat'
       ? await env.DB.prepare('SELECT id FROM ultra_sent WHERE phone = ? AND body = ? AND created_at >= ? ORDER BY id LIMIT 1').bind(phone, flat, since).first()
       : await env.DB.prepare('SELECT id FROM ultra_sent WHERE phone = ? AND created_at >= ? ORDER BY id DESC LIMIT 1').bind(phone, since).first();
