@@ -40,10 +40,12 @@ export async function ultraToMeta(env, payload, now = new Date()) {
     if (!isPrivate(d.to)) return null;
     const phone = digits(d.to);
     const body = String(d.body || '').trim();
+    // להשוואה עם מה שהבוט שלח: בלי הבדלים של רווחים וירידות שורה
+    const flat = body.replace(/\s+/g, ' ').trim();
     // הבוט שלח את זה? (נרשם בשליחה, ב-15 הדקות האחרונות)
     const since = new Date(now.getTime() - 15 * 60000).toISOString();
     const mine = d.type === 'chat'
-      ? await env.DB.prepare('SELECT id FROM ultra_sent WHERE phone = ? AND body = ? AND created_at >= ? ORDER BY id LIMIT 1').bind(phone, body, since).first()
+      ? await env.DB.prepare('SELECT id FROM ultra_sent WHERE phone = ? AND body = ? AND created_at >= ? ORDER BY id LIMIT 1').bind(phone, flat, since).first()
       : await env.DB.prepare('SELECT id FROM ultra_sent WHERE phone = ? AND created_at >= ? ORDER BY id DESC LIMIT 1').bind(phone, since).first();
     if (mine) { await env.DB.prepare('DELETE FROM ultra_sent WHERE id = ?').bind(mine.id).run(); return null; }
     // ההודעות של הבוט לחנן (מספר ההתראות) לא נחשבות "חנן ענה"

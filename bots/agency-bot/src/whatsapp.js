@@ -14,7 +14,7 @@ const ultraBase = (env) => `https://api.ultramsg.com/${env.ULTRAMSG_INSTANCE}`;
 // UltraMsg: כל שליחה נרשמת, כדי שההודעה שחוזרת אלינו כ"נשלחה" לא תיחשב כאילו חנן ענה
 async function ultra(env, path, to, fields, logBody) {
   // נרשם לפני השליחה: ההודעה יכולה לחזור אלינו מ-UltraMsg עוד לפני שהשליחה מסתיימת
-  const logged = await env.DB?.prepare('INSERT INTO ultra_sent (phone, body, created_at) VALUES (?, ?, ?)').bind(to, String(logBody || '').trim(), new Date().toISOString()).run().catch(() => null);
+  const logged = await env.DB?.prepare('INSERT INTO ultra_sent (phone, body, created_at) VALUES (?, ?, ?)').bind(to, String(logBody || '').replace(/\s+/g, ' ').trim(), new Date().toISOString()).run().catch(() => null);
   const res = await fetch(`${ultraBase(env)}/messages/${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
