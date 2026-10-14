@@ -18,6 +18,9 @@ export async function tableLink(env, origin = env.WORKER_URL) {
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const day = (iso) => { if (!iso) return ''; const p = ilParts(new Date(iso)); return `${p.d}/${p.m} ${p.hh}:${p.mm}`; };
+// הכפתורים בטבלה: אותן פעולות כמו הפקודות בוואטסאפ
+export const TABLE_ACTIONS = { done: 'סיום', cancel: 'ביטול', irrelevant: 'לא רלוונטי' };
+const closed = (status) => /הסתיימה|בוטלה|לא רלוונטי|ויתר|ביקורת/.test(status || '');
 const fallbackStatus = (state) => ({ bot: 'בשיחה עם הבוט', handoff: `הועבר ל${BUSINESS.ownerName}`, closed: 'נסגר' }[state] || state);
 
 async function rows(env) {
@@ -45,7 +48,9 @@ export async function renderTable(env, url) {
     return `<tr data-q="${esc([r.cname, r.phone, displayPhone(r.phone), r.issue, r.address, status].join(' '))}">
 <td>${esc(day(r.started_at))}</td><td><b>${esc(status)}</b>${r.urgent ? ' <span class="u">דחוף</span>' : ''}</td>
 <td>${esc(r.cname || '')}</td><td><a href="https://wa.me/${esc(r.phone)}">${esc(displayPhone(r.phone))}</a></td>
-<td>${esc(r.issue || '')}</td><td>${nav}</td><td class="s">${esc(r.lead_note || '')}</td><td class="s">${esc(r.lead_log || '')}</td></tr>`;
+<td>${esc(r.issue || '')}</td><td>${nav}</td><td class="s">${esc(r.lead_note || '')}</td><td class="s">${esc(r.lead_log || '')}</td>
+<td class="act">${closed(status) ? '' : `<form method="post" action="/table/action" onsubmit="return confirm('לסמן שהעבודה הסתיימה? הלקוח יקבל בקשה לביקורת בגוגל.')"><input type="hidden" name="k" value="${esc(url.searchParams.get('k'))}"><input type="hidden" name="phone" value="${esc(r.phone)}"><input type="hidden" name="act" value="done"><button class="ok">✓ טופל</button></form>
+<form method="post" action="/table/action" onsubmit="return confirm('לסגור את הפנייה בלי ביקורת?')"><input type="hidden" name="k" value="${esc(url.searchParams.get('k'))}"><input type="hidden" name="phone" value="${esc(r.phone)}"><input type="hidden" name="act" value="irrelevant"><button class="no">לא רלוונטי</button></form>`}</td></tr>`;
   }).join('');
   const html = `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>לקוחות · ${esc(BUSINESS.shortName)}</title><style>
@@ -58,12 +63,30 @@ h1{font-size:19px;margin:0}.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{back
 .bar{padding:0 16px 12px;display:flex;gap:8px}.bar a{white-space:nowrap;align-self:center;color:var(--acc)}
 .wrap{overflow-x:auto;padding:0 16px 24px}table{border-collapse:collapse;width:100%;min-width:900px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}th{background:var(--bg);color:var(--mute);font-weight:600;position:sticky;top:0}
-td.s{color:var(--mute);font-size:13px;max-width:280px}a{color:var(--acc);text-decoration:none}.u{color:var(--u);font-weight:700;font-size:12px}
+td.s{color:var(--mute);font-size:13px;max-width:280px}td.act{white-space:nowrap}td.act form{display:inline}
+button{font:inherit;border-radius:8px;padding:6px 10px;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);margin:2px}
+button.ok{background:#1b7f3b;border-color:#1b7f3b;color:#fff;font-weight:600}button.no{color:var(--mute)}
+.flash{margin:0 16px 12px;padding:10px 12px;border-radius:10px;background:#e7f6ec;color:#14532d;border:1px solid #b7e1c4}a{color:var(--acc);text-decoration:none}.u{color:var(--u);font-weight:700;font-size:12px}
 .empty{padding:32px;text-align:center;color:var(--mute)}</style></head><body>
 <header><h1>הלקוחות של ${esc(BUSINESS.shortName)}</h1><div class="stats"><span class="stat">השבוע: <b>${week.length}</b> פניות</span><span class="stat">דחופות: <b>${week.filter((r) => r.urgent).length}</b></span><span class="stat">עבודות שהסתיימו: <b>${done}</b></span><span class="stat">סה"כ: <b>${list.length}</b></span></div></header>
-<div class="bar"><input id="q" placeholder="חיפוש: שם, טלפון, תקלה, כתובת" autocomplete="off"><a href="?k=${esc(url.searchParams.get('k'))}&format=csv">הורדה לאקסל</a></div>
-<div class="wrap">${list.length ? `<table><thead><tr><th>תאריך</th><th>סטטוס</th><th>שם</th><th>טלפון</th><th>תקלה</th><th>כתובת</th><th>הערות</th><th>מה קרה</th></tr></thead><tbody>${trs}</tbody></table>` : '<div class="empty">עוד אין פניות. ברגע שלקוח יכתוב, הוא יופיע כאן.</div>'}</div>
+${url.searchParams.get('ok') ? `<div class="flash">✓ ${esc(url.searchParams.get('ok'))}</div>` : ''}<div class="bar"><input id="q" placeholder="חיפוש: שם, טלפון, תקלה, כתובת" autocomplete="off"><a href="?k=${esc(url.searchParams.get('k'))}&format=csv">הורדה לאקסל</a></div>
+<div class="wrap">${list.length ? `<table><thead><tr><th>תאריך</th><th>סטטוס</th><th>שם</th><th>טלפון</th><th>תקלה</th><th>כתובת</th><th>הערות</th><th>מה קרה</th><th></th></tr></thead><tbody>${trs}</tbody></table>` : '<div class="empty">עוד אין פניות. ברגע שלקוח יכתוב, הוא יופיע כאן.</div>'}</div>
 <script>const q=document.getElementById('q');q&&q.addEventListener('input',()=>{const v=q.value.trim();document.querySelectorAll('tbody tr').forEach(t=>{t.style.display=!v||t.dataset.q.includes(v)?'':'none'})})</script>
 </body></html>`;
   return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+}
+
+// לחיצה על כפתור בטבלה: מבצעים את אותה פקודה כאילו בעל העסק כתב אותה בוואטסאפ (כולל אישור אליו בוואטסאפ)
+export async function tableAction(env, request, url, runCommand) {
+  const form = await request.formData();
+  const k = String(form.get('k') || '');
+  const back = (msg) => Response.redirect(`${url.origin}/table?k=${encodeURIComponent(k)}${msg ? `&ok=${encodeURIComponent(msg)}` : ''}`, 303);
+  const phone = String(form.get('phone') || '').replace(/\D/g, '');
+  const cmd = TABLE_ACTIONS[String(form.get('act') || '')];
+  if (!cmd || !phone) return back('');
+  const known = await env.DB.prepare('SELECT 1 FROM conversations WHERE phone = ? LIMIT 1').bind(phone).first();
+  if (!known) return back('');
+  const local = phone.startsWith('972') ? `0${phone.slice(3)}` : `+${phone}`;
+  await runCommand(env, `${cmd} ${local}`, new Date(), null, env.OWNER_PHONE);
+  return back(cmd === 'סיום' ? `סומן כגמור: ${displayPhone(phone)}. בעוד כמה שעות הלקוח יקבל בקשה לביקורת` : `נסגר: ${displayPhone(phone)}`);
 }
