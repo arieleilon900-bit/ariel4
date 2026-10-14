@@ -1,0 +1,285 @@
+<title>מפת הבוט של חנן</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a control-room map read top to bottom — live status, the message path, the brain, the lifecycle, then the reference tables. Brass (keys, cylinders) on steel. */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #18202a;
+  --mute: #5a6573;
+  --line: #dde2e8;
+  --steel: #2f4458;
+  --brass: #a8761c;
+  --brass-soft: #f6ecd8;
+  --ok: #1d7a46;
+  --ok-soft: #e3f3ea;
+  --warn: #9a5b00;
+  --warn-soft: #fbf0dc;
+  --bad: #b3261e;
+  --display: "Secular One", "IBM Plex Sans Hebrew", "Arial Hebrew", sans-serif;
+  --body: "IBM Plex Sans Hebrew", "Arial Hebrew", "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161c; --panel: #18202a; --ink: #e8edf2; --mute: #9aa6b4; --line: #2a3542;
+    --steel: #8fb0cf; --brass: #e0b25a; --brass-soft: #2e2716; --ok: #5fcf8f; --ok-soft: #15291e;
+    --warn: #f0b860; --warn-soft: #2d2412; --bad: #ff8a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #18202a; --ink: #e8edf2; --mute: #9aa6b4; --line: #2a3542;
+  --steel: #8fb0cf; --brass: #e0b25a; --brass-soft: #2e2716; --ok: #5fcf8f; --ok-soft: #15291e;
+  --warn: #f0b860; --warn-soft: #2d2412; --bad: #ff8a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--body); direction: rtl; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+h1, h2 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; }
+h2 { font-size: 22px; color: var(--steel); }
+h3 { margin: 0; font-size: 16px; }
+p { margin: 0; }
+.lead { color: var(--mute); max-width: 62ch; }
+section { display: grid; gap: 16px; min-width: 0; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--brass); font-weight: 700; }
+code, .mono { font-family: var(--mono); font-size: 13px; direction: ltr; unicode-bidi: isolate; }
+a { color: var(--steel); }
+
+/* status strip */
+.status { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; min-width: 0; }
+.stat .k { color: var(--mute); font-size: 13px; }
+.stat .v { font-weight: 600; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+
+/* path diagram */
+.path { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; align-items: stretch; }
+.node { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; position: relative; min-width: 0; }
+.node.core { border-color: var(--brass); box-shadow: 0 0 0 3px var(--brass-soft); }
+.node .tag { font-size: 12px; color: var(--mute); }
+.arrow { display: none; }
+.path .node + .node { margin-right: 22px; }
+.path .node + .node::before { content: "←"; position: absolute; right: -19px; top: 50%; transform: translateY(-50%); color: var(--brass); font-size: 18px; }
+.under { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 820px) {
+  .path { grid-template-columns: 1fr; gap: 22px; }
+  .path .node + .node { margin-right: 0; }
+  .path .node + .node::before { content: "↓"; right: 50%; top: -21px; transform: translateX(50%); }
+  .under { grid-template-columns: 1fr; }
+}
+
+/* brain */
+.brain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 820px) { .brain { grid-template-columns: 1fr; } }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.box.claude { background: var(--brass-soft); border-color: var(--brass); }
+ul { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 680px) { .split { grid-template-columns: 1fr; } }
+
+/* lifecycle */
+.life { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.step { padding: 12px 14px; display: grid; gap: 4px; border-inline-start: 1px solid var(--line); align-content: start; }
+.step:first-child { border-inline-start: 0; }
+.step .when { font-family: var(--mono); font-size: 12px; color: var(--brass); direction: rtl; }
+.step b { font-size: 14px; }
+.step span { font-size: 13px; color: var(--mute); }
+
+/* tables */
+.tbl { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; }
+th, td { text-align: right; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; letter-spacing: .04em; color: var(--mute); font-weight: 600; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cmd { font-weight: 700; white-space: nowrap; }
+
+/* checklist */
+.todo { display: grid; gap: 8px; }
+.todo .row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.who { font-size: 12px; color: var(--mute); white-space: nowrap; }
+.dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; background: var(--warn); }
+.dot.done { background: var(--ok); }
+.note { color: var(--mute); font-size: 13px; }
+</style>
+
+<div class="wrap">
+
+<header style="display:grid;gap:10px">
+  <div class="eyebrow">עונה ראשון · חנן המנעולן</div>
+  <h1>מפת הבוט של חנן</h1>
+  <p class="lead">כל המערכת בעמוד אחד: איפה הבוט רץ, איך הודעה עוברת דרכו, מה המוח מקבל ומחזיר, מה קורה לבד ומתי, ואיפה כל דבר נשמר. מצב נכון ל-14/10/2026.</p>
+</header>
+
+<section aria-labelledby="s-status">
+  <h2 id="s-status">מה פועל עכשיו</h2>
+  <div class="status">
+    <div class="stat"><span class="k">הבוט</span><span class="v"><span class="pill ok">באוויר</span> מצב בדיקה</span></div>
+    <div class="stat"><span class="k">עונה ללקוחות</span><span class="v">רק ל-<span class="mono">052-5759417</span></span></div>
+    <div class="stat"><span class="k">מספר העסק (בבדיקה)</span><span class="v"><span class="mono">053-3776774</span> · השותף</span></div>
+    <div class="stat"><span class="k">"חנן" שמקבל סיכומים</span><span class="v"><span class="mono">052-4666175</span> · אריאל</span></div>
+    <div class="stat"><span class="k">חיבור לוואטסאפ</span><span class="v">UltraMsg <span class="pill warn">לבדיקות בלבד</span></span></div>
+    <div class="stat"><span class="k">החיבור של חנן</span><span class="v">360dialog, רשמי <span class="pill ok">ישראל נתמכת</span></span></div>
+  </div>
+  <p class="note">כתובת הבוט: <span class="mono">hanan-locksmith-bot.eliyabuis12.workers.dev</span>. בדיקת מצב: <span class="mono">/health</span>. טבלת הלקוחות: כותבים לבוט "טבלה" ומקבלים קישור.</p>
+</section>
+
+<section aria-labelledby="s-path">
+  <h2 id="s-path">הדרך של הודעה, בשנייה אחת</h2>
+  <div class="path">
+    <div class="node"><span class="tag">1</span><h3>הלקוח</h3><p>כותב, מקליט, שולח תמונה או מיקום, בוואטסאפ הרגיל שלו.</p></div>
+    <div class="node"><span class="tag">2</span><h3>וואטסאפ</h3><p>היום UltraMsg (סריקת QR). אצל חנן: 360dialog, החיבור הרשמי של Meta.</p></div>
+    <div class="node core"><span class="tag">3 · השרת</span><h3>Cloudflare Worker</h3><p>מקבל את ההודעה, בודק שהיא אמיתית, שומר אותה, ומחליט מה לעשות.</p></div>
+    <div class="node core"><span class="tag">4 · המוח</span><h3>Claude</h3><p>קורא את כל השיחה ומחזיר תשובה ללקוח, ומה נאסף עד עכשיו.</p></div>
+    <div class="node"><span class="tag">5</span><h3>חזרה ללקוח</h3><p>התשובה יוצאת מהמספר של העסק, בשפה של הלקוח.</p></div>
+  </div>
+  <div class="under">
+    <div class="box"><h3>Whisper</h3><p>הופך הודעה קולית לטקסט לפני שהיא מגיעה למוח. רץ אצל Cloudflare.</p></div>
+    <div class="box"><h3>מסד הנתונים (D1)</h3><p>כל לקוח, שיחה, הודעה, עבודה, תזכורת ומה שחנן לימד. בתוך Cloudflare.</p></div>
+    <div class="box"><h3>חנן</h3><p>מקבל סיכום אחד מסודר כשהפרטים מלאים, ונותן פקודות בתשובה עליו.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="s-brain">
+  <h2 id="s-brain">המוח: מה Claude מקבל ומה הוא מחזיר</h2>
+  <div class="brain">
+    <div class="box">
+      <div class="eyebrow">נכנס</div>
+      <ul>
+        <li>פרטי העסק: שירותים, אזורים, שעות, שבת, מחירים</li>
+        <li>מה שחנן לימד ב"למד"</li>
+        <li>איך חנן מדבר ותשובות לשאלות חוזרות (מהטופס)</li>
+        <li>כל השיחה עם הלקוח עד עכשיו (עד 30 הודעות)</li>
+        <li>תמונה, אם נשלחה</li>
+        <li>השעה עכשיו, ואם הפנייה כבר אצל חנן</li>
+      </ul>
+    </div>
+    <div class="box claude">
+      <div class="eyebrow">הכללים שלו</div>
+      <ul>
+        <li>שואל שאלה אחת בכל פעם: מה קרה, תמונה, כתובת</li>
+        <li>"היי" בלבד: שולח תפריט שירותים ממוספר</li>
+        <li>דחוף (ילד ברכב, גז, אדם מבוגר): מעביר מיד, ומפנה למד"א ולמשטרה</li>
+        <li>עונה בשפה של הלקוח, 1-2 משפטים</li>
+        <li>לא ממציא מחיר או תשובה שאין לו. שואל את חנן</li>
+        <li>ספאם ומכירות: לא עונה</li>
+        <li>לא רואה סרטונים. רואה תמונות</li>
+      </ul>
+    </div>
+    <div class="box">
+      <div class="eyebrow">יוצא (תמיד באותו מבנה)</div>
+      <ul>
+        <li><b>תשובה</b> ללקוח</li>
+        <li><b>שפה</b>, <b>שם</b>, <b>תקלה</b>, <b>כתובת</b></li>
+        <li><b>דחוף?</b> ולמה</li>
+        <li><b>מוכן להעביר לחנן?</b></li>
+        <li><b>הלקוח ויתר?</b></li>
+        <li><b>סיכום לחנן</b></li>
+        <li><b>ספאם / שירות / אחר</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="split">
+    <div class="box"><h3>מה המוח מחליט</h3><p>מה לענות, מה הבין מהלקוח, ומתי יש מספיק כדי להעביר לחנן.</p></div>
+    <div class="box"><h3>מה הקוד מחליט (לא AI)</h3><p>מתי לשלוח תזכורות, למי מותר לכתוב ובאיזו שעה, פקודות של חנן, הטבלה, שבת, הסרה מרשימה, ספאם חוזר, והגנות מלולאות. ככה זה צפוי ולא תלוי במה שה-AI "מרגיש".</p></div>
+  </div>
+  <p class="note">המודל: Claude Opus 5.5 דרך Anthropic. אם הוא לא עונה תוך 18 שניות, הלקוח מקבל "קיבלנו, חנן יחזור אליך" והפנייה עוברת לחנן. אחרי כל עדכון של הבוט רצה בדיקה אוטומטית מול המוח האמיתי: עברית, אנגלית, "היי" ודחוף.</p>
+</section>
+
+<section aria-labelledby="s-life">
+  <h2 id="s-life">החיים של פנייה, מההודעה הראשונה ועד שנה אחרי</h2>
+  <div class="tbl" style="border:0;background:none">
+    <div class="life" style="min-width:900px">
+      <div class="step"><span class="when">0 דק׳</span><b>הלקוח כותב</b><span>הבוט עונה תוך שניות ושואל מה קרה</span></div>
+      <div class="step"><span class="when">אחרי האיסוף</span><b>סיכום לחנן</b><span>שם, טלפון, תקלה, כתובת, וויז, תמונות, הקלטות, קישור לטבלה</span></div>
+      <div class="step"><span class="when">אחרי הסיכום</span><b>הבוט ממשיך</b><span>עונה ללקוח. חנן מקבל סיכום מעודכן אחד, רק אם יש משהו חדש</span></div>
+      <div class="step"><span class="when">חנן עונה</span><b>הבוט יוצא</b><span>"בדרך 20", "תור", או תשובה מהטלפון. הבוט לא מתערב יותר</span></div>
+      <div class="step"><span class="when">יום לפני · שעתיים</span><b>תזכורות ללקוח</b><span>לעבודה מתואמת. לחנן: רשימה ב-07:00 ותזכורת שעה לפני</span></div>
+      <div class="step"><span class="when">"סיום" / ✓ טופל</span><b>העבודה נסגרת</b><span>הטבלה מתעדכנת</span></div>
+      <div class="step"><span class="when">+3 שעות</span><b>ביקורת בגוגל</b><span>בקשה עם הקישור לפרופיל של חנן</span></div>
+      <div class="step"><span class="when">+7 ימים</span><b>המלצה</b><span>"אפשר להעביר את המספר לחברים"</span></div>
+      <div class="step"><span class="when">+365 ימים</span><b>תזכורת שנתית</b><span>"לבדוק שהמנעול והדלת תקינים?"</span></div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="s-nets">
+  <h2 id="s-nets">אף אחד לא נשאר תלוי</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>מה קרה</th><th>מתי</th><th>מה הבוט עושה</th></tr></thead>
+      <tbody>
+        <tr><td>הבוט לא הצליח לענות ללקוח</td><td class="num">5 דק׳</td><td>מעביר את הפנייה לחנן מיד</td></tr>
+        <tr><td>הלקוח הפסיק לענות באמצע</td><td class="num">30 דק׳</td><td>תזכורת אחת ללקוח ("עדיין צריך עזרה?"), בין 08:00 ל-21:00</td></tr>
+        <tr><td>ועדיין לא ענה</td><td class="num">+3 שעות</td><td>חנן מקבל את מה שיש, כדי להתקשר</td></tr>
+        <tr><td>חנן לא חזר ללקוח</td><td class="num">30 דק׳ · +60 דק׳</td><td>שתי תזכורות לחנן (דחוף: 10 ו-20 דק׳), בין 07:00 ל-22:00. בשנייה הלקוח מקבל "חנן באמצע עבודה, הפנייה אצלו"</td></tr>
+        <tr><td>הלקוח התחיל להוסיף פרטים ונעלם</td><td class="num">30 דק׳</td><td>חנן מקבל את מה שנאסף, פעם אחת</td></tr>
+        <tr><td>עבודה מתואמת עברה ולא סומנה</td><td class="num">+3 שעות</td><td>שואל את חנן מה קרה</td></tr>
+        <tr><td>שאל מחיר ונעלם, בלי עבודה</td><td class="num">24 שעות</td><td>הודעת מעקב אחת ללקוח</td></tr>
+        <tr><td>הודעה לחנן לא נשלחה</td><td class="num">כל 15 דק׳</td><td>ניסיון חוזר, עד 12 שעות</td></tr>
+        <tr><td>כל יום ראשון</td><td class="num">08:00-09:00</td><td>דוח שבועי לחנן, עם קישור לטבלה</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="s-cmd">
+  <h2 id="s-cmd">השלט של חנן: פקודות בוואטסאפ</h2>
+  <p class="lead">עונים (החלקה ימינה) על ההודעה שקיבלו על הלקוח, וכותבים מילה. משפט רגיל בתשובה כזו נשלח ללקוח כמו שהוא.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>כותבים</th><th>מה קורה</th></tr></thead>
+      <tbody>
+        <tr><td class="cmd">בדרך 20</td><td>הלקוח מקבל שחנן בדרך, הגעה בעוד כ-20 דקות</td></tr>
+        <tr><td class="cmd">תור מחר 10:00</td><td>נקבעה עבודה, ויוצאות תזכורות ללקוח ולחנן</td></tr>
+        <tr><td class="cmd">סיום</td><td>העבודה הסתיימה. אחרי זה ביקורת, המלצה ותזכורת שנתית. אותו דבר כמו "✓ טופל" בטבלה</td></tr>
+        <tr><td class="cmd">טופל</td><td>טיפלת (למשל התקשרת), והבוט מפסיק להזכיר</td></tr>
+        <tr><td class="cmd">ביטול · לא רלוונטי</td><td>מבטל עבודה / סוגר פנייה בלי מעקב</td></tr>
+        <tr><td class="cmd">תמונות</td><td>שולח שוב את התמונות של הלקוח</td></tr>
+        <tr><td class="cmd">שקט · חסום · בוט</td><td>מישהו מוכר / ספאם / הבוט חוזר לענות לו</td></tr>
+        <tr><td class="cmd">למד ...</td><td>מלמד את הבוט תשובה. "מה למדת" מציג, "שכח 3" מוחק</td></tr>
+        <tr><td class="cmd">טבלה · דוח · סטטוס</td><td>קישור לטבלה / הסיכום השבועי / מה קורה עכשיו</td></tr>
+        <tr><td class="cmd">עצור בוט · הפעל בוט</td><td>הבוט מפסיק לגמרי (גם תזכורות) / חוזר</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="s-store">
+  <h2 id="s-store">איפה כל דבר נשמר, ועל שם מי</h2>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>מה</th><th>איפה</th><th>על שם</th><th>עלות בחודש</th></tr></thead>
+      <tbody>
+        <tr><td>השרת (הבוט עצמו)</td><td>Cloudflare Workers</td><td>מייל העסק</td><td class="num">5$</td></tr>
+        <tr><td>לקוחות, שיחות, עבודות, מה שחנן לימד</td><td>Cloudflare D1</td><td>מייל העסק</td><td class="num">כלול</td></tr>
+        <tr><td>תמלול הקלטות</td><td>Cloudflare Workers AI</td><td>מייל העסק</td><td class="num">כלול / אגורות</td></tr>
+        <tr><td>המוח</td><td>Anthropic (Claude)</td><td>מייל העסק</td><td class="num">10-20$</td></tr>
+        <tr><td>החיבור לוואטסאפ (בדיקות)</td><td>UltraMsg, instance194049</td><td>השותף</td><td class="num">כ-39$</td></tr>
+        <tr><td>החיבור של חנן (בסוף)</td><td>360dialog</td><td>מייל העסק</td><td class="num">49€</td></tr>
+        <tr><td>הקוד</td><td>GitHub, <span class="mono">bots/hanan-locksmith</span></td><td>אריאל</td><td class="num">0</td></tr>
+        <tr><td>סיסמאות ומפתחות</td><td>GitHub Secrets, מוצפן</td><td>אריאל</td><td class="num">0</td></tr>
+        <tr><td>תמונות והקלטות של לקוחות</td><td>וואטסאפ / UltraMsg. אצלנו רק קישור</td><td>-</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">עדכון של הבוט: אני משנה בקוד, GitHub מריץ את כל הבדיקות האוטומטיות, ורק אם כולן עוברות הבוט עולה מחדש לבד, תוך דקה-שתיים.</p>
+</section>
+
+<section aria-labelledby="s-left">
+  <h2 id="s-left">מה נשאר עד שחנן מקבל את הבוט</h2>
+  <div class="todo">
+    <div class="row"><span class="dot done"></span><div>הבוט, הטבלה, התזכורות, ההקלטות, התמונות, השפות וההגנות</div><span class="who">בנוי ונבדק</span></div>
+    <div class="row"><span class="dot"></span><div>בדיקה בזמן אמת של התזכורות: לא לענות 30 דקות, וללחוץ "✓ טופל" ולחכות לבקשת הביקורת</div><span class="who">אריאל + השותף</span></div>
+    <div class="row"><span class="dot"></span><div>Anthropic: טעינה אוטומטית ותקרה חודשית</div><span class="who">השותף</span></div>
+    <div class="row"><span class="dot"></span><div>הטופס של חנן: שירותים, שעות, אזורים, מחירים, סגנון, מספר להתראות</div><span class="who">חנן</span></div>
+    <div class="row"><span class="dot"></span><div>המחיר בחוזה: "500 + מע"מ" או "500 כולל מע"מ"</div><span class="who">אריאל מחליט</span></div>
+    <div class="row"><span class="dot"></span><div>יום החיבור: אימות עסק ב-Meta, חנן סורק QR ב-360dialog, הבוט עובר למספר שלו, המדריך</div><span class="who">כולם, שעה אחת</span></div>
+  </div>
+</section>
+
+</div>
