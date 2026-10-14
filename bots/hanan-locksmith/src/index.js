@@ -47,6 +47,15 @@ export default {
       return tableAction(env, request, url, handleOwnerCommand);
     }
 
+    // שליחת הקישור לטבלה לבעל העסק בוואטסאפ (מופעל ידנית מ-GitHub Actions)
+    if (url.pathname === '/admin/send-table' && request.method === 'POST') {
+      const key = (url.searchParams.get('key') || '').trim();
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
+      setWindowAlwaysOpen(isUltra(env));
+      await handleOwnerCommand(env, 'טבלה', new Date(), null, env.OWNER_PHONE);
+      return new Response('sent');
+    }
+
     // בדיקה עצמית אחרי כל העלאה: המוח האמיתי עונה על שיחה לדוגמה (בלי לשלוח כלום לאף אחד)
     if (url.pathname === '/admin/selftest' && request.method === 'GET') {
       const key = (url.searchParams.get('key') || '').trim();

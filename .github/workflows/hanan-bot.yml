@@ -9,6 +9,11 @@ on:
       - 'bots/hanan-locksmith/**'
       - '.github/workflows/hanan-bot.yml'
   workflow_dispatch:
+    inputs:
+      send_table:
+        description: 'Send the customer table link to the owner on WhatsApp'
+        type: boolean
+        default: false
 
 concurrency:
   group: hanan-bot
@@ -98,3 +103,12 @@ jobs:
           echo "$out"
           curl -s -m 20 "$url/health"
           echo "$out" | grep -q '^OK מסד' && ! echo "$out" | grep -q '^FAIL'
+
+      - name: Send the table link to the owner (manual)
+        if: steps.ready.outputs.go == 'true' && github.event.inputs.send_table == 'true'
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          curl -s -m 30 -X POST -G "$url/admin/send-table" --data-urlencode "key=$key"
