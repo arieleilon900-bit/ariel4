@@ -40,8 +40,8 @@ export default {
 
     // בדיקה עצמית אחרי כל העלאה: המוח האמיתי עונה על שיחה לדוגמה (בלי לשלוח כלום לאף אחד)
     if (url.pathname === '/admin/selftest' && request.method === 'GET') {
-      const key = url.searchParams.get('key') || '';
-      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, env.WA_VERIFY_TOKEN)) return new Response('forbidden', { status: 403 });
+      const key = (url.searchParams.get('key') || '').trim();
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
       return new Response(await selfTest(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
