@@ -61,6 +61,9 @@ export default {
       return new Response('forbidden', { status: 403 });
     }
 
+    // הבוט כבוי (BOT_OFF = "1"): מקבלים ומתעלמים, בלי לענות לאף אחד
+    if (url.pathname === '/webhook' && request.method === 'POST' && env.BOT_OFF === '1') return new Response('ok');
+
     // UltraMsg: אין חתימה, אז מילת הסוד נמצאת בכתובת (/webhook?key=WA_VERIFY_TOKEN). /admin/setup מגדיר את זה לבד
     if (url.pathname === '/webhook' && request.method === 'POST' && isUltra(env)) {
       if (!env.WA_VERIFY_TOKEN || !safeEqual(url.searchParams.get('key') || '', env.WA_VERIFY_TOKEN)) return new Response('forbidden', { status: 403 });
@@ -96,6 +99,7 @@ export default {
   async scheduled(event, env, ctx) {
     const now = new Date(event.scheduledTime || Date.now());
     setWindowAlwaysOpen(isUltra(env));
+    if (env.BOT_OFF === '1') return;
     if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
     if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));
