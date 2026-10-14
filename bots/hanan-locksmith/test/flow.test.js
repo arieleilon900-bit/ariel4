@@ -954,3 +954,21 @@ test('UltraMsg setup: saved contacts become known (bot stays quiet with family);
   await processWebhook(t, inbound(CUSTOMER, { type: 'text', text: { body: 'שלום' } }, 't2'), new Date());
   assert.deepEqual(textsTo(CUSTOMER), ['היי']);
 });
+
+test('language: an English-speaking customer gets the fixed messages in English; empty or emoji-only messages are ignored', async () => {
+  sent.length = 0; aiRequests = [];
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'Got it, I passed it to Hanan', language: 'en', issue: 'locked out', address: '5 Herzl St Holon', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: "Hi, I'm locked out, 5 Herzl St Holon" } }, 'l1'), t0);
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'how long?' } }, 'l2'), t0);
+  assert.ok(textsTo(CUSTOMER).includes("I passed this on to Hanan too. He'll get back to you shortly."));
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 0541234567 20' } }, 'l3'), t0);
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('about 20 minutes')));
+
+  const n = sent.length, ai0 = aiRequests.length;
+  await processWebhook(env, inbound('972547777777', { type: 'text', text: { body: '👍' } }, 'l4'), t0);
+  await processWebhook(env, inbound('972547777777', { type: 'text', text: { body: ' ?! ' } }, 'l5'), t0);
+  assert.equal(sent.length, n);
+  assert.equal(aiRequests.length, ai0);
+});

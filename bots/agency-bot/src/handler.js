@@ -1,6 +1,6 @@
 // טיפול בהודעה נכנסת מלקוח, ובהודעות שחנן שולח מהאפליקציה (Coexistence).
 import { runTurn } from './ai.js';
-import { BUSINESS, MESSAGES, TEMPLATES, TIMING } from './config.js';
+import { BUSINESS, MESSAGES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
 import { upsertLead } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, inServiceWindow, nowIso, wazeLink, addHours } from './util.js';
 import * as wa from './whatsapp.js';
@@ -12,6 +12,11 @@ const CONV_IDLE_HOURS = 72; // שיחה שלא זזה 3 ימים נחשבת סג
 // הבוט בהפסקה ("עצור בוט"): לא עונה ללקוחות, וכל הודעה עוברת ישר לחנן
 export async function isPaused(env) {
   return (await env.DB.prepare("SELECT value FROM settings WHERE key = 'paused'").first())?.value === '1';
+}
+
+// השפה של הלקוח (נשמרת מהשיחה): he / en / ru / ar
+export async function customerLang(env, phone) {
+  return (await env.DB.prepare('SELECT lang FROM customers WHERE phone = ?').bind(phone).first())?.lang || 'he';
 }
 
 export async function logEvent(env, type, phone, now = new Date()) {
@@ -174,6 +179,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export async function handleInbound(env, msg, contactName, now = new Date()) {
   const phone = msg.from;
   if (IGNORED_TYPES.has(msg.type)) return;
+  // הודעה בלי שום אות או מספר (ריקה, רק "?", ".", אימוג'י, 👍): לא עונים עליה ולא מבזבזים קריאה ל-AI
+  if (msg.type === 'text' && !/[\p{L}\p{N}]/u.test(msg.text?.body || '')) return;
   // מצב בדיקה (TEST_PHONES = רשימת מספרים מופרדת בפסיקים): הבוט עונה רק להם ולחנן, וכל השאר לא מקבלים כלום
   if (env.TEST_PHONES && phone !== env.OWNER_PHONE && phone !== env.ADMIN_PHONE
     && !String(env.TEST_PHONES).split(',').map((p) => p.trim()).includes(phone)) return;
@@ -213,7 +220,7 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, wa_id, created_at) VALUES (0, 'user', ?, ?, ?)").bind(optText, msg.id, nowIso(now)).run();
     await env.DB.prepare('UPDATE customers SET opted_out = 1 WHERE phone = ?').bind(phone).run();
     await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE phone = ? AND state IN ('bot','handoff')").bind(phone).run();
-    await wa.sendText(env, phone, MESSAGES.optedOut);
+    await wa.sendText(env, phone, tmsg(await customerLang(env, phone), 'optedOut'));
     await logEvent(env, 'opt_out', phone, now);
     return;
   }
@@ -239,10 +246,11 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     await sendToOwner(env, `💬 ${customer?.name || ''} ${displayPhone(phone)} כתב/ה: ${content.text}`.trim(), now, phone);
     if (content.photoId) await forwardPhotosToOwner(env, [content.photoId], now, phone);
     const lastBot = await env.DB.prepare("SELECT text, created_at FROM messages WHERE conv_id = ? AND role = 'assistant' ORDER BY id DESC LIMIT 1").bind(conv.id).first();
-    const recentlySaid = lastBot && lastBot.text === MESSAGES.waitingForOwner && (now.getTime() - new Date(lastBot.created_at).getTime()) < 30 * 60000;
+    const waitingText = tmsg(customer?.lang || 'he', 'waitingForOwner');
+    const recentlySaid = lastBot && lastBot.text === waitingText && (now.getTime() - new Date(lastBot.created_at).getTime()) < 30 * 60000;
     if (!recentlySaid) {
-      await wa.sendText(env, phone, MESSAGES.waitingForOwner);
-      await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, MESSAGES.waitingForOwner, nowIso(now)).run();
+      await wa.sendText(env, phone, waitingText);
+      await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, waitingText, nowIso(now)).run();
     }
     return;
   }

@@ -52,6 +52,64 @@ function defaultMessages(b) {
   };
 }
 
+// אותן הודעות בשפות אחרות, ללקוח שכותב באנגלית, רוסית או ערבית. השם של בעל העסק: client.business.ownerNames
+function i18n(b, lang) {
+  const o = b.ownerNames?.[lang] || b.ownerName;
+  const sn = b.shortNames?.[lang] || b.shortName;
+  const f = b.ownerGender === 'female';
+  const T = {
+    en: {
+      waitingForOwner: () => `I passed this on to ${o} too. ${f ? 'She' : 'He'}'ll get back to you shortly.`,
+      eta: (min) => `${o} is on ${f ? 'her' : 'his'} way 🚗 Estimated arrival: about ${min} minutes.`,
+      followup: () => `Hi, just checking if you still need help? ${o} is available, you can write here.`,
+      review: (link) => `Thank you for choosing ${sn} 🙏 If you were happy, a short Google review would help us a lot:\n${link}`,
+      referral: () => 'Glad we could help! If a friend or family member ever needs us, feel free to pass on this number 🙂',
+      yearly: () => `Hi, it's been a year since ${o} worked for you. Want us to check that everything is still in good shape?`,
+      reminderDayBefore: (when, address) => `Reminder: ${o} is coming to you ${when}${address ? ` at ${address}` : ''}. If anything changed, just write here.`,
+      reminderTwoHours: (time) => `${o} will be with you today at ${time}. See you soon 🙂`,
+      optedOut: () => "You've been removed and won't get any more reminders or updates. If you ever need us, just write here.",
+      customerNudge: () => `Hi, do you still need help? We can pick up where we left off, and I'll pass everything on to ${o}.`,
+      customerReassure: () => `${o} is still in the middle of a job. Your request is with ${f ? 'her' : 'him'} and ${f ? 'she' : 'he'}'ll get back to you shortly.`,
+    },
+    ru: {
+      waitingForOwner: () => `Я передал это и ${o}. ${f ? 'Она' : 'Он'} скоро с вами свяжется.`,
+      eta: (min) => `${o} уже ${f ? 'едет' : 'едет'} к вам 🚗 Примерное время прибытия: около ${min} минут.`,
+      followup: () => `Здравствуйте, вам ещё нужна помощь? ${o} на связи, можно написать здесь.`,
+      review: (link) => `Спасибо, что выбрали ${sn} 🙏 Если вы довольны, короткий отзыв в Google нам очень поможет:\n${link}`,
+      referral: () => 'Рады были помочь! Если друзьям или родным понадобится помощь, можно передать им этот номер 🙂',
+      yearly: () => `Здравствуйте, прошёл год с нашей работы у вас. Хотите, проверим, что всё в порядке?`,
+      reminderDayBefore: (when, address) => `Напоминание: ${o} ${f ? 'приедет' : 'приедет'} к вам ${when}${address ? ` по адресу ${address}` : ''}. Если что-то изменилось, напишите здесь.`,
+      reminderTwoHours: (time) => `${o} будет у вас сегодня в ${time}. До встречи 🙂`,
+      optedOut: () => 'Вы отписаны и больше не будете получать напоминания. Если понадобится помощь, просто напишите здесь.',
+      customerNudge: () => `Здравствуйте, вам ещё нужна помощь? Можно продолжить с того места, где остановились, и я всё передам ${o}.`,
+      customerReassure: () => `${o} ещё на заказе. Ваша заявка у ${f ? 'неё' : 'него'}, ${f ? 'она' : 'он'} скоро с вами свяжется.`,
+    },
+    ar: {
+      waitingForOwner: () => `نقلت هذا أيضاً إلى ${o}. ${f ? 'ستعود' : 'سيعود'} إليك قريباً.`,
+      eta: (min) => `${o} في الطريق إليك 🚗 الوصول المتوقع: حوالي ${min} دقيقة.`,
+      followup: () => `مرحباً، هل ما زلت بحاجة إلى مساعدة؟ ${o} ${f ? 'متاحة' : 'متاح'}، يمكنك الكتابة هنا.`,
+      review: (link) => `شكراً لاختيارك ${sn} 🙏 إذا كنت راضياً، تقييم قصير في جوجل يساعدنا كثيراً:\n${link}`,
+      referral: () => 'سعدنا بمساعدتك! إذا احتاج أحد الأصدقاء أو العائلة إلينا، يمكنك إعطاؤه هذا الرقم 🙂',
+      yearly: () => 'مرحباً، مرّت سنة منذ عملنا عندك. هل تريد أن نتأكد أن كل شيء بحالة جيدة؟',
+      reminderDayBefore: (when, address) => `تذكير: ${o} ${f ? 'قادمة' : 'قادم'} إليك ${when}${address ? ` إلى العنوان ${address}` : ''}. إذا تغيّر شيء، اكتب هنا.`,
+      reminderTwoHours: (time) => `${o} ${f ? 'ستكون' : 'سيكون'} عندك اليوم الساعة ${time}. إلى اللقاء 🙂`,
+      optedOut: () => 'تمت إزالتك ولن تصلك تذكيرات أو تحديثات بعد الآن. إذا احتجت إلينا، اكتب هنا فقط.',
+      customerNudge: () => `مرحباً، هل ما زلت بحاجة إلى مساعدة؟ يمكننا المتابعة من حيث توقفنا، وسأنقل كل شيء إلى ${o}.`,
+      customerReassure: () => `${o} ما ${f ? 'زالت' : 'زال'} في عمل آخر. طلبك ${f ? 'عندها' : 'عنده'} و${f ? 'ستعود' : 'سيعود'} إليك قريباً.`,
+    },
+  };
+  return T[lang];
+}
+
+// הודעה קבועה בשפה של הלקוח (אם אין תרגום, או שהלקוח שינה את ההודעה בעברית ב-client.js: עברית)
+export function msg(lang, key, ...args) {
+  const t = lang !== 'he' && !CUSTOM_MESSAGES.has(key) ? i18n(BUSINESS, lang)?.[key] : null;
+  if (t) return t(...args);
+  const he = MESSAGES[key];
+  return typeof he === 'function' ? he(...args) : he;
+}
+const CUSTOM_MESSAGES = new Set();
+
 // תבניות מאושרות ב-WhatsApp Manager, להודעות מחוץ לחלון 24 שעות.
 // השמות כאן חייבים להיות זהים לשמות שיוצרים ב-Meta (רשימה ב-SETUP.md).
 export const TEMPLATES = {
@@ -114,6 +172,8 @@ export function applyClient(client = {}) {
   if (!BUSINESS.shortName) BUSINESS.shortName = BUSINESS.name;
   for (const k of Object.keys(MESSAGES)) delete MESSAGES[k];
   Object.assign(MESSAGES, defaultMessages(BUSINESS), client.messages || {});
+  CUSTOM_MESSAGES.clear();
+  for (const k of Object.keys(client.messages || {})) CUSTOM_MESSAGES.add(k);
   Object.assign(TIMING, DEFAULT_TIMING, client.timing || {});
   Object.assign(FEATURES, DEFAULT_FEATURES, client.features || {});
   const defs = defaultTemplates(BUSINESS).map((d) => (client.templates?.[d.name] ? { ...d, body: client.templates[d.name] } : d));

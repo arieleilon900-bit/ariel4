@@ -1,8 +1,8 @@
 // פקודות שחנן שולח לבוט בוואטסאפ, מהמספר שמוגדר ב-OWNER_PHONE.
-import { BUSINESS, FEATURES, MESSAGES, TEMPLATES } from './config.js';
+import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, msg as tmsg } from './config.js';
 import { upsertLead } from './sheets.js';
 import { displayPhone, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
-import { aiRespond, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
+import { aiRespond, customerLang, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
 import { deliverReceipt } from './receipts.js';
 import * as wa from './whatsapp.js';
@@ -253,7 +253,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'eta': {
       const min = c.minutes || 30;
-      const r = await sendToCustomer(env, c.phone, MESSAGES.eta(min), { name: TEMPLATES.eta, params: [String(min)] }, now);
+      const r = await sendToCustomer(env, c.phone, tmsg(await customerLang(env, c.phone), 'eta', min), { name: TEMPLATES.eta, params: [String(min)] }, now);
       await logEvent(env, 'eta', c.phone, now);
       if (r.ok) await upsertLead(env, c.phone, { status: `${BUSINESS.ownerName} בדרך (כ-${min} דק׳)` }, now);
       return sendToOwner(env, r.ok ? `✓ נשלח ל-${displayPhone(c.phone)} שאתה בדרך (כ-${min} דק׳).` : `לא הצלחתי לשלוח ל-${displayPhone(c.phone)}.`, now);

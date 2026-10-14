@@ -1,7 +1,7 @@
 // משימות מתוזמנות: כל 15 דקות (תזכורות, מעקבים, ביקורות, קבלות), וכל יום ראשון (דוח שבועי).
-import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, TIMING } from './config.js';
+import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
 import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
-import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
+import { customerLang, logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
 import { deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
@@ -46,13 +46,15 @@ async function appointmentReminders(env, now) {
     }
     if (j.reminders_sent === 0 && hoursLeft <= TIMING.reminderDayBeforeHours && hoursLeft > 3 && canMessageNow(now)) {
       const when = whenLabel(at, now);
-      const r = await sendToCustomer(env, j.phone, MESSAGES.reminderDayBefore(when, j.address), { name: TEMPLATES.reminderDayBefore, params: [when, j.address || '-'] }, now);
+      const lang = await customerLang(env, j.phone);
+      const p = ilParts(at);
+      const r = await sendToCustomer(env, j.phone, tmsg(lang, 'reminderDayBefore', lang === 'he' ? when : `${p.d}/${p.m} ${p.hh}:${p.mm}`, j.address), { name: TEMPLATES.reminderDayBefore, params: [when, j.address || '-'] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
     } else if (hoursLeft <= TIMING.reminderTwoHoursBefore + 0.25) {
       // לא בלילה ולא בשבת: אם זה יוצא אז, מוותרים על התזכורת הזו
       if (!canMessageNow(now)) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); continue; }
       const time = ilTime(at);
-      const r = await sendToCustomer(env, j.phone, MESSAGES.reminderTwoHours(time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
+      const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'reminderTwoHours', time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
       if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = 2 WHERE id = ?').bind(j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
     }
   }
@@ -109,7 +111,7 @@ async function followups(env, now) {
     const known = await env.DB.prepare('SELECT known FROM customers WHERE phone = ?').bind(c.phone).first();
     if (known?.known) continue;
     if (job || await optedOut(env, c.phone)) continue; // כבר נפתחה עבודה, אין צורך במעקב
-    const r = await sendToCustomer(env, c.phone, MESSAGES.followup, { name: TEMPLATES.followup }, now);
+    const r = await sendToCustomer(env, c.phone, tmsg(await customerLang(env, c.phone), 'followup'), { name: TEMPLATES.followup }, now);
     if (r.ok) { await logEvent(env, 'followup', c.phone, now); await upsertLead(env, c.phone, { status: 'נשלחה הודעת מעקב' }, now); }
   }
 }
@@ -130,7 +132,7 @@ async function reviews(env, now) {
       await logEvent(env, 'review_skipped', j.phone, now);
       continue;
     }
-    const r = await sendToCustomer(env, j.phone, MESSAGES.review(env.REVIEW_LINK), { name: TEMPLATES.review, params: [env.REVIEW_LINK] }, now);
+    const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'review', env.REVIEW_LINK), { name: TEMPLATES.review, params: [env.REVIEW_LINK] }, now);
     await env.DB.prepare('UPDATE jobs SET review_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
     if (r.ok) { await logEvent(env, 'review', j.phone, now); await upsertLead(env, j.phone, { status: 'עבודה הסתיימה, נשלחה בקשת ביקורת' }, now); }
   }
@@ -141,7 +143,7 @@ async function referrals(env, now) {
   const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND review_sent_at IS NOT NULL AND referral_sent_at IS NULL AND review_sent_at <= ?").bind(cutoff).all()).results;
   for (const j of jobs) {
     if (await optedOut(env, j.phone)) { await env.DB.prepare('UPDATE jobs SET referral_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run(); continue; }
-    const r = await sendToCustomer(env, j.phone, MESSAGES.referral, { name: TEMPLATES.referral }, now);
+    const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'referral'), { name: TEMPLATES.referral }, now);
     await env.DB.prepare('UPDATE jobs SET referral_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
     if (r.ok) await logEvent(env, 'referral', j.phone, now);
   }
@@ -154,7 +156,7 @@ async function yearly(env, now) {
     // היה אצלו שוב בשנה האחרונה, או ביקש הסרה: לא שולחים
     const newer = await env.DB.prepare("SELECT 1 FROM jobs WHERE phone = ? AND id > ? AND status = 'done'").bind(j.phone, j.id).first();
     if (newer || await optedOut(env, j.phone)) { await env.DB.prepare('UPDATE jobs SET yearly_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run(); continue; }
-    const r = await sendToCustomer(env, j.phone, MESSAGES.yearly, { name: TEMPLATES.yearly }, now);
+    const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'yearly'), { name: TEMPLATES.yearly }, now);
     await env.DB.prepare('UPDATE jobs SET yearly_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
     if (r.ok) await logEvent(env, 'yearly', j.phone, now);
   }

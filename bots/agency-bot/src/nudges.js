@@ -1,9 +1,9 @@
 // מי שלא עונה: לקוח שהפסיק לענות באמצע, חנן שלא טיפל בפנייה, ועבודה שעבר זמנה ולא סומנה.
-import { BUSINESS, FEATURES, MESSAGES, TIMING } from './config.js';
+import { BUSINESS, FEATURES, MESSAGES, TIMING, msg as tmsg } from './config.js';
 import { upsertLead } from './sheets.js';
 import { addHours, displayPhone, inServiceWindow, nowIso } from './util.js';
 import { customerHours, ownerHours, restNow } from './hours.js';
-import { forwardPhotosToOwner, logEvent, ownerSummary, sendToOwner } from './handler.js';
+import { customerLang, forwardPhotosToOwner, logEvent, ownerSummary, sendToOwner } from './handler.js';
 import * as wa from './whatsapp.js';
 
 const minutesSince = (iso, now) => (now.getTime() - new Date(iso).getTime()) / 60000;
@@ -36,10 +36,11 @@ async function customerNudges(env, now) {
     const canNudge = conv.customer_nudges === 0 && !cust?.opted_out && customerHours(now) && inServiceWindow(
       (await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first())?.last_inbound_at, now);
     if (canNudge && age >= TIMING.customerNudgeMinutes) {
-      const r = await wa.sendText(env, conv.phone, MESSAGES.customerNudge);
+      const nudgeText = tmsg(await customerLang(env, conv.phone), 'customerNudge');
+      const r = await wa.sendText(env, conv.phone, nudgeText);
       await env.DB.prepare('UPDATE conversations SET customer_nudges = 1 WHERE id = ?').bind(conv.id).run();
       if (r.ok) {
-        await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, MESSAGES.customerNudge, nowIso(now)).run();
+        await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, nudgeText, nowIso(now)).run();
         await logEvent(env, 'customer_nudge', conv.phone, now);
       }
       continue;
@@ -96,8 +97,9 @@ async function ownerNudges(env, now) {
     if (!first && customerHours(now)) {
       const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first();
       if (inServiceWindow(c?.last_inbound_at, now)) {
-        const r = await wa.sendText(env, conv.phone, MESSAGES.customerReassure);
-        if (r.ok) await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, MESSAGES.customerReassure, nowIso(now)).run();
+        const reassure = tmsg(await customerLang(env, conv.phone), 'customerReassure');
+        const r = await wa.sendText(env, conv.phone, reassure);
+        if (r.ok) await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, reassure, nowIso(now)).run();
       }
     }
   }
