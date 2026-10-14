@@ -153,12 +153,27 @@ async function yearly(env, now) {
 
 // קבלות מיש חשבונית: כל מסמך חדש נשלח ללקוח, והעבודה מסומנת כגמורה (מה שמפעיל בקשת ביקורת)
 async function invoices(env, now) {
-  const since = new Date(now.getTime() - 24 * 3600000).toISOString();
-  const docs = await fetchNewDocuments(env, since);
+  let docs = [];
+  try {
+    docs = await fetchNewDocuments(env, now);
+  } catch (err) {
+    console.error('yesh poll failed', err);
+    await logEvent(env, 'yesh_error', null, now);
+    return;
+  }
   for (const d of docs) {
-    const seen = await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(String(d.id)).first();
-    if (seen || !d.phone || !d.pdfUrl) continue;
-    await deliverReceipt(env, d.phone, d.pdfUrl, { docId: String(d.id), now });
+    const seen = await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(d.id).first();
+    if (seen) continue;
+    if (!d.phone || !d.pdfUrl) {
+      // אין טלפון נייד במסמך: חנן שולח בעצמו
+      if (d.customerName) await sendToOwner(env, `הקבלה ל-${d.customerName} לא נשלחה בוואטסאפ, כי אין בה טלפון. אפשר להעביר לי את ה-PDF עם הטלפון שלו.`, now);
+      continue;
+    }
+    // חנן כבר שלח את הקבלה הזו ידנית (העביר PDF לבוט) בשעות האחרונות: רק מסמנים, לא שולחים שוב
+    const manual = await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_doc_id IS NULL AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
+      .bind(d.phone, new Date(now.getTime() - 12 * 3600000).toISOString()).first();
+    if (manual) { await env.DB.prepare('UPDATE jobs SET invoice_doc_id = ? WHERE id = ?').bind(d.id, manual.id).run(); continue; }
+    await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, now });
   }
 }
 

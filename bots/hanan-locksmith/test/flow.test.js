@@ -29,6 +29,7 @@ const sent = [];           // הודעות שנשלחו ב-WhatsApp
 let aiQueue = [];          // תשובות שה-AI "יחזיר" לפי הסדר
 let aiRequests = [];
 let outSeq = 0;
+let yeshQueue = [], yeshRequests = [];
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
   if (url.includes('api.anthropic.com')) {
@@ -40,11 +41,12 @@ globalThis.fetch = async (url, init = {}) => {
     }), { status: 200, headers: { 'content-type': 'application/json', 'request-id': 'req_test' } });
   }
   if (url.includes('graph.facebook.com')) {
-    if (url.endsWith('/messages')) { sent.push(JSON.parse(init.body)); return Response.json({ messages: [{ id: `wamid.out${++outSeq}` }] }); }
+    if (url.endsWith('/messages') || url === 'https://waba-v2.360dialog.io/messages') { sent.push(JSON.parse(init.body)); return Response.json({ messages: [{ id: `wamid.out${++outSeq}` }] }); }
     if (url.endsWith('/media')) return Response.json({ id: 'uploaded-media' });
     return Response.json({ url: 'https://lookaside.example/media', mime_type: 'image/jpeg' });
   }
   if (url.includes('lookaside.example')) return new Response(new Uint8Array([1, 2, 3]), { status: 200 });
+  if (url.includes('api.yeshinvoice.co.il')) { yeshRequests.push({ url, auth: init.headers.Authorization, body: JSON.parse(init.body) }); return Response.json(yeshQueue.shift() || { Success: true, ReturnValue: [], totalpage: 1 }); }
   throw new Error('unexpected fetch ' + url);
 };
 
@@ -694,4 +696,107 @@ test('template definitions match what the bot sends and Meta rules', async () =>
     assert.ok(!/^\s*\{\{/.test(d.body) && !/\}\}\s*$/.test(d.body), `${d.name}: no variable at start/end`);
     assert.ok(d.body.length <= 1024);
   }
+});
+
+test('Yesh Invoice: new receipts go to customers automatically, no backlog, no double send', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk' };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי' } }, 'y0'), t0);
+
+  // פעם ראשונה: רק מסמנים, לא שולחים קבלות ישנות
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 9, DocumentNumber: 100, CustomerPhone: '0541234567', pdfUrl: 'https://yesh.example/100.pdf', CustomerName: 'דני' }] }];
+  await runEvery15(env, t0);
+  assert.equal(yeshRequests.length, 0, 'first run only stores the starting point');
+
+  // אחר כך: קבלה חדשה → ללקוח, עם הקישור ל-PDF
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 9, DocumentNumber: 101, CustomerPhone: '054-1234567', pdfUrl: 'https://yesh.example/101.pdf', CustomerName: 'דני' }] }];
+  await runEvery15(env, new Date(t0.getTime() + 15 * 60000));
+  assert.equal(JSON.parse(yeshRequests[0].auth).userkey, 'uk');
+  assert.deepEqual(yeshRequests[0].body.docTypes, [6, 8, 9]);
+  const doc = sent.find((m) => m.to === CUSTOMER && m.type === 'document');
+  assert.equal(doc.document.link, 'https://yesh.example/101.pdf');
+  assert.equal(env.DB.raw.prepare('SELECT invoice_doc_id FROM jobs').get().invoice_doc_id, '9-101');
+
+  // אותו מסמך שוב (חפיפה בזמנים): לא נשלח פעמיים
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 9, DocumentNumber: 101, CustomerPhone: '054-1234567', pdfUrl: 'https://yesh.example/101.pdf' }] }];
+  await runEvery15(env, new Date(t0.getTime() + 30 * 60000));
+  assert.equal(sent.filter((m) => m.to === CUSTOMER && m.type === 'document').length, 1);
+
+  // חנן שלח קבלה ידנית ללקוח אחר, ואחר כך היא מגיעה גם מיש חשבונית: לא נשלחת שוב
+  const B = '972542222222';
+  aiQueue = [ai({ reply: 'מה קרה?' })];
+  await processWebhook(env, inbound(B, { type: 'text', text: { body: 'היי' } }, 'y1'), t0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'קבלה 0542222222 https://x.example/m.pdf' } }, 'y2'), new Date(t0.getTime() + 40 * 60000));
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 6, DocumentNumber: 7, CustomerPhone: '0542222222', pdfUrl: 'https://yesh.example/7.pdf' }] }];
+  await runEvery15(env, new Date(t0.getTime() + 45 * 60000));
+  assert.equal(sent.filter((m) => m.to === B && (m.type === 'document' || m.template?.name === 'invoice_v1')).length, 1);
+});
+
+test('360dialog provider: same messages, different address and key; webhook needs the secret header', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const calls = [];
+  const orig = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => { if (String(url).includes('360dialog')) { calls.push({ url: String(url), headers: init.headers }); if (String(url).endsWith('/messages')) { sent.push(JSON.parse(init.body)); return Response.json({ messages: [{ id: 'd360.1' }] }); } } return orig(url, init); };
+  try {
+    const env = { ...makeEnv(), WA_PROVIDER: '360dialog', D360_API_KEY: 'dk', WA_VERIFY_TOKEN: 'sec' };
+    aiQueue = [ai({ reply: 'מה קרה?' })];
+    await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'd1'), new Date('2026-10-14T08:00:00Z'));
+    const send = calls.find((c) => c.url === 'https://waba-v2.360dialog.io/messages');
+    assert.ok(send, 'sent through 360dialog');
+    assert.equal(send.headers['D360-API-KEY'], 'dk');
+
+    const worker = (await import('../src/index.js')).default;
+    const post = (h) => worker.fetch(new Request('https://bot.example/webhook', { method: 'POST', headers: h, body: '{"entry":[]}' }), env, { waitUntil() {} });
+    assert.equal((await post({})).status, 401, 'no secret header → rejected');
+    assert.equal((await post({ 'x-bot-secret': 'sec' })).status, 200);
+  } finally { globalThis.fetch = orig; }
+});
+
+test('/admin/setup: wires the webhook, creates missing templates, checks keys; needs the secret', async () => {
+  const reqs = [];
+  const orig = globalThis.fetch;
+  globalThis.fetch = async (url, init = {}) => {
+    url = String(url); const method = init.method || 'GET';
+    reqs.push({ url, method, body: init.body, headers: init.headers });
+    const G = 'https://graph.facebook.com/v24.0';
+    if (url.startsWith(`${G}/123?fields=`)) return Response.json({ display_phone_number: '+1 555 0100', verified_name: 'חנן המנעולן', quality_rating: 'GREEN', status: 'CONNECTED' });
+    if (url === `${G}/APP1/subscriptions`) return Response.json({ success: true });
+    if (url === `${G}/WABA1/subscribed_apps`) return method === 'POST' ? Response.json({ success: true }) : Response.json({ data: [{ whatsapp_business_api_data: { name: 'Onerishon' } }] });
+    if (url.startsWith(`${G}/WABA1/message_templates?`)) return Response.json({ data: [{ name: 'followup_v1', status: 'APPROVED', language: 'he' }] });
+    if (url.startsWith(`${G}/APP1/uploads?`)) return Response.json({ id: 'upload:77' });
+    if (url === `${G}/upload:77`) return Response.json({ h: '4::handle' });
+    if (url === `${G}/WABA1/message_templates`) return Response.json({ id: 't1', status: 'PENDING', category: 'UTILITY' });
+    if (url.includes('api.anthropic.com/v1/models')) return Response.json({ id: 'claude-opus-5-5', display_name: 'Claude Opus 5.5', type: 'model', created_at: '2026-01-01T00:00:00Z' });
+    return orig(url, init);
+  };
+  try {
+    const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'sec', WA_APP_SECRET: 'appsec', META_APP_ID: 'APP1', WABA_ID: 'WABA1', ADMIN_PHONE: '972524666175' };
+    const worker = (await import('../src/index.js')).default;
+    const get = (q) => worker.fetch(new Request(`https://bot.example/admin/setup${q}`), env, { waitUntil() {} });
+    assert.equal((await get('?key=nope')).status, 403);
+    const text = await (await get('?key=sec')).text();
+    assert.ok(text.includes('✓ וואטסאפ: המספר +1 555 0100'), text);
+    assert.ok(text.includes('✓ webhook'));
+    const sub = reqs.find((r) => r.url.endsWith('/APP1/subscriptions'));
+    const params = new URLSearchParams(sub.body);
+    assert.equal(params.get('callback_url'), 'https://bot.example/webhook');
+    assert.equal(params.get('access_token'), 'APP1|appsec');
+    assert.ok(params.get('fields').includes('smb_message_echoes'));
+    const created = reqs.filter((r) => r.url.endsWith('/WABA1/message_templates') && r.method === 'POST').map((r) => JSON.parse(r.body));
+    assert.equal(created.length, 8, 'all but the existing one');
+    assert.ok(!created.some((t) => t.name === 'followup_v1'));
+    const inv = created.find((t) => t.name === 'invoice_v1');
+    assert.deepEqual(inv.components[0], { type: 'HEADER', format: 'DOCUMENT', example: { header_handle: ['4::handle'] } });
+    const alert = created.find((t) => t.name === 'owner_alert_v1');
+    assert.equal(alert.components.at(-1).buttons[0].text, 'קיבלתי');
+    assert.deepEqual(created.find((t) => t.name === 'appt_reminder_v1').components[0].example.body_text, [['מחר ב-14:30', 'הרצל 5 חולון']]);
+    assert.ok(text.includes('✓ AI: המפתח עובד'));
+    assert.ok(text.includes('הכל מוכן'), text);
+    // check=1 לא משנה כלום
+    const before = reqs.filter((r) => r.method === 'POST').length;
+    await get('?key=sec&check=1');
+    assert.equal(reqs.filter((r) => r.method === 'POST').length, before);
+  } finally { globalThis.fetch = orig; }
 });

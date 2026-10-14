@@ -65,9 +65,11 @@ jobs:
           WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
           WA_APP_SECRET: ${{ secrets.WA_APP_SECRET }}
           GOOGLE_SA_JSON: ${{ secrets.GOOGLE_SA_JSON }}
-          YESH_API_KEY: ${{ secrets.YESH_API_KEY }}
+          D360_API_KEY: ${{ secrets.D360_API_KEY }}
+          YESH_USERKEY: ${{ secrets.YESH_USERKEY }}
+          YESH_SECRET: ${{ secrets.YESH_SECRET }}
         run: |
-          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON YESH_API_KEY; do
+          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON YESH_USERKEY YESH_SECRET D360_API_KEY; do
             value="${!name}"
             if [ -n "$value" ]; then
               printf '%s' "$value" | npx wrangler secret put "$name"

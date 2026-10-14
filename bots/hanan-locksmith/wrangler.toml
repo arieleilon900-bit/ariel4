@@ -18,6 +18,11 @@ migrations_dir = "migrations"
 binding = "AI"
 
 [vars]
+# meta = ישירות מול Meta. 360dialog = דרך הספק (למספר האמיתי, שעובד גם באפליקציה)
+WA_PROVIDER = "meta"
+# מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
+WABA_ID = ""
+META_APP_ID = ""
 # מספר הבדיקה של Meta בהתחלה, ואחר כך המספר האמיתי
 WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
 # הטלפון של חנן לקבלת סיכומים ופקודות (פורמט בינלאומי, בלי +)
@@ -37,4 +42,6 @@ TEMPLATE_LANG = "he"
 # WA_APP_SECRET       App Secret של האפליקציה ב-Meta (לבדיקת חתימה)
 # ANTHROPIC_API_KEY   מפתח Claude
 # GOOGLE_SA_JSON      כל התוכן של קובץ ה-JSON של ה-Service Account
-# YESH_API_KEY        מפתח ה-API של יש חשבונית (בשלב הקבלות)
+# YESH_USERKEY        יש חשבונית: User Key (מהגדרות ה-API בחשבון של חנן)
+# YESH_SECRET         יש חשבונית: Secret
+# D360_API_KEY        360dialog (רק אם WA_PROVIDER = "360dialog")

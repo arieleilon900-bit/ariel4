@@ -1,0 +1,151 @@
+// הגדרה ובדיקה אוטומטית: https://<השרת>/admin/setup?key=<WA_VERIFY_TOKEN>
+// עושה בעצמו את מה שהיה צריך ללחוץ ב-Meta (חיבור ה-webhook, יצירת 9 התבניות), ובודק שכל המפתחות עובדים.
+// &check=1 = רק בדיקה, בלי לשנות כלום. בטוח להריץ שוב ושוב: מה שכבר קיים לא נוצר מחדש.
+import Anthropic from '@anthropic-ai/sdk';
+import { TEMPLATE_DEFS } from './config.js';
+import { MODEL } from './ai.js';
+import { ensureHeader, getAccessToken } from './sheets.js';
+import { yeshCall, yeshConfigured } from './yesh.js';
+import { is360 } from './whatsapp.js';
+
+const D360 = 'https://waba-v2.360dialog.io';
+const graph = (env) => `https://graph.facebook.com/${env.GRAPH_VERSION || 'v24.0'}`;
+const WEBHOOK_FIELDS = ['messages', 'smb_message_echoes', 'history', 'smb_app_state_sync'];
+// קובץ PDF קטן לדוגמה: Meta דורשים דוגמה לתבנית עם מסמך (הקבלה)
+const SAMPLE_PDF = '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n';
+
+async function j(res) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error?.message || data.meta?.developer_message || `HTTP ${res.status}`);
+  return data;
+}
+
+export async function runSetup(env, { origin, checkOnly = false } = {}) {
+  const out = [];
+  const ok = (t) => out.push(`✓ ${t}`);
+  const bad = (t) => out.push(`✗ ${t}`);
+  const warn = (t) => out.push(`⚠ ${t}`);
+  const step = async (name, fn) => { try { await fn(); } catch (e) { bad(`${name}: ${e.message}`); } };
+  const bearer = { Authorization: `Bearer ${env.WA_TOKEN}` };
+  const d360 = { 'D360-API-KEY': env.D360_API_KEY, 'Content-Type': 'application/json' };
+
+  out.push(checkOnly ? 'בדיקה בלבד (לא משנה כלום)' : 'הגדרה ובדיקה', '');
+
+  await step('מסד הנתונים', async () => {
+    await env.DB.prepare('SELECT COUNT(*) AS n FROM knowledge').first();
+    ok('מסד הנתונים: כל הטבלאות קיימות');
+  });
+
+  // ---------- וואטסאפ ----------
+  if (is360(env)) {
+    if (!env.D360_API_KEY) bad('360dialog: חסר D360_API_KEY');
+    else await step('360dialog webhook', async () => {
+      if (!checkOnly) {
+        await j(await fetch(`${D360}/v1/configs/webhook`, { method: 'POST', headers: d360, body: JSON.stringify({ url: `${origin}/webhook`, headers: { 'X-Bot-Secret': env.WA_VERIFY_TOKEN } }) }));
+      }
+      const cur = await j(await fetch(`${D360}/v1/configs/webhook`, { headers: d360 }));
+      cur.url === `${origin}/webhook` ? ok(`360dialog: ההודעות מגיעות לשרת (${cur.url})`) : bad(`360dialog: ההודעות מגיעות ל-${cur.url || 'שום מקום'}, לא לשרת הזה`);
+    });
+  } else {
+    if (!env.WA_TOKEN || !env.WA_PHONE_NUMBER_ID || String(env.WA_PHONE_NUMBER_ID).startsWith('REPLACE')) bad('וואטסאפ: חסרים WA_TOKEN או WA_PHONE_NUMBER_ID');
+    else await step('המספר בוואטסאפ', async () => {
+      const p = await j(await fetch(`${graph(env)}/${env.WA_PHONE_NUMBER_ID}?fields=display_phone_number,verified_name,quality_rating,code_verification_status,status`, { headers: bearer }));
+      ok(`וואטסאפ: המספר ${p.display_phone_number} בשם "${p.verified_name}" (איכות: ${p.quality_rating || '?'}, סטטוס: ${p.status || p.code_verification_status || '?'})`);
+    });
+
+    if (!env.META_APP_ID || !env.WA_APP_SECRET) warn('webhook: חסרים META_APP_ID או WA_APP_SECRET, אז את החיבור של Meta לשרת צריך לעשות ידנית (SETUP.md שלב 7)');
+    else await step('webhook', async () => {
+      if (!checkOnly) {
+        const body = new URLSearchParams({
+          object: 'whatsapp_business_account', callback_url: `${origin}/webhook`, verify_token: env.WA_VERIFY_TOKEN,
+          fields: WEBHOOK_FIELDS.join(','), include_values: 'true', access_token: `${env.META_APP_ID}|${env.WA_APP_SECRET}`,
+        });
+        await j(await fetch(`${graph(env)}/${env.META_APP_ID}/subscriptions`, { method: 'POST', body }));
+      }
+      ok(`webhook: Meta שולחים הודעות ל-${origin}/webhook (${WEBHOOK_FIELDS.join(', ')})`);
+    });
+
+    if (!env.WABA_ID) warn('חסר WABA_ID (מזהה חשבון הוואטסאפ העסקי): בלי זה אי אפשר לחבר את החשבון ולהקים תבניות');
+    else await step('חיבור החשבון', async () => {
+      if (!checkOnly) await j(await fetch(`${graph(env)}/${env.WABA_ID}/subscribed_apps`, { method: 'POST', headers: bearer }));
+      const subs = await j(await fetch(`${graph(env)}/${env.WABA_ID}/subscribed_apps`, { headers: bearer }));
+      subs.data?.length ? ok(`חשבון הוואטסאפ מחובר לאפליקציה (${subs.data.map((s) => s.whatsapp_business_api_data?.name).join(', ')})`) : bad('חשבון הוואטסאפ לא מחובר לאפליקציה');
+    });
+  }
+
+  // ---------- תבניות ----------
+  const canTemplates = is360(env) ? !!env.D360_API_KEY : !!(env.WABA_ID && env.WA_TOKEN);
+  if (canTemplates) await step('תבניות', async () => {
+    const listUrl = is360(env) ? `${D360}/message_templates?limit=200` : `${graph(env)}/${env.WABA_ID}/message_templates?fields=name,status,language&limit=200`;
+    const listed = await j(await fetch(listUrl, { headers: is360(env) ? d360 : bearer }));
+    const existing = listed.waba_templates || listed.data || [];
+    const lang = env.TEMPLATE_LANG || 'he';
+    for (const def of TEMPLATE_DEFS) {
+      const have = existing.find((t) => t.name === def.name && (!t.language || t.language === lang));
+      if (have) { (have.status === 'APPROVED' ? ok : warn)(`תבנית ${def.name}: ${statusHe(have.status)}`); continue; }
+      if (checkOnly) { bad(`תבנית ${def.name}: לא קיימת`); continue; }
+      try {
+        const components = [];
+        if (def.documentHeader) {
+          if (is360(env) || !env.META_APP_ID) { warn(`תבנית ${def.name}: עם מסמך (קבלה) צריך ליצור ידנית ב-WhatsApp Manager. הטקסט: ${def.body}`); continue; }
+          components.push({ type: 'HEADER', format: 'DOCUMENT', example: { header_handle: [await uploadSample(env)] } });
+        }
+        const body = { type: 'BODY', text: def.body };
+        if (def.examples?.length) body.example = { body_text: [def.examples] };
+        components.push(body);
+        if (def.quickReplies?.length) components.push({ type: 'BUTTONS', buttons: def.quickReplies.map((text) => ({ type: 'QUICK_REPLY', text })) });
+        const url = is360(env) ? `${D360}/message_templates` : `${graph(env)}/${env.WABA_ID}/message_templates`;
+        const r = await j(await fetch(url, {
+          method: 'POST', headers: is360(env) ? d360 : { ...bearer, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: def.name, language: lang, category: def.category, allow_category_change: true, components }),
+        }));
+        ok(`תבנית ${def.name}: נוצרה, ${statusHe(r.status)}`);
+      } catch (e) { bad(`תבנית ${def.name}: ${e.message}`); }
+    }
+  });
+
+  // ---------- AI ----------
+  if (!env.ANTHROPIC_API_KEY) bad('AI: חסר ANTHROPIC_API_KEY');
+  else await step('AI', async () => {
+    const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 0, timeout: 8000 });
+    const m = await client.models.retrieve(env.CLAUDE_MODEL || MODEL);
+    ok(`AI: המפתח עובד (${m.display_name || m.id})`);
+  });
+
+  // ---------- גיליון ----------
+  if (!env.SHEET_ID || !env.GOOGLE_SA_JSON) warn('גיליון: לא מוגדר (SHEET_ID / GOOGLE_SA_JSON). הבוט עובד גם בלי');
+  else await step('גיליון', async () => {
+    const token = await getAccessToken(env);
+    const r = checkOnly ? 'נבדק' : await ensureHeader(env, token);
+    ok(`גיליון: יש גישה${r === 'created' ? ', ונוספה שורת כותרות' : ''}`);
+  });
+
+  // ---------- יש חשבונית ----------
+  if (!yeshConfigured(env)) warn('יש חשבונית: לא מחובר (YESH_USERKEY / YESH_SECRET). חנן שולח קבלות ידנית בינתיים');
+  else await step('יש חשבונית', async () => {
+    await yeshCall(env, 'getInvoices', { CustomerID: -1, PageSize: 1, PageNumber: 1, docTypes: [], Search: '', from: '2020-01-01 00:00', to: '2100-01-01 00:00' });
+    ok('יש חשבונית: המפתחות עובדים, קבלות חדשות יישלחו ללקוחות לבד');
+  });
+
+  // ---------- הגדרות ----------
+  env.OWNER_PHONE ? ok(`התראות לחנן: ${env.OWNER_PHONE}`) : bad('חסר OWNER_PHONE');
+  env.ADMIN_PHONE ? ok(`התראות תקלה: ${env.ADMIN_PHONE}`) : warn('אין ADMIN_PHONE: התראות על תקלות לא יישלחו');
+  env.REVIEW_LINK ? ok('קישור לביקורת בגוגל: מוגדר') : warn('אין REVIEW_LINK: בקשות ביקורת לא יישלחו');
+
+  const fails = out.filter((l) => l.startsWith('✗')).length;
+  out.push('', fails ? `יש ${fails} דברים לתקן (מסומנים ב-✗).` : 'הכל מוכן.');
+  return out.join('\n');
+}
+
+function statusHe(s) {
+  return { APPROVED: 'מאושרת', PENDING: 'מחכה לאישור של Meta', REJECTED: 'נדחתה (צריך לשנות את הטקסט)', PAUSED: 'מושהית', DISABLED: 'מושבתת' }[s] || s || 'נשלחה';
+}
+
+// Meta: העלאת קובץ דוגמה כדי לקבל "handle" לתבנית עם מסמך
+async function uploadSample(env) {
+  const bytes = new TextEncoder().encode(SAMPLE_PDF);
+  const q = new URLSearchParams({ file_name: 'receipt-sample.pdf', file_length: String(bytes.length), file_type: 'application/pdf', access_token: env.WA_TOKEN });
+  const session = await j(await fetch(`${graph(env)}/${env.META_APP_ID}/uploads?${q}`, { method: 'POST' }));
+  const up = await j(await fetch(`${graph(env)}/${session.id}`, { method: 'POST', headers: { Authorization: `OAuth ${env.WA_TOKEN}`, file_offset: '0' }, body: bytes }));
+  return up.h;
+}

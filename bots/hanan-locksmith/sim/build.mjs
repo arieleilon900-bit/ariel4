@@ -10,6 +10,9 @@ const swap = {
   setup(b) {
     // הבוט האמיתי מדבר עם Anthropic וגוגל; בדף הניסיון מחליפים את שני הקבצים האלה בלבד
     b.onResolve({ filter: /^\.\/(ai|sheets)\.js$/ }, (args) => (args.importer.includes('/src/') ? { path: resolve(here, args.path) } : undefined));
+    // דף הניסיון לא מדבר עם Anthropic ישירות (רק דרך Claude של מי שפותח את הדף)
+    b.onResolve({ filter: /^@anthropic-ai\/sdk$/ }, () => ({ path: 'anthropic-stub', namespace: 'stub' }));
+    b.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export default class Anthropic { constructor() { throw new Error("not in the trial page"); } }', loader: 'js' }));
   },
 };
 const out = await build({

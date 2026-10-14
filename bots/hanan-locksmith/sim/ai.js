@@ -3,6 +3,7 @@
 import { SCHEMA, buildSystemPrompt, fallbackResult, normalize } from '../src/prompt.js';
 
 export { buildSystemPrompt };
+export const MODEL = 'sim';
 
 function b64ToBlob(b64, mime) {
   const bin = atob(b64);

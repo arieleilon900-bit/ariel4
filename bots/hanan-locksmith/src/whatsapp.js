@@ -1,11 +1,19 @@
 // WhatsApp Cloud API (Meta): שליחה, קבלת מדיה, ובדיקת חתימה.
 
+// שני ספקים אפשריים, אותו מבנה הודעות:
+// meta (ברירת מחדל): ישירות מול Meta, עם WA_TOKEN ו-WA_PHONE_NUMBER_ID
+// 360dialog: ספק מורשה (בשביל מספר שעובד גם באפליקציה וגם בבוט), עם D360_API_KEY
+const D360 = 'https://waba-v2.360dialog.io';
+export const is360 = (env) => env.WA_PROVIDER === '360dialog';
 const graph = (env) => `https://graph.facebook.com/${env.GRAPH_VERSION || 'v24.0'}`;
+const authHeaders = (env) => (is360(env) ? { 'D360-API-KEY': env.D360_API_KEY } : { Authorization: `Bearer ${env.WA_TOKEN}` });
+// כתובת לשליחה: ב-Meta דרך מזהה המספר, ב-360dialog ישירות
+const endpoint = (env, path) => (is360(env) ? `${D360}/${path}` : `${graph(env)}/${env.WA_PHONE_NUMBER_ID}/${path}`);
 
 async function call(env, path, body) {
-  const res = await fetch(`${graph(env)}/${path}`, {
+  const res = await fetch(endpoint(env, path), {
     method: 'POST',
-    headers: { Authorization: `Bearer ${env.WA_TOKEN}`, 'Content-Type': 'application/json' },
+    headers: { ...authHeaders(env), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
@@ -17,7 +25,7 @@ async function call(env, path, body) {
 }
 
 export function sendText(env, to, text) {
-  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+  return call(env, 'messages', {
     messaging_product: 'whatsapp', to, type: 'text',
     text: { body: String(text).slice(0, 4000), preview_url: true },
   });
@@ -35,37 +43,39 @@ export function sendTemplate(env, to, name, params = [], doc = null, filename = 
   if (params.length) {
     components.push({ type: 'body', parameters: params.map((p) => ({ type: 'text', text: String(p).slice(0, 1000) })) });
   }
-  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+  return call(env, 'messages', {
     messaging_product: 'whatsapp', to, type: 'template',
     template: { name, language: { code: env.TEMPLATE_LANG || 'he' }, components },
   });
 }
 
 export function sendDocument(env, to, doc, filename, caption) {
-  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+  return call(env, 'messages', {
     messaging_product: 'whatsapp', to, type: 'document',
     document: { ...docRef(doc, filename), caption },
   });
 }
 
 export function sendImageById(env, to, mediaId, caption) {
-  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+  return call(env, 'messages', {
     messaging_product: 'whatsapp', to, type: 'image', image: { id: mediaId, caption },
   });
 }
 
 export function markRead(env, messageId) {
-  return call(env, `${env.WA_PHONE_NUMBER_ID}/messages`, {
+  return call(env, 'messages', {
     messaging_product: 'whatsapp', status: 'read', message_id: messageId,
   });
 }
 
 // מורידים מדיה שלקוח שלח (תמונה / הקלטה)
 export async function downloadMedia(env, mediaId) {
-  const meta = await fetch(`${graph(env)}/${mediaId}`, { headers: { Authorization: `Bearer ${env.WA_TOKEN}` } });
+  const meta = await fetch(is360(env) ? `${D360}/${mediaId}` : `${graph(env)}/${mediaId}`, { headers: authHeaders(env) });
   if (!meta.ok) throw new Error(`media meta ${meta.status}`);
   const info = await meta.json();
-  const file = await fetch(info.url, { headers: { Authorization: `Bearer ${env.WA_TOKEN}` } });
+  // ב-360dialog מורידים דרך השרת שלהם: מחליפים את הכתובת של Meta בכתובת שלהם
+  const url = is360(env) ? String(info.url).replace(/\\/g, '').replace('https://lookaside.fbsbx.com', D360) : info.url;
+  const file = await fetch(url, { headers: authHeaders(env) });
   if (!file.ok) throw new Error(`media download ${file.status}`);
   return { bytes: new Uint8Array(await file.arrayBuffer()), mime: info.mime_type || 'application/octet-stream' };
 }
@@ -76,8 +86,8 @@ export async function uploadMedia(env, bytes, mime) {
   form.append('messaging_product', 'whatsapp');
   form.append('type', mime);
   form.append('file', new Blob([bytes], { type: mime }), 'file');
-  const res = await fetch(`${graph(env)}/${env.WA_PHONE_NUMBER_ID}/media`, {
-    method: 'POST', headers: { Authorization: `Bearer ${env.WA_TOKEN}` }, body: form,
+  const res = await fetch(endpoint(env, 'media'), {
+    method: 'POST', headers: authHeaders(env), body: form,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(`media upload ${res.status} ${JSON.stringify(data)}`);

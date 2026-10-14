@@ -4,7 +4,16 @@
 // cron          ← תזכורות, מעקבים ודוח שבועי
 import { handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
-import { verifySignature } from './whatsapp.js';
+import { runSetup } from './setup.js';
+import { is360, verifySignature } from './whatsapp.js';
+
+// השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
+function safeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -12,6 +21,14 @@ export default {
 
     if (url.pathname === '/' || url.pathname === '/health') {
       return new Response(healthText(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
+
+    // הגדרה ובדיקה אוטומטית (רק עם מילת הסוד)
+    if (url.pathname === '/admin/setup' && request.method === 'GET') {
+      const key = url.searchParams.get('key') || '';
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, env.WA_VERIFY_TOKEN)) return new Response('forbidden', { status: 403 });
+      const text = await runSetup(env, { origin: url.origin, checkOnly: url.searchParams.get('check') === '1' });
+      return new Response(text, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     if (url.pathname === '/webhook' && request.method === 'GET') {
@@ -24,10 +41,13 @@ export default {
 
     if (url.pathname === '/webhook' && request.method === 'POST') {
       const raw = await request.text();
-      // בלי סוד: לא מקבלים כלום (חוץ מבדיקה מקומית עם ALLOW_UNSIGNED=1), כדי שאף אחד לא יתחזה ל-Meta
-      const ok = env.WA_APP_SECRET
-        ? await verifySignature(env.WA_APP_SECRET, raw, request.headers.get('x-hub-signature-256'))
-        : env.ALLOW_UNSIGNED === '1';
+      // בלי סוד: לא מקבלים כלום (חוץ מבדיקה מקומית עם ALLOW_UNSIGNED=1), כדי שאף אחד לא יתחזה ל-Meta.
+      // דרך 360dialog אין חתימה של Meta: הם שולחים כותרת עם מילת סוד שהגדרנו (X-Bot-Secret = WA_VERIFY_TOKEN)
+      const ok = is360(env)
+        ? !!env.WA_VERIFY_TOKEN && safeEqual(request.headers.get('x-bot-secret') || '', env.WA_VERIFY_TOKEN)
+        : env.WA_APP_SECRET
+          ? await verifySignature(env.WA_APP_SECRET, raw, request.headers.get('x-hub-signature-256'))
+          : env.ALLOW_UNSIGNED === '1';
       if (!ok) return new Response('bad signature', { status: 401 });
       let body;
       try { body = JSON.parse(raw); } catch { return new Response('bad json', { status: 400 }); }
@@ -48,12 +68,14 @@ export default {
 
 // מה חסר בהגדרות (רק שמות, אף פעם לא ערכים)
 export function healthText(env) {
-  const need = {
-    WA_TOKEN: env.WA_TOKEN, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, WA_APP_SECRET: env.WA_APP_SECRET,
-    ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE,
-    WA_PHONE_NUMBER_ID: env.WA_PHONE_NUMBER_ID && !String(env.WA_PHONE_NUMBER_ID).startsWith('REPLACE'),
-  };
-  const nice = { GOOGLE_SA_JSON: env.GOOGLE_SA_JSON, SHEET_ID: env.SHEET_ID, REVIEW_LINK: env.REVIEW_LINK, ADMIN_PHONE: env.ADMIN_PHONE };
+  const need = is360(env)
+    ? { D360_API_KEY: env.D360_API_KEY, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE }
+    : {
+      WA_TOKEN: env.WA_TOKEN, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, WA_APP_SECRET: env.WA_APP_SECRET,
+      ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE,
+      WA_PHONE_NUMBER_ID: env.WA_PHONE_NUMBER_ID && !String(env.WA_PHONE_NUMBER_ID).startsWith('REPLACE'),
+    };
+  const nice = { GOOGLE_SA_JSON: env.GOOGLE_SA_JSON, SHEET_ID: env.SHEET_ID, REVIEW_LINK: env.REVIEW_LINK, ADMIN_PHONE: env.ADMIN_PHONE, YESH_USERKEY: env.YESH_USERKEY, YESH_SECRET: env.YESH_SECRET };
   const missing = Object.keys(need).filter((k) => !need[k]);
   const optional = Object.keys(nice).filter((k) => !nice[k]);
   return [
