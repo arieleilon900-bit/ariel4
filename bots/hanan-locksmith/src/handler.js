@@ -141,7 +141,7 @@ export function ownerSummary(conv, result, phone, now) {
   if (nav) lines.push(`ניווט: ${nav}`);
   if (result.urgent && result.urgent_reason) lines.push(`למה דחוף: ${result.urgent_reason}`);
   if (result.summary_for_owner) lines.push('', result.summary_for_owner);
-  lines.push('', `לוואטסאפ איתו: https://wa.me/${phone}`, `התקבל: ${ilDateTimeLabel(now)}`);
+  lines.push('', `וואטסאפ ללקוח: https://wa.me/${phone}`, `התקבל: ${ilDateTimeLabel(now)}`);
   return lines.join('\n');
 }
 
@@ -360,7 +360,7 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     const voices = (await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' AND text LIKE '[הודעה קולית]%' ORDER BY id").bind(conv.id).all()).results;
     const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
     const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now);
-    await sendToOwner(env, voiceText ? `${summaryText}\n\nמה הוא אמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
+    await sendToOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
     await forwardPhotosToOwner(env, JSON.parse(fresh.photos || '[]'), now, phone);
     await upsertLead(env, phone, { status: result.urgent ? 'דחוף, הועבר לחנן' : 'הועבר לחנן', name, issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
   }

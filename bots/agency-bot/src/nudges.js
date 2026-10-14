@@ -86,7 +86,7 @@ async function ownerNudges(env, now) {
     const text = [
       conv.urgent ? `🚨 פנייה דחופה שעוד לא טופלה: ${who}` : `⏰ עדיין לא חזרת ל-${who}`,
       first ? `כדאי לחזור אליו לפני שהוא פונה ל${BUSINESS.competitor}.` : 'זו התזכורת האחרונה על הפנייה הזו.',
-      `לוואטסאפ איתו: https://wa.me/${conv.phone}`,
+      `וואטסאפ ללקוח: https://wa.me/${conv.phone}`,
       `כשטיפלת (גם בטלפון) כתוב לי: טופל ${displayPhone(conv.phone)}`,
     ].join('\n');
     await sendToOwner(env, text, now, conv.phone);
