@@ -43,7 +43,7 @@ ADMIN_PHONE = "972524666175"
 # ID של גיליון הלקוחות בגוגל (ריק = בלי גיליון)
 SHEET_ID = ""
 # קישור לכתיבת ביקורת בגוגל
-REVIEW_LINK = ""
+REVIEW_LINK = "https://share.google/YbZcFKcU6EyeKotWc"
 # שמות התבניות המאושרות ב-WhatsApp Manager (להודעות מחוץ לחלון 24 שעות)
 TEMPLATE_LANG = "he"
 
