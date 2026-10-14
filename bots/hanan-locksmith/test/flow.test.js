@@ -1025,3 +1025,24 @@ test('UltraMsg media: photo seen by the AI and forwarded to Hanan as a link, vid
   await post({ id: 'm4', from: '972545555555@c.us', type: 'ptt', body: '', media: 'https://ultra-media.example/v.ogg' });
   assert.match(JSON.stringify(aiRequests.at(-1).messages), /הודעה קולית\] ננעלתי בחוץ ברחוב הרצל/, 'voice transcribed into the conversation');
 });
+
+test('table "טופל" button: marks the job done like the WhatsApp command, review follows, protected by the key', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', WORKER_URL: 'https://bot.example' };
+  const t0 = new Date();
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'ננעל בחוץ', address: 'הרצל 5 חולון', customer_name: 'דני', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ הרצל 5 חולון' } }, 'bt1'), t0);
+  const { tableKey } = await import('../src/table.js');
+  const k = await tableKey(env);
+  const post = (key, act = 'done') => worker.fetch(new Request('https://bot.example/table/action', { method: 'POST', body: new URLSearchParams({ k: key, phone: CUSTOMER, act }) }), env, { waitUntil() {} });
+  assert.equal((await post('wrong')).status, 403);
+  const html = await (await worker.fetch(new Request(`https://bot.example/table?k=${k}`), env, { waitUntil() {} })).text();
+  assert.ok(html.includes('✓ טופל'), 'button shown for an open lead');
+  const res = await post(k);
+  assert.equal(res.status, 303);
+  assert.equal(env.DB.raw.prepare("SELECT status FROM jobs WHERE phone = ?").get(CUSTOMER).status, 'done');
+  assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('סומן כגמור'), 'owner gets the same confirmation as on WhatsApp');
+  const after = await (await worker.fetch(new Request(`https://bot.example/table?k=${k}`), env, { waitUntil() {} })).text();
+  assert.ok(after.includes('עבודה הסתיימה') && !after.includes('name="act" value="done"'), 'no button once done');
+});

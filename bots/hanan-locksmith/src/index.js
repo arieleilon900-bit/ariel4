@@ -7,7 +7,8 @@ import { runEvery15, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isUltra, verifySignature } from './whatsapp.js';
 import { ultraToMeta } from './ultramsg.js';
-import { renderTable, tableKey } from './table.js';
+import { renderTable, tableAction, tableKey } from './table.js';
+import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
 
@@ -36,6 +37,14 @@ export default {
       const k = await tableKey(env);
       if (!k || !safeEqual(url.searchParams.get('k') || '', k)) return new Response('forbidden', { status: 403 });
       return renderTable(env, url);
+    }
+
+    if (url.pathname === '/table/action' && request.method === 'POST') {
+      const k = await tableKey(env);
+      const form = await request.clone().formData().catch(() => null);
+      if (!k || !form || !safeEqual(String(form.get('k') || ''), k)) return new Response('forbidden', { status: 403 });
+      setWindowAlwaysOpen(isUltra(env));
+      return tableAction(env, request, url, handleOwnerCommand);
     }
 
     // בדיקה עצמית אחרי כל העלאה: המוח האמיתי עונה על שיחה לדוגמה (בלי לשלוח כלום לאף אחד)
