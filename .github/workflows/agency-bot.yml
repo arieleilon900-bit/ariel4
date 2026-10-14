@@ -66,13 +66,14 @@ jobs:
           WA_APP_SECRET: ${{ secrets[format('{0}_WA_APP_SECRET', matrix.client.prefix)] }}
           GOOGLE_SA_JSON: ${{ secrets[format('{0}_GOOGLE_SA_JSON', matrix.client.prefix)] }}
           D360_API_KEY: ${{ secrets[format('{0}_D360_API_KEY', matrix.client.prefix)] }}
+          ULTRAMSG_TOKEN: ${{ secrets[format('{0}_ULTRAMSG_TOKEN', matrix.client.prefix)] }}
           YESH_USERKEY: ${{ secrets[format('{0}_YESH_USERKEY', matrix.client.prefix)] }}
           YESH_SECRET: ${{ secrets[format('{0}_YESH_SECRET', matrix.client.prefix)] }}
           CLIENT_ANTHROPIC: ${{ secrets[format('{0}_ANTHROPIC_API_KEY', matrix.client.prefix)] }}
           SHARED_ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           ANTHROPIC_API_KEY="${CLIENT_ANTHROPIC:-$SHARED_ANTHROPIC}"
-          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET; do
+          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET ULTRAMSG_TOKEN; do
             value="${!name}"
             if [ -n "$value" ]; then printf '%s' "$value" | npx wrangler secret put "$name" --config "$CONFIG"
             else echo "::notice::${{ matrix.client.prefix }}_$name not set"; fi

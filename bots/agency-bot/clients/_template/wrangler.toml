@@ -17,7 +17,10 @@ migrations_dir = "../../migrations"
 binding = "AI"
 
 [vars]
+# meta / 360dialog / ultramsg (וואטסאפ רגיל דרך UltraMsg, לא רשמי: סיכון לחסימת המספר)
 WA_PROVIDER = "meta"
+# UltraMsg: מספר ה-Instance (לא סוד). הטוקן: סוד בשם <PREFIX>_ULTRAMSG_TOKEN
+ULTRAMSG_INSTANCE = ""
 WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
 WABA_ID = ""
 META_APP_ID = ""

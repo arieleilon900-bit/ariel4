@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -47,6 +47,13 @@ globalThis.fetch = async (url, init = {}) => {
     return Response.json({ url: 'https://lookaside.example/media', mime_type: 'image/jpeg' });
   }
   if (url.includes('lookaside.example')) return new Response(new Uint8Array([1, 2, 3]), { status: 200 });
+  if (url.startsWith('https://api.ultramsg.com/')) {
+    const b = JSON.parse(init.body);
+    const type = url.split('/messages/')[1];
+    sent.push({ to: b.to.replace('+', ''), type: type === 'chat' ? 'text' : type, text: type === 'chat' ? { body: b.body } : undefined, ultra: b });
+    return Response.json({ sent: 'true', message: 'ok', id: ++outSeq });
+  }
+  if (url.startsWith('https://ultra-media.example/')) return new Response(new Uint8Array([1, 2, 3]), { status: 200, headers: { 'content-type': 'image/jpeg' } });
   if (url.startsWith('https://oauth2.googleapis.com/token')) return Response.json({ access_token: 'g', expires_in: 3600 });
   if (url.startsWith('https://sheets.googleapis.com/')) {
     const range = decodeURIComponent(url.split('/values/')[1].split('?')[0]);
@@ -894,4 +901,62 @@ test('customer table: one row per lead, status updated to the end; no review lin
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צריך להחליף צילינדר' } }, 'sh4'), new Date('2026-11-15T08:00:00Z'));
   assert.equal(sheet.length, 3);
   assert.equal(sheet[2][4], 'החלפת צילינדר');
+});
+
+test('UltraMsg: customer → handoff, Hanan commands, Hanan answering from his phone stops the bot, bot messages are not "Hanan"', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', WA_VERIFY_TOKEN: 'secret' };
+  const waits = [];
+  const ctx = { waitUntil: (p) => waits.push(p) };
+  const post = async (payload, key = 'secret') => {
+    const res = await worker.fetch(new Request(`https://bot.example/webhook?key=${key}`, { method: 'POST', body: JSON.stringify(payload) }), env, ctx);
+    await Promise.all(waits.splice(0));
+    return res;
+  };
+  const recv = (from, data) => ({ event_type: 'message_received', instanceId: '1', data: { from: `${from}@c.us`, to: '972500000000@c.us', fromMe: false, pushname: 'דני', time: 1, ...data } });
+
+  // בלי מילת הסוד: לא נכנס
+  assert.equal((await post(recv(CUSTOMER, { id: 'u0', type: 'chat', body: 'היי' }), 'wrong')).status, 403);
+
+  // לקוח כותב (גם בלילה/אחרי יממה אין תבניות: הכל טקסט רגיל)
+  aiQueue = [ai({ reply: 'קיבלתי, העברתי לחנן', issue: 'ננעל בחוץ', address: 'הרצל 5 חולון', customer_name: 'דני', ready_for_handoff: true, summary_for_owner: 'מחכה ליד הדלת' })];
+  await post(recv(CUSTOMER, { id: 'u1', type: 'chat', body: 'ננעלתי בחוץ הרצל 5 חולון' }));
+  assert.deepEqual(textsTo(CUSTOMER), ['קיבלתי, העברתי לחנן']);
+  const alert = sent.find((m) => m.to === OWNER);
+  assert.ok(alert && alert.type === 'text' && alert.text.body.includes('הרצל 5 חולון'), 'owner gets the full summary as plain text, no template');
+
+  // הבוט שלח ללקוח: חוזר אלינו כ-message_create, ולא נחשב "חנן ענה"
+  await post({ event_type: 'message_create', data: { id: 'c1', from: '972500000000@c.us', to: `${CUSTOMER}@c.us`, fromMe: true, type: 'chat', body: 'קיבלתי, העברתי לחנן' } });
+  assert.equal(env.DB.raw.prepare('SELECT owner_replied_at FROM conversations').get().owner_replied_at, null);
+
+  // חנן עונה על הסיכום (ציטוט) עם "בדרך 15": הטלפון נלקח מהטקסט המצוטט
+  sent.length = 0;
+  await post(recv(OWNER, { id: 'u2', type: 'chat', body: 'בדרך 15', quotedMsg: { id: 'x', body: alert.text.body } }));
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('15 דקות')));
+
+  // תמונה מהלקוח מגיעה כקישור
+  aiQueue = [];
+  await post(recv(CUSTOMER, { id: 'u3', type: 'image', body: '', media: 'https://ultra-media.example/a.jpg' }));
+
+  // לקוח חדש, וחנן עונה לו בעצמו מהטלפון: הבוט מפסיק איתו
+  const C2 = '972541111111';
+  aiQueue = [ai({ reply: 'היי, מה קרה?' })];
+  await post(recv(C2, { id: 'u4', type: 'chat', body: 'שלום' }));
+  await post({ event_type: 'message_create', data: { id: 'c2', from: '972500000000@c.us', to: `${C2}@c.us`, fromMe: true, type: 'chat', body: 'אחי אני מתקשר אליך עכשיו' } });
+  const conv2 = env.DB.raw.prepare('SELECT state, owner_replied_at FROM conversations WHERE phone = ?').get(C2);
+  assert.equal(conv2.state, 'handoff');
+  assert.ok(conv2.owner_replied_at);
+
+  // קבוצות: מתעלמים
+  const n = sent.length;
+  await post({ event_type: 'message_received', data: { id: 'g1', from: '1203@g.us', fromMe: false, type: 'chat', body: 'היי' } });
+  assert.equal(sent.length, n);
+
+  // תזכורת שבוע אחרי, ללקוח שלא כתב מזמן: טקסט רגיל
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום 0541234567' } }, 'u5'), new Date());
+  const { runEvery15 } = await import('../src/cron.js');
+  sent.length = 0;
+  await runEvery15(env, new Date(Date.now() + 8 * 86400000));
+  assert.ok(sent.filter((m) => m.to === CUSTOMER).every((m) => m.type === 'text'));
 });

@@ -5,7 +5,9 @@
 import { handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
 import { runSetup } from './setup.js';
-import { is360, verifySignature } from './whatsapp.js';
+import { is360, isUltra, verifySignature } from './whatsapp.js';
+import { ultraToMeta } from './ultramsg.js';
+import { setWindowAlwaysOpen } from './util.js';
 
 // השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
 function safeEqual(a, b) {
@@ -39,6 +41,18 @@ export default {
       return new Response('forbidden', { status: 403 });
     }
 
+    // UltraMsg: אין חתימה, אז מילת הסוד נמצאת בכתובת (/webhook?key=WA_VERIFY_TOKEN). /admin/setup מגדיר את זה לבד
+    if (url.pathname === '/webhook' && request.method === 'POST' && isUltra(env)) {
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(url.searchParams.get('key') || '', env.WA_VERIFY_TOKEN)) return new Response('forbidden', { status: 403 });
+      let payload;
+      try { payload = await request.json(); } catch { return new Response('bad json', { status: 400 }); }
+      ctx.waitUntil((async () => {
+        const body = await ultraToMeta(env, payload);
+        if (body) await processWebhook(env, body);
+      })().catch((err) => console.error('ultramsg webhook failed', err, JSON.stringify(payload).slice(0, 500))));
+      return new Response('ok');
+    }
+
     if (url.pathname === '/webhook' && request.method === 'POST') {
       const raw = await request.text();
       // בלי סוד: לא מקבלים כלום (חוץ מבדיקה מקומית עם ALLOW_UNSIGNED=1), כדי שאף אחד לא יתחזה ל-Meta.
@@ -61,6 +75,7 @@ export default {
 
   async scheduled(event, env, ctx) {
     const now = new Date(event.scheduledTime || Date.now());
+    setWindowAlwaysOpen(isUltra(env));
     if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));
   },
@@ -68,7 +83,9 @@ export default {
 
 // מה חסר בהגדרות (רק שמות, אף פעם לא ערכים)
 export function healthText(env) {
-  const need = is360(env)
+  const need = isUltra(env)
+    ? { ULTRAMSG_INSTANCE: env.ULTRAMSG_INSTANCE, ULTRAMSG_TOKEN: env.ULTRAMSG_TOKEN, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE }
+    : is360(env)
     ? { D360_API_KEY: env.D360_API_KEY, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE }
     : {
       WA_TOKEN: env.WA_TOKEN, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, WA_APP_SECRET: env.WA_APP_SECRET,
@@ -86,6 +103,7 @@ export function healthText(env) {
 }
 
 export async function processWebhook(env, body, now = new Date()) {
+  setWindowAlwaysOpen(isUltra(env));
   for (const entry of body.entry || []) {
     for (const change of entry.changes || []) {
       const v = change.value || {};
