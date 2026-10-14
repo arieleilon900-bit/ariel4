@@ -20,6 +20,26 @@ async function j(res) {
   return data;
 }
 
+// UltraMsg: מחבר לבד את ההודעות לשרת (בבדיקת המצב וכל 15 דקות), בלי שמישהו יצטרך לפתוח את /admin/setup.
+// לא נוגע אם כבר מחובר נכון.
+let ultraWired = '';
+export async function ensureUltraWebhook(env, origin) {
+  if (!isUltra(env) || !env.ULTRAMSG_INSTANCE || !env.ULTRAMSG_TOKEN || !env.WA_VERIFY_TOKEN || !origin) return 'skip';
+  const hook = `${origin}/webhook?key=${encodeURIComponent(env.WA_VERIFY_TOKEN)}`;
+  if (ultraWired === hook) return 'cached';
+  const U = `https://api.ultramsg.com/${env.ULTRAMSG_INSTANCE}`;
+  const cur = await j(await fetch(`${U}/instance/settings?token=${encodeURIComponent(env.ULTRAMSG_TOKEN)}`));
+  if (cur.webhook_url !== hook || String(cur.webhook_message_received) !== 'true' || String(cur.webhook_message_create) !== 'true') {
+    await j(await fetch(`${U}/instance/settings`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: env.ULTRAMSG_TOKEN, webhook_url: hook, webhook_message_received: true, webhook_message_create: true, webhook_message_ack: false, webhook_message_download_media: false, sendDelay: 1 }),
+    }));
+    console.log('UltraMsg webhook wired');
+  }
+  ultraWired = hook;
+  return 'wired';
+}
+
 export async function runSetup(env, { origin, checkOnly = false } = {}) {
   const out = [];
   const ok = (t) => out.push(`✓ ${t}`);

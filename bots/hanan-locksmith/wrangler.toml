@@ -25,6 +25,8 @@ WA_PROVIDER = "ultramsg"
 ULTRAMSG_INSTANCE = "instance194049"
 # מצב בדיקה: הבוט עונה רק למספרים האלה (ולחנן). ריק = עונה לכולם
 TEST_PHONES = "none"
+# הכתובת של הבוט (בשביל חיבור אוטומטי של UltraMsg)
+WORKER_URL = "https://hanan-locksmith-bot.eliyabuis12.workers.dev"
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
 WABA_ID = ""
 META_APP_ID = ""

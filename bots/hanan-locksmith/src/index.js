@@ -4,7 +4,7 @@
 // cron          ← תזכורות, מעקבים ודוח שבועי
 import { handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
-import { runSetup } from './setup.js';
+import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isUltra, verifySignature } from './whatsapp.js';
 import { ultraToMeta } from './ultramsg.js';
 import { setWindowAlwaysOpen } from './util.js';
@@ -22,6 +22,10 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/' || url.pathname === '/health') {
+      if (isUltra(env)) {
+        const w = await ensureUltraWebhook(env, url.origin).catch((e) => `error: ${e.message}`);
+        return new Response(`${healthText(env)}\nUltraMsg: ${w === 'skip' ? 'not configured' : String(w).startsWith('error') ? w : 'connected'}`, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      }
       return new Response(healthText(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
@@ -76,6 +80,7 @@ export default {
   async scheduled(event, env, ctx) {
     const now = new Date(event.scheduledTime || Date.now());
     setWindowAlwaysOpen(isUltra(env));
+    if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
     if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));
   },
