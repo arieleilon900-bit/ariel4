@@ -61,7 +61,7 @@ export default {
 
   async scheduled(event, env, ctx) {
     const now = new Date(event.scheduledTime || Date.now());
-    if (event.cron === '0 6 * * 0') ctx.waitUntil(weeklyReport(env, now));
+    if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));
   },
 };

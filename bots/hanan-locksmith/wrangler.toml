@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # כל 15 דקות: תזכורות, מעקבים, ביקורות. כל יום ראשון 06:00 UTC (09:00 בישראל): דוח שבועי.
 [triggers]
-crons = ["*/15 * * * *", "0 6 * * 0"]
+crons = ["*/15 * * * *", "0 6 * * SUN"]
 
 [[d1_databases]]
 binding = "DB"
