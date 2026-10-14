@@ -15,6 +15,7 @@ function toMetaMessage(d) {
   switch (d.type) {
     case 'chat': return { ...msg, type: 'text', text: { body: String(d.body || '') } };
     case 'image': return { ...msg, type: 'image', image: { id: d.media, caption } };
+    case 'video': return { ...msg, type: 'video', video: { id: d.media, caption } };
     case 'ptt': case 'audio': return { ...msg, type: 'audio', audio: { id: d.media } };
     case 'document': return { ...msg, type: 'document', document: { id: d.media, filename: d.filename || caption || 'file', mime_type: d.mimetype || '', caption } };
     case 'location': {

@@ -29,10 +29,10 @@ export async function ensureUltraWebhook(env, origin) {
   if (ultraWired === hook) return 'cached';
   const U = `https://api.ultramsg.com/${env.ULTRAMSG_INSTANCE}`;
   const cur = await j(await fetch(`${U}/instance/settings?token=${encodeURIComponent(env.ULTRAMSG_TOKEN)}`));
-  if (cur.webhook_url !== hook || String(cur.webhook_message_received) !== 'true' || String(cur.webhook_message_create) !== 'true') {
+  if (cur.webhook_url !== hook || String(cur.webhook_message_received) !== 'true' || String(cur.webhook_message_create) !== 'true' || String(cur.webhook_message_download_media) !== 'true') {
     await j(await fetch(`${U}/instance/settings`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: env.ULTRAMSG_TOKEN, webhook_url: hook, webhook_message_received: true, webhook_message_create: true, webhook_message_ack: false, webhook_message_download_media: false, sendDelay: 1 }),
+      body: JSON.stringify({ token: env.ULTRAMSG_TOKEN, webhook_url: hook, webhook_message_received: true, webhook_message_create: true, webhook_message_ack: false, webhook_message_download_media: true, sendDelay: 1 }),
     }));
     console.log('UltraMsg webhook wired');
   }
@@ -71,7 +71,7 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
         if (!checkOnly) {
           await j(await fetch(`${U}/instance/settings`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: env.ULTRAMSG_TOKEN, webhook_url: hook, webhook_message_received: true, webhook_message_create: true, webhook_message_ack: false, webhook_message_download_media: false, sendDelay: 1 }),
+            body: JSON.stringify({ token: env.ULTRAMSG_TOKEN, webhook_url: hook, webhook_message_received: true, webhook_message_create: true, webhook_message_ack: false, webhook_message_download_media: true, sendDelay: 1 }),
           }));
         }
         const cur = await j(await fetch(`${U}/instance/settings?token=${encodeURIComponent(env.ULTRAMSG_TOKEN)}`));

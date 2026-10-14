@@ -96,6 +96,14 @@ export function sendImageById(env, to, mediaId, caption) {
   });
 }
 
+// סרטון: ב-UltraMsg לפי קישור, ב-Meta לפי מזהה מדיה
+export function sendVideoById(env, to, mediaId, caption) {
+  if (isUltra(env)) return ultra(env, 'video', to, { video: mediaId, caption: caption || '' }, caption);
+  return call(env, 'messages', {
+    messaging_product: 'whatsapp', to, type: 'video', video: { id: mediaId, caption },
+  });
+}
+
 export function markRead(env, messageId) {
   if (isUltra(env)) return Promise.resolve({ ok: true });
   return call(env, 'messages', {

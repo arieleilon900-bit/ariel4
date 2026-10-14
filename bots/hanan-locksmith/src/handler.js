@@ -87,6 +87,9 @@ async function extractContent(env, msg) {
         photoId: msg.image.id,
       };
     }
+    case 'video':
+      // ה-AI לא רואה סרטונים: חנן מקבל את הסרטון עצמו, וה-AI יודע שנשלח סרטון
+      return { text: msg.video?.caption ? `[שלחתי סרטון] ${msg.video.caption}` : '[שלחתי סרטון]', photoId: `video:${msg.video?.id}` };
     case 'audio': {
       try {
         const media = await wa.downloadMedia(env, msg.audio.id);
@@ -158,7 +161,19 @@ export async function forwardPhotosToOwner(env, photoIds, now = new Date(), abou
   }
   for (const id of photoIds) {
     try {
-      const media = await wa.downloadMedia(env, id);
+      const isVideo = String(id).startsWith('video:');
+      const realId = isVideo ? String(id).slice(6) : id;
+      // UltraMsg: הקובץ כבר בקישור, שולחים אותו ישר בלי להוריד
+      if (wa.isUltra(env)) {
+        await (isVideo ? wa.sendVideoById(env, env.OWNER_PHONE, realId, 'סרטון מהלקוח') : wa.sendImageById(env, env.OWNER_PHONE, realId, 'תמונה מהלקוח'));
+        continue;
+      }
+      const media = await wa.downloadMedia(env, realId);
+      if (isVideo) {
+        const vid = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
+        await wa.sendVideoById(env, env.OWNER_PHONE, vid, 'סרטון מהלקוח');
+        continue;
+      }
       const newId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
       await wa.sendImageById(env, env.OWNER_PHONE, newId, 'תמונה מהלקוח');
     } catch (err) {

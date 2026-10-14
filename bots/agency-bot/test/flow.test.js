@@ -1020,3 +1020,27 @@ test('built-in customer table: one row per lead with live status, link via "טב
   assert.ok(csv.includes('עבודה הסתיימה'));
   assert.equal((await worker.fetch(new Request('https://bot.example/table?k=nope'), env, { waitUntil() {} })).status, 403);
 });
+
+test('UltraMsg media: photo seen by the AI and forwarded to Hanan as a link, video forwarded, voice transcribed', async () => {
+  sent.length = 0; aiRequests = [];
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', WA_VERIFY_TOKEN: 'secret' };
+  const waits = [];
+  const post = async (data) => {
+    await worker.fetch(new Request('https://bot.example/webhook?key=secret', { method: 'POST', body: JSON.stringify({ event_type: 'message_received', data: { from: '972546666666@c.us', fromMe: false, time: 1, ...data } }) }), env, { waitUntil: (p) => waits.push(p) });
+    await Promise.all(waits.splice(0));
+  };
+  aiQueue = [ai({ reply: 'רואה צילינדר רגיל. מה הכתובת?', issue: 'צילינדר תקוע' })];
+  await post({ id: 'm1', type: 'image', body: 'זה המנעול', media: 'https://ultra-media.example/lock.jpg' });
+  const last = aiRequests.at(-1).messages.at(-1);
+  assert.equal(last.content[0].type, 'image', 'the AI receives the photo');
+  aiQueue = [ai({ reply: 'קיבלתי, העברתי', issue: 'צילינדר תקוע', address: 'הרצל 5', ready_for_handoff: true })];
+  await post({ id: 'm2', type: 'chat', body: 'הרצל 5 נתניה' });
+  assert.ok(sent.some((m) => m.to === OWNER && m.type === 'image' && m.ultra.image === 'https://ultra-media.example/lock.jpg'), 'photo forwarded to Hanan as a link');
+  await post({ id: 'm3', type: 'video', body: '', media: 'https://ultra-media.example/door.mp4' });
+  assert.ok(sent.some((m) => m.to === OWNER && m.type === 'video' && m.ultra.video === 'https://ultra-media.example/door.mp4'), 'video forwarded to Hanan');
+  sent.length = 0;
+  aiQueue = [ai({ reply: 'הבנתי', issue: 'ננעל בחוץ' })];
+  await post({ id: 'm4', from: '972545555555@c.us', type: 'ptt', body: '', media: 'https://ultra-media.example/v.ogg' });
+  assert.match(JSON.stringify(aiRequests.at(-1).messages), /הודעה קולית\] ננעלתי בחוץ ברחוב הרצל/, 'voice transcribed into the conversation');
+});
