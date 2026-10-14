@@ -1,0 +1,79 @@
+name: Deploy agency bots
+
+# כל לקוח בתיקייה bots/agency-bot/clients/<שם> שיש לו wrangler.toml עם database_id אמיתי, עולה לשרת משלו.
+# הסודות של כל לקוח ב-GitHub Secrets עם קידומת: <שם באותיות גדולות>_WA_TOKEN וכו'.
+on:
+  push:
+    branches: [main, claude/bold-knuth-scehxs]
+    paths:
+      - 'bots/agency-bot/**'
+      - '.github/workflows/agency-bot.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: bots/agency-bot } }
+    outputs:
+      clients: ${{ steps.list.outputs.clients }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm test
+      - name: Clients ready to deploy
+        id: list
+        run: |
+          list='[]'
+          for f in clients/*/wrangler.toml; do
+            slug=$(basename "$(dirname "$f")")
+            [ "$slug" = "_template" ] && continue
+            grep -q 'REPLACE_WITH_DATABASE_ID' "$f" && { echo "::notice::$slug: no database_id yet, skipped"; continue; }
+            prefix=$(echo "$slug" | tr 'a-z-' 'A-Z_')
+            list=$(echo "$list" | jq -c --arg s "$slug" --arg p "$prefix" '. + [{slug: $s, prefix: $p}]')
+          done
+          echo "clients=$list" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: test
+    if: needs.test.outputs.clients != '[]' && needs.test.outputs.clients != ''
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        client: ${{ fromJSON(needs.test.outputs.clients) }}
+    defaults: { run: { working-directory: bots/agency-bot } }
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CONFIG: clients/${{ matrix.client.slug }}/wrangler.toml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - name: Use this client's settings
+        run: echo "export { default } from '../clients/${{ matrix.client.slug }}/client.js';" > src/client.js
+      - name: Database tables
+        run: npx wrangler d1 migrations apply ${{ matrix.client.slug }}-bot --remote --config "$CONFIG"
+      - name: Deploy
+        run: npx wrangler deploy --config "$CONFIG"
+      - name: Secrets
+        env:
+          WA_TOKEN: ${{ secrets[format('{0}_WA_TOKEN', matrix.client.prefix)] }}
+          WA_VERIFY_TOKEN: ${{ secrets[format('{0}_WA_VERIFY_TOKEN', matrix.client.prefix)] }}
+          WA_APP_SECRET: ${{ secrets[format('{0}_WA_APP_SECRET', matrix.client.prefix)] }}
+          GOOGLE_SA_JSON: ${{ secrets[format('{0}_GOOGLE_SA_JSON', matrix.client.prefix)] }}
+          D360_API_KEY: ${{ secrets[format('{0}_D360_API_KEY', matrix.client.prefix)] }}
+          YESH_USERKEY: ${{ secrets[format('{0}_YESH_USERKEY', matrix.client.prefix)] }}
+          YESH_SECRET: ${{ secrets[format('{0}_YESH_SECRET', matrix.client.prefix)] }}
+          CLIENT_ANTHROPIC: ${{ secrets[format('{0}_ANTHROPIC_API_KEY', matrix.client.prefix)] }}
+          SHARED_ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ANTHROPIC_API_KEY="${CLIENT_ANTHROPIC:-$SHARED_ANTHROPIC}"
+          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET; do
+            value="${!name}"
+            if [ -n "$value" ]; then printf '%s' "$value" | npx wrangler secret put "$name" --config "$CONFIG"
+            else echo "::notice::${{ matrix.client.prefix }}_$name not set"; fi
+          done

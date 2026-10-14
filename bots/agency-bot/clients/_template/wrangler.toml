@@ -1,0 +1,34 @@
+# השרת של הלקוח הזה. נוצר מ-scripts/new-client.mjs. ממלאים את מה שמסומן ב-REPLACE.
+name = "__SLUG__-bot"
+main = "../../src/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["*/15 * * * *", "0 6 * * 0"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "__SLUG__-bot"
+database_id = "REPLACE_WITH_DATABASE_ID"
+migrations_dir = "../../migrations"
+
+[ai]
+binding = "AI"
+
+[vars]
+WA_PROVIDER = "meta"
+WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
+WABA_ID = ""
+META_APP_ID = ""
+# הטלפון של בעל העסק לסיכומים ופקודות (מספר אחר ממספר העסק), בפורמט 9725XXXXXXXX
+OWNER_PHONE = ""
+# מי מקבל התראות על תקלות (אריאל)
+ADMIN_PHONE = "972524666175"
+SHEET_ID = ""
+REVIEW_LINK = ""
+TEMPLATE_LANG = "he"
+
+# סודות (GitHub Secrets, עם הקידומת של הלקוח, למשל __PREFIX___WA_TOKEN):
+# WA_TOKEN, WA_VERIFY_TOKEN, WA_APP_SECRET, GOOGLE_SA_JSON, D360_API_KEY, YESH_USERKEY, YESH_SECRET
+# ANTHROPIC_API_KEY: אם אין ללקוח מפתח משלו, משתמשים במשותף (ANTHROPIC_API_KEY בלי קידומת)

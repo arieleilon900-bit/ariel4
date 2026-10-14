@@ -1,0 +1,353 @@
+<title>הבוט של עונה ראשון</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Assistant:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: control strip on top (clock + time travel), two phones side by side (customer | Hanan), then the sheet and log underneath. Stacks to one column on phones. */
+:root{
+  --bg:#eef0ee; --surface:#ffffff; --ink:#1c2326; --muted:#5f6a6e; --line:#d5dad7;
+  --brass:#9a6b1f; --brass-soft:#f3e7d1; --steel:#2f4a52; --steel-soft:#dde7e9;
+  --ok:#2e7d4f; --warn:#b4541a;
+  --display:'Rubik','Arial Hebrew',Arial,sans-serif; --body:'Assistant','Arial Hebrew',Arial,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141a1c; --surface:#1d2528; --ink:#e6ebec; --muted:#9aa6aa; --line:#33403f;
+  --brass:#d8a650; --brass-soft:#3a2f1c; --steel:#9cc3cc; --steel-soft:#24363b; --ok:#6cc28f; --warn:#e88b52; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1c; --surface:#1d2528; --ink:#e6ebec; --muted:#9aa6aa; --line:#33403f;
+  --brass:#d8a650; --brass-soft:#3a2f1c; --steel:#9cc3cc; --steel-soft:#24363b; --ok:#6cc28f; --warn:#e88b52; color-scheme:dark}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+.wrap{direction:rtl;max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:16px}
+h1{font:700 clamp(22px,4vw,30px)/1.15 var(--display);margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:70ch}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.clock{font:500 15px var(--mono);color:var(--steel);font-variant-numeric:tabular-nums;margin-inline-end:auto}
+.clock b{font-family:var(--body);font-weight:700;color:var(--ink)}
+button{font:600 15px var(--body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--brass)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+button.primary{background:var(--brass);border-color:var(--brass);color:#fff}
+button:disabled{opacity:.5;cursor:default}
+.notice{border-radius:10px;padding:10px 14px;background:var(--brass-soft);border:1px solid var(--line)}
+.phones{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.phones{grid-template-columns:1fr}}
+.phone{min-width:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;height:min(640px,78vh)}
+.phead{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--steel);color:#fff}
+[data-theme="dark"] .phead{color:#0f1a1d}
+.phead .who{font:700 16px var(--display)}
+.phead .num{font:500 12px var(--mono);opacity:.85;direction:ltr}
+.kinds{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.kinds button{border-radius:999px;padding:6px 14px}
+.kinds button[aria-selected="true"]{background:var(--steel);border-color:var(--steel);color:var(--surface)}
+.phead select{margin-inline-start:auto;font:600 14px var(--body);border-radius:6px;padding:3px 6px}
+.chat{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.msg{max-width:82%;padding:7px 10px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.45;position:relative}
+.msg.out{align-self:flex-start;background:var(--brass-soft)}
+.msg.in{align-self:flex-end;background:var(--surface);border:1px solid var(--line)}
+.msg .t{display:block;font:500 11px var(--mono);color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.msg .tag{display:inline-block;font:600 12px var(--body);color:var(--steel);background:var(--steel-soft);border-radius:4px;padding:0 6px;margin-bottom:4px}
+.msg .quote{display:block;border-inline-start:3px solid var(--brass);padding-inline-start:6px;color:var(--muted);font-size:13px;margin-bottom:4px;max-height:3.2em;overflow:hidden}
+.msg img{display:block;border-radius:8px;max-height:180px;margin-bottom:4px}
+.msg .qr{display:block;margin-top:6px;width:100%}
+.msg.pick{cursor:pointer}
+.msg.pick:hover{outline:2px solid var(--brass)}
+.typing{align-self:flex-end;color:var(--muted);font-size:14px;font-style:italic}
+.empty{margin:auto;color:var(--muted);text-align:center;max-width:32ch;font-size:15px}
+.compose{border-top:1px solid var(--line);padding:8px;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.quotebar{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);background:var(--bg);border-radius:6px;padding:4px 8px}
+.quotebar span{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.row{display:flex;gap:6px}
+.row input[type=text]{flex:1;min-width:0;font:16px var(--body);border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font-size:13px;padding:3px 9px;border-radius:999px;background:var(--bg)}
+.tools button{font-size:14px;padding:5px 9px}
+.lower{display:grid;grid-template-columns:3fr 2fr;gap:16px}
+@media (max-width:820px){.lower{grid-template-columns:1fr}}
+.panel{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.panel h2{font:700 17px var(--display);margin:0 0 8px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:right;vertical-align:top;white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:13px}
+td.long{white-space:normal;min-width:140px}
+.log{font:13px/1.5 var(--mono);max-height:240px;overflow:auto;direction:rtl;color:var(--muted)}
+.log div{border-bottom:1px dashed var(--line);padding:2px 0}
+.help{font-size:14px;color:var(--muted)}
+.help li{margin-bottom:3px}
+@media (prefers-reduced-motion:no-preference){.msg{animation:pop .18s ease-out}@keyframes pop{from{transform:translateY(4px);opacity:.4}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>הבוט של עונה ראשון</h1>
+    <p class="sub">עונה ללקוחות שלך בוואטסאפ תוך שניות, 24/7, אוסף את הפרטים ומעביר אליך סיכום. משמאל אתה הלקוח, מימין אתה בעל העסק. בחר סוג עסק ונסה. השעון מאפשר לקפוץ קדימה ולראות תזכורות, מעקבים וביקורות.</p>
+    <div class="kinds" id="kinds" role="tablist" aria-label="סוג העסק"></div>
+  </header>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <div class="bar">
+    <div class="clock" id="clock">טוען…</div>
+    <button id="t30">+30 דקות</button>
+    <button id="t3h">+3 שעות</button>
+    <button id="tmorning">למחר ב-08:00</button>
+    <button id="treset">התחל מחדש</button>
+  </div>
+
+  <div class="phones">
+    <section class="phone" aria-label="הטלפון של הלקוח">
+      <div class="phead">
+        <div><div class="who">לקוח</div><div class="num" id="cnum"></div></div>
+        <select id="cpick" aria-label="איזה לקוח">
+          <option value="972541234567|דני">דני</option>
+          <option value="972527654321|מרים">מרים</option>
+          <option value="972586667777|Ahmad">Ahmad</option>
+        </select>
+      </div>
+      <div class="chat" id="cchat"></div>
+      <div class="compose">
+        <div class="chips" id="cchips"></div>
+        <div class="row">
+          <input type="text" id="cinput" placeholder="כתוב הודעה ללקוח העסק…" autocomplete="off">
+          <button class="primary" id="csend">שלח</button>
+        </div>
+        <div class="row tools">
+          <button id="cphoto">📷 תמונה</button>
+          <input type="file" id="cfile" accept="image/*" hidden>
+          <button id="cloc">📍 מיקום</button>
+          <button id="cvoice" title="הטקסט שבתיבה יישלח כאילו נאמר בהקלטה">🎤 הקלטה</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="phone" aria-label="הטלפון של בעל העסק">
+      <div class="phead">
+        <div><div class="who" id="oname">בעל העסק</div><div class="num">050-1112233 · מספר ההתראות</div></div>
+      </div>
+      <div class="chat" id="ochat"></div>
+      <div class="compose">
+        <div class="quotebar" id="quotebar" hidden><span id="quotetext"></span><button id="quoteclear">ביטול</button></div>
+        <div class="chips" id="ochips"></div>
+        <div class="row">
+          <input type="text" id="oinput" placeholder="פקודה או הודעה. לחץ על הודעה כדי לענות עליה" autocomplete="off">
+          <button class="primary" id="osend">שלח</button>
+        </div>
+        <div class="row tools">
+          <button id="opdf">📎 שלח קובץ ללקוח</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="lower">
+    <section class="panel">
+      <h2>הטבלה של העסק</h2>
+      <div class="scroll"><table><thead><tr><th>מתי</th><th>מה</th><th>שם</th><th>טלפון</th><th>פנייה</th><th>כתובת</th><th>דחוף</th><th>הערות</th></tr></thead><tbody id="sheet"><tr><td colspan="8" class="long">כאן יופיעו הפניות והעבודות, כמו בגיליון הגוגל של העסק.</td></tr></tbody></table></div>
+    </section>
+    <section class="panel">
+      <h2>מה כדאי לנסות</h2>
+      <ol class="help">
+        <li>כלקוח: בחר אחת מההודעות לדוגמה, וענה לבוט על מה שהוא שואל. בעל העסק מקבל סיכום.</li>
+        <li>ההודעה הראשונה לבעל העסק מגיעה מקוצרת (הוא לא כתב לבוט היום). לחץ "קיבלתי" ותקבל אותה במלואה.</li>
+        <li>כבעל העסק: לחץ על הסיכום ואז כתוב "בדרך 20" או "תור מחר 10:00".</li>
+        <li>קפוץ בזמן: "+30 דקות" בלי לענות. בעל העסק מקבל תזכורת. "למחר ב-08:00": רשימת העבודות ותזכורות ללקוח.</li>
+        <li>כבעל העסק: לחץ על הסיכום ואז "סיום", וקפוץ 3 שעות: הלקוח מקבל בקשת ביקורת. בלילה ובשבת הבוט לא שולח ללקוחות, אז אם השעון בלילה, קפוץ "למחר ב-08:00".</li>
+        <li id="learnhint">ללמד את הבוט: כבעל העסק לחץ על "למד…". אחר כך כלקוח שאל על המחיר, והבוט עונה בתשובה של בעל העסק.</li>
+        <li>נסה גם: "יש ילד נעול באוטו!", הודעה באנגלית, "הסר", או "עצור בוט".</li>
+      </ol>
+      <h2>יומן</h2>
+      <div class="log" id="log"></div>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-asm.js"></script>
+<script>/*__BOT_BUNDLE__*/</script>
+<script>
+(function () {
+  const OWNER = '972501112233';
+  // סוג העסק: לפי #slug בכתובת. החלפה = טעינה מחדש עם מסד נתונים ריק
+  const preset = BotSim.PRESETS.find((p) => '#' + p.slug === location.hash) || BotSim.PRESETS[0];
+  BotSim.applyClient(preset.client);
+  const $ = (id) => document.getElementById(id);
+  const media = new Map();
+  const threads = new Map(); // phone -> [msg]
+  const byWamid = new Map(); // wamid -> {phone, msg}
+  let env, simNow = new Date(), customer = { phone: '972541234567', name: 'דני' }, quote = null, seq = 0, aiBusy = 0, voiceText = '';
+
+  const hhmm = (d) => BotSim.ilParts(d).hh + ':' + BotSim.ilParts(d).mm;
+  function log(t) { const d = document.createElement('div'); d.textContent = hhmm(simNow) + '  ' + t; $('log').prepend(d); }
+  function notice(t) { $('notice').textContent = t; $('notice').hidden = !t; }
+
+  // ---------- הצגת הודעות ----------
+  function push(phone, m) {
+    if (!threads.has(phone)) threads.set(phone, []);
+    m.time = hhmm(simNow);
+    threads.get(phone).push(m);
+    if (phone === OWNER) renderOwner(); else if (phone === customer.phone) renderCustomer();
+  }
+  function bubble(m, mine, pickable) {
+    const el = document.createElement('div');
+    el.className = 'msg ' + (mine ? 'out' : 'in') + (pickable ? ' pick' : '');
+    if (m.tag) { const t = document.createElement('span'); t.className = 'tag'; t.textContent = m.tag; el.append(t, document.createElement('br')); }
+    if (m.quote) { const q = document.createElement('span'); q.className = 'quote'; q.textContent = m.quote; el.append(q); }
+    if (m.img) { const i = document.createElement('img'); i.src = m.img; i.alt = 'תמונה'; el.append(i); }
+    el.append(document.createTextNode(m.text || ''));
+    if (m.button) {
+      const b = document.createElement('button'); b.className = 'qr'; b.textContent = m.button;
+      b.onclick = (e) => { e.stopPropagation(); ownerSend({ type: 'button', button: { text: m.button, payload: m.button }, context: { id: m.wamid } }, m.button, null); };
+      el.append(b);
+    }
+    const t = document.createElement('span'); t.className = 't'; t.textContent = m.time; el.append(t);
+    if (pickable) el.onclick = () => { quote = m; $('quotetext').textContent = 'עונה על: ' + (m.text || m.tag || '').slice(0, 80); $('quotebar').hidden = false; $('oinput').focus(); };
+    return el;
+  }
+  function render(box, list, mineDir, pickable, emptyText) {
+    box.textContent = '';
+    if (!list.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = emptyText; box.append(e); }
+    for (const m of list) box.append(bubble(m, m.dir === mineDir, pickable && m.dir === 'in' && m.wamid));
+    if (aiBusy && box === $('cchat')) { const t = document.createElement('div'); t.className = 'typing'; t.textContent = 'הבוט כותב…'; box.append(t); }
+    box.scrollTop = box.scrollHeight;
+  }
+  const renderCustomer = () => render($('cchat'), threads.get(customer.phone) || [], 'out', false, 'כתוב לעסק כמו לקוח אמיתי. למשל: "היי, ננעלתי מחוץ לבית"');
+  const renderOwner = () => render($('ochat'), threads.get(OWNER) || [], 'out', true, 'כאן יגיעו לבעל העסק סיכומים, תזכורות והתראות מהבוט.');
+
+  // מה שהבוט שולח בוואטסאפ
+  function onSend(body, wamid) {
+    const m = { dir: 'in', wamid };
+    if (body.type === 'text') m.text = body.text.body;
+    else if (body.type === 'image') { const x = media.get(body.image.id); m.img = x && URL.createObjectURL(x.blob); m.text = body.image.caption || ''; }
+    else if (body.type === 'document') { m.tag = '📄 ' + (body.document.filename || 'מסמך'); m.text = body.document.caption || ''; }
+    else if (body.type === 'template') {
+      const comps = body.template.components || [];
+      const params = (comps.find((c) => c.type === 'body')?.parameters || []).map((p) => p.text);
+      const doc = comps.find((c) => c.type === 'header')?.parameters?.[0]?.document;
+      m.tag = 'תבנית מאושרת: ' + body.template.name + (doc ? ' + 📄 ' + (doc.filename || '') : '');
+      m.text = params.join(' · ');
+      if (body.template.name === 'owner_alert_v1') m.button = 'קיבלתי';
+    }
+    byWamid.set(wamid, m);
+    push(body.to, m);
+    log('נשלח ל-' + (body.to === OWNER ? BotSim.BUSINESS.ownerName : BotSim.displayPhone(body.to)) + ': ' + (m.tag || '') + ' ' + (m.text || '').slice(0, 60));
+  }
+
+  // ---------- שליחה ----------
+  async function deliver(from, name, msg) {
+    const payload = { entry: [{ changes: [{ field: 'messages', value: { contacts: [{ wa_id: from, profile: { name } }], messages: [{ from, id: 'in' + (++seq), timestamp: String(Math.floor(simNow / 1000)), ...msg }] } }] }] };
+    try { await BotSim.processWebhook(env, payload, new Date(simNow)); } catch (e) { log('שגיאה: ' + e.message); console.error(e); }
+  }
+  function customerSend(msg, shown) {
+    push(customer.phone, { dir: 'out', ...shown });
+    deliver(customer.phone, customer.name, msg);
+  }
+  function ownerSend(msg, text, q) {
+    push(OWNER, { dir: 'out', text, quote: q ? (q.text || q.tag || '').slice(0, 80) : '' });
+    deliver(OWNER, BotSim.BUSINESS.ownerName, msg);
+  }
+
+  $('csend').onclick = () => { const t = $('cinput').value.trim(); if (!t) return; $('cinput').value = ''; customerSend({ type: 'text', text: { body: t } }, { text: t }); };
+  $('cinput').onkeydown = (e) => { if (e.key === 'Enter') $('csend').click(); };
+  $('cphoto').onclick = () => $('cfile').click();
+  $('cfile').onchange = () => {
+    const f = $('cfile').files[0]; if (!f) return; $('cfile').value = '';
+    const id = 'cimg' + (++seq); media.set(id, { blob: f, mime: f.type || 'image/jpeg' });
+    const caption = $('cinput').value.trim(); $('cinput').value = '';
+    customerSend({ type: 'image', image: { id, caption } }, { img: URL.createObjectURL(f), text: caption });
+  };
+  $('cloc').onclick = () => customerSend({ type: 'location', location: { latitude: 32.0158, longitude: 34.7874, name: '', address: preset.location || 'הרצל 5, חולון' } }, { tag: '📍 מיקום', text: preset.location || 'הרצל 5, חולון' });
+  $('cvoice').onclick = () => {
+    const t = $('cinput').value.trim() || 'שלום, ננעלתי מחוץ לדירה ברחוב סוקולוב 12 ברמת גן, אפשר לבוא?';
+    $('cinput').value = ''; voiceText = t;
+    const id = 'aud' + (++seq); media.set(id, { blob: new Blob([new Uint8Array([79, 103, 103, 83])], { type: 'audio/ogg' }), mime: 'audio/ogg' });
+    customerSend({ type: 'audio', audio: { id } }, { tag: '🎤 הודעה קולית', text: '"' + t + '"' });
+  };
+  $('cpick').onchange = () => { const [p, n] = $('cpick').value.split('|'); customer = { phone: p, name: n }; $('cnum').textContent = BotSim.displayPhone(p); renderCustomer(); };
+
+  $('osend').onclick = () => {
+    const t = $('oinput').value.trim(); if (!t) return; $('oinput').value = '';
+    const q = quote; clearQuote();
+    ownerSend({ type: 'text', text: { body: t }, ...(q ? { context: { id: q.wamid } } : {}) }, t, q);
+  };
+  $('oinput').onkeydown = (e) => { if (e.key === 'Enter') $('osend').click(); };
+  function clearQuote() { quote = null; $('quotebar').hidden = true; }
+  $('quoteclear').onclick = clearQuote;
+  $('opdf').onclick = () => {
+    if (!quote) { notice('כדי לשלוח קובץ ללקוח, לחץ קודם על ההודעה של הלקוח בטלפון של בעל העסק.'); }
+    const pdf = new Blob(['%PDF-1.4\n% קובץ לדוגמה\n'], { type: 'application/pdf' });
+    const id = 'pdf' + (++seq); media.set(id, { blob: pdf, mime: 'application/pdf' });
+    const caption = $('oinput').value.trim(); $('oinput').value = '';
+    const q = quote; clearQuote();
+    ownerSend({ type: 'document', document: { id, filename: 'מחירון-' + seq + '.pdf', mime_type: 'application/pdf', caption }, ...(q ? { context: { id: q.wamid } } : {}) }, '📎 מחירון.pdf' + (caption ? ' · ' + caption : ''), q);
+  };
+
+  function chips(box, list, fn) { for (const t of list) { const b = document.createElement('button'); b.textContent = t; b.onclick = () => fn(t); box.append(b); } }
+  chips($('cchips'), [...preset.samples, 'הסר'], (t) => { $('cinput').value = t; $('cinput').focus(); });
+  chips($('ochips'), ['בדרך 20', 'תור מחר 10:00', 'טופל', 'סיום', preset.learn, 'מה למדת', 'עזרה', 'סטטוס', 'עצור בוט', 'הפעל בוט'], (t) => { $('oinput').value = t; $('oinput').focus(); });
+
+  // ---------- שעון ----------
+  function showClock() { $('clock').innerHTML = ''; const b = document.createElement('b'); b.textContent = 'השעה אצל הבוט: '; $('clock').append(b, document.createTextNode(BotSim.ilDateTimeLabel(simNow))); }
+  async function advance(ms) {
+    const target = simNow.getTime() + ms;
+    for (const b of document.querySelectorAll('.bar button')) b.disabled = true;
+    while (simNow.getTime() + 15 * 60000 <= target) {
+      simNow = new Date(simNow.getTime() + 15 * 60000); showClock();
+      try { await BotSim.runEvery15(env, new Date(simNow)); } catch (e) { log('שגיאה בתזמון: ' + e.message); }
+    }
+    if (simNow.getTime() < target) {
+      simNow = new Date(target); showClock();
+      try { await BotSim.runEvery15(env, new Date(simNow)); } catch (e) { log('שגיאה בתזמון: ' + e.message); }
+    }
+    for (const b of document.querySelectorAll('.bar button')) b.disabled = false;
+    log('השעון התקדם');
+  }
+  $('t30').onclick = () => advance(30 * 60000);
+  $('t3h').onclick = () => advance(3 * 3600000);
+  $('tmorning').onclick = () => {
+    const p = BotSim.ilParts(new Date(simNow.getTime() + 86400000));
+    const t = BotSim.parseIlDateTime(`${p.d}/${p.m}/${p.y}`, '08:00', simNow);
+    advance(Math.max(15 * 60000, t.getTime() - simNow.getTime()));
+  };
+  $('treset').onclick = () => location.reload();
+
+  // ---------- הפעלה ----------
+  async function start() {
+    for (const p of BotSim.PRESETS) {
+      const b = document.createElement('button');
+      b.textContent = p.label; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(p === preset));
+      b.onclick = () => { if (p !== preset) { location.hash = p.slug; location.reload(); } };
+      $('kinds').append(b);
+    }
+    $('oname').textContent = BotSim.BUSINESS.ownerName + ' · ' + BotSim.BUSINESS.shortName;
+    $('cinput').placeholder = 'כתוב הודעה ל' + BotSim.BUSINESS.shortName + '…';
+    showClock();
+    $('cnum').textContent = BotSim.displayPhone(customer.phone);
+    renderCustomer(); renderOwner();
+    const SQL = await initSqlJs();
+    BotSim.installFetch({ onSend, media });
+    env = {
+      DB: BotSim.makeD1(SQL), WA_TOKEN: 'sim', WA_PHONE_NUMBER_ID: 'sim', OWNER_PHONE: OWNER,
+      REVIEW_LINK: 'https://g.page/r/hanan-locksmith/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '1500',
+      SHEET_ID: 'sim', GOOGLE_SA_JSON: 'sim',
+      AI: { run: async () => ({ text: voiceText }) },
+      onSheetRow: (v) => {
+        const tb = $('sheet'); if (tb.dataset.filled !== '1') { tb.textContent = ''; tb.dataset.filled = '1'; }
+        const tr = document.createElement('tr');
+        v.forEach((x, i) => { const td = document.createElement('td'); td.textContent = x; if (i >= 4) td.className = 'long'; tr.append(td); });
+        tb.prepend(tr);
+      },
+      onAiStart: () => { aiBusy++; renderCustomer(); },
+      onAiEnd: () => { aiBusy = Math.max(0, aiBusy - 1); renderCustomer(); },
+      onAiError: (e) => {
+        if (e?.code === 'not_granted' || e?.code === 'sampling_disabled') notice('ה-AI לא אושר בדף הזה, אז הבוט מעביר כל פנייה ישר לבעל העסק (כמו שהוא עושה כשה-AI נופל). כדי לנסות את השיחה המלאה, אשר את Claude כשהדף שואל.');
+        else if (e?.code === 'rate_limited') notice('הגעת למגבלת השימוש ב-Claude לעכשיו. נסה שוב בעוד כמה דקות.');
+        log('ה-AI לא ענה (' + (e?.code || 'שגיאה') + '), הלקוח הועבר לבעל העסק');
+      },
+    };
+    const claude = window.claude;
+    env.SAMPLE = claude ? await claude.use('sample') : null;
+    if (!env.SAMPLE) notice('הדף לא מחובר ל-Claude, אז ה-AI לא עונה כאן. פתח את הדף מתוך Claude כדי לנסות את השיחה המלאה. שאר הדברים (פקודות, תזכורות, טבלה) עובדים.');
+    log('הבוט מוכן');
+  }
+  start().catch((e) => { notice('הדף לא הצליח לעלות: ' + e.message); console.error(e); });
+})();
+</script>
