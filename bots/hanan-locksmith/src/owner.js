@@ -192,6 +192,9 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     return sendToOwner(env, `לא הבנתי את "${t.slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
   }
 
+  // OWNER_QUIET = "1": מספר של בעל העסק שמשמש גם לשיחות רגילות (למשל בבדיקה): הודעה שהיא לא פקודה, ולא תשובה על לקוח, לא מקבלת תגובה
+  if (c.cmd === 'unknown' && !quoted && env.OWNER_QUIET === '1') return;
+
   const needsPhone = !['help', 'report', 'table', 'unknown', 'status', 'pause', 'resume', 'learn', 'knowledge', 'forget'].includes(c.cmd);
   if (needsPhone && c.phone == null) {
     if (!quoted) return sendToOwner(env, 'על איזה לקוח? ענה (החלקה ימינה) על ההודעה שקיבלת עליו, או כתוב גם את הטלפון. למשל: סיום 0541234567', now);

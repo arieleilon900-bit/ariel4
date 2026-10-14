@@ -24,9 +24,11 @@ WA_PROVIDER = "ultramsg"
 # UltraMsg: מספר ה-Instance (לא סוד). הטוקן נכנס כסוד ULTRAMSG_TOKEN
 ULTRAMSG_INSTANCE = "instance194049"
 # מצב בדיקה: הבוט עונה רק למספרים האלה (ולחנן). ריק = עונה לכולם
-TEST_PHONES = "none"
+TEST_PHONES = "972504004426"
 # "1" = הבוט כבוי לגמרי: לא עונה לאף אחד ולא שולח כלום
-BOT_OFF = "1"
+BOT_OFF = "0"
+# "1" = הודעה מבעל העסק שהיא לא פקודה לא מקבלת תגובה (כשהמספר שלו משמש גם לשיחות רגילות)
+OWNER_QUIET = "1"
 # הכתובת של הבוט (בשביל חיבור אוטומטי של UltraMsg)
 WORKER_URL = "https://hanan-locksmith-bot.eliyabuis12.workers.dev"
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup

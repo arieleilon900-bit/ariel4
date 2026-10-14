@@ -992,3 +992,12 @@ test('built-in customer table: one row per lead with live status, link via "טב
   assert.ok(csv.includes('עבודה הסתיימה'));
   assert.equal((await worker.fetch(new Request('https://bot.example/table?k=nope'), env, { waitUntil() {} })).status, 403);
 });
+
+test('OWNER_QUIET: ordinary chat from the owner number gets no reply; commands still work', async () => {
+  sent.length = 0;
+  const env = { ...makeEnv(), OWNER_QUIET: '1' };
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'מה קורה אחי, מתי נפגשים?' } }, 'q1'), new Date());
+  assert.equal(sent.length, 0);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'q2'), new Date());
+  assert.ok(textsTo(OWNER).length >= 1);
+});
