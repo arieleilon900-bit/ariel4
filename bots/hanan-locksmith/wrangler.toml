@@ -10,7 +10,7 @@ crons = ["*/15 * * * *", "0 6 * * 0"]
 [[d1_databases]]
 binding = "DB"
 database_name = "hanan-bot"
-database_id = "REPLACE_WITH_DATABASE_ID"
+database_id = "07f9c174-05b0-4187-a574-38fe41f09746"
 migrations_dir = "migrations"
 
 # תמלול הודעות קוליות
