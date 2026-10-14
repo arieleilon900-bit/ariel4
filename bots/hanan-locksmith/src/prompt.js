@@ -33,7 +33,7 @@ function hananSection(b, knowledge) {
   return `\n===== חנן =====\n${parts.join('\n\n')}\n===== סוף =====\n`;
 }
 
-export function buildSystemPrompt({ now = new Date(), returningCustomer = null, profileName = '', knowledge = [] } = {}) {
+export function buildSystemPrompt({ now = new Date(), returningCustomer = null, profileName = '', knowledge = [], afterHandoff = false } = {}) {
   const b = BUSINESS;
   const open = isOpen(b.hours, now);
   const shabbat = b.shabbat?.enabled && isShabbat(now);
@@ -76,6 +76,12 @@ ${profileName ? `השם של הלקוח בפרופיל הוואטסאפ: ${profi
 ${hananSection(b, knowledge)}
 אם שואלים אם אתה בוט: תגיד בכנות שאתה העוזר הדיגיטלי של חנן, ושחנן מקבל את כל הפרטים.
 ספאם, פרסומות, מכירות, הודעות שלא קשורות לשירות: category=spam, reply ריק.
+${afterHandoff ? `
+חשוב, מצב נוכחי: הפנייה של הלקוח הזה כבר הועברה ל${b.ownerName} עם כל הפרטים, והוא יחזור אליו. עכשיו:
+- ענה ללקוח בקצרה ובנעימות. שאלה שאתה יודע לענות עליה: תענה. "כמה זמן?" / "מתי?": ש${b.ownerName} קיבל הכל ויחזור אליו בהקדם. אל תשאל שוב פרטים שכבר נאספו.
+- ready_for_handoff=false תמיד (הפנייה כבר אצלו).
+- summary_for_owner: רק אם יש משהו חדש ש${b.ownerName} חייב לדעת: פרט חדש על התקלה, שינוי כתובת, בקשה לדבר איתו, משהו דחוף, או שהלקוח כבר לא צריך. משפט אחד. אם אין שום דבר חדש (תודה, אוקיי, שאלה מתי מגיעים) השאר ריק.
+- אם הלקוח רק כתב תודה או אוקיי, reply יכול להיות ריק.` : ''}
 זמן נוכחי בישראל: ${ilDateTimeLabel(now)}.`;
 }
 

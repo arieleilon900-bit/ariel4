@@ -136,11 +136,17 @@ test('lead → questions → handoff → owner commands → reminders → review
   const conv = env.DB.raw.prepare('SELECT * FROM conversations').get();
   assert.equal(conv.state, 'handoff');
 
-  // 4. אחרי ההעברה: הלקוח כותב שוב → מועבר לחנן, בלי AI
-  const before = aiRequests.length;
+  // 4. אחרי ההעברה, חנן עוד לא ענה: הבוט עונה ללקוח, וחנן לא מקבל הודעה על "כמה זמן?"
+  const ownerBefore = sent.filter((m) => m.to === OWNER).length;
+  aiQueue = [ai({ reply: 'חנן קיבל את כל הפרטים ויחזור אליך בהקדם', summary_for_owner: '' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'עוד כמה זמן?' } }, 'w4'), t0);
-  assert.equal(aiRequests.length, before);
-  assert.ok(textsTo(CUSTOMER).includes('העברתי גם את זה לחנן. הוא יחזור אליך בהקדם.'));
+  assert.ok(textsTo(CUSTOMER).includes('חנן קיבל את כל הפרטים ויחזור אליך בהקדם'));
+  assert.ok(aiRequests.at(-1).system.includes('כבר הועברה'), 'AI knows the lead is already with Hanan');
+  assert.equal(sent.filter((m) => m.to === OWNER).length, ownerBefore, 'no extra message to Hanan');
+  // פרט חדש וחשוב: חנן מקבל עדכון אחד
+  aiQueue = [ai({ reply: 'עדכנתי את חנן', summary_for_owner: 'הלקוח עבר לכתובת הרצל 7 במקום 5' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'רגע, אני בעצם בהרצל 7' } }, 'w4b'), t0);
+  assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('הרצל 7 במקום 5'), 'one update to Hanan with the new detail');
 
   // 5. חנן: "בדרך"  (חנן כותב לבוט → נפתח לו חלון, אז התשובות אליו בטקסט חופשי)
   sent.length = 0;
@@ -961,8 +967,6 @@ test('language: an English-speaking customer gets the fixed messages in English;
   const t0 = new Date('2026-10-14T08:00:00Z');
   aiQueue = [ai({ reply: 'Got it, I passed it to Hanan', language: 'en', issue: 'locked out', address: '5 Herzl St Holon', ready_for_handoff: true })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: "Hi, I'm locked out, 5 Herzl St Holon" } }, 'l1'), t0);
-  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'how long?' } }, 'l2'), t0);
-  assert.ok(textsTo(CUSTOMER).includes("I passed this on to Hanan too. He'll get back to you shortly."));
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 0541234567 20' } }, 'l3'), t0);
   assert.ok(textsTo(CUSTOMER).some((t) => t.includes('about 20 minutes')));
 
@@ -1045,4 +1049,30 @@ test('table "טופל" button: marks the job done like the WhatsApp command, rev
   assert.ok(JSON.stringify(sent.filter((m) => m.to === OWNER)).includes('סומן כגמור'), 'owner gets the same confirmation as on WhatsApp');
   const after = await (await worker.fetch(new Request(`https://bot.example/table?k=${k}`), env, { waitUntil() {} })).text();
   assert.ok(after.includes('עבודה הסתיימה') && !after.includes('name="act" value="done"'), 'no button once done');
+});
+
+test('after handoff (UltraMsg): Hanan already answered → bot silent, nothing forwarded; before he answers a photo comes as one update', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), WA_PROVIDER: 'ultramsg', ULTRAMSG_INSTANCE: 'instance1', ULTRAMSG_TOKEN: 'tok', WA_VERIFY_TOKEN: 'secret' };
+  const waits = [];
+  const post = async (payload) => { await worker.fetch(new Request('https://bot.example/webhook?key=secret', { method: 'POST', body: JSON.stringify(payload) }), env, { waitUntil: (p) => waits.push(p) }); await Promise.all(waits.splice(0)); };
+  const C = '972543333333';
+  const recv = (data) => ({ event_type: 'message_received', data: { from: `${C}@c.us`, fromMe: false, time: 1, ...data } });
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'ננעל', address: 'הרצל 1', ready_for_handoff: true })];
+  await post(recv({ id: 'h1', type: 'chat', body: 'ננעלתי בחוץ הרצל 1' }));
+  // לפני שחנן ענה: תמונה → עדכון אחד לחנן + התמונה
+  sent.length = 0;
+  aiQueue = [ai({ reply: 'תודה, העברתי', summary_for_owner: '' })];
+  await post(recv({ id: 'h2', type: 'image', body: '', media: 'https://ultra-media.example/x.jpg' }));
+  const toOwner = sent.filter((m) => m.to === OWNER);
+  assert.equal(toOwner.filter((m) => m.type === 'text').length, 1, 'one update');
+  assert.ok(toOwner.some((m) => m.type === 'image'));
+  // חנן עונה מהטלפון
+  await post({ event_type: 'message_create', data: { id: 'e1', from: '972500000000@c.us', to: `${C}@c.us`, fromMe: true, type: 'chat', body: 'אני בדרך אליך' } });
+  sent.length = 0;
+  const aiBefore = aiRequests.length;
+  await post(recv({ id: 'h3', type: 'chat', body: 'מעולה תודה' }));
+  assert.equal(sent.length, 0, 'bot silent, Hanan sees it in his app');
+  assert.equal(aiRequests.length, aiBefore);
 });

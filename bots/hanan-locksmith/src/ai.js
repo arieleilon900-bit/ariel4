@@ -10,7 +10,7 @@ export const MODEL = 'claude-opus-5-5';
 // הזמן שמותר לשיחה עם ה-AI: Cloudflare נותנים לעיבוד ברקע 30 שניות בסך הכל
 const AI_TIMEOUT_MS = 10000;
 
-export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '', knowledge = [] }) {
+export async function runTurn(env, { history, image = null, now = new Date(), returningCustomer = null, profileName = '', knowledge = [], afterHandoff = false }) {
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: AI_TIMEOUT_MS, maxRetries: 0 });
   const messages = [];
   for (const m of history) {
@@ -34,7 +34,7 @@ export async function runTurn(env, { history, image = null, now = new Date(), re
       max_tokens: 8000,
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      system: buildSystemPrompt({ now, returningCustomer, profileName, knowledge }),
+      system: buildSystemPrompt({ now, returningCustomer, profileName, knowledge, afterHandoff }),
       messages,
       // שיחת קבלת פנייה קצרה: חשיבה קלה מספיקה, ועונה מהר יותר
       output_config: { effort: env.CLAUDE_EFFORT || 'low', format: { type: 'json_schema', schema: SCHEMA } },
