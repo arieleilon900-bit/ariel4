@@ -115,7 +115,12 @@ export function wazeLink({ lat, lng, address }) {
 }
 
 // האם עדיין בחלון 24 השעות מההודעה האחרונה של הלקוח (אז מותר טקסט חופשי)
+// UltraMsg (וואטסאפ רגיל): אין חלון של 24 שעות, אפשר תמיד לשלוח טקסט חופשי
+let windowAlwaysOpen = false;
+export function setWindowAlwaysOpen(v) { windowAlwaysOpen = !!v; }
+
 export function inServiceWindow(lastInboundAt, now = new Date()) {
+  if (windowAlwaysOpen) return true;
   if (!lastInboundAt) return false;
   return hoursBetween(lastInboundAt, now) < 23.5;
 }

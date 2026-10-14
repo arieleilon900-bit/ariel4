@@ -19,7 +19,10 @@ binding = "AI"
 
 [vars]
 # meta = ישירות מול Meta. 360dialog = דרך הספק (למספר האמיתי, שעובד גם באפליקציה)
+# ultramsg = וואטסאפ רגיל דרך UltraMsg (סריקת QR). לא רשמי: יש סיכון לחסימת המספר
 WA_PROVIDER = "meta"
+# UltraMsg: מספר ה-Instance (לא סוד). הטוקן נכנס כסוד ULTRAMSG_TOKEN
+ULTRAMSG_INSTANCE = ""
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
 WABA_ID = ""
 META_APP_ID = ""
@@ -45,3 +48,4 @@ TEMPLATE_LANG = "he"
 # YESH_USERKEY        יש חשבונית: User Key (מהגדרות ה-API בחשבון של חנן)
 # YESH_SECRET         יש חשבונית: Secret
 # D360_API_KEY        360dialog (רק אם WA_PROVIDER = "360dialog")
+# ULTRAMSG_TOKEN      UltraMsg (רק אם WA_PROVIDER = "ultramsg")

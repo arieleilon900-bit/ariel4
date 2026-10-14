@@ -81,8 +81,11 @@ export function parseCommand(text) {
 // על איזה לקוח חנן מדבר: לפי ההודעה שהוא ענה עליה (ציטוט)
 async function contextPhone(env, msg) {
   const id = msg?.context?.id;
-  if (!id) return null;
-  return (await env.DB.prepare('SELECT phone FROM owner_refs WHERE wamid = ?').bind(id).first())?.phone || null;
+  const ref = id ? (await env.DB.prepare('SELECT phone FROM owner_refs WHERE wamid = ?').bind(id).first())?.phone : null;
+  if (ref) return ref;
+  // UltraMsg: המזהה של ההודעה המצוטטת לא תמיד ידוע, אבל הטקסט שלה כן. לוקחים את הטלפון של הלקוח מתוכו
+  const m = String(msg?.context?.body || '').match(/(?:\+?972[-\s]?|0)5\d[-\s]?\d{3}[-\s]?\d{4}/);
+  return m ? normalizePhone(m[0]) : null;
 }
 
 async function latestConv(env, phone) {

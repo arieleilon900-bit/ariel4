@@ -6,7 +6,7 @@ import { FEATURES, TEMPLATE_DEFS } from './config.js';
 import { MODEL } from './ai.js';
 import { ensureHeader, getAccessToken } from './sheets.js';
 import { yeshCall, yeshConfigured } from './yesh.js';
-import { is360 } from './whatsapp.js';
+import { is360, isUltra } from './whatsapp.js';
 
 const D360 = 'https://waba-v2.360dialog.io';
 const graph = (env) => `https://graph.facebook.com/${env.GRAPH_VERSION || 'v24.0'}`;
@@ -37,7 +37,29 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   });
 
   // ---------- וואטסאפ ----------
-  if (is360(env)) {
+  if (isUltra(env)) {
+    const U = `https://api.ultramsg.com/${env.ULTRAMSG_INSTANCE}`;
+    if (!env.ULTRAMSG_INSTANCE || !env.ULTRAMSG_TOKEN) bad('UltraMsg: חסרים ULTRAMSG_INSTANCE או ULTRAMSG_TOKEN');
+    else {
+      await step('UltraMsg מחובר', async () => {
+        const st = await j(await fetch(`${U}/instance/status?token=${encodeURIComponent(env.ULTRAMSG_TOKEN)}`));
+        const s = st.status?.accountStatus?.status || st.status?.accountStatus || JSON.stringify(st).slice(0, 80);
+        s === 'authenticated' ? ok('UltraMsg: המספר מחובר') : bad(`UltraMsg: המספר לא מחובר (${s}). צריך לסרוק QR בלוח של UltraMsg`);
+      });
+      await step('UltraMsg webhook', async () => {
+        const hook = `${origin}/webhook?key=${encodeURIComponent(env.WA_VERIFY_TOKEN || '')}`;
+        if (!checkOnly) {
+          await j(await fetch(`${U}/instance/settings`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: env.ULTRAMSG_TOKEN, webhook_url: hook, webhook_message_received: true, webhook_message_create: true, webhook_message_ack: false, webhook_message_download_media: false, sendDelay: 1 }),
+          }));
+        }
+        const cur = await j(await fetch(`${U}/instance/settings?token=${encodeURIComponent(env.ULTRAMSG_TOKEN)}`));
+        String(cur.webhook_url || '').startsWith(`${origin}/webhook`) ? ok('UltraMsg: ההודעות מגיעות לשרת') : bad(`UltraMsg: ההודעות מגיעות ל-${cur.webhook_url || 'שום מקום'}, לא לשרת הזה`);
+        String(cur.webhook_message_create) === 'true' ? ok('UltraMsg: הבוט רואה כשחנן עונה מהטלפון') : warn('UltraMsg: webhook_message_create כבוי, הבוט לא יידע כשחנן עונה בעצמו');
+      });
+    }
+  } else if (is360(env)) {
     if (!env.D360_API_KEY) bad('360dialog: חסר D360_API_KEY');
     else await step('360dialog webhook', async () => {
       if (!checkOnly) {
@@ -74,7 +96,8 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   }
 
   // ---------- תבניות ----------
-  const canTemplates = is360(env) ? !!env.D360_API_KEY : !!(env.WABA_ID && env.WA_TOKEN);
+  const canTemplates = isUltra(env) ? false : is360(env) ? !!env.D360_API_KEY : !!(env.WABA_ID && env.WA_TOKEN);
+  if (isUltra(env)) ok('תבניות: לא צריך ב-UltraMsg (כל ההודעות נשלחות כטקסט רגיל)');
   if (canTemplates) await step('תבניות', async () => {
     const listUrl = is360(env) ? `${D360}/message_templates?limit=200` : `${graph(env)}/${env.WABA_ID}/message_templates?fields=name,status,language&limit=200`;
     const listed = await j(await fetch(listUrl, { headers: is360(env) ? d360 : bearer }));

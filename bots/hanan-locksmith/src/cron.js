@@ -7,6 +7,8 @@ import { deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
 import { runNudges } from './nudges.js';
 import { upsertLead } from './sheets.js';
+import { setWindowAlwaysOpen } from './util.js';
+import { isUltra } from './whatsapp.js';
 
 // לקוח שכתב "הסר" לא מקבל הודעות יזומות
 async function optedOut(env, phone) {
@@ -17,6 +19,7 @@ async function optedOut(env, phone) {
 const canMessageNow = customerHours;
 
 export async function runEvery15(env, now = new Date()) {
+  setWindowAlwaysOpen(isUltra(env));
   await appointmentReminders(env, now);
   await ownerAgenda(env, now);
   await ownerJobReminders(env, now);
@@ -185,6 +188,7 @@ async function invoices(env, now) {
 }
 
 export async function weeklyReport(env, now = new Date()) {
+  setWindowAlwaysOpen(isUltra(env));
   const since = new Date(now.getTime() - 7 * 86400000).toISOString();
   const rows = (await env.DB.prepare('SELECT type, COUNT(*) AS n FROM events WHERE created_at >= ? GROUP BY type').bind(since).all()).results;
   const n = Object.fromEntries(rows.map((r) => [r.type, r.n]));
