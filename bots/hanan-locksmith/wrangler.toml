@@ -20,11 +20,11 @@ binding = "AI"
 [vars]
 # meta = ישירות מול Meta. 360dialog = דרך הספק (למספר האמיתי, שעובד גם באפליקציה)
 # ultramsg = וואטסאפ רגיל דרך UltraMsg (סריקת QR). לא רשמי: יש סיכון לחסימת המספר
-WA_PROVIDER = "meta"
+WA_PROVIDER = "ultramsg"
 # UltraMsg: מספר ה-Instance (לא סוד). הטוקן נכנס כסוד ULTRAMSG_TOKEN
-ULTRAMSG_INSTANCE = ""
+ULTRAMSG_INSTANCE = "instance194049"
 # מצב בדיקה: הבוט עונה רק למספרים האלה (ולחנן). ריק = עונה לכולם
-TEST_PHONES = ""
+TEST_PHONES = "none"
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
 WABA_ID = ""
 META_APP_ID = ""
