@@ -1,5 +1,5 @@
 // משימות מתוזמנות: כל 15 דקות (תזכורות, מעקבים, ביקורות, קבלות), וכל יום ראשון (דוח שבועי).
-import { BUSINESS, MESSAGES, TEMPLATES, TIMING } from './config.js';
+import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, TIMING } from './config.js';
 import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
 import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
@@ -153,6 +153,7 @@ async function yearly(env, now) {
 
 // קבלות מיש חשבונית: כל מסמך חדש נשלח ללקוח, והעבודה מסומנת כגמורה (מה שמפעיל בקשת ביקורת)
 async function invoices(env, now) {
+  if (!FEATURES.receipts) return;
   let docs = [];
   try {
     docs = await fetchNewDocuments(env, now);
@@ -189,7 +190,7 @@ export async function weeklyReport(env, now = new Date()) {
     `פניות חדשות: ${c('lead')}`,
     `הועברו אליך: ${c('handoff') + c('urgent')} (מתוכן דחופות: ${c('urgent')})`,
     `עבודות שהסתיימו: ${done?.n || 0}`,
-    `קבלות שנשלחו: ${c('invoice')}`,
+    FEATURES.receipts ? `קבלות שנשלחו: ${c('invoice')}` : null,
     '',
     'מה הבוט עשה בשבילך:',
     `הודעות "בדרך": ${c('eta')}`,

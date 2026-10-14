@@ -128,7 +128,7 @@ td.long{white-space:normal;min-width:140px}
           <button class="primary" id="osend">שלח</button>
         </div>
         <div class="row tools">
-          <button id="opdf">🧾 שלח קבלה (PDF)</button>
+          <button id="opdf">📎 שלח קובץ ללקוח</button>
         </div>
       </div>
     </section>
@@ -264,11 +264,12 @@ td.long{white-space:normal;min-width:140px}
   function clearQuote() { quote = null; $('quotebar').hidden = true; }
   $('quoteclear').onclick = clearQuote;
   $('opdf').onclick = () => {
-    const pdf = new Blob(['%PDF-1.4\n% קבלה לדוגמה\n'], { type: 'application/pdf' });
+    if (!quote) { notice('כדי לשלוח קובץ ללקוח, לחץ קודם על ההודעה של הלקוח בטלפון של חנן.'); }
+    const pdf = new Blob(['%PDF-1.4\n% קובץ לדוגמה\n'], { type: 'application/pdf' });
     const id = 'pdf' + (++seq); media.set(id, { blob: pdf, mime: 'application/pdf' });
     const caption = $('oinput').value.trim(); $('oinput').value = '';
     const q = quote; clearQuote();
-    ownerSend({ type: 'document', document: { id, filename: 'קבלה-' + seq + '.pdf', mime_type: 'application/pdf', caption }, ...(q ? { context: { id: q.wamid } } : {}) }, '🧾 קבלה.pdf' + (caption ? ' · ' + caption : ''), q);
+    ownerSend({ type: 'document', document: { id, filename: 'מחירון-' + seq + '.pdf', mime_type: 'application/pdf', caption }, ...(q ? { context: { id: q.wamid } } : {}) }, '📎 מחירון.pdf' + (caption ? ' · ' + caption : ''), q);
   };
 
   function chips(box, list, fn) { for (const t of list) { const b = document.createElement('button'); b.textContent = t; b.onclick = () => fn(t); box.append(b); } }

@@ -54,7 +54,9 @@ const { processWebhook } = await import('../src/index.js');
 const { runEvery15, weeklyReport } = await import('../src/cron.js');
 const { parseCommand } = await import('../src/owner.js');
 const util = await import('../src/util.js');
-const { MESSAGES } = await import('../src/config.js');
+const { MESSAGES, FEATURES } = await import('../src/config.js');
+// רוב הבדיקות של הקבלות רצות עם הקבלות דלוקות; הבדיקה האחרונה בודקת את המצב הכבוי (ברירת המחדל)
+FEATURES.receipts = true;
 
 const OWNER = '972503429998';
 const CUSTOMER = '972541234567';
@@ -799,4 +801,24 @@ test('/admin/setup: wires the webhook, creates missing templates, checks keys; n
     await get('?key=sec&check=1');
     assert.equal(reqs.filter((r) => r.method === 'POST').length, before);
   } finally { globalThis.fetch = orig; }
+});
+
+test('receipts off (the default for Hanan): no Yesh polling, PDFs are plain files, no receipt in help', async () => {
+  FEATURES.receipts = false;
+  try {
+    sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
+    const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk' };
+    const t0 = new Date('2026-10-14T08:00:00Z');
+    await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'עזרה' } }, 'x0'), t0);
+    assert.ok(!lastSentTo(OWNER).text.body.includes('קבלה'), 'help has no receipt line');
+    aiQueue = [ai({ reply: 'מעביר', issue: 'דלת', address: 'הרצל 5', ready_for_handoff: true })];
+    await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'דלת, הרצל 5' } }, 'x1'), t0);
+    const summary = lastSentTo(OWNER);
+    for (let i = 1; i <= 3; i++) await runEvery15(env, new Date(t0.getTime() + i * 15 * 60000));
+    assert.equal(yeshRequests.length, 0, 'Yesh never called');
+    await processWebhook(env, inbound(OWNER, { type: 'document', document: { id: 'pdfz', filename: 'מחירון.pdf', mime_type: 'application/pdf' }, context: { id: wamidOf(summary) } }, 'x2'), t0);
+    const d = sent.find((m) => m.to === CUSTOMER && m.type === 'document');
+    assert.equal(d.document.filename, 'מחירון.pdf');
+    assert.equal(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM jobs WHERE status = 'done'").get().n, 0, 'a file does not close the job');
+  } finally { FEATURES.receipts = true; }
 });

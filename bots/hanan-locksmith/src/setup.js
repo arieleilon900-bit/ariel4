@@ -2,7 +2,7 @@
 // עושה בעצמו את מה שהיה צריך ללחוץ ב-Meta (חיבור ה-webhook, יצירת 9 התבניות), ובודק שכל המפתחות עובדים.
 // &check=1 = רק בדיקה, בלי לשנות כלום. בטוח להריץ שוב ושוב: מה שכבר קיים לא נוצר מחדש.
 import Anthropic from '@anthropic-ai/sdk';
-import { TEMPLATE_DEFS } from './config.js';
+import { FEATURES, TEMPLATE_DEFS } from './config.js';
 import { MODEL } from './ai.js';
 import { ensureHeader, getAccessToken } from './sheets.js';
 import { yeshCall, yeshConfigured } from './yesh.js';
@@ -80,7 +80,7 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
     const listed = await j(await fetch(listUrl, { headers: is360(env) ? d360 : bearer }));
     const existing = listed.waba_templates || listed.data || [];
     const lang = env.TEMPLATE_LANG || 'he';
-    for (const def of TEMPLATE_DEFS) {
+    for (const def of TEMPLATE_DEFS.filter((d) => FEATURES.receipts || !d.documentHeader)) {
       const have = existing.find((t) => t.name === def.name && (!t.language || t.language === lang));
       if (have) { (have.status === 'APPROVED' ? ok : warn)(`תבנית ${def.name}: ${statusHe(have.status)}`); continue; }
       if (checkOnly) { bad(`תבנית ${def.name}: לא קיימת`); continue; }
@@ -121,7 +121,7 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   });
 
   // ---------- יש חשבונית ----------
-  if (!yeshConfigured(env)) warn('יש חשבונית: לא מחובר (YESH_USERKEY / YESH_SECRET). חנן שולח קבלות ידנית בינתיים');
+  if (!FEATURES.receipts) { /* קבלות כבויות: לא בודקים את יש חשבונית */ } else if (!yeshConfigured(env)) warn('יש חשבונית: לא מחובר (YESH_USERKEY / YESH_SECRET). חנן שולח קבלות ידנית בינתיים');
   else await step('יש חשבונית', async () => {
     await yeshCall(env, 'getInvoices', { CustomerID: -1, PageSize: 1, PageNumber: 1, docTypes: [], Search: '', from: '2020-01-01 00:00', to: '2100-01-01 00:00' });
     ok('יש חשבונית: המפתחות עובדים, קבלות חדשות יישלחו ללקוחות לבד');

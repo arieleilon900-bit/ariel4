@@ -1,5 +1,5 @@
 // פקודות שחנן שולח לבוט בוואטסאפ, מהמספר שמוגדר ב-OWNER_PHONE.
-import { MESSAGES, TEMPLATES } from './config.js';
+import { FEATURES, MESSAGES, TEMPLATES } from './config.js';
 import { appendRow } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
 import { aiRespond, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
@@ -7,13 +7,12 @@ import { weeklyReport } from './cron.js';
 import { deliverReceipt } from './receipts.js';
 import * as wa from './whatsapp.js';
 
-export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ההודעה שקיבלת על הלקוח, וכותבים רק את הפקודה. בלי טלפון.
+const HELP_TEXT = `הכי פשוט: עונים (החלקה ימינה) על ההודעה שקיבלת על הלקוח, וכותבים רק את הפקודה. בלי טלפון.
 טקסט רגיל בתשובה כזו נשלח ללקוח כמו שהוא.
 
 בדרך 20 ← שולח ללקוח שאתה בדרך, הגעה בעוד כ-20 דקות
 תור 17/10 14:30 הרצל 5 חולון ← קובע עבודה + תזכורות ללקוח ולך
-קבלה ← מעבירים לבוט את ה-PDF מיש חשבונית (בתשובה על הלקוח, או עם הטלפון שלו בכיתוב)
-טופל ← טיפלת (למשל התקשרת), והבוט מפסיק להזכיר לך
+__RECEIPT_LINE__טופל ← טיפלת (למשל התקשרת), והבוט מפסיק להזכיר לך
 סיום ← העבודה הסתיימה (אחרי זה: בקשת ביקורת, המלצה, ותזכורת בעוד שנה)
 ביטול ← מבטל עבודה מתואמת
 לא רלוונטי ← סוגר את הפנייה בלי מעקב
@@ -31,6 +30,7 @@ export const HELP = `הכי פשוט: עונים (החלקה ימינה) על ה
 עזרה ← הרשימה הזו
 
 אפשר גם בלי לענות על הודעה: כותבים את הטלפון אחרי הפקודה. למשל: סיום 0541234567`;
+export const HELP = HELP_TEXT.replace('__RECEIPT_LINE__', FEATURES.receipts ? 'קבלה ← מעבירים לבוט את ה-PDF מיש חשבונית (בתשובה על הלקוח, או עם הטלפון שלו בכיתוב)\n' : '');
 
 const PHONE = String.raw`(\+?\d[\d\-]{7,15})`;
 // מילים שפותחות פקודה: טקסט שמתחיל בהן לא נשלח ללקוח גם אם לא הבנו אותו
@@ -92,6 +92,7 @@ async function latestConv(env, phone) {
 // חנן מעביר לבוט קובץ (PDF של קבלה): הלקוח לפי הכיתוב, לפי הציטוט, או לפי הטלפון שישלח מיד אחרי
 async function handleOwnerFile(env, msg, now) {
   const file = msg.document;
+  if (!FEATURES.receipts) return relayFileToCustomer(env, msg, now);
   if (!/pdf/i.test(file.mime_type || '') && !/\.pdf$/i.test(file.filename || '')) {
     return sendToOwner(env, 'קיבלתי קובץ, אבל רק PDF של קבלה נשלח ללקוח אוטומטית. את השאר שלח ללקוח מהטלפון שלך.', now);
   }
@@ -157,7 +158,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
   if (msg && msg.type === 'document') return handleOwnerFile(env, msg, now);
   if (msg && msg.type === 'image') return handleOwnerImage(env, msg, now);
   // רק טלפון, ויש קובץ שמחכה (חנן שלח קבלה בלי לציין לקוח)
-  const onlyPhone = /^\s*\+?\d[\d\- ]{7,14}\d\s*$/.test(text || '') ? normalizePhone(text) : '';
+  const onlyPhone = !FEATURES.receipts ? '' : /^\s*\+?\d[\d\- ]{7,14}\d\s*$/.test(text || '') ? normalizePhone(text) : '';
   if (onlyPhone) {
     // לפי הסדר: הקובץ הראשון שנשלח מקבל את הטלפון הראשון
     const pending = await env.DB.prepare('SELECT * FROM owner_pending_file WHERE used = 0 AND created_at >= ? ORDER BY id ASC LIMIT 1').bind(new Date(now.getTime() - 2 * 3600000).toISOString()).first();
@@ -288,6 +289,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     }
 
     case 'receipt': {
+      if (!FEATURES.receipts) return sendToOwner(env, 'שליחת קבלות דרך הבוט כבויה.', now);
       const r = await deliverReceipt(env, c.phone, c.link, { now });
       return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(c.phone)} והעבודה סומנה כגמורה.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(c.phone)}.`, now);
     }
@@ -373,4 +375,24 @@ async function sheetRow(env, phone, what, note, now, address = null) {
   const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(phone).first();
   const conv = await latestConv(env, phone);
   await appendRow(env, [ilDateTimeLabel(now), what, cust?.name || '', displayPhone(phone), conv?.issue || '', address || conv?.address || '', '', note || '']);
+}
+
+// קבצים (כשהקבלות כבויות): קובץ בתשובה על לקוח נשלח אליו כמו שהוא
+async function relayFileToCustomer(env, msg, now) {
+  const phone = await contextPhone(env, msg);
+  if (!phone) return sendToOwner(env, 'קיבלתי קובץ. כדי לשלוח אותו ללקוח, שלח אותו בתשובה (החלקה ימינה) על ההודעה שלו.', now);
+  const cust = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(phone).first();
+  if (!inServiceWindow(cust?.last_inbound_at, now)) {
+    return sendToOwner(env, `הלקוח ${displayPhone(phone)} לא כתב ב-24 השעות האחרונות, ווואטסאפ לא מאפשר לשלוח לו קובץ. שלח לו מהטלפון שלך.`, now, phone);
+  }
+  try {
+    const media = await wa.downloadMedia(env, msg.document.id);
+    const id = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
+    const r = await wa.sendDocument(env, phone, id, msg.document.filename || 'קובץ', msg.document.caption || '');
+    await markOwnerReplied(env, phone, now);
+    return sendToOwner(env, r.ok ? `✓ הקובץ נשלח ל-${displayPhone(phone)}.` : `לא הצלחתי לשלוח ל-${displayPhone(phone)}.`, now, phone);
+  } catch (err) {
+    console.error('owner file relay failed', err);
+    return sendToOwner(env, `לא הצלחתי לשלוח את הקובץ ל-${displayPhone(phone)}.`, now, phone);
+  }
 }

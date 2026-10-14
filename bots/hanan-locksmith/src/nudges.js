@@ -1,5 +1,5 @@
 // מי שלא עונה: לקוח שהפסיק לענות באמצע, חנן שלא טיפל בפנייה, ועבודה שעבר זמנה ולא סומנה.
-import { BUSINESS, MESSAGES, TIMING } from './config.js';
+import { BUSINESS, FEATURES, MESSAGES, TIMING } from './config.js';
 import { appendRow } from './sheets.js';
 import { addHours, displayPhone, ilDateTimeLabel, inServiceWindow, nowIso } from './util.js';
 import { customerHours, ownerHours, restNow } from './hours.js';
@@ -114,7 +114,7 @@ async function doneChecks(env, now) {
     const ph = displayPhone(j.phone);
     await sendToOwner(env, [
       `מה קרה עם העבודה אצל ${cust?.name || 'הלקוח'} ${ph}?`,
-      `סיימת: שלח לי את הקבלה (PDF, ובכיתוב ${ph}) או כתוב: סיום ${ph}`,
+      FEATURES.receipts ? `סיימת: שלח לי את הקבלה (PDF, ובכיתוב ${ph}) או כתוב: סיום ${ph}` : `סיימת: כתוב סיום ${ph} (ואז הלקוח מקבל בקשת ביקורת)`,
       `בוטל: כתוב: ביטול ${ph}`,
     ].join('\n'), now, j.phone);
   }

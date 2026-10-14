@@ -57,6 +57,11 @@ export const BUSINESS = {
   ],
 };
 
+// מה פעיל בבוט. receipts = שליחת קבלות ללקוח (מיש חשבונית אוטומטית, או PDF שחנן מעביר). כבוי: חנן לא רוצה קבלות דרך הבוט
+export const FEATURES = {
+  receipts: false,
+};
+
 // תזמונים
 export const TIMING = {
   followupAfterHours: 24,      // מעקב אחרי לקוח שקיבל סיכום ולא נפתחה לו עבודה
