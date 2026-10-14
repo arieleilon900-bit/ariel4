@@ -683,3 +683,15 @@ test('Hanan teaches the bot: למד / מה למדת / שכח, and it reaches the
   assert.ok(sys.includes('250-450'), 'taught fact in prompt');
   assert.ok(!sys.includes('לא עובד בשבת'), 'forgotten fact removed');
 });
+
+test('template definitions match what the bot sends and Meta rules', async () => {
+  const { TEMPLATES, TEMPLATE_DEFS } = await import('../src/config.js');
+  const names = new Set(TEMPLATE_DEFS.map((d) => d.name));
+  for (const n of Object.values(TEMPLATES)) assert.ok(names.has(n), `template ${n} defined`);
+  for (const d of TEMPLATE_DEFS) {
+    const vars = d.body.match(/\{\{\d+\}\}/g) || [];
+    assert.equal(vars.length, (d.examples || []).length, `${d.name}: one example per variable`);
+    assert.ok(!/^\s*\{\{/.test(d.body) && !/\}\}\s*$/.test(d.body), `${d.name}: no variable at start/end`);
+    assert.ok(d.body.length <= 1024);
+  }
+});

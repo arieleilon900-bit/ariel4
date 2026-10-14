@@ -106,3 +106,17 @@ export const TEMPLATES = {
   invoice: 'invoice_v1',            // כותרת: מסמך PDF
   ownerAlert: 'owner_alert_v1',     // {{1}} = טקסט הסיכום (להודעות לחנן מחוץ לחלון)
 };
+
+// הטקסטים של התבניות, כמו שהן נוצרות ב-Meta (ההגדרה האוטומטית ב-/admin/setup יוצרת אותן מכאן).
+// אסור שטקסט יתחיל או ייגמר במשתנה. examples = דוגמה לכל משתנה, ש-Meta דורשים.
+export const TEMPLATE_DEFS = [
+  { name: 'owner_alert_v1', category: 'UTILITY', body: 'יש עדכון חדש מהבוט של העסק:\n{{1}}\nכדי לקבל הודעות מלאות ותמונות, לחץ על "קיבלתי".', examples: ['פנייה חדשה | שם: דני | טלפון: 054-1234567 | תקלה: ננעל בחוץ'], quickReplies: ['קיבלתי'] },
+  { name: 'followup_v1', category: 'UTILITY', body: 'היי, רציתי לבדוק אם עדיין צריך עזרה עם המנעול? חנן זמין, אפשר לכתוב כאן.' },
+  { name: 'appt_reminder_v1', category: 'UTILITY', body: 'תזכורת: חנן המנעולן מגיע אליך {{1}} לכתובת {{2}}. אם משהו השתנה, אפשר לכתוב כאן.', examples: ['מחר ב-14:30', 'הרצל 5 חולון'] },
+  { name: 'appt_today_v1', category: 'UTILITY', body: 'חנן המנעולן מגיע אליך היום ב-{{1}}. נתראה!', examples: ['14:30'] },
+  { name: 'on_the_way_v1', category: 'UTILITY', body: 'חנן המנעולן בדרך אליך. זמן הגעה משוער: כ-{{1}} דקות.', examples: ['20'] },
+  { name: 'invoice_v1', category: 'UTILITY', body: 'מצורפת הקבלה על העבודה. תודה שבחרת בחנן המנעולן!', documentHeader: true },
+  { name: 'review_request_v1', category: 'MARKETING', body: 'תודה שבחרת בחנן המנעולן! אם יצאת מרוצה, ביקורת קצרה בגוגל תעזור לנו מאוד: {{1}} תודה רבה!', examples: ['https://g.page/r/example/review'] },
+  { name: 'referral_v1', category: 'MARKETING', body: 'שמחנו לעזור! אם מישהו מהחברים או מהמשפחה צריך מנעולן, אפשר להעביר להם את המספר הזה.' },
+  { name: 'yearly_checkup_v1', category: 'MARKETING', body: 'היי, עברה שנה מאז שחנן המנעולן עבד אצלך. רוצה שנבדוק שהמנעול והדלת במצב טוב?' },
+];
