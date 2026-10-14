@@ -7,6 +7,8 @@ import { runEvery15, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isUltra, verifySignature } from './whatsapp.js';
 import { ultraToMeta } from './ultramsg.js';
+import { renderTable, tableKey } from './table.js';
+import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
 
 // השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
@@ -27,6 +29,20 @@ export default {
         return new Response(`${healthText(env)}\nUltraMsg: ${w === 'skip' ? 'not configured' : String(w).startsWith('error') ? w : 'connected'}`, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
       }
       return new Response(healthText(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
+
+    // טבלת הלקוחות (הקישור נשלח לחנן כשהוא כותב לבוט "טבלה")
+    if (url.pathname === '/table' && request.method === 'GET') {
+      const k = await tableKey(env);
+      if (!k || !safeEqual(url.searchParams.get('k') || '', k)) return new Response('forbidden', { status: 403 });
+      return renderTable(env, url);
+    }
+
+    // בדיקה עצמית אחרי כל העלאה: המוח האמיתי עונה על שיחה לדוגמה (בלי לשלוח כלום לאף אחד)
+    if (url.pathname === '/admin/selftest' && request.method === 'GET') {
+      const key = url.searchParams.get('key') || '';
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, env.WA_VERIFY_TOKEN)) return new Response('forbidden', { status: 403 });
+      return new Response(await selfTest(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     // הגדרה ובדיקה אוטומטית (רק עם מילת הסוד)
@@ -85,6 +101,28 @@ export default {
     else ctx.waitUntil(runEvery15(env, now));
   },
 };
+
+async function selfTest(env) {
+  const out = [];
+  const cases = [
+    { name: 'עברית', text: 'היי ננעלתי מחוץ לבית', lang: 'he' },
+    { name: 'אנגלית', text: "Hi, I'm locked out of my apartment", lang: 'en' },
+    { name: 'דחוף', text: 'דחוף!! הילד שלי נעול באוטו בשמש', urgent: true },
+  ];
+  for (const c of cases) {
+    const t = Date.now();
+    const r = await runTurn(env, { history: [{ role: 'user', text: c.text }], now: new Date() });
+    const problems = [];
+    if (r.failed) problems.push(`המוח לא ענה: ${r.summary_for_owner}`);
+    if (!r.reply) problems.push('תשובה ריקה');
+    if (c.lang && r.language !== c.lang) problems.push(`שפה ${r.language} במקום ${c.lang}`);
+    if (c.urgent && !r.urgent) problems.push('לא זיהה דחוף');
+    out.push(`${problems.length ? 'FAIL' : 'OK'} ${c.name} (${Date.now() - t}ms): ${problems.join('; ') || r.reply}`);
+  }
+  await env.DB.prepare('SELECT COUNT(*) FROM conversations').first();
+  out.push('OK מסד הנתונים');
+  return out.join('\n');
+}
 
 // מה חסר בהגדרות (רק שמות, אף פעם לא ערכים)
 export function healthText(env) {

@@ -7,6 +7,7 @@ import init1 from '../migrations/0001_init.sql';
 import init2 from '../migrations/0002_settings.sql';
 import init3 from '../migrations/0003_knowledge.sql';
 import init4 from '../migrations/0004_ultramsg.sql';
+import init5 from '../migrations/0005_leads.sql';
 
 export { processWebhook, runEvery15, weeklyReport, ilDateTimeLabel, ilParts, displayPhone, parseIlDateTime };
 
@@ -18,6 +19,7 @@ export function makeD1(SQL) {
   db.exec(init2);
   db.exec(init3);
   db.exec(init4);
+  db.exec(init5);
   return {
     raw: db,
     prepare(sql) {

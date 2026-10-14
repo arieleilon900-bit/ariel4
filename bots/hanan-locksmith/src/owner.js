@@ -4,6 +4,7 @@ import { upsertLead } from './sheets.js';
 import { displayPhone, ilParts, inServiceWindow, normalizePhone, nowIso, parseIlDateTime, whenLabel } from './util.js';
 import { aiRespond, customerLang, forwardPhotosToOwner, isPaused, logEvent, markOwnerReplied, sendToCustomer, sendToOwner } from './handler.js';
 import { weeklyReport } from './cron.js';
+import { tableLink } from './table.js';
 import { deliverReceipt } from './receipts.js';
 import * as wa from './whatsapp.js';
 
@@ -24,6 +25,7 @@ __RECEIPT_LINE__טופל ← טיפלת (למשל התקשרת), והבוט מפ
 מה למדת ← רשימת כל מה שלימדת את הבוט
 שכח 3 ← מוחק את שורה 3 מהרשימה
 דוח ← הסיכום השבועי עכשיו
+טבלה ← קישור לטבלה של כל הלקוחות
 סטטוס ← מה קורה עכשיו: פניות היום, מחכים לך, הבוט פועל או בהפסקה
 עצור בוט ← הבוט מפסיק לענות ללקוחות, והכל מגיע ישר אליך
 הפעל בוט ← הבוט חוזר לעבוד
@@ -57,6 +59,7 @@ export function parseCommand(text) {
   let m0;
   if (/^(עזרה|help|פקודות)$/i.test(t)) return { cmd: 'help' };
   if (/^דוח$/.test(t)) return { cmd: 'report' };
+  if (/^(טבלה|טבלת לקוחות|לקוחות)$/.test(t)) return { cmd: 'table' };
   if (/^סטטוס$/.test(t)) return { cmd: 'status' };
   if ((m0 = String(text || '').trim().match(/^(?:למד|תלמד)[:\s]+([\s\S]{3,})$/))) return { cmd: 'learn', fact: m0[1].trim() };
   if (/^(מה למדת|מה אתה יודע|רשימה)$/.test(t)) return { cmd: 'knowledge' };
@@ -189,7 +192,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
     return sendToOwner(env, `לא הבנתי את "${t.slice(0, 40)}". אם זו פקודה, כתוב "עזרה" לרשימה. אם זו הודעה ללקוח, כתוב משפט מלא.`, now, quoted);
   }
 
-  const needsPhone = !['help', 'report', 'unknown', 'status', 'pause', 'resume', 'learn', 'knowledge', 'forget'].includes(c.cmd);
+  const needsPhone = !['help', 'report', 'table', 'unknown', 'status', 'pause', 'resume', 'learn', 'knowledge', 'forget'].includes(c.cmd);
   if (needsPhone && c.phone == null) {
     if (!quoted) return sendToOwner(env, 'על איזה לקוח? ענה (החלקה ימינה) על ההודעה שקיבלת עליו, או כתוב גם את הטלפון. למשל: סיום 0541234567', now);
     c.phone = quoted;
@@ -202,6 +205,11 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
     case 'report':
       return weeklyReport(env, now);
+
+    case 'table': {
+      const link = await tableLink(env);
+      return sendToOwner(env, link ? `כל הלקוחות שלך, מתעדכן לבד:\n${link}\n\nשמור את הקישור. אל תעביר אותו לאחרים.` : 'הטבלה עוד לא מוגדרת (חסר WORKER_URL).', now);
+    }
 
     case 'learn': {
       const fact = c.fact.slice(0, 500);

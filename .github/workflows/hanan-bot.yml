@@ -84,3 +84,16 @@ jobs:
               echo "::notice::$name is not set in GitHub secrets yet"
             fi
           done
+
+      - name: Self-test (the real AI answers sample customers, nothing is sent)
+        if: steps.ready.outputs.go == 'true'
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          if [ -z "$url" ] || [ -z "$WA_VERIFY_TOKEN" ]; then echo "::notice::WORKER_URL or WA_VERIFY_TOKEN missing, skipping self-test"; exit 0; fi
+          sleep 5
+          out=$(curl -s -m 90 "$url/admin/selftest?key=$WA_VERIFY_TOKEN")
+          echo "$out"
+          curl -s -m 20 "$url/health"
+          echo "$out" | grep -q '^OK מסד' && ! echo "$out" | grep -q '^FAIL'
