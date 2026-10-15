@@ -207,6 +207,7 @@ const ACTIONS = {
   bot: (p) => `בוט ${p}`,
   learn: (p, f) => { const t = String(f.get('fact') || '').replace(/\s+/g, ' ').trim().slice(0, 500); return t.length >= 3 ? `למד ${t}` : ''; },
   block: (p) => `חסום ${p}`,
+  quiet: (p) => `שקט ${p}`,
 };
 
 function page(title, body) {
@@ -257,7 +258,7 @@ ${[15, 30, 45, 60].map((m) => f('eta', `${m} דק'`, '', `<input type="hidden" n
 <div class="card"><h2>סיימתי</h2><div class="row">
 ${f('done', '✓ סיימתי את העבודה', 'g')}</div><div style="color:var(--mute);font-size:14px">אחרי 3 שעות הלקוח מקבל בקשה לביקורת בגוגל.</div></div>
 <div class="card"><h2>עוד</h2><div class="row">
-${f('handled', 'חזרתי אליו בטלפון', 'n')}${f('irrelevant', 'לא רלוונטי', 'n')}${f('cancel', 'העבודה בוטלה', 'n')}${f('bot', 'שהבוט יענה לו', 'n')}${f('block', 'ספאם, לחסום', 'n')}</div></div>
+${f('handled', 'חזרתי אליו בטלפון', 'n')}${f('irrelevant', 'לא רלוונטי', 'n')}${f('cancel', 'העבודה בוטלה', 'n')}${f('quiet', 'מכיר אותו: שהבוט לא יענה לו', 'n')}${f('bot', 'שהבוט יענה לו', 'n')}${f('block', 'ספאם, לחסום', 'n')}</div></div>
 <div class="card"><h2>ללמד את הבוט (מעכשיו הוא עונה ככה לכל הלקוחות)</h2>
 <form method="post" class="row"><input type="hidden" name="act" value="learn"><input name="fact" placeholder="למשל: פריצת רכב עולה 250-400 ₪" aria-label="מה ללמד"><button>למד</button></form></div>
 <p><a href="https://wa.me/${phone}">וואטסאפ ללקוח</a></p>`);
