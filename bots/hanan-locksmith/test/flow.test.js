@@ -834,7 +834,7 @@ test('/admin/setup: wires the webhook, creates missing templates, checks keys; n
   } finally { globalThis.fetch = orig; }
 });
 
-test('receipts off (the default for Hanan): no Yesh polling, PDFs are plain files, no receipt in help', async () => {
+test('receipts off: no Yesh polling, PDFs are plain files, no receipt in help', async () => {
   FEATURES.receipts = false;
   try {
     sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];

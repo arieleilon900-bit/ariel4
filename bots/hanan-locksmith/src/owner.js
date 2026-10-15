@@ -32,7 +32,7 @@ __RECEIPT_LINE__טופל ← טיפלת (למשל התקשרת), והבוט מפ
 עזרה ← הרשימה הזו
 
 אפשר גם בלי לענות על הודעה: כותבים את הטלפון אחרי הפקודה. למשל: סיום 0541234567`;
-export const HELP = HELP_TEXT.replace('__RECEIPT_LINE__', FEATURES.receipts ? 'קבלה ← מעבירים לבוט את ה-PDF מיש חשבונית (בתשובה על הלקוח, או עם הטלפון שלו בכיתוב)\n' : '');
+export const helpText = () => HELP_TEXT.replace('__RECEIPT_LINE__', FEATURES.receipts ? 'קבלה ← מעבירים לבוט את ה-PDF מיש חשבונית (בתשובה על הלקוח, או עם הטלפון שלו בכיתוב)\n' : '');
 
 const PHONE = String.raw`(\+?\d[\d\-]{7,15})`;
 // מילים שפותחות פקודה: טקסט שמתחיל בהן לא נשלח ללקוח גם אם לא הבנו אותו
@@ -211,7 +211,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
 
   switch (c.cmd) {
     case 'help':
-      return sendToOwner(env, HELP, now);
+      return sendToOwner(env, helpText(), now);
 
     case 'report':
       return weeklyReport(env, now);

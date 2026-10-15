@@ -61,9 +61,9 @@ export const BUSINESS = {
   ],
 };
 
-// מה פעיל בבוט. receipts = שליחת קבלות ללקוח (מיש חשבונית אוטומטית, או PDF שחנן מעביר). כבוי: חנן לא רוצה קבלות דרך הבוט
+// מה פעיל בבוט. receipts = שליחת קבלות ללקוח (מיש חשבונית אוטומטית, או PDF שחנן מעביר לבוט)
 export const FEATURES = {
-  receipts: false,
+  receipts: true,
 };
 
 // תזמונים
