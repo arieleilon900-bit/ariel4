@@ -1,7 +1,7 @@
 // משימות מתוזמנות: כל 15 דקות (תזכורות, מעקבים, ביקורות, קבלות), וכל יום ראשון (דוח שבועי).
 import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
 import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
-import { customerLang, logEvent, sendToCustomer, sendToOwner } from './handler.js';
+import { customerLang, flushDueSummaries, logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
 import { deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
@@ -23,6 +23,7 @@ export async function runEvery15(env, now = new Date()) {
   setWindowAlwaysOpen(isUltra(env));
   // כל שלב בנפרד: תקלה באחד (למשל רשת) לא עוצרת את השאר
   const step = async (name, fn) => { try { await fn(env, now); } catch (err) { console.error(`cron ${name} failed`, err); } };
+  await step('summaries', flushDueSummaries);
   await step('appointments', appointmentReminders);
   await step('agenda', ownerAgenda);
   await step('owner job reminders', ownerJobReminders);

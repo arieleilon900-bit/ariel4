@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -83,7 +83,7 @@ const CUSTOMER = '972541234567';
 function makeEnv() {
   return {
     DB: makeD1(), WA_TOKEN: 't', WA_PHONE_NUMBER_ID: '123', OWNER_PHONE: OWNER, ANTHROPIC_API_KEY: 'k',
-    REVIEW_LINK: 'https://g.page/r/test/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '0',
+    REVIEW_LINK: 'https://g.page/r/test/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '0', SUMMARY_SETTLE_MIN: '0',
     AI: { run: async () => ({ text: 'ננעלתי בחוץ ברחוב הרצל' }) },
   };
 }
@@ -1221,4 +1221,67 @@ test('after handoff: customer stops in the middle of new details → Hanan gets 
   const partial = sent.filter((m) => m.to === OWNER && /התחיל\/ה להוסיף/.test(m.text?.body || ''));
   assert.equal(partial.length, 1, 'one partial update');
   assert.match(partial[0].text.body, /גם ננעלתי מחוץ לבית/);
+});
+
+test('one report at the end of the conversation: Hanan gets nothing while the customer is still writing, then ONE summary with everything', async () => {
+  sent.length = 0;
+  const { flushDueSummaries } = await import('../src/handler.js');
+  const env = { ...makeEnv(), SUMMARY_SETTLE_MIN: '3' };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  const at = (min) => new Date(t0.getTime() + min * 60000);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סטטוס' } }, 's0'), t0); // חלון פתוח לחנן
+  const base = () => sent.filter((m) => m.to === OWNER).length;
+  const b0 = base();
+  aiQueue = [ai({ reply: 'העברתי לחנן, אפשר תמונה של המנעול?', issue: 'ננעל מחוץ לבית', address: 'הרצל 5 חולון', customer_name: 'יוסי', ready_for_handoff: true, summary_for_owner: 'ננעל בחוץ' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ הרצל 5 חולון' } }, 's1'), at(0));
+  aiQueue = [ai({ reply: 'תודה, קיבלתי', ready_for_handoff: true, summary_for_owner: 'ננעל בחוץ. צילינדר רגיל, הדלת של רב-בריח' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'image', image: { id: 'lock1', caption: '' } }, 's2'), at(1));
+  aiQueue = [ai({ reply: 'בשמחה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'תודה רבה' } }, 's3'), at(2));
+  await flushDueSummaries(env, at(4)); // רק דקתיים מההודעה האחרונה
+  await runEvery15(env, at(4));
+  assert.equal(base(), b0, 'nothing reaches Hanan while the conversation is still going');
+  await flushDueSummaries(env, at(5.5));
+  const out = sent.filter((m) => m.to === OWNER).slice(b0);
+  const texts = out.filter((m) => m.type === 'text');
+  assert.equal(texts.length, 1, 'exactly one report');
+  assert.match(texts[0].text.body, /פנייה חדשה/);
+  assert.match(texts[0].text.body, /רב-בריח/);
+  assert.match(texts[0].text.body, /הרצל 5 חולון/);
+  assert.match(texts[0].text.body, /יוסי/);
+  assert.equal(out.filter((m) => m.type === 'image').length, 1, 'the photo comes with it');
+  await flushDueSummaries(env, at(10));
+  assert.equal(sent.filter((m) => m.to === OWNER).length, b0 + out.length, 'sent once');
+  // התזכורת לחנן נספרת מרגע שהדוח הגיע אליו
+  const conv = env.DB.raw.prepare('SELECT * FROM conversations').get();
+  assert.equal(conv.handed_off_at, at(5.5).toISOString());
+
+  // לקוח שכותב בלי הפסקה: חנן לא מחכה יותר מ-15 דקות
+  const C2 = '972547777777';
+  aiQueue = [ai({ reply: 'העברתי', issue: 'רכב', address: 'בן יהודה 1', ready_for_handoff: true })];
+  await processWebhook(env, inbound(C2, { type: 'text', text: { body: 'הרכב נעול בן יהודה 1' } }, 'c1'), at(20));
+  for (let i = 1; i <= 7; i++) {
+    aiQueue = [ai({ reply: 'אוקיי' })];
+    await processWebhook(env, inbound(C2, { type: 'text', text: { body: `עוד פרט ${i}` } }, `c1-${i}`), at(20 + i * 2));
+    await flushDueSummaries(env, at(20 + i * 2));
+  }
+  assert.equal(sent.filter((m) => m.to === OWNER && /בן יהודה/.test(m.text?.body || '')).length, 0, 'still writing at minute 14: not yet');
+  await flushDueSummaries(env, at(35));
+  assert.equal(sent.filter((m) => m.to === OWNER && /בן יהודה/.test(m.text?.body || '')).length, 1, 'cap: sent after 15 minutes even though he kept writing');
+
+  // דחוף: מיד, בלי לחכות
+  const C3 = '972546666666';
+  aiQueue = [ai({ reply: 'חנן מקבל את זה עכשיו', issue: 'ילד נעול ברכב', address: 'הרצל 9', urgent: true, urgent_reason: 'ילד ברכב', ready_for_handoff: true })];
+  await processWebhook(env, inbound(C3, { type: 'text', text: { body: 'הילד נעול ברכב!!' } }, 'u1'), at(60));
+  assert.ok(sent.some((m) => m.to === OWNER && /פנייה דחופה/.test(m.text?.body || '') && /ילד נעול ברכב/.test(m.text.body)), 'urgent goes out at once');
+
+  // לקוח שוויתר לפני שהדוח יצא: חנן לא מקבל כלום
+  const C4 = '972545555555';
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'דלת', address: 'סוקולוב 3', ready_for_handoff: true })];
+  await processWebhook(env, inbound(C4, { type: 'text', text: { body: 'ננעלתי סוקולוב 3' } }, 'd1'), at(90));
+  aiQueue = [ai({ reply: 'אין בעיה, בהצלחה', customer_done: true })];
+  await processWebhook(env, inbound(C4, { type: 'text', text: { body: 'הסתדרתי, תודה' } }, 'd2'), at(91));
+  await flushDueSummaries(env, at(100));
+  assert.equal(sent.filter((m) => m.to === OWNER && /סוקולוב/.test(m.text?.body || '')).length, 0, 'customer gave up before the report: nothing to Hanan');
+  assert.equal(env.DB.raw.prepare('SELECT state FROM conversations WHERE phone = ?').get(C4).state, 'closed');
 });

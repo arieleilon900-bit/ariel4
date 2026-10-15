@@ -5,7 +5,7 @@ compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
 [triggers]
-crons = ["*/15 * * * *", "0 6 * * SUN"]
+crons = ["* * * * *", "*/15 * * * *", "0 6 * * SUN"]
 
 [[d1_databases]]
 binding = "DB"

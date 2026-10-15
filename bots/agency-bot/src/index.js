@@ -2,7 +2,7 @@
 // GET /webhook  ← אימות של Meta בזמן החיבור
 // POST /webhook ← הודעות נכנסות מוואטסאפ
 // cron          ← תזכורות, מעקבים ודוח שבועי
-import { handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
+import { flushDueSummaries, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isUltra, verifySignature } from './whatsapp.js';
@@ -105,6 +105,8 @@ export default {
   async scheduled(event, env, ctx) {
     const now = new Date(event.scheduledTime || Date.now());
     setWindowAlwaysOpen(isUltra(env));
+    // כל דקה: רק הסיכומים לבעל העסק שהגיע הזמן שלהם (הלקוח סיים לכתוב)
+    if (event.cron === '* * * * *') { ctx.waitUntil(flushDueSummaries(env, now)); return; }
     if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
     if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));

@@ -70,7 +70,7 @@ async function partialHandoff(env, conv, now, title = 'לקוח התחיל לכ�
 
 // 1ב. אחרי ההעברה הלקוח התחיל להוסיף פרטים (הבוט שאל שאלה), ונעלם באמצע: אחרי 30 דקות חנן מקבל את מה שנאסף
 async function unfinishedUpdates(env, now) {
-  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND handed_off_at >= ?")
+  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND summary_due_at IS NULL AND handed_off_at >= ?")
     .bind(new Date(now.getTime() - 72 * 3600000).toISOString()).all()).results;
   for (const conv of convs) {
     const lastUpd = (await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'owner_update'").bind(conv.id).first())?.id;
@@ -97,7 +97,7 @@ async function unfinishedUpdates(env, now) {
 
 // 2. חנן קיבל פנייה ועוד לא טיפל בה
 async function ownerNudges(env, now) {
-  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND owner_nudges < 2 AND handed_off_at >= ?")
+  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND owner_replied_at IS NULL AND owner_nudges < 2 AND summary_due_at IS NULL AND handed_off_at >= ?")
     .bind(new Date(now.getTime() - 72 * 3600000).toISOString()).all()).results; // 72 שעות: פנייה מליל שישי מקבלת תזכורת ביום ראשון
   for (const conv of convs) {
     if (restNow(now) && BUSINESS.shabbat?.enabled) continue; // שומר שבת: לא מזכירים, גם לא דחוף

@@ -341,6 +341,15 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
   // בזמן שה-AI חשב, השיחה עברה לחנן (הודעה קודמת, או שחנן ענה מהאפליקציה): ההודעה הזו עוברת אליו
   const state = (await env.DB.prepare('SELECT state FROM conversations WHERE id = ?').bind(conv.id).first())?.state;
   if (state !== 'bot') {
+    // הסיכום לחנן עוד מחכה לסוף השיחה: הפרטים נכנסים אליו, בלי הודעה נפרדת
+    const pend = await env.DB.prepare('SELECT summary_due_at FROM conversations WHERE id = ?').bind(conv.id).first();
+    if (state === 'handoff' && pend?.summary_due_at) {
+      await env.DB.prepare('UPDATE conversations SET issue = COALESCE(NULLIF(?, \'\'), issue), address = COALESCE(NULLIF(?, \'\'), address), urgent = MAX(urgent, ?) WHERE id = ?')
+        .bind(result.issue, result.address, result.urgent ? 1 : 0, conv.id).run();
+      await scheduleSummary(env, conv.id, { kind: 'new', note: result.summary_for_owner }, now);
+      if (result.urgent) await flushSummary(env, conv.id, now, { urgent_reason: result.urgent_reason });
+      return;
+    }
     if (state === 'handoff') {
       await sendToOwner(env, `${result.urgent ? '🚨 דחוף! ' : ''}💬 ${customer?.name || ''} ${displayPhone(phone)} כתב/ה: ${content.text}`.trim(), now, phone);
       if (content.photoId) await forwardPhotosToOwner(env, [content.photoId], now, phone);
@@ -390,22 +399,19 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     const moved = await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ? AND state = 'bot'")
       .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();
     if (!moved.meta?.changes) {
-      // תור אחר כבר העביר לחנן: לפחות ההודעה הזו מגיעה אליו
+      // תור אחר כבר העביר לחנן. אם הסיכום עוד מחכה, הוא פשוט יכלול גם את זה
+      if ((await env.DB.prepare('SELECT summary_due_at FROM conversations WHERE id = ?').bind(conv.id).first())?.summary_due_at) {
+        await scheduleSummary(env, conv.id, { kind: 'new', note: result.summary_for_owner }, now);
+        if (result.urgent) await flushSummary(env, conv.id, now, { urgent_reason: result.urgent_reason });
+        return;
+      }
       await sendToOwner(env, `${result.urgent ? '🚨 דחוף! ' : ''}💬 ${displayPhone(phone)} כתב/ה: ${content.text}`, now, phone);
       return;
     }
-    const fresh = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
-    const name = result.customer_name || customer?.name || contactName || '';
-    await logEvent(env, result.urgent ? 'urgent' : 'handoff', phone, now);
-    // הודעות קוליות: חנן מקבל את התמלול המלא, לא רק את הסיכום של ה-AI
-    const voices = (await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' AND text LIKE '[הודעה קולית]%' ORDER BY id").bind(conv.id).all()).results;
-    const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
-    const table = await tableLink(env);
-    const summaryText = ownerSummary(fresh, { ...result, customer_name: name }, phone, now) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
-    await sendToOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
-    await forwardPhotosToOwner(env, JSON.parse(fresh.photos || '[]'), now, phone);
-    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(conv.id, nowIso(now)).run();
-    await upsertLead(env, phone, { status: result.urgent ? `דחוף, הועבר ל${BUSINESS.ownerName}` : `הועבר ל${BUSINESS.ownerName}`, name, issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
+    // הסיכום לחנן לא יוצא מיד: הבוט ממשיך לדבר עם הלקוח, וחנן מקבל דוח אחד כשהלקוח סיים לכתוב.
+    // דחוף: מיד
+    await scheduleSummary(env, conv.id, { kind: 'new', note: result.summary_for_owner }, now);
+    if (result.urgent) await flushSummary(env, conv.id, now, { urgent_reason: result.urgent_reason });
   }
 }
 
@@ -431,21 +437,96 @@ async function afterHandoffTurn(env, { conv, phone, customer, contactName, conte
   await env.DB.prepare('UPDATE conversations SET issue = COALESCE(NULLIF(?, \'\'), issue), address = COALESCE(NULLIF(?, \'\'), address), urgent = MAX(urgent, ?) WHERE id = ?')
     .bind(result.issue, result.address, result.urgent ? 1 : 0, conv.id).run();
   const becameUrgent = result.urgent && !fresh.urgent;
+  // הסיכום לחנן עוד לא יצא (הלקוח עדיין באמצע השיחה): כל מה שנאסף נכנס לסיכום אחד, והשעון מתחיל מחדש
+  if (fresh.summary_due_at) {
+    if (result.customer_done && fresh.summary_kind === 'new') {
+      // הלקוח ויתר לפני שחנן שמע עליו: לא מטרידים את חנן בכלל
+      await env.DB.prepare("UPDATE conversations SET summary_due_at = NULL, state = 'closed', followup_sent = 1, customer_nudges = 2 WHERE id = ?").bind(conv.id).run();
+      await logEvent(env, 'customer_done', phone, now);
+      await upsertLead(env, phone, { status: 'הלקוח ויתר', name, issue: updatedIssue(fresh, result), address: result.address || fresh.address, note: result.summary_for_owner }, now);
+      return;
+    }
+    const kind = result.customer_done ? 'cancel' : (result.ready_for_handoff ? 'update' : fresh.summary_kind);
+    await scheduleSummary(env, conv.id, { kind, note: result.summary_for_owner || (result.customer_done ? 'הלקוח כתב שכבר לא צריך.' : '') }, now);
+    if (becameUrgent) await flushSummary(env, conv.id, now, { becameUrgent: true, urgent_reason: result.urgent_reason });
+    return;
+  }
   if (!result.ready_for_handoff && !becameUrgent && !result.customer_done) return; // עדיין אוסף פרטים, או סתם תודה
-  // סיכום אחד מעודכן, עם כל התמונות שהגיעו מאז הסיכום הקודם
-  const lastUpdate = (await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'owner_update'").bind(conv.id).first())?.id || 0;
-  const media = (await env.DB.prepare("SELECT media_id FROM messages WHERE conv_id = ? AND role = 'user' AND media_id IS NOT NULL AND id > ? ORDER BY id").bind(conv.id, lastUpdate).all()).results.map((r) => r.media_id);
-  const updated = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(conv.id).first();
-  const body = ownerSummary(updated, { ...result, customer_name: name, summary_for_owner: result.summary_for_owner || (result.customer_done ? 'הלקוח כתב שכבר לא צריך.' : '') }, phone, now)
-    .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, becameUrgent ? '🚨 עדכון דחוף לפנייה' : (result.customer_done ? '❎ הלקוח ביטל' : '🔄 עדכון לפנייה'));
+  await scheduleSummary(env, conv.id, { kind: result.customer_done ? 'cancel' : 'update', note: result.summary_for_owner || (result.customer_done ? 'הלקוח כתב שכבר לא צריך.' : '') }, now);
+  if (becameUrgent) await flushSummary(env, conv.id, now, { becameUrgent: true, urgent_reason: result.urgent_reason });
+}
+
+const updatedIssue = (conv, result) => result.issue || conv.issue || '';
+
+// כמה דקות של שקט מהלקוח לפני שחנן מקבל את הסיכום. ככה הוא מקבל דוח אחד בסוף השיחה, לא הודעה על כל הודעה
+const settleMinutes = (env) => (env.SUMMARY_SETTLE_MIN != null && env.SUMMARY_SETTLE_MIN !== '' ? +env.SUMMARY_SETTLE_MIN : 3);
+// וגם אם הלקוח ממשיך לכתוב בלי הפסקה, חנן לא מחכה יותר מזה
+const SETTLE_CAP_MINUTES = 15;
+
+// קובע (או דוחה) את הסיכום לחנן. כל הודעה של הלקוח מתחילה את השעון מחדש
+async function scheduleSummary(env, convId, { kind, note = '' }, now) {
+  const c = await env.DB.prepare('SELECT summary_due_at, summary_since, summary_kind FROM conversations WHERE id = ?').bind(convId).first();
+  const pending = !!c?.summary_due_at;
+  const since = pending ? c.summary_since : nowIso(now);
+  // פנייה חדשה שעוד לא נשלחה נשארת "פנייה חדשה" גם אם הלקוח הוסיף פרטים
+  const finalKind = pending && c.summary_kind === 'new' ? 'new' : kind;
+  const due = new Date(Math.min(now.getTime() + settleMinutes(env) * 60000, new Date(since).getTime() + SETTLE_CAP_MINUTES * 60000)).toISOString();
+  await env.DB.prepare("UPDATE conversations SET summary_due_at = ?, summary_since = ?, summary_kind = ?, owner_note = COALESCE(NULLIF(?, ''), owner_note) WHERE id = ?")
+    .bind(due, since, finalKind, note || '', convId).run();
+  if (settleMinutes(env) <= 0) await flushSummary(env, convId, now);
+}
+
+// שולח לחנן את הסיכום שמחכה (נקרא מה-cron כל דקה, או מיד כשזה דחוף)
+export async function flushSummary(env, convId, now = new Date(), extra = {}) {
+  const c = await env.DB.prepare('SELECT * FROM conversations WHERE id = ?').bind(convId).first();
+  if (!c?.summary_due_at) return;
+  // רק פעם אחת, גם אם שני תהליכים הגיעו ביחד
+  const claim = await env.DB.prepare('UPDATE conversations SET summary_due_at = NULL WHERE id = ? AND summary_due_at = ?').bind(convId, c.summary_due_at).run();
+  if (!claim.meta?.changes) return;
+  const phone = c.phone;
+  const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(phone).first();
+  const name = cust?.name || '';
+  const urgent = !!c.urgent;
+  const res = { customer_name: name, urgent, urgent_reason: extra.urgent_reason || '', summary_for_owner: c.owner_note || '' };
+
+  if (c.summary_kind === 'new') {
+    await logEvent(env, urgent ? 'urgent' : 'handoff', phone, now);
+    // הודעות קוליות: חנן מקבל את התמלול המלא, לא רק את הסיכום של ה-AI
+    const voices = (await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' AND text LIKE '[הודעה קולית]%' ORDER BY id").bind(convId).all()).results;
+    const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
+    const table = await tableLink(env);
+    const summaryText = ownerSummary(c, res, phone, now) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
+    await sendToOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
+    await forwardPhotosToOwner(env, JSON.parse(c.photos || '[]'), now, phone);
+    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(convId, nowIso(now)).run();
+    // התזכורות לחנן נספרות מרגע שהסיכום הגיע אליו
+    await env.DB.prepare('UPDATE conversations SET handed_off_at = ? WHERE id = ?').bind(nowIso(now), convId).run();
+    await upsertLead(env, phone, { status: urgent ? `דחוף, הועבר ל${BUSINESS.ownerName}` : `הועבר ל${BUSINESS.ownerName}`, name, issue: c.issue || '', address: c.address || '', urgent, note: c.owner_note || '' }, now);
+    return;
+  }
+
+  // עדכון לפנייה שחנן כבר קיבל: סיכום מעודכן אחד, עם התמונות שהגיעו מאז הסיכום הקודם
+  const cancel = c.summary_kind === 'cancel';
+  const lastUpdate = (await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'owner_update'").bind(convId).first())?.id || 0;
+  const media = (await env.DB.prepare("SELECT media_id FROM messages WHERE conv_id = ? AND role = 'user' AND media_id IS NOT NULL AND id > ? ORDER BY id").bind(convId, lastUpdate).all()).results.map((r) => r.media_id);
+  const body = ownerSummary(c, res, phone, now)
+    .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, extra.becameUrgent ? '🚨 עדכון דחוף לפנייה' : (cancel ? '❎ הלקוח ביטל' : '🔄 עדכון לפנייה'));
   await sendToOwner(env, body, now, phone);
-  await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(conv.id, nowIso(now)).run();
+  await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(convId, nowIso(now)).run();
   if (media.length) await forwardPhotosToOwner(env, media, now, phone);
-  if (result.customer_done) {
-    await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(conv.id).run();
+  if (cancel) {
+    await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(convId).run();
     await upsertLead(env, phone, { status: 'הלקוח ויתר' }, now);
   } else {
-    await upsertLead(env, phone, { status: becameUrgent ? `דחוף, הועבר ל${BUSINESS.ownerName}` : `עודכן ל${BUSINESS.ownerName}`, issue: result.issue, address: result.address, urgent: result.urgent, note: result.summary_for_owner }, now);
+    await upsertLead(env, phone, { status: urgent && extra.becameUrgent ? `דחוף, הועבר ל${BUSINESS.ownerName}` : `עודכן ל${BUSINESS.ownerName}`, issue: c.issue || '', address: c.address || '', urgent, note: c.owner_note || '' }, now);
+  }
+}
+
+// כל הסיכומים שהגיע הזמן שלהם (cron כל דקה)
+export async function flushDueSummaries(env, now = new Date()) {
+  const due = (await env.DB.prepare('SELECT id FROM conversations WHERE summary_due_at IS NOT NULL AND summary_due_at <= ?').bind(nowIso(now)).all()).results;
+  for (const r of due) {
+    try { await flushSummary(env, r.id, now); } catch (err) { console.error('summary flush failed', r.id, err); }
   }
 }
 
