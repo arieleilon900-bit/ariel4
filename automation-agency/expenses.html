@@ -1,0 +1,269 @@
+<title>הוצאות עונה ראשון</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a running ledger — monthly burn and margin on top, the full list of what we pay for below, add form at the end. Steel and brass, same family as the bot map. */
+:root {
+  --bg: #f3f5f7; --panel: #ffffff; --ink: #18202a; --mute: #5a6573; --line: #dde2e8;
+  --steel: #2f4458; --brass: #a8761c; --brass-soft: #f6ecd8;
+  --ok: #1d7a46; --ok-soft: #e3f3ea; --warn: #9a5b00; --warn-soft: #fbf0dc; --bad: #b3261e; --bad-soft: #fbe6e4;
+  --display: "Secular One", "IBM Plex Sans Hebrew", "Arial Hebrew", sans-serif;
+  --body: "IBM Plex Sans Hebrew", "Arial Hebrew", "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161c; --panel: #18202a; --ink: #e8edf2; --mute: #9aa6b4; --line: #2a3542;
+    --steel: #8fb0cf; --brass: #e0b25a; --brass-soft: #2e2716;
+    --ok: #5fcf8f; --ok-soft: #15291e; --warn: #f0b860; --warn-soft: #2d2412; --bad: #ff8a80; --bad-soft: #3a1b19; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #18202a; --ink: #e8edf2; --mute: #9aa6b4; --line: #2a3542;
+  --steel: #8fb0cf; --brass: #e0b25a; --brass-soft: #2e2716;
+  --ok: #5fcf8f; --ok-soft: #15291e; --warn: #f0b860; --warn-soft: #2d2412; --bad: #ff8a80; --bad-soft: #3a1b19; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); direction: rtl; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+h1, h2 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 38px); }
+h2 { font-size: 20px; color: var(--steel); }
+p { margin: 0; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--brass); font-weight: 700; }
+.lead { color: var(--mute); max-width: 64ch; }
+.num { font-variant-numeric: tabular-nums; }
+.ltr { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.tile.key { border-color: var(--brass); box-shadow: 0 0 0 3px var(--brass-soft); }
+.tile .k { color: var(--mute); font-size: 13px; }
+.tile .v { font-family: var(--display); font-size: 28px; line-height: 1.2; }
+.tile .s { color: var(--mute); font-size: 12px; }
+.v.pos { color: var(--ok); } .v.neg { color: var(--bad); }
+
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--steel); color: var(--bg); border-color: var(--steel); }
+
+.tbl { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; min-width: 820px; }
+th, td { text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; color: var(--mute); font-weight: 600; background: var(--bg); letter-spacing: .03em; }
+tr:last-child td { border-bottom: 0; }
+td .sub { color: var(--mute); font-size: 12px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.active { background: var(--ok-soft); color: var(--ok); }
+.pill.planned { background: var(--warn-soft); color: var(--warn); }
+.pill.canceled { background: var(--bg); color: var(--mute); }
+.est { font-size: 11px; color: var(--warn); font-weight: 600; }
+.acts { white-space: nowrap; display: flex; gap: 6px; }
+.btn { font: inherit; font-size: 13px; border-radius: 8px; padding: 5px 10px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.btn:focus-visible, .chip:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+.btn.primary { background: var(--steel); border-color: var(--steel); color: var(--bg); font-weight: 600; }
+.btn.danger { color: var(--bad); }
+.btn.danger.armed { background: var(--bad); color: var(--bg); border-color: var(--bad); }
+
+form { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+label { display: grid; gap: 4px; font-size: 13px; color: var(--mute); min-width: 0; }
+input, select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.msg { font-size: 13px; color: var(--mute); }
+.msg.err { color: var(--bad); }
+.empty { padding: 28px; text-align: center; color: var(--mute); }
+.rates { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.rates label { width: 120px; }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:8px">
+    <div class="eyebrow">עונה ראשון</div>
+    <h1>הוצאות עונה ראשון</h1>
+    <p class="lead">כל מה שאנחנו משלמים עליו, בשקלים. כל קנייה חדשה נכנסת לכאן, והסיכום למעלה מתעדכן לבד. סכומים בדולר וביורו מומרים לפי השערים שבתחתית העמוד.</p>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="סיכום">
+    <div class="tile key"><span class="k">הוצאה חודשית קבועה</span><span class="v num" id="t-monthly">—</span><span class="s" id="t-monthly-s">טוען…</span></div>
+    <div class="tile"><span class="k">מתוכנן להוסיף בחודש</span><span class="v num" id="t-planned">—</span><span class="s">כשנחבר את חנן בדרך הרשמית</span></div>
+    <div class="tile"><span class="k">שילמנו חד-פעמי</span><span class="v num" id="t-once">—</span><span class="s">טעינות, רכישות, הקמה</span></div>
+    <div class="tile"><span class="k">נשאר בחודש מחנן</span><span class="v num" id="t-net">—</span><span class="s" id="t-net-s">הכנסה פחות הוצאות</span></div>
+  </section>
+
+  <section style="display:grid;gap:12px" aria-labelledby="h-list">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="h-list">מה אנחנו משלמים</h2>
+      <div class="bar" role="group" aria-label="סינון">
+        <button class="chip" data-f="all" aria-pressed="true">הכל</button>
+        <button class="chip" data-f="active" aria-pressed="false">פעיל</button>
+        <button class="chip" data-f="planned" aria-pressed="false">מתוכנן</button>
+        <button class="chip" data-f="canceled" aria-pressed="false">בוטל</button>
+      </div>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>מה</th><th>קטגוריה</th><th>סכום</th><th>בשקלים</th><th>תדירות</th><th>מצב</th><th>מאז</th><th>על שם</th><th></th></tr></thead>
+        <tbody id="rows"><tr><td colspan="9" class="empty">טוען את ההוצאות…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="msg" id="status-msg"></p>
+  </section>
+
+  <section style="display:grid;gap:12px" aria-labelledby="h-add" id="add-section">
+    <h2 id="h-add">קנינו משהו חדש</h2>
+    <form id="add" autocomplete="off">
+      <div class="grid">
+        <label for="f-name">מה קנינו<input id="f-name" required maxlength="80" placeholder="למשל: דומיין לאתר של חנן"></label>
+        <label for="f-cat">קטגוריה<select id="f-cat"><option>שרת</option><option>AI</option><option>וואטסאפ</option><option>כלים</option><option>שיווק</option><option>אחר</option></select></label>
+        <label for="f-amount">סכום<input id="f-amount" type="number" min="0" step="0.01" required inputmode="decimal"></label>
+        <label for="f-cur">מטבע<select id="f-cur"><option value="ILS">₪ שקל</option><option value="USD">$ דולר</option><option value="EUR">€ יורו</option></select></label>
+        <label for="f-cad">תדירות<select id="f-cad"><option value="monthly">כל חודש</option><option value="yearly">כל שנה</option><option value="once">חד-פעמי</option><option value="usage">לפי שימוש (הערכה לחודש)</option></select></label>
+        <label for="f-status">מצב<select id="f-status"><option value="active">פעיל / שולם</option><option value="planned">מתוכנן</option></select></label>
+        <label for="f-date">מתאריך<input id="f-date" type="date"></label>
+        <label for="f-owner">על שם<input id="f-owner" maxlength="40" placeholder="מייל העסק / אריאל / השותף"></label>
+      </div>
+      <label for="f-note">הערה<input id="f-note" maxlength="160" placeholder="לא חובה"></label>
+      <div class="row">
+        <button class="btn primary" type="submit">הוספה לטבלה</button>
+        <label class="row" style="color:var(--ink);font-size:13px" for="f-est"><input id="f-est" type="checkbox" style="width:auto"> הסכום הוא הערכה</label>
+        <span class="msg" id="add-msg"></span>
+      </div>
+    </form>
+  </section>
+
+  <section style="display:grid;gap:10px" aria-labelledby="h-rates">
+    <h2 id="h-rates">שערים והכנסה</h2>
+    <div class="rates">
+      <label for="r-usd">דולר בשקלים<input id="r-usd" type="number" step="0.01" min="0"></label>
+      <label for="r-eur">יורו בשקלים<input id="r-eur" type="number" step="0.01" min="0"></label>
+      <label for="r-inc" style="width:170px">הכנסה חודשית מחנן (₪, לפני מע"מ)<input id="r-inc" type="number" step="1" min="0"></label>
+      <button class="btn" id="save-rates" type="button">שמירה</button>
+      <span class="msg" id="rates-msg"></span>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const CAD = { monthly: 'כל חודש', yearly: 'כל שנה', once: 'חד-פעמי', usage: 'לפי שימוש' };
+  const STATUS = { active: 'פעיל', planned: 'מתוכנן', canceled: 'בוטל' };
+  const SYM = { ILS: '₪', USD: '$', EUR: '€' };
+  let rates = { USD: 3.7, EUR: 4.0, income: 500 };
+  let items = [];
+  let filter = 'all';
+  let db = null, canWrite = true;
+  let armed = null;
+
+  const ils = (n) => '₪' + Math.round(n).toLocaleString('he-IL');
+  const toIls = (it) => Number(it.amount || 0) * (it.currency === 'ILS' ? 1 : Number(rates[it.currency] || 0));
+  const monthlyOf = (it) => it.cadence === 'monthly' || it.cadence === 'usage' ? toIls(it) : it.cadence === 'yearly' ? toIls(it) / 12 : 0;
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function render() {
+    const act = items.filter((i) => i.status === 'active');
+    const monthly = act.reduce((s, i) => s + monthlyOf(i), 0);
+    const planned = items.filter((i) => i.status === 'planned').reduce((s, i) => s + monthlyOf(i), 0);
+    const once = act.filter((i) => i.cadence === 'once').reduce((s, i) => s + toIls(i), 0);
+    $('t-monthly').textContent = ils(monthly);
+    $('t-monthly-s').textContent = `${act.filter((i) => i.cadence !== 'once').length} מנויים פעילים`;
+    $('t-planned').textContent = planned ? '+' + ils(planned) : ils(0);
+    $('t-once').textContent = ils(once);
+    const net = Number(rates.income || 0) - monthly;
+    $('t-net').textContent = ils(net);
+    $('t-net').className = 'v num ' + (net >= 0 ? 'pos' : 'neg');
+    $('t-net-s').textContent = `${ils(rates.income || 0)} פחות ${ils(monthly)}. עם המתוכנן: ${ils(net - planned)}`;
+
+    const list = items.filter((i) => filter === 'all' || i.status === filter)
+      .sort((a, b) => ({ active: 0, planned: 1, canceled: 2 }[a.status] - { active: 0, planned: 1, canceled: 2 }[b.status]) || monthlyOf(b) - monthlyOf(a));
+    const tb = $('rows');
+    if (!items.length) { tb.innerHTML = `<tr><td colspan="9" class="empty">${db ? 'עוד אין הוצאות. הוסיפו את הראשונה בטופס למטה.' : 'הטבלה לא נטענה בתצוגה הזו.'}</td></tr>`; return; }
+    if (!list.length) { tb.innerHTML = '<tr><td colspan="9" class="empty">אין הוצאות במצב הזה.</td></tr>'; return; }
+    tb.innerHTML = list.map((i) => `<tr>
+      <td><b>${esc(i.name)}</b>${i.note ? `<div class="sub">${esc(i.note)}</div>` : ''}</td>
+      <td>${esc(i.category)}</td>
+      <td class="num"><span class="ltr">${SYM[i.currency] || ''}${Number(i.amount || 0).toLocaleString('he-IL')}</span>${i.estimate ? ' <span class="est">הערכה</span>' : ''}</td>
+      <td class="num">${ils(toIls(i))}</td>
+      <td>${CAD[i.cadence] || ''}</td>
+      <td><span class="pill ${esc(i.status)}">${STATUS[i.status] || ''}</span></td>
+      <td class="num">${esc(i.since || '')}</td>
+      <td>${esc(i.owner || '')}</td>
+      <td>${canWrite && db ? `<div class="acts">
+        ${i.status !== 'active' ? `<button class="btn" data-act="active" data-id="${esc(i.id)}">שולם</button>` : ''}
+        ${i.status !== 'canceled' ? `<button class="btn" data-act="canceled" data-id="${esc(i.id)}">ביטלנו</button>` : ''}
+        <button class="btn danger ${armed === i.id ? 'armed' : ''}" data-act="delete" data-id="${esc(i.id)}">${armed === i.id ? 'בטוח? למחוק' : 'מחיקה'}</button>
+      </div>` : ''}</td></tr>`).join('');
+  }
+
+  document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
+    filter = b.dataset.f;
+    document.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+    render();
+  }));
+
+  $('rows').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b || !db) return;
+    const id = b.dataset.id, act = b.dataset.act;
+    try {
+      if (act === 'delete') {
+        if (armed !== id) { armed = id; render(); setTimeout(() => { if (armed === id) { armed = null; render(); } }, 4000); return; }
+        armed = null;
+        await db.doc('expenses/' + id).delete();
+      } else {
+        await db.doc('expenses/' + id).update({ status: act });
+      }
+      $('status-msg').textContent = '';
+    } catch (err) {
+      $('status-msg').textContent = 'לא נשמר: ' + (err?.message || 'נסו שוב');
+      $('status-msg').className = 'msg err';
+    }
+  });
+
+  $('add').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!db) return;
+    const amount = Number($('f-amount').value);
+    if (!$('f-name').value.trim() || !(amount >= 0)) { $('add-msg').textContent = 'חסר שם או סכום'; return; }
+    const doc = {
+      name: $('f-name').value.trim(), category: $('f-cat').value, amount, currency: $('f-cur').value,
+      cadence: $('f-cad').value, status: $('f-status').value, since: $('f-date').value || new Date().toISOString().slice(0, 10),
+      owner: $('f-owner').value.trim(), note: $('f-note').value.trim(), estimate: $('f-est').checked, createdAt: new Date().toISOString(),
+    };
+    try {
+      await db.collection('expenses').add(doc);
+      e.target.reset();
+      $('add-msg').textContent = 'נוסף ✓';
+      $('add-msg').className = 'msg';
+    } catch (err) {
+      $('add-msg').textContent = err?.code === 'invalid_argument' ? 'אין לך הרשאה להוסיף כאן' : 'לא נשמר: ' + (err?.message || 'נסו שוב');
+      $('add-msg').className = 'msg err';
+    }
+  });
+
+  $('save-rates').addEventListener('click', async () => {
+    if (!db) return;
+    const next = { USD: Number($('r-usd').value) || rates.USD, EUR: Number($('r-eur').value) || rates.EUR, income: Number($('r-inc').value) || 0 };
+    try { await db.doc('settings/rates').set(next); $('rates-msg').textContent = 'נשמר ✓'; }
+    catch (err) { $('rates-msg').textContent = 'לא נשמר: ' + (err?.message || ''); }
+  });
+
+  function fillRates() { $('r-usd').value = rates.USD; $('r-eur').value = rates.EUR; $('r-inc').value = rates.income; }
+  fillRates();
+  render();
+
+  (async () => {
+    db = window.claude ? await window.claude.use('db') : null;
+    if (!db) { $('add-section').hidden = true; render(); return; }
+    const user = await window.claude.use('user');
+    const w = user ? await user.can('data.write') : null;
+    if (w === false) { canWrite = false; $('add-section').hidden = true; $('save-rates').hidden = true; }
+    db.doc('settings/rates').onSnapshot((s) => { if (s.exists) { rates = { ...rates, ...s.data() }; fillRates(); render(); } });
+    db.collection('expenses').onSnapshot((s) => {
+      items = s.docs.map((d) => ({ id: d.id, ...d.data() }));
+      render();
+    }, (err) => { $('status-msg').textContent = 'הטבלה הפסיקה להתעדכן. רעננו את הדף.'; });
+  })();
+})();
+</script>
