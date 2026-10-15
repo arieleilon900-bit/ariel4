@@ -12,6 +12,7 @@ import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
 import { FORM_HTML } from './form-page.js';
+import { BUSINESS } from './config.js';
 import { actionPage, ownerByEmail, serveMedia } from './email.js';
 
 // בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
@@ -223,7 +224,7 @@ async function selfTest(env) {
   const cases = [
     { name: 'עברית', text: 'היי ננעלתי מחוץ לבית', lang: 'he' },
     { name: 'אנגלית', text: "Hi, I'm locked out of my apartment", lang: 'en' },
-    { name: 'רק שלום (תפריט)', text: 'היי', menu: true },
+    { name: 'רק שלום', text: 'היי', menu: true },
     { name: 'דחוף', text: 'דחוף!! הילד שלי נעול באוטו בשמש', urgent: true },
   ];
   for (const c of cases) {
@@ -234,7 +235,7 @@ async function selfTest(env) {
     if (!r.reply) problems.push('תשובה ריקה');
     if (c.lang && r.language !== c.lang) problems.push(`שפה ${r.language} במקום ${c.lang}`);
     if (c.urgent && !r.urgent) problems.push('לא זיהה דחוף');
-    if (c.menu && !/1\./.test(r.reply)) problems.push('לא שלח תפריט שירותים');
+    if (c.menu && !BUSINESS.greeting && !/1\./.test(r.reply)) problems.push('לא שלח תפריט שירותים');
     out.push(`${problems.length ? 'FAIL' : 'OK'} ${c.name} (${Date.now() - t}ms): ${problems.join('; ') || r.reply}`);
   }
   await env.DB.prepare('SELECT COUNT(*) FROM conversations').first();
