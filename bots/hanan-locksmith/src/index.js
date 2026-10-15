@@ -11,6 +11,12 @@ import { renderTable, tableAction, tableKey } from './table.js';
 import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
+import { actionPage, ownerByEmail, serveMedia } from './email.js';
+
+// בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
+const withOwner = (env) => (env.OWNER_EMAIL && !env.OWNER_PHONE ? { ...env, OWNER_PHONE: 'email' } : env);
+// לחיצה על כפתור (בטבלה או במייל) כשההתראות במייל: האישור מוצג בדף, לא נשלח עוד מייל
+const quietCommand = (e, ...a) => handleOwnerCommand(ownerByEmail(e) ? { ...e, __capture: [] } : e, ...a);
 
 // השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
 function safeEqual(a, b) {
@@ -22,7 +28,15 @@ function safeEqual(a, b) {
 
 export default {
   async fetch(request, env, ctx) {
+    env = withOwner(env);
     const url = new URL(request.url);
+
+    // הקישורים במייל לבעל העסק: תמונות של לקוחות, ודף הכפתורים (בדרך / תור / סיימתי)
+    if (url.pathname === '/media' && request.method === 'GET') return serveMedia(env, url);
+    if (url.pathname === '/act' && (request.method === 'GET' || request.method === 'POST')) {
+      setWindowAlwaysOpen(isUltra(env));
+      return actionPage(env, request, url, handleOwnerCommand);
+    }
 
     if (url.pathname === '/' || url.pathname === '/health') {
       if (isUltra(env)) {
@@ -44,7 +58,7 @@ export default {
       const form = await request.clone().formData().catch(() => null);
       if (!k || !form || !safeEqual(String(form.get('k') || ''), k)) return new Response('forbidden', { status: 403 });
       setWindowAlwaysOpen(isUltra(env));
-      return tableAction(env, request, url, handleOwnerCommand);
+      return tableAction(env, request, url, quietCommand);
     }
 
     // שליחת הקישור לטבלה לבעל העסק בוואטסאפ (מופעל ידנית מ-GitHub Actions)
@@ -115,6 +129,7 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
+    env = withOwner(env);
     const now = new Date(event.scheduledTime || Date.now());
     setWindowAlwaysOpen(isUltra(env));
     if (env.BOT_OFF === '1') return;

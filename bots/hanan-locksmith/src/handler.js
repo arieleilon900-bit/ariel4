@@ -7,6 +7,7 @@ import * as wa from './whatsapp.js';
 import { handleOwnerCommand } from './owner.js';
 import { tableLink } from './table.js';
 import { ownerHours } from './hours.js';
+import { ownerByEmail, sendOwnerEmail } from './email.js';
 
 const CONV_IDLE_HOURS = 72; // שיחה שלא זזה 3 ימים נחשבת סגורה, והודעה חדשה פותחת שיחה חדשה
 
@@ -37,6 +38,8 @@ export async function sendToCustomer(env, phone, text, template = null, now = ne
 // about = הטלפון של הלקוח שההודעה עוסקת בו: אם חנן עונה (ציטוט) על ההודעה הזו, הבוט יודע על איזה לקוח מדובר
 export async function sendToOwner(env, text, now = new Date(), about = null, to = env.OWNER_PHONE, opts = {}) {
   if (!to) return { ok: false };
+  // לבעל העסק אין מספר וואטסאפ נפרד: הכל מגיע אליו במייל
+  if (ownerByEmail(env) && to === env.OWNER_PHONE) return sendOwnerEmail(env, text, { about, now, retry: !!opts.retry });
   const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(to).first();
   const open = inServiceWindow(c?.last_inbound_at, now);
   const r = open
@@ -158,8 +161,20 @@ export function ownerSummary(conv, result, phone, now) {
   return lines.join('\n');
 }
 
+// הודעה לחנן יחד עם התמונות. במייל: הכל באותו מייל
+export async function notifyOwner(env, text, media, now = new Date(), about = null) {
+  if (ownerByEmail(env)) return sendOwnerEmail(env, text, { about, media, now });
+  await sendToOwner(env, text, now, about);
+  if (media.length) await forwardPhotosToOwner(env, media, now, about);
+}
+
 export async function forwardPhotosToOwner(env, photoIds, now = new Date(), about = null) {
-  if (!photoIds.length || !env.OWNER_PHONE) return;
+  if (!photoIds.length) return;
+  if (ownerByEmail(env)) {
+    const what = photoIds.length === 1 ? 'תמונה' : `${photoIds.length} תמונות`;
+    return sendOwnerEmail(env, `📷 ${what} מהלקוח${about ? ` ${displayPhone(about)}` : ''}`, { about, media: photoIds, now });
+  }
+  if (!env.OWNER_PHONE) return;
   // תמונה אפשר לשלוח רק בתוך 24 שעות מההודעה האחרונה של חנן לבוט. אחרת: מסבירים לו איך לקבל אותן
   const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(env.OWNER_PHONE).first();
   if (!inServiceWindow(c?.last_inbound_at, now)) {
@@ -364,7 +379,7 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
     await logEvent(env, 'spam', phone, now);
     if (notified) return;
     // חנן תמיד יודע, למקרה שה-AI טעה. בלילה ובשבת: ההודעה מחכה לו ומגיעה כשהוא כותב לבוט
-    const note = `סיננתי כספאם הודעה מ-${displayPhone(phone)}: "${String(content.text).slice(0, 120)}". אם זה לקוח, ענה על ההודעה הזו: בוט`;
+    const note = `סיננתי כספאם הודעה מ-${displayPhone(phone)}: "${String(content.text).slice(0, 120)}". ${ownerByEmail(env) ? 'אם זה לקוח, לחץ למטה "בדרך / תור / סיימתי" ואז "שהבוט יענה לו".' : 'אם זה לקוח, ענה על ההודעה הזו: בוט'}`;
     if (ownerHours(now)) await sendToOwner(env, note, now, phone);
     else await env.DB.prepare('INSERT INTO owner_outbox (text, about, created_at) VALUES (?, ?, ?)').bind(note, phone, nowIso(now)).run();
     return;
@@ -495,8 +510,7 @@ export async function flushSummary(env, convId, now = new Date(), extra = {}) {
     const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
     const table = await tableLink(env);
     const summaryText = ownerSummary(c, res, phone, now) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
-    await sendToOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, now, phone);
-    await forwardPhotosToOwner(env, JSON.parse(c.photos || '[]'), now, phone);
+    await notifyOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, JSON.parse(c.photos || '[]'), now, phone);
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(convId, nowIso(now)).run();
     // התזכורות לחנן נספרות מרגע שהסיכום הגיע אליו
     await env.DB.prepare('UPDATE conversations SET handed_off_at = ? WHERE id = ?').bind(nowIso(now), convId).run();
@@ -510,9 +524,8 @@ export async function flushSummary(env, convId, now = new Date(), extra = {}) {
   const media = (await env.DB.prepare("SELECT media_id FROM messages WHERE conv_id = ? AND role = 'user' AND media_id IS NOT NULL AND id > ? ORDER BY id").bind(convId, lastUpdate).all()).results.map((r) => r.media_id);
   const body = ownerSummary(c, res, phone, now)
     .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, extra.becameUrgent ? '🚨 עדכון דחוף לפנייה' : (cancel ? '❎ הלקוח ביטל' : '🔄 עדכון לפנייה'));
-  await sendToOwner(env, body, now, phone);
+  await notifyOwner(env, body, media, now, phone);
   await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(convId, nowIso(now)).run();
-  if (media.length) await forwardPhotosToOwner(env, media, now, phone);
   if (cancel) {
     await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(convId).run();
     await upsertLead(env, phone, { status: 'הלקוח ויתר' }, now);
