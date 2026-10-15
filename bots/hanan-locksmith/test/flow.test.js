@@ -1426,3 +1426,23 @@ test('Hanan hours: Sun-Thu 08:00-17:00, no Fri/Sat/holidays; the bot tells the c
   assert.match(p, /מד"א 101/);
   assert.doesNotMatch(buildSystemPrompt({ now: il('2026-10-15T10:00:00') }), /מחוץ לשעות העבודה/);
 });
+
+test('form: answers are saved on the server and sent to Ariel, so nothing is lost; the page loads; reading them needs the secret', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const env = { ...makeEnv(), ADMIN_PHONE: '972524666175', WA_VERIFY_TOKEN: 'secret' };
+  const ctx = { waitUntil: () => {} };
+  const call = (path, init) => worker.fetch(new Request(`https://bot.example${path}`, init), env, ctx);
+  const page = await call('/form');
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /שליחת התשובות/);
+  const answers = 'תשובות לשאלון האפיון של הבוט (חנן המנעולן):\n\n5. אילו סוגי עבודות אתה עושה?\nפריצות, צילינדרים, רכבים';
+  const r = await call('/form', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: answers, fields: {} }) });
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('access-control-allow-origin'), '*');
+  assert.deepEqual(await r.json(), { ok: true, notified: true });
+  assert.ok(sent.some((m) => m.to === '972524666175' && /טופס חדש/.test(JSON.stringify(m))), 'Ariel notified');
+  assert.equal((await call('/admin/forms?key=nope')).status, 403);
+  assert.match(await (await call('/admin/forms?key=secret')).text(), /פריצות, צילינדרים, רכבים/);
+  assert.equal((await call('/form', { method: 'POST', body: '{"text":"x"}' })).status, 400, 'empty form rejected');
+});

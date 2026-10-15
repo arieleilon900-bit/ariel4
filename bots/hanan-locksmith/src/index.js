@@ -2,7 +2,7 @@
 // GET /webhook  ← אימות של Meta בזמן החיבור
 // POST /webhook ← הודעות נכנסות מוואטסאפ
 // cron          ← תזכורות, מעקבים ודוח שבועי
-import { flushDueSummaries, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
+import { flushDueSummaries, sendToOwner, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isUltra, verifySignature } from './whatsapp.js';
@@ -11,6 +11,7 @@ import { renderTable, tableAction, tableKey } from './table.js';
 import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
+import { FORM_HTML } from './form-page.js';
 import { actionPage, ownerByEmail, serveMedia } from './email.js';
 
 // בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
@@ -30,6 +31,22 @@ export default {
   async fetch(request, env, ctx) {
     env = withOwner(env);
     const url = new URL(request.url);
+
+    // טופס השאלות לבעל העסק: הדף עצמו, וקבלת התשובות (נשמרות במסד הנתונים ונשלחות לאריאל בוואטסאפ)
+    if (url.pathname === '/form' && request.method === 'GET') {
+      return new Response(FORM_HTML, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' } });
+    }
+    if (url.pathname === '/form' && request.method === 'OPTIONS') return new Response(null, { headers: FORM_CORS });
+    if (url.pathname === '/form' && request.method === 'POST') {
+      setWindowAlwaysOpen(isUltra(env));
+      return receiveForm(env, request);
+    }
+    if (url.pathname === '/admin/forms' && request.method === 'GET') {
+      const key = (url.searchParams.get('key') || '').trim();
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
+      const rows = (await env.DB.prepare("SELECT key, value FROM settings WHERE key LIKE 'form:%' ORDER BY key DESC LIMIT 20").all()).results;
+      return new Response(rows.map((r) => `===== ${r.key.slice(5)} =====\n${r.value}`).join('\n\n') || 'אין טפסים', { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
 
     // הקישורים במייל לבעל העסק: תמונות של לקוחות, ודף הכפתורים (בדרך / תור / סיימתי)
     if (url.pathname === '/media' && request.method === 'GET') return serveMedia(env, url);
@@ -147,6 +164,28 @@ export default {
     else ctx.waitUntil(runEvery15(env, now));
   },
 };
+
+const FORM_CORS = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type' };
+
+// תשובות מהטופס: נשמרות קודם (כדי ששום דבר לא ילך לאיבוד), ואז נשלחות לאריאל
+async function receiveForm(env, request) {
+  const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json', ...FORM_CORS } });
+  let body;
+  try { body = await request.json(); } catch { return json({ ok: false }, 400); }
+  const text = String(body?.text || '').slice(0, 30000).trim();
+  if (text.length < 20) return json({ ok: false }, 400);
+  const now = new Date();
+  // הגנה מהצפה: עד 10 טפסים בשעה
+  const recent = (await env.DB.prepare("SELECT COUNT(*) AS n FROM settings WHERE key LIKE 'form:%' AND key >= ?").bind(`form:${new Date(now.getTime() - 3600000).toISOString()}`).first())?.n || 0;
+  if (recent >= 10) return json({ ok: false }, 429);
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?)').bind(`form:${now.toISOString()}`, text).run();
+  const to = env.ADMIN_PHONE || env.OWNER_PHONE;
+  let notified = false;
+  if (to && to !== 'email') {
+    try { notified = !!(await sendToOwner(env, `📋 טופס חדש מבעל העסק:\n\n${text}`, now, null, to))?.ok; } catch (err) { console.error('form notify failed', err); }
+  }
+  return json({ ok: true, notified });
+}
 
 async function demoConversation(env) {
   const customer = [

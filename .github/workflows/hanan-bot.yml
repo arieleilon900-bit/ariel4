@@ -14,6 +14,10 @@ on:
         description: 'Send the customer table link to the owner on WhatsApp'
         type: boolean
         default: false
+      show_forms:
+        description: 'Print the latest owner form answers in the log'
+        type: boolean
+        default: false
 
 concurrency:
   group: hanan-bot
@@ -116,6 +120,15 @@ jobs:
           url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
           key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
           curl -s -m 150 -G "$url/admin/demo" --data-urlencode "key=$key"
+
+      - name: Show owner form answers (manual)
+        if: steps.ready.outputs.go == 'true' && github.event.inputs.show_forms == 'true'
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          curl -s -m 30 -G "$url/admin/forms" --data-urlencode "key=$key"
 
       - name: Send the table link to the owner (manual)
         if: steps.ready.outputs.go == 'true' && github.event.inputs.send_table == 'true'
