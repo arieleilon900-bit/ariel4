@@ -1401,3 +1401,28 @@ test('questions: the bot answers what it knows; an unknown question gets a warm 
   assert.equal(textsTo(CUSTOMER).at(-1), 'היי, כיף לשמוע ממך שוב! במה אפשר לעזור הפעם?');
   assert.match(aiRequests.at(-1).system, /לקוח חוזר/);
 });
+
+test('Hanan hours: Sun-Thu 08:00-17:00, no Fri/Sat/holidays; the bot tells the customer when Hanan is back; no owner nagging on days off', async () => {
+  const { BUSINESS } = await import('../src/config.js');
+  const { isOpen, nextOpenLabel } = util;
+  const { ownerHours } = await import('../src/hours.js');
+  const { buildSystemPrompt } = await import('../src/prompt.js');
+  const il = (s) => new Date(`${s}+03:00`); // אוקטובר: שעון קיץ בישראל
+  const h = BUSINESS.hours, hol = BUSINESS.holidays;
+  assert.equal(isOpen(h, il('2026-10-15T10:00:00'), hol), true, 'Thursday 10:00 open');
+  assert.equal(isOpen(h, il('2026-10-15T17:30:00'), hol), false, 'Thursday 17:30 closed');
+  assert.equal(isOpen(h, il('2026-10-16T10:00:00'), hol), false, 'Friday closed');
+  assert.equal(nextOpenLabel(h, il('2026-10-14T19:00:00'), hol), 'מחר ב-08:00');
+  assert.equal(nextOpenLabel(h, il('2026-10-15T07:00:00'), hol), 'היום ב-08:00');
+  assert.equal(nextOpenLabel(h, il('2026-10-15T18:00:00'), hol), 'ביום ראשון ב-08:00', 'Thursday evening → Sunday');
+  assert.equal(nextOpenLabel(h, il('2026-10-17T12:00:00'), hol), 'מחר ב-08:00', 'Saturday → Sunday');
+  // ערב ראש השנה 2027 (שישי 1/10) ← ראש השנה שבת-ראשון ← שני 4/10
+  assert.equal(nextOpenLabel(h, il('2027-09-30T18:00:00'), hol), 'ביום שני ב-08:00', 'skips Rosh Hashana');
+  assert.equal(isOpen(h, il('2027-10-11T10:00:00'), hol), false, 'Yom Kippur (Monday) closed');
+  assert.equal(ownerHours(il('2026-10-16T10:00:00')), false, 'no reminders to Hanan on Friday');
+  assert.equal(ownerHours(il('2026-10-18T10:00:00')), true, 'Sunday yes');
+  const p = buildSystemPrompt({ now: il('2026-10-15T18:00:00') });
+  assert.match(p, /חוזר לעבוד ביום ראשון ב-08:00/);
+  assert.match(p, /מד"א 101/);
+  assert.doesNotMatch(buildSystemPrompt({ now: il('2026-10-15T10:00:00') }), /מחוץ לשעות העבודה/);
+});

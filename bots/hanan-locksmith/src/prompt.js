@@ -1,7 +1,7 @@
 // מה ה-AI יודע ומה הוא מחזיר: ההוראות (system prompt), מבנה התשובה, וטיפול בתשובה לא תקינה.
 // משותף לבוט (ai.js) ולדף הניסיון (sim/).
 import { BUSINESS } from './config.js';
-import { isOpen, isShabbat, ilDateTimeLabel } from './util.js';
+import { isOpen, isShabbat, ilDateTimeLabel, nextOpenLabel } from './util.js';
 
 export const SCHEMA = {
   type: 'object',
@@ -36,7 +36,8 @@ function hananSection(b, knowledge) {
 
 export function buildSystemPrompt({ now = new Date(), returningCustomer = null, profileName = '', knowledge = [], afterHandoff = false } = {}) {
   const b = BUSINESS;
-  const open = isOpen(b.hours, now);
+  const open = isOpen(b.hours, now, b.holidays);
+  const next = open ? '' : nextOpenLabel(b.hours, now, b.holidays);
   const shabbat = b.shabbat?.enabled && isShabbat(now);
   return `אתה המוקדן הדיגיטלי של "${b.name}", מנעולן. אתה עונה ללקוחות בוואטסאפ בשם העסק. בעל העסק הוא ${b.ownerName}.
 
@@ -65,7 +66,7 @@ export function buildSystemPrompt({ now = new Date(), returningCustomer = null, 
 אזורי שירות: ${b.areas}.${b.outOfAreaMessage ? ` אם הלקוח מחוץ לאזור: ${b.outOfAreaMessage}` : ''}
 ${b.priceGuidance ? `מחירים: ${b.priceGuidance}` : 'מחירים: אל תיתן מחיר בכלל. תגיד שחנן ייתן מחיר אחרי שיראה את התמונה או את המקום.'}
 אסור: ${b.neverSay.join('; ')}.
-${shabbat ? `עכשיו שבת. ${b.shabbat.message}` : open ? '' : `עכשיו מחוץ לשעות העבודה. אסוף את הפרטים כרגיל, ותגיד ללקוח ש${b.afterHoursMessage}.`}
+${shabbat ? `עכשיו שבת. ${b.shabbat.message}` : open ? '' : `עכשיו מחוץ לשעות העבודה של ${b.ownerName}${b.hours ? ` (${b.hours.from}-${b.hours.to})` : ''}. אסוף את הפרטים כרגיל, ובסוף תגיד ללקוח ש${String(b.afterHoursMessage).replace('{next}', next || 'בהקדם')}. אל תבטיח שהוא יגיע לפני כן. מקרה דחוף: תגיד שהעברת ל${b.ownerName} עכשיו, ושאם יש סכנה צריך להתקשר מיד למד"א 101 או למשטרה 100, ואל תבטיח ש${b.ownerName} יגיע.`}
 ${returningCustomer ? `זה לקוח חוזר${returningCustomer.name ? ` בשם ${returningCustomer.name}` : ''} (עבודות קודמות: ${returningCustomer.jobs_count}). פנה אליו בחום${returningCustomer.name ? ' בשמו' : ''}.` : ''}
 
 ${b.botGender === 'female' ? 'דבר על עצמך בלשון נקבה.' : 'דבר על עצמך בלשון זכר.'}

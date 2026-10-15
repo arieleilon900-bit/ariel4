@@ -99,12 +99,34 @@ export function parseIlDateTime(dateStr, timeStr, now = new Date()) {
 }
 
 // האם עכשיו בשעות העבודה (hours=null פירושו 24/7)
-export function isOpen(hours, now = new Date()) {
+const ymd = (p) => `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
+export const isHoliday = (holidays, now = new Date()) => !!holidays?.includes(ymd(ilParts(now)));
+
+export function isOpen(hours, now = new Date(), holidays = []) {
   if (!hours) return true;
   const p = ilParts(now);
-  if (!hours.days.includes(p.dow)) return false;
+  if (!hours.days.includes(p.dow) || isHoliday(holidays, now)) return false;
   const cur = `${p.hh}:${p.mm}`;
   return cur >= hours.from && cur < hours.to;
+}
+
+// מתי העסק נפתח שוב, במילים: "היום ב-08:00", "מחר ב-08:00", "ביום ראשון ב-08:00", "ב-24/4 ב-08:00"
+const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+export function nextOpenLabel(hours, now = new Date(), holidays = []) {
+  if (!hours) return '';
+  const today = ilParts(now);
+  for (let i = 0; i < 21; i++) {
+    const day = new Date(now.getTime() + i * 86400000);
+    const p = ilParts(day);
+    if (!hours.days.includes(p.dow) || isHoliday(holidays, day)) continue;
+    if (i === 0 && `${today.hh}:${today.mm}` >= hours.from) continue;
+    const at = `ב-${hours.from}`;
+    if (i === 0) return `היום ${at}`;
+    if (i === 1) return `מחר ${at}`;
+    if (i < 7) return `ביום ${DAY_NAMES[p.dow]} ${at}`;
+    return `ב-${p.d}/${p.m} ${at}`;
+  }
+  return '';
 }
 
 // קישור ניווט בוויז
