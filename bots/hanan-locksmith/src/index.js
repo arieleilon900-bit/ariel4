@@ -200,11 +200,16 @@ async function demoConversation(env) {
   const history = [];
   const out = [];
   let after = false;
+  let usd = 0;
   let collected = { issue: '', address: '', notes: [], questions: [] };
   for (const text of customer) {
     history.push({ role: 'user', text });
     const r = await runTurn(env, { history, now: new Date(), afterHandoff: after });
     out.push(`לקוח: ${text}`, `בוט: ${r.reply || '(לא עונה)'}`);
+    if (r.usage) {
+      usd += r.usage.usd;
+      out.push(`   (עלות: ${r.usage.usd.toFixed(4)}$ | מהזיכרון: ${r.usage.read} | נכתב לזיכרון: ${r.usage.write} | רגיל: ${r.usage.input} | תשובה: ${r.usage.output})`);
+    }
     if (r.reply) history.push({ role: 'assistant', text: r.reply });
     collected = { issue: r.issue || collected.issue, address: r.address || collected.address, notes: r.summary_for_owner ? [r.summary_for_owner] : collected.notes, questions: r.question_for_owner ? [...collected.questions, r.question_for_owner] : collected.questions };
     const flags = [r.ready_for_handoff && 'מעביר לחנן', r.urgent && 'דחוף', r.question_for_owner && `שאלה לחנן: ${r.question_for_owner}`].filter(Boolean);
@@ -216,6 +221,7 @@ async function demoConversation(env) {
     '🔔 פנייה חדשה',
     ...(collected.questions.length ? [`❓ הלקוח מחכה לתשובה ממך: ${collected.questions.join(' / ')}`] : []),
     `תקלה: ${collected.issue || '(לא פורט)'}`, `כתובת: ${collected.address || '(לא נמסרה)'}`, ...(collected.notes.length ? ['', collected.notes[0]] : []));
+  out.push('', `עלות השיחה ל-Anthropic: ${usd.toFixed(3)}$ (פנייה ראשונה של היום משלמת גם את הכתיבה לזיכרון)`);
   return out.join('\n');
 }
 

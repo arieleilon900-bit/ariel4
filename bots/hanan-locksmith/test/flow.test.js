@@ -28,6 +28,8 @@ function makeD1() {
 const sent = [];           // הודעות שנשלחו ב-WhatsApp
 let aiQueue = [];          // תשובות שה-AI "יחזיר" לפי הסדר
 let aiRequests = [];
+// ההוראות נשלחות כשני חלקים: קבוע (נשמר בזיכרון הזמני) ומשתנה
+const sysText = (req) => req.system.map((b) => b.text).join('\n');
 let outSeq = 0;
 let yeshQueue = [], yeshRequests = [];
 const sheet = [];        // גיליון הגוגל המדומה
@@ -117,7 +119,7 @@ test('lead → questions → handoff → owner commands → reminders → review
   aiQueue = [ai({ reply: 'היי, מה קרה בדיוק?', }) ];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'שלום ננעלתי בחוץ' } }, 'w1'), t0);
   assert.deepEqual(textsTo(CUSTOMER), ['היי, מה קרה בדיוק?']);
-  assert.match(aiRequests[0].system, /המוקדן הדיגיטלי/);
+  assert.match(sysText(aiRequests[0]), /המוקדן הדיגיטלי/);
 
   // הודעה כפולה מ-Meta לא מעובדת פעמיים
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'שלום ננעלתי בחוץ' } }, 'w1'), t0);
@@ -145,7 +147,7 @@ test('lead → questions → handoff → owner commands → reminders → review
   aiQueue = [ai({ reply: 'חנן קיבל את כל הפרטים ויחזור אליך בהקדם', summary_for_owner: '' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'עוד כמה זמן?' } }, 'w4'), t0);
   assert.ok(textsTo(CUSTOMER).includes('חנן קיבל את כל הפרטים ויחזור אליך בהקדם'));
-  assert.ok(aiRequests.at(-1).system.includes('כבר הועברה'), 'AI knows the lead is already with Hanan');
+  assert.ok(sysText(aiRequests.at(-1)).includes('כבר הועברה'), 'AI knows the lead is already with Hanan');
   assert.equal(sent.filter((m) => m.to === OWNER).length, ownerBefore, 'no extra message to Hanan');
   // פרט חדש וחשוב: חנן מקבל עדכון אחד
   aiQueue = [ai({ reply: 'עדכנתי את חנן', address: 'הרצל 7 חולון', ready_for_handoff: true, summary_for_owner: 'הלקוח עבר לכתובת הרצל 7 במקום 5' })];
@@ -1371,7 +1373,7 @@ test('questions: the bot answers what it knows; an unknown question gets a warm 
   // שאלה שהבוט יודע: עונה וממשיך, שום דבר לחנן
   aiQueue = [ai({ reply: 'כן, אנחנו פותחים גם רכבים. מה הדגם?', issue: 'פריצת רכב' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'אתם פותחים רכבים?' } }, 'q1'), at(0));
-  assert.match(aiRequests[0].system, /ענה על כל שאלה של הלקוח/);
+  assert.match(sysText(aiRequests[0]), /ענה על כל שאלה של הלקוח/);
   await flushDueSummaries(env, at(10));
   assert.equal(sent.filter((m) => m.to === OWNER).length, b0, 'nothing to Hanan for a question the bot answered');
   // שאלה שהבוט לא יודע: תשובה חמה ללקוח, והשאלה מגיעה לחנן גם בלי כתובת
@@ -1403,7 +1405,7 @@ test('questions: the bot answers what it knows; an unknown question gets a warm 
   aiQueue = [ai({ reply: 'היי, כיף לשמוע ממך שוב! במה אפשר לעזור הפעם?' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי מה נשמע, אשמח לעוד טיפול' } }, 'q6'), at(30 + 24 * 60));
   assert.equal(textsTo(CUSTOMER).at(-1), 'היי, כיף לשמוע ממך שוב! במה אפשר לעזור הפעם?');
-  assert.match(aiRequests.at(-1).system, /לקוח חוזר/);
+  assert.match(sysText(aiRequests.at(-1)), /לקוח חוזר/);
 });
 
 test('Hanan hours: Sun-Thu 08:00-17:00, no Fri/Sat/holidays; the bot tells the customer when Hanan is back; no owner nagging on days off', async () => {
@@ -1485,4 +1487,26 @@ test("Hanan's own settings: Shabbat by sunset with his words, reminders 2h and 1
     await runEvery15(env, new Date('2026-10-16T07:15:00Z'));
     assert.equal(sent.filter((m) => m.to === OWNER && /שבוע/.test(JSON.stringify(m))).length, 1, 'weekly report once on Friday 10:00');
   } finally { B0.shabbat.enabled = false; delete T0.customerReminderHours; T0.weeklyReportAt = null; T0.yearlyAfterDays = 365; }
+});
+
+test('prompt caching: the fixed instructions are one cached block that is identical for every customer and every hour; time, Shabbat and the customer come after it', async () => {
+  const { buildSystemParts, buildSystemPrompt } = await import('../src/prompt.js');
+  const il = (s) => new Date(`${s}+03:00`);
+  const a = buildSystemParts({ now: il('2026-10-15T10:00:00') });
+  const b = buildSystemParts({ now: il('2026-10-16T21:00:00'), returningCustomer: { name: 'דני', jobs_count: 2 }, profileName: 'Dani', knowledge: ['שכפול מפתח 20 ש"ח'], afterHandoff: true });
+  assert.equal(a.stable, b.stable, 'the cached part never changes');
+  assert.match(b.live, /לקוח חוזר/);
+  assert.match(b.live, /Dani/);
+  assert.match(b.live, /שכפול מפתח/);
+  assert.match(b.live, /כבר הועברה/);
+  assert.match(b.live, /זמן נוכחי בישראל/);
+  assert.doesNotMatch(a.stable, /זמן נוכחי|לקוח חוזר|כבר הועברה/);
+  assert.ok(a.stable.length > 3000, 'long enough to be cached');
+  assert.equal(buildSystemPrompt({ now: il('2026-10-15T10:00:00') }), `${a.stable}\n${a.live}`);
+  sent.length = 0; aiRequests = [];
+  aiQueue = [ai({ reply: 'אהלן' })];
+  await processWebhook(makeEnv(), inbound('972500000777', { type: 'text', text: { body: 'היי ננעלתי בחוץ' } }, 'cache1'), il('2026-10-15T10:00:00'));
+  const sys = aiRequests.at(-1).system;
+  assert.deepEqual(sys[0].cache_control, { type: 'ephemeral', ttl: '1h' });
+  assert.equal(sys[1].cache_control, undefined);
 });
