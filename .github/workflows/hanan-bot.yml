@@ -107,6 +107,16 @@ jobs:
           curl -s -m 20 "$url/health"
           echo "$out" | grep -q '^OK מסד' && ! echo "$out" | grep -q '^FAIL'
 
+      - name: Demo conversation (real AI, nothing is sent)
+        if: steps.ready.outputs.go == 'true'
+        continue-on-error: true
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          curl -s -m 150 -G "$url/admin/demo" --data-urlencode "key=$key"
+
       - name: Send the table link to the owner (manual)
         if: steps.ready.outputs.go == 'true' && github.event.inputs.send_table == 'true'
         env:
