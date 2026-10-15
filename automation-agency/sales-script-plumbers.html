@@ -1,0 +1,208 @@
+<title>תסריט מכירה לאינסטלטורים</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+/* Layout: one reading column; a sticky strip of the 8 call stages on top; each stage = goal line, dialogue, then "why" and a table of hard answers. */
+:root{
+  --bg:#f2f5f6; --surface:#ffffff; --ink:#18252b; --muted:#56666d; --line:#d3dde0;
+  --copper:#a8552a; --copper-soft:#f6e6dc; --pipe:#1f5a6b; --pipe-soft:#e0edf0;
+  --display:'Rubik','Arial Hebrew',Arial,sans-serif; --body:'Assistant','Arial Hebrew',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11191c; --surface:#182327; --ink:#e4ecee; --muted:#9db0b6; --line:#2c3c42;
+  --copper:#e08a5a; --copper-soft:#3a271c; --pipe:#86c3d3; --pipe-soft:#1c3239; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11191c; --surface:#182327; --ink:#e4ecee; --muted:#9db0b6; --line:#2c3c42;
+  --copper:#e08a5a; --copper-soft:#3a271c; --pipe:#86c3d3; --pipe-soft:#1c3239; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:17px/1.65 var(--body)}
+.wrap{direction:rtl;max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.25;margin:0}
+h1{font-size:2rem;font-weight:700}
+h2{font-size:1.45rem;font-weight:700;display:flex;gap:12px;align-items:baseline}
+h2 .n{color:var(--copper);font-variant-numeric:tabular-nums}
+h3{font-size:1.05rem;font-weight:700;color:var(--pipe)}
+p{margin:0}
+header{display:grid;gap:12px}
+.lede{color:var(--muted);max-width:62ch}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);border-bottom:1px solid var(--line);padding-block:10px;display:flex;gap:6px;overflow-x:auto}
+nav a{flex:none;font:600 .9rem var(--body);color:var(--pipe);text-decoration:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+nav a:hover,nav a:focus-visible{border-color:var(--pipe);outline:none}
+section{display:grid;gap:16px;scroll-margin-top:64px}
+.goal{background:var(--pipe-soft);border-radius:8px;padding:12px 14px}
+.goal b{color:var(--pipe)}
+.talk{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.talk li{display:grid;grid-template-columns:4.2em 1fr;gap:10px;align-items:start}
+.talk .who{font:700 .8rem var(--display);letter-spacing:.03em;padding-top:4px;color:var(--muted)}
+.talk .me .who{color:var(--copper)}
+.talk .me .say{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.talk .say{min-width:0}
+.talk .note{grid-column:1 / -1;color:var(--muted);font-style:italic;font-size:.95rem;padding-inline-start:5.2em}
+ul.plain{margin:0;padding-inline-start:1.2em;display:grid;gap:6px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{text-align:right;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font:700 .85rem var(--display);color:var(--muted);letter-spacing:.03em;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;width:38%}
+.price{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.price div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:4px}
+.price .lead{border-color:var(--copper);background:var(--copper-soft)}
+.price strong{font:700 1.35rem var(--display);font-variant-numeric:tabular-nums}
+.price span{color:var(--muted);font-size:.95rem}
+.key{border-inline-start:3px solid var(--copper);padding-inline-start:12px}
+.why{color:var(--muted)}
+footer{color:var(--muted);font-size:.95rem;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width:480px){.talk li{grid-template-columns:1fr;gap:2px}.talk .note{padding-inline-start:0}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>תסריט מכירה לאינסטלטורים</h1>
+  <p class="lede">שיחת טלפון אחת, 8 שלבים, בערך 15 דקות. המטרה: אינסטלטור שאומר "כן" ומשלם מקדמה. בכל שלב יש את מה שאומרים, למה זה עובד, ומה עונים כשהוא מתנגד.</p>
+  <p class="key"><b>למה אינסטלטורים:</b> סתימה, נזילה או הצפה זה דחוף. הלקוח מתקשר לשלושה אינסטלטורים, ומי שעונה ראשון מקבל את העבודה. האינסטלטור עובד לבד, עם הידיים בתוך הצנרת, ולא יכול לענות. הבוט שלנו בנוי בדיוק לזה: עונה תוך שניות, מזהה מה דחוף, אוסף תמונה וכתובת, ושולח לו דוח אחד מסודר.</p>
+</header>
+
+<nav aria-label="שלבי השיחה">
+  <a href="#s1">1 פתיחה</a><a href="#s2">2 המצב שלו</a><a href="#s3">3 הכאב בכסף</a><a href="#s4">4 דמו</a><a href="#s5">5 מחיר</a><a href="#s6">6 התנגדויות</a><a href="#s7">7 סגירה</a><a href="#s8">8 אחרי ה"כן"</a>
+</nav>
+
+<section id="s1">
+  <h2><span class="n">1</span> פתיחה (30 שניות)</h2>
+  <p class="goal"><b>המטרה:</b> שהוא ירצה להמשיך לדבר. לא מוכרים כלום בשלב הזה.</p>
+  <ul class="talk">
+    <li class="me"><span class="who">אתה</span><span class="say">היי, מדבר משה?</span></li>
+    <li><span class="who">הוא</span><span class="say">כן, מי זה?</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">משה, כאן אריאל. אתה לא מכיר אותי, ואני יודע שאני תופס אותך באמצע עבודה. אגיד לך תוך 20 שניות למה אני מתקשר, ואתה תחליט אם זה מעניין אותך. בסדר?</span></li>
+    <li><span class="who">הוא</span><span class="say">נו, דבר.</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">אני עובד עם בעלי מקצוע שעובדים בשטח, על בעיה אחת: לקוחות שמתקשרים כשאתה באמצע עבודה. שאלה אחת: כשאתה עם הראש מתחת לכיור, ומישהו מתקשר עם נזילה, מה קורה עם השיחה הזו?</span></li>
+    <li class="note">ועכשיו שותקים עד שהוא עונה.</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>הוא אומר</th><th>אתה עונה</th></tr></thead>
+    <tbody>
+      <tr><td>"חוזר אליו כשאני מסיים"</td><td>"הגיוני. וכמה פעמים יצא שחזרת, והוא כבר הזמין מישהו אחר?" ← שלב 2</td></tr>
+      <tr><td>"אני עונה תמיד"</td><td>"גם כשאתה מתחת לבית עם הידיים בביוב? ובשתיים בלילה?"</td></tr>
+      <tr><td>"אני באמצע עבודה"</td><td>"בדיוק בגלל זה אני מתקשר. מתי נוח, היום ב-19:00 או מחר ב-7:30 לפני העבודה?"</td></tr>
+      <tr><td>"מאיפה יש לך את המספר?"</td><td>"מדפי זהב / מגוגל. חיפשתי אינסטלטורים באזור שלך." תמיד את האמת.</td></tr>
+      <tr><td>"לא מעוניין"</td><td>"בסדר גמור, לא אחזור. רק מסקרנות: מה קורה אצלך עם שיחות שנכנסות באמצע עבודה?" ניסיון אחד בלבד. אם שוב לא, מודים ומנתקים.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="why"><b>לא אומרים בפתיחה:</b> "בוט", "AI", "אוטומציה", "מערכת", "יש לך דקה?". הוא לא קונה טכנולוגיה. הוא קונה עבודות.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="n">2</span> המצב שלו (2 דקות)</h2>
+  <p class="goal"><b>המטרה:</b> שלושה מספרים: כמה פניות בשבוע, האם הוא מפסיד חלק, וכמה שווה עבודה. הוא מדבר, אתה רושם.</p>
+  <ul class="talk">
+    <li class="me"><span class="who">אתה</span><span class="say">אפשר לשאול אותך שתיים-שלוש שאלות? ואני אגיד לך בכנות אם יש לי משהו בשבילך או לא.</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">בשבוע רגיל, כמה פניות חדשות נכנסות אליך? שיחות, וואטסאפים, הכל.</span></li>
+    <li><span class="who">הוא</span><span class="say">לא יודע, 20? 30?</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">יפה. ויצא לך שחזרת ללקוח אחרי שעה, והוא כבר הביא מישהו אחר?</span></li>
+    <li class="note">זו השאלה הכי חשובה. אם הוא מתחיל לספר סיפור, לא קוטעים.</li>
+    <li class="me"><span class="who">אתה</span><span class="say">וכמה שווה לך עבודה ממוצעת? פתיחת סתימה, איתור נזילה?</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">רגע, אז אם הבנתי: נכנסות לך בערך 25 פניות בשבוע, ובזמן עבודה אתה לא יכול לענות, אז חלק כבר הולכים למישהו אחר עד שאתה חוזר. נכון?</span></li>
+  </ul>
+  <p class="why">כשהוא אומר "כן, בדיוק", הוא אמר את הבעיה בעצמו. אם יש לו פחות מ-5 פניות בשבוע, הוא לא הלקוח שלנו: מודים יפה ועוברים לבא.</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">3</span> הכאב בכסף (דקה)</h2>
+  <p class="goal"><b>המטרה:</b> שהוא יגיד בקול כמה הוא מפסיד בחודש. מספר שהוא אמר, הוא מאמין לו.</p>
+  <ul class="talk">
+    <li class="me"><span class="who">אתה</span><span class="say">אפשר חשבון קטן? 25 פניות בשבוע זה בערך 100 בחודש. מתוך ה-100, כמה לדעתך הולכים לאיבוד כי לא ענית מהר? 3? 5?</span></li>
+    <li><span class="who">הוא</span><span class="say">אולי 5.</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">ואמרת שעבודה שווה בערך 600 שקל. אז 5 עבודות זה 3,000 שקל בחודש שהולכים לאינסטלטור אחר.</span></li>
+    <li class="note">שותקים שתי שניות.</li>
+    <li class="me"><span class="who">אתה</span><span class="say">וגם אם זה רק חצי, זה 1,500 שקל בחודש. נשמע לך הגיוני?</span></li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>הוא אומר</th><th>אתה עונה</th></tr></thead>
+    <tbody>
+      <tr><td>"אולי אחת בחודש"</td><td>"אפילו אחת זה 600 שקל בחודש, 7,200 בשנה. וזה רק מהשיחות שלא ענית."</td></tr>
+      <tr><td>"אני לא מפסיד כלום"</td><td>"מעולה. ומי מבקש מהלקוחות ביקורת בגוגל אחרי כל עבודה?" ← הבוט עושה גם את זה</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s4">
+  <h2><span class="n">4</span> הדמו (3 דקות)</h2>
+  <p class="goal"><b>המטרה:</b> שהוא יראה את זה עובד, על עצמו, בטלפון שלו.</p>
+  <ul class="talk">
+    <li class="me"><span class="who">אתה</span><span class="say">אני שולח לך עכשיו קישור בוואטסאפ. תבחר שם "אינסטלטור", ותכתוב כאילו אתה לקוח עם נזילה. תכתוב מה שבא לך.</span></li>
+    <li class="note">שולחים את קישור הדמו של עונה ראשון. שותקים ונותנים לו לשחק.</li>
+    <li class="me"><span class="who">אתה</span><span class="say">ראית? הוא ענה תוך שניות, שאל מה קרה, ביקש תמונה וכתובת. ובצד השני, זה מה שאתה מקבל: הודעה אחת מסודרת עם שם, טלפון, הבעיה, הכתובת, קישור לוויז והתמונות.</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">אתה עונה על ההודעה "בדרך 20", והלקוח מקבל שאתה בדרך. סיימת? כותב "סיום", ואחרי 3 שעות הלקוח מקבל בקשה לביקורת בגוגל.</span></li>
+  </ul>
+  <p>מה להדגיש, לפי מה שהוא אמר בשלב 2:</p>
+  <ul class="plain">
+    <li><b>דחוף מגיע מיד.</b> הצפה, צינור שהתפוצץ, מים ליד חשמל: הבוט מזהה ושולח לו מיד, גם בלילה.</li>
+    <li><b>הוא לא מאבד את הוואטסאפ שלו.</b> הוא ממשיך לעבוד מהאפליקציה כרגיל. ברגע שהוא עונה ללקוח, הבוט יוצא מהשיחה.</li>
+    <li><b>הודעות קוליות ותמונות.</b> הבוט מבין הקלטות, רואה תמונות, ועונה בעברית, ערבית, רוסית ואנגלית.</li>
+    <li><b>תזכורות.</b> לא חזר ללקוח? מקבל תזכורת. תור למחר? הלקוח מקבל תזכורת יום לפני ושעתיים לפני.</li>
+    <li><b>טבלה של כל הלקוחות</b> עם כפתור "טופל", ודוח שבועי כל יום ראשון.</li>
+  </ul>
+  <p class="why">אם הוא שואל אם יש לנו לקוחות: "הלקוח הראשון שלנו הוא מנעולן, אותה מערכת בדיוק. אתה יכול להיות הראשון באינסטלציה." לא ממציאים מספרים ותוצאות שעוד אין.</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">5</span> ההצעה והמחיר (2 דקות)</h2>
+  <p class="goal"><b>המטרה:</b> מחיר אחד ברור, עם הבטחה שמורידה ממנו את הסיכון.</p>
+  <div class="price">
+    <div class="lead"><span>לקוחות מייסדים (3 הראשונים)</span><strong>1,500 ₪ הקמה</strong><span>ואז 490 ₪ לחודש + מע"מ, נעול לשנה. בתמורה: המלצה כתובה אחרי חודש.</span></div>
+    <div><span>מחיר רגיל</span><strong>2,500 ₪ הקמה</strong><span>ואז 590 ₪ לחודש + מע"מ.</span></div>
+  </div>
+  <ul class="talk">
+    <li class="me"><span class="who">אתה</span><span class="say">אני לוקח רק שלושה אינסטלטורים ראשונים במחיר מייסדים: 1,500 שקל להקמה, ו-490 לחודש. זה פחות מעבודה אחת שהלכה לאיבוד.</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">ויש הבטחה: אם אחרי 30 יום לא ראית לפחות עבודה אחת שהייתה הולכת לאיבוד, אתה לא משלם על החודש הבא, ואני מנתק הכל.</span></li>
+  </ul>
+  <p class="why"><b>כל המחירים לפני מע"מ, ואומרים את זה בקול.</b> אצל חנן המחיר כלל מע"מ, ונשאר לנו מעט מדי. ההקמה כוללת: חיבור הוואטסאפ, התאמה לעסק שלו (שירותים, אזורים, מחירים), ומדריך. החודשי כולל: השרת, המוח, עלויות הוואטסאפ, תחזוקה ושינויים.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">6</span> התנגדויות</h2>
+  <p class="goal"><b>הכלל:</b> קודם מסכימים איתו, אחר כך עונים, ואז שואלים שאלה. לא מתווכחים.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>הוא אומר</th><th>אתה עונה</th></tr></thead>
+    <tbody>
+      <tr><td>"יקר"</td><td>"מבין. אמרת שאתה מפסיד בערך 5 עבודות בחודש. אם הבוט מחזיר רק אחת, הוא כבר שילם את עצמו. וההבטחה אומרת שאם לא, אתה לא משלם."</td></tr>
+      <tr><td>"לקוחות לא אוהבים לדבר עם רובוט"</td><td>"נכון, ולכן הוא לא נשמע כמו רובוט. הוא כותב כמו מוקדנית שלך, בשמך. ניסית בעצמך בדמו, איך זה הרגיש?"</td></tr>
+      <tr><td>"יחסמו לי את הוואטסאפ"</td><td>"שאלה טובה. אנחנו מחברים רק בדרך הרשמית של וואטסאפ, דרך ספק מאושר של Meta. אתה ממשיך עם האפליקציה שלך כרגיל."</td></tr>
+      <tr><td>"יש לי מוקד / מזכירה"</td><td>"מעולה. ומה קורה בשתיים בלילה, בשבת, או כשהיא בשיחה אחרת? והיא מבקשת מכל לקוח ביקורת בגוגל?"</td></tr>
+      <tr><td>"אני לא מבין בטכנולוגיה"</td><td>"אתה לא צריך. אנחנו מחברים הכל. אתה רק עונה על ההודעות כמו שאתה עונה היום."</td></tr>
+      <tr><td>"אני צריך לחשוב"</td><td>"בטח. מה בדיוק אתה רוצה לבדוק? המחיר, או אם זה יעבוד אצלך?" ← עונים על מה שהוא אומר, ואז שלב 7</td></tr>
+      <tr><td>"תשלח לי בוואטסאפ"</td><td>"שולח עכשיו. ונקבע שיחה של 5 דקות מחר ב-19:00 לשאלות?" תמיד עם מועד.</td></tr>
+      <tr><td>"מה אם הבוט טועה?"</td><td>"הוא לא ממציא מחירים. מה שהוא לא יודע, הוא שואל אותך. ואתה מלמד אותו בהודעה אחת: 'למד פתיחת סתימה מתחילה מ-350'."</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">7</span> סגירה</h2>
+  <p class="goal"><b>המטרה:</b> החלטה עכשיו. נותנים שתי אפשרויות, ושתיהן "כן".</p>
+  <ul class="talk">
+    <li class="me"><span class="who">אתה</span><span class="say">אז ככה: יש לי מקום לעוד שני אינסטלטורים במחיר מייסדים. אתה רוצה שנתחיל השבוע, או בשבוע הבא?</span></li>
+    <li class="note">שותקים. מי שמדבר ראשון מפסיד.</li>
+    <li><span class="who">הוא</span><span class="say">השבוע.</span></li>
+    <li class="me"><span class="who">אתה</span><span class="say">מעולה. כדי לשמור לך את המקום, מקדמה של 750 שקל עכשיו בביט, והשאר ביום שהבוט עולה אצלך. אני שולח לך עכשיו את הפרטים.</span></li>
+  </ul>
+  <p class="why">אם הוא מהסס בשלב הזה, זה בדרך כלל מחיר או אמון. שואלים: "מה עוצר אותך?", עונים מטבלת ההתנגדויות, וחוזרים על השאלה של שתי האפשרויות פעם אחת. לא לוחצים יותר מזה.</p>
+</section>
+
+<section id="s8">
+  <h2><span class="n">8</span> אחרי ה"כן"</h2>
+  <p class="goal"><b>המטרה:</b> בוט עובד אצלו תוך שבוע, ושני שמות של חברים למקצוע.</p>
+  <ol class="plain">
+    <li><b>באותו יום:</b> הודעת תודה, פרטי תשלום, וקישור לטופס (שירותים, אזורים, שעות, מחירים, מקרים דחופים, מספר להתראות שונה ממספר העסק).</li>
+    <li><b>עד 3 ימים:</b> מכינים את הבוט לפי הטופס, ובודקים אותו על מספר בדיקה.</li>
+    <li><b>שיחת חיבור, 15 דקות:</b> הוא סורק QR מאפליקציית WhatsApp Business שלו, ובודקים יחד הודעה אמיתית.</li>
+    <li><b>שולחים לו מדריך קצר</b> (כמו המדריך של חנן): איך עונים לבוט, הטבלה, "למד".</li>
+    <li><b>אחרי שבוע:</b> מתקשרים לשאול איך הולך, ומבקשים: "יש לך שני חברים אינסטלטורים, באזור אחר, שזה יעזור להם? אם הם סוגרים, אתה מקבל חודש חינם."</li>
+    <li><b>אחרי חודש:</b> מבקשים את ההמלצה הכתובה ותמונה של דוח שבועי (עם הסכמה שלו).</li>
+  </ol>
+</section>
+
+<footer>
+  <p>החוק: טלפון זה הדרך העיקרית. בהודעה כתובה לעסק מותרת פנייה אחת שמבקשת הסכמה, בלי סדרת הודעות למי שלא ענה. כל "לא" נרשם ברשימה עם הסיבה.</p>
+</footer>
+</div>
