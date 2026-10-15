@@ -205,6 +205,7 @@ const ACTIONS = {
   irrelevant: (p) => `לא רלוונטי ${p}`,
   cancel: (p) => `ביטול ${p}`,
   bot: (p) => `בוט ${p}`,
+  learn: (p, f) => { const t = String(f.get('fact') || '').replace(/\s+/g, ' ').trim().slice(0, 500); return t.length >= 3 ? `למד ${t}` : ''; },
   block: (p) => `חסום ${p}`,
 };
 
@@ -237,7 +238,7 @@ export async function actionPage(env, request, url, runCommand) {
     const form = await request.formData();
     const make = ACTIONS[String(form.get('act') || '')];
     const cmd = make ? make(local(phone), form) : '';
-    if (!cmd) result = 'חסר תאריך או שעה. נסה שוב.';
+    if (!cmd) result = 'חסר מידע (תאריך ושעה, או מה ללמד). נסה שוב.';
     else {
       const capture = [];
       await runCommand({ ...env, __capture: capture }, cmd, new Date(), null, env.OWNER_PHONE);
@@ -257,5 +258,7 @@ ${[15, 30, 45, 60].map((m) => f('eta', `${m} דק'`, '', `<input type="hidden" n
 ${f('done', '✓ סיימתי את העבודה', 'g')}</div><div style="color:var(--mute);font-size:14px">אחרי 3 שעות הלקוח מקבל בקשה לביקורת בגוגל.</div></div>
 <div class="card"><h2>עוד</h2><div class="row">
 ${f('handled', 'חזרתי אליו בטלפון', 'n')}${f('irrelevant', 'לא רלוונטי', 'n')}${f('cancel', 'העבודה בוטלה', 'n')}${f('bot', 'שהבוט יענה לו', 'n')}${f('block', 'ספאם, לחסום', 'n')}</div></div>
+<div class="card"><h2>ללמד את הבוט (מעכשיו הוא עונה ככה לכל הלקוחות)</h2>
+<form method="post" class="row"><input type="hidden" name="act" value="learn"><input name="fact" placeholder="למשל: פריצת רכב עולה 250-400 ₪" aria-label="מה ללמד"><button>למד</button></form></div>
 <p><a href="https://wa.me/${phone}">וואטסאפ ללקוח</a></p>`);
 }

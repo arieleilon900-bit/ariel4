@@ -10,6 +10,8 @@ import { ownerHours } from './hours.js';
 import { ownerByEmail, sendOwnerEmail } from './email.js';
 
 const CONV_IDLE_HOURS = 72; // שיחה שלא זזה 3 ימים נחשבת סגורה, והודעה חדשה פותחת שיחה חדשה
+// חנן כבר ענה ללקוח בעצמו, והשיחה שקטה 12 שעות: הודעה חדשה של הלקוח (למשל "אשמח לעוד עבודה") היא פנייה חדשה, והבוט עונה
+const OWNER_HANDLED_IDLE_HOURS = 12;
 
 // הבוט בהפסקה ("עצור בוט"): לא עונה ללקוחות, וכל הודעה עוברת ישר לחנן
 export async function isPaused(env) {
@@ -138,7 +140,9 @@ async function extractContent(env, msg) {
 async function getOrCreateConversation(env, phone, now) {
   const open = () => env.DB.prepare("SELECT * FROM conversations WHERE phone = ? AND state IN ('bot','handoff') ORDER BY id DESC LIMIT 1").bind(phone).first();
   const conv = await open();
-  if (conv && (now.getTime() - new Date(conv.updated_at).getTime()) / 3600000 < CONV_IDLE_HOURS) return { conv, isNew: false };
+  const idleHours = conv ? (now.getTime() - new Date(conv.updated_at).getTime()) / 3600000 : 0;
+  const ownerDone = conv?.state === 'handoff' && conv.owner_replied_at && idleHours >= OWNER_HANDLED_IDLE_HOURS && !conv.summary_due_at;
+  if (conv && idleHours < CONV_IDLE_HOURS && !ownerDone) return { conv, isNew: false };
   if (conv) await env.DB.prepare("UPDATE conversations SET state = 'closed' WHERE id = ?").bind(conv.id).run();
   // אם הודעה אחרת של אותו לקוח פתחה שיחה באותו רגע, האינדקס הייחודי מונע שיחה כפולה
   const res = await env.DB.prepare('INSERT OR IGNORE INTO conversations (phone, started_at, updated_at) VALUES (?, ?, ?)').bind(phone, nowIso(now), nowIso(now)).run();
@@ -399,6 +403,11 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
   if (result.language) await env.DB.prepare('UPDATE customers SET lang = ? WHERE phone = ?').bind(result.language, phone).run();
   await env.DB.prepare('UPDATE conversations SET issue = COALESCE(NULLIF(?, \'\'), issue), address = COALESCE(NULLIF(?, \'\'), address), urgent = MAX(urgent, ?) WHERE id = ?')
     .bind(result.issue, result.address, result.urgent ? 1 : 0, conv.id).run();
+  // שאלה שהבוט לא ידע לענות: נכנסת לסיכום לחנן, והסיכום יוצא גם אם עוד חסרים פרטים. הבוט ממשיך את השיחה
+  if (result.question_for_owner) {
+    await addOwnerQuestion(env, conv.id, result.question_for_owner);
+    if (!result.customer_done) result.ready_for_handoff = true;
+  }
 
   // הלקוח כבר לא צריך: סוגרים בלי תזכורות ובלי מעקב
   if (result.customer_done && !result.ready_for_handoff) {
@@ -451,6 +460,10 @@ async function afterHandoffTurn(env, { conv, phone, customer, contactName, conte
   await env.DB.prepare('UPDATE conversations SET issue = COALESCE(NULLIF(?, \'\'), issue), address = COALESCE(NULLIF(?, \'\'), address), urgent = MAX(urgent, ?) WHERE id = ?')
     .bind(result.issue, result.address, result.urgent ? 1 : 0, conv.id).run();
   const becameUrgent = result.urgent && !fresh.urgent;
+  if (result.question_for_owner) {
+    await addOwnerQuestion(env, conv.id, result.question_for_owner);
+    result.ready_for_handoff = true;
+  }
   // הסיכום לחנן עוד לא יצא (הלקוח עדיין באמצע השיחה): כל מה שנאסף נכנס לסיכום אחד, והשעון מתחיל מחדש
   if (fresh.summary_due_at) {
     if (result.customer_done && fresh.summary_kind === 'new') {
@@ -471,6 +484,20 @@ async function afterHandoffTurn(env, { conv, phone, customer, contactName, conte
 }
 
 const updatedIssue = (conv, result) => result.issue || conv.issue || '';
+
+async function addOwnerQuestion(env, convId, q) {
+  await env.DB.prepare("UPDATE conversations SET owner_questions = CASE WHEN owner_questions IS NULL OR owner_questions = '' THEN ? ELSE owner_questions || char(10) || ? END WHERE id = ?")
+    .bind(String(q).slice(0, 300), String(q).slice(0, 300), convId).run();
+}
+
+// השאלות שהלקוח מחכה להן, בראש ההודעה לחנן
+function withQuestions(text, conv) {
+  const qs = String(conv.owner_questions || '').split('\n').map((x) => x.trim()).filter(Boolean);
+  if (!qs.length) return text;
+  const lines = text.split('\n');
+  lines.splice(1, 0, `❓ הלקוח מחכה לתשובה ממך: ${qs.join(' / ')}`);
+  return lines.join('\n');
+}
 
 // כמה דקות של שקט מהלקוח לפני שחנן מקבל את הסיכום. ככה הוא מקבל דוח אחד בסוף השיחה, לא הודעה על כל הודעה
 const settleMinutes = (env) => (env.SUMMARY_SETTLE_MIN != null && env.SUMMARY_SETTLE_MIN !== '' ? +env.SUMMARY_SETTLE_MIN : 3);
@@ -509,7 +536,8 @@ export async function flushSummary(env, convId, now = new Date(), extra = {}) {
     const voices = (await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' AND text LIKE '[הודעה קולית]%' ORDER BY id").bind(convId).all()).results;
     const voiceText = voices.map((v) => v.text.replace('[הודעה קולית] ', '🎤 ')).join('\n');
     const table = await tableLink(env);
-    const summaryText = ownerSummary(c, res, phone, now) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
+    const summaryText = withQuestions(ownerSummary(c, res, phone, now), c) + (table ? `\nכל הלקוחות בטבלה: ${table}` : '');
+    await env.DB.prepare("UPDATE conversations SET owner_questions = NULL WHERE id = ?").bind(convId).run();
     await notifyOwner(env, voiceText ? `${summaryText}\n\nמה נאמר בהקלטה:\n${voiceText}` : summaryText, JSON.parse(c.photos || '[]'), now, phone);
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(convId, nowIso(now)).run();
     // התזכורות לחנן נספרות מרגע שהסיכום הגיע אליו
@@ -522,8 +550,10 @@ export async function flushSummary(env, convId, now = new Date(), extra = {}) {
   const cancel = c.summary_kind === 'cancel';
   const lastUpdate = (await env.DB.prepare("SELECT MAX(id) AS id FROM messages WHERE conv_id = ? AND role = 'owner_update'").bind(convId).first())?.id || 0;
   const media = (await env.DB.prepare("SELECT media_id FROM messages WHERE conv_id = ? AND role = 'user' AND media_id IS NOT NULL AND id > ? ORDER BY id").bind(convId, lastUpdate).all()).results.map((r) => r.media_id);
-  const body = ownerSummary(c, res, phone, now)
-    .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, extra.becameUrgent ? '🚨 עדכון דחוף לפנייה' : (cancel ? '❎ הלקוח ביטל' : '🔄 עדכון לפנייה'));
+  const hasQ = !!String(c.owner_questions || '').trim();
+  const body = withQuestions(ownerSummary(c, res, phone, now)
+    .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, extra.becameUrgent ? '🚨 עדכון דחוף לפנייה' : (cancel ? '❎ הלקוח ביטל' : (hasQ ? '❓ שאלה חדשה מהלקוח' : '🔄 עדכון לפנייה'))), c);
+  await env.DB.prepare("UPDATE conversations SET owner_questions = NULL WHERE id = ?").bind(convId).run();
   await notifyOwner(env, body, media, now, phone);
   await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(convId, nowIso(now)).run();
   if (cancel) {
