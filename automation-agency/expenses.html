@@ -137,7 +137,7 @@ input, select { font: inherit; color: var(--ink); background: var(--bg); border:
     <div class="rates">
       <label for="r-usd">דולר בשקלים<input id="r-usd" type="number" step="0.01" min="0"></label>
       <label for="r-eur">יורו בשקלים<input id="r-eur" type="number" step="0.01" min="0"></label>
-      <label for="r-inc" style="width:190px">הכנסה חודשית מחנן, נטו אחרי מע"מ (₪)<input id="r-inc" type="number" step="0.01" min="0"></label>
+      <label for="r-inc" style="width:190px">הכנסה חודשית מחנן (₪, עוסק פטור: בלי מע"מ)<input id="r-inc" type="number" step="0.01" min="0"></label>
       <button class="btn" id="save-rates" type="button">שמירה</button>
       <span class="msg" id="rates-msg"></span>
     </div>
@@ -174,7 +174,7 @@ input, select { font: inherit; color: var(--ink); background: var(--bg); border:
     $('t-net').textContent = ils(net);
     $('t-net').className = 'v num ' + (net >= 0 ? 'pos' : 'neg');
     const replaced = items.filter((i) => i.status === 'active' && i.replacedOnSwitch).reduce((s, i) => s + monthlyOf(i), 0);
-    $('t-net-s').textContent = `${ils(rates.income || 0)} נטו (500 ÷ 1.18) פחות ${ils(monthly)}. אחרי המעבר ל-360dialog: ${ils(net - planned + replaced)}`;
+    $('t-net-s').textContent = `${ils(rates.income || 0)} מחנן (עוסק פטור, בלי מע"מ) פחות ${ils(monthly)}. אחרי המעבר ל-360dialog: ${ils(net - planned + replaced)}`;
 
     const list = items.filter((i) => filter === 'all' || i.status === filter)
       .sort((a, b) => ({ active: 0, planned: 1, canceled: 2 }[a.status] - { active: 0, planned: 1, canceled: 2 }[b.status]) || monthlyOf(b) - monthlyOf(a));
