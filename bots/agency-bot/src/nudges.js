@@ -3,7 +3,8 @@ import { BUSINESS, FEATURES, MESSAGES, TIMING, msg as tmsg } from './config.js';
 import { upsertLead } from './sheets.js';
 import { addHours, displayPhone, inServiceWindow, nowIso } from './util.js';
 import { customerHours, ownerHours, restNow } from './hours.js';
-import { customerLang, forwardPhotosToOwner, isPaused, logEvent, ownerSummary, sendToOwner } from './handler.js';
+import { customerLang, forwardPhotosToOwner, isPaused, logEvent, notifyOwner, ownerSummary, sendToOwner } from './handler.js';
+import { ownerByEmail } from './email.js';
 import * as wa from './whatsapp.js';
 
 const minutesSince = (iso, now) => (now.getTime() - new Date(iso).getTime()) / 60000;
@@ -62,8 +63,7 @@ async function partialHandoff(env, conv, now, title = 'לקוח התחיל לכ�
   const lastUser = await env.DB.prepare("SELECT text FROM messages WHERE conv_id = ? AND role = 'user' ORDER BY id DESC LIMIT 1").bind(conv.id).first();
   const summary = ownerSummary(conv, { customer_name: cust?.name || '', urgent: !!conv.urgent, summary_for_owner: lastUser?.text ? `ההודעה האחרונה שלו: ${lastUser.text}` : '' }, conv.phone, now)
     .replace(/^(🔔 פנייה חדשה|🚨 פנייה דחופה!)/, `⚠️ ${title}`);
-  await sendToOwner(env, summary, now, conv.phone);
-  await forwardPhotosToOwner(env, JSON.parse(conv.photos || '[]'), now, conv.phone);
+  await notifyOwner(env, summary, JSON.parse(conv.photos || '[]'), now, conv.phone);
   await logEvent(env, 'partial', conv.phone, now);
   await upsertLead(env, conv.phone, { status: `פנייה חלקית, הועבר ל${BUSINESS.ownerName}`, note: 'הלקוח הפסיק לענות באמצע' }, now);
 }
@@ -88,10 +88,8 @@ async function unfinishedUpdates(env, now) {
       ...users.slice(-6).map((m) => `• ${m.text}`),
       `וואטסאפ ללקוח: https://wa.me/${conv.phone}`,
     ].join('\n');
-    await sendToOwner(env, text, now, conv.phone);
+    await notifyOwner(env, text, users.map((m) => m.media_id).filter(Boolean), now, conv.phone);
     await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'owner_update', '', ?)").bind(conv.id, nowIso(now)).run();
-    const media = users.map((m) => m.media_id).filter(Boolean);
-    if (media.length) await forwardPhotosToOwner(env, media, now, conv.phone);
   }
 }
 
@@ -117,7 +115,7 @@ async function ownerNudges(env, now) {
       conv.urgent ? `🚨 פנייה דחופה שעוד לא טופלה: ${who}` : `⏰ עדיין לא חזרת ל-${who}`,
       first ? `כדאי לחזור אליו לפני שהוא פונה ל${BUSINESS.competitor}.` : 'זו התזכורת האחרונה על הפנייה הזו.',
       `וואטסאפ ללקוח: https://wa.me/${conv.phone}`,
-      `כשטיפלת (גם בטלפון) כתוב לי: טופל ${displayPhone(conv.phone)}`,
+      ownerByEmail(env) ? 'כשטיפלת, לחץ למטה על "בדרך / תור / סיימתי".' : `כשטיפלת (גם בטלפון) כתוב לי: טופל ${displayPhone(conv.phone)}`,
     ].join('\n');
     await sendToOwner(env, text, now, conv.phone);
     await env.DB.prepare('UPDATE conversations SET owner_nudges = owner_nudges + 1, owner_nudged_at = ? WHERE id = ?').bind(nowIso(now), conv.id).run();
@@ -144,7 +142,10 @@ async function doneChecks(env, now) {
     await env.DB.prepare('UPDATE jobs SET done_check_sent = 1 WHERE id = ?').bind(j.id).run();
     const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(j.phone).first();
     const ph = displayPhone(j.phone);
-    await sendToOwner(env, [
+    await sendToOwner(env, ownerByEmail(env) ? [
+      `מה קרה עם העבודה אצל ${cust?.name || 'הלקוח'} ${ph}?`,
+      'לחץ למטה על "בדרך / תור / סיימתי" וסמן: סיימתי, או העבודה בוטלה.',
+    ].join('\n') : [
       `מה קרה עם העבודה אצל ${cust?.name || 'הלקוח'} ${ph}?`,
       FEATURES.receipts ? `סיימת: שלח לי את הקבלה (PDF, ובכיתוב ${ph}) או כתוב: סיום ${ph}` : `סיימת: כתוב סיום ${ph} (ואז הלקוח מקבל בקשת ביקורת)`,
       `בוטל: כתוב: ביטול ${ph}`,

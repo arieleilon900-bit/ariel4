@@ -11,6 +11,13 @@ import { renderTable, tableAction, tableKey } from './table.js';
 import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
+import { BUSINESS } from './config.js';
+import { actionPage, ownerByEmail, serveMedia } from './email.js';
+
+// בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
+const withOwner = (env) => (env.OWNER_EMAIL && !env.OWNER_PHONE ? { ...env, OWNER_PHONE: 'email' } : env);
+// לחיצה על כפתור (בטבלה או במייל) כשההתראות במייל: האישור מוצג בדף, לא נשלח עוד מייל
+const quietCommand = (e, ...a) => handleOwnerCommand(ownerByEmail(e) ? { ...e, __capture: [] } : e, ...a);
 
 // השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
 function safeEqual(a, b) {
@@ -22,7 +29,15 @@ function safeEqual(a, b) {
 
 export default {
   async fetch(request, env, ctx) {
+    env = withOwner(env);
     const url = new URL(request.url);
+
+    // הקישורים במייל לבעל העסק: תמונות של לקוחות, ודף הכפתורים (בדרך / תור / סיימתי)
+    if (url.pathname === '/media' && request.method === 'GET') return serveMedia(env, url);
+    if (url.pathname === '/act' && (request.method === 'GET' || request.method === 'POST')) {
+      setWindowAlwaysOpen(isUltra(env));
+      return actionPage(env, request, url, handleOwnerCommand);
+    }
 
     if (url.pathname === '/' || url.pathname === '/health') {
       if (isUltra(env)) {
@@ -44,7 +59,7 @@ export default {
       const form = await request.clone().formData().catch(() => null);
       if (!k || !form || !safeEqual(String(form.get('k') || ''), k)) return new Response('forbidden', { status: 403 });
       setWindowAlwaysOpen(isUltra(env));
-      return tableAction(env, request, url, handleOwnerCommand);
+      return tableAction(env, request, url, quietCommand);
     }
 
     // בדיקה עצמית אחרי כל העלאה: המוח האמיתי עונה על שיחה לדוגמה (בלי לשלוח כלום לאף אחד)
@@ -52,6 +67,13 @@ export default {
       const key = (url.searchParams.get('key') || '').trim();
       if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
       return new Response(await selfTest(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
+
+    // שיחה לדוגמה עם המוח האמיתי (שום דבר לא נשלח ולא נשמר): רואים איך הבוט עונה בסגנון של חנן
+    if (url.pathname === '/admin/demo' && request.method === 'GET') {
+      const key = (url.searchParams.get('key') || '').trim();
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
+      return new Response(await demoConversation(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     // הגדרה ובדיקה אוטומטית (רק עם מילת הסוד)
@@ -103,6 +125,7 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
+    env = withOwner(env);
     const now = new Date(event.scheduledTime || Date.now());
     setWindowAlwaysOpen(isUltra(env));
     // כל דקה: רק הסיכומים לבעל העסק שהגיע הזמן שלהם (הלקוח סיים לכתוב)
@@ -112,6 +135,37 @@ export default {
     else ctx.waitUntil(runEvery15(env, now));
   },
 };
+
+async function demoConversation(env) {
+  const customer = [
+    'היי',
+    'ננעלתי מחוץ לבית, המפתח נשאר בפנים',
+    'אין לי איך לצלם, הטלפון כמעט מת',
+    'הרצל 12 נתניה, קומה 3',
+    'כמה זה עולה בערך? ואפשר לשלם באשראי?',
+    'תודה רבה',
+  ];
+  const history = [];
+  const out = [];
+  let after = false;
+  let collected = { issue: '', address: '', notes: [], questions: [] };
+  for (const text of customer) {
+    history.push({ role: 'user', text });
+    const r = await runTurn(env, { history, now: new Date(), afterHandoff: after });
+    out.push(`לקוח: ${text}`, `בוט: ${r.reply || '(לא עונה)'}`);
+    if (r.reply) history.push({ role: 'assistant', text: r.reply });
+    collected = { issue: r.issue || collected.issue, address: r.address || collected.address, notes: r.summary_for_owner ? [r.summary_for_owner] : collected.notes, questions: r.question_for_owner ? [...collected.questions, r.question_for_owner] : collected.questions };
+    const flags = [r.ready_for_handoff && `מעביר ל${BUSINESS.ownerName}`, r.urgent && 'דחוף', r.question_for_owner && `שאלה ל${BUSINESS.ownerName}: ${r.question_for_owner}`].filter(Boolean);
+    if (flags.length) out.push(`   [${flags.join(' | ')}]`);
+    out.push('');
+    if (r.ready_for_handoff) after = true;
+  }
+  out.push(`--- הדוח ש${BUSINESS.ownerName} מקבל (אחרי 3 דקות שקט) ---`,
+    '🔔 פנייה חדשה',
+    ...(collected.questions.length ? [`❓ הלקוח מחכה לתשובה ממך: ${collected.questions.join(' / ')}`] : []),
+    `תקלה: ${collected.issue || '(לא פורט)'}`, `כתובת: ${collected.address || '(לא נמסרה)'}`, ...(collected.notes.length ? ['', collected.notes[0]] : []));
+  return out.join('\n');
+}
 
 async function selfTest(env) {
   const out = [];

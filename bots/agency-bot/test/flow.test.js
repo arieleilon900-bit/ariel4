@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -829,7 +829,7 @@ test('/admin/setup: wires the webhook, creates missing templates, checks keys; n
   } finally { globalThis.fetch = orig; }
 });
 
-test('receipts off (the default for Hanan): no Yesh polling, PDFs are plain files, no receipt in help', async () => {
+test('receipts off: no Yesh polling, PDFs are plain files, no receipt in help', async () => {
   FEATURES.receipts = false;
   try {
     sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
@@ -1284,4 +1284,133 @@ test('one report at the end of the conversation: Hanan gets nothing while the cu
   await flushDueSummaries(env, at(100));
   assert.equal(sent.filter((m) => m.to === OWNER && /סוקולוב/.test(m.text?.body || '')).length, 0, 'customer gave up before the report: nothing to Hanan');
   assert.equal(env.DB.raw.prepare('SELECT state FROM conversations WHERE phone = ?').get(C4).state, 'closed');
+});
+
+test('owner by email: one summary email with photos and a buttons link; buttons run commands without extra emails; Gmail dialogue', async () => {
+  sent.length = 0;
+  const { default: worker } = await import('../src/index.js');
+  const { flushDueSummaries } = await import('../src/handler.js');
+  const { buildMime } = await import('../src/email.js');
+  const mails = [];
+  const env = { ...makeEnv(), OWNER_PHONE: undefined, OWNER_EMAIL: 'hanan@example.com', WORKER_URL: 'https://bot.example', WA_VERIFY_TOKEN: 'secret', SUMMARY_SETTLE_MIN: '3', __mail: async (m) => { mails.push(m); } };
+  const ctx = { waitUntil: () => {} };
+  const call = (path, init) => worker.fetch(new Request(`https://bot.example${path}`, init), env, ctx);
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  const ownerEnv = { ...env, OWNER_PHONE: 'email' };
+  aiQueue = [ai({ reply: 'תודה! מה הכתובת?', issue: 'ננעל בחוץ' })];
+  await processWebhook(ownerEnv, inbound(CUSTOMER, { type: 'image', image: { id: 'door9', caption: 'ננעלתי' } }, 'e1'), t0);
+  aiQueue = [ai({ reply: 'העברתי לחנן', issue: 'ננעל בחוץ', address: 'הרצל 5 חולון', customer_name: 'רון', ready_for_handoff: true, summary_for_owner: 'דלת פלדלת' })];
+  await processWebhook(ownerEnv, inbound(CUSTOMER, { type: 'text', text: { body: 'הרצל 5 חולון' } }, 'e2'), new Date(t0.getTime() + 60000));
+  assert.equal(mails.length, 0, 'nothing until the conversation settles');
+  await flushDueSummaries(ownerEnv, new Date(t0.getTime() + 5 * 60000));
+  assert.equal(mails.length, 1, 'one email');
+  assert.equal(sent.filter((m) => m.to === OWNER).length, 0, 'nothing on WhatsApp');
+  const m = mails[0];
+  assert.equal(m.to, 'hanan@example.com');
+  assert.match(m.subject, /פנייה חדשה/);
+  assert.match(m.text, /הרצל 5 חולון/);
+  assert.match(m.html, /\/media\?id=door9&amp;k=|\/media\?id=door9&k=/);
+  const act = m.html.match(/https:\/\/bot\.example\/act\?p=(\d+)&k=([0-9a-f]+)/);
+  assert.ok(act, 'buttons link');
+
+  // התמונה נפתחת רק עם המפתח
+  assert.equal((await call('/media?id=door9&k=bad')).status, 403);
+  const img = m.html.match(/\/media\?id=door9&k=([0-9a-f]+)/);
+  assert.equal((await call(`/media?id=door9&k=${img[1]}`)).status, 200);
+
+  // דף הכפתורים: פתיחה לא מבצעת כלום, לחיצה כן
+  assert.equal((await call(`/act?p=${act[1]}&k=nope`)).status, 403);
+  const before = sent.length;
+  const page = await (await call(`/act?p=${act[1]}&k=${act[2]}`)).text();
+  assert.match(page, /רון/);
+  assert.equal(sent.length, before, 'opening the page sends nothing');
+  const form = new FormData(); form.set('act', 'eta'); form.set('min', '30');
+  const res = await (await call(`/act?p=${act[1]}&k=${act[2]}`, { method: 'POST', body: form })).text();
+  assert.ok(textsTo(CUSTOMER).some((t) => t.includes('30 דקות') || t === '[template:on_the_way_v1]'), 'customer told he is on the way');
+  assert.match(res, /✓|בדרך/);
+  assert.equal(mails.length, 1, 'no confirmation email');
+  const form2 = new FormData(); form2.set('act', 'appt'); form2.set('date', new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10)); form2.set('time', '14:30'); form2.set('address', 'הרצל 5 חולון');
+  await call(`/act?p=${act[1]}&k=${act[2]}`, { method: 'POST', body: form2 });
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM jobs WHERE status='open' AND scheduled_at IS NOT NULL").get().n, 1, 'appointment set');
+  const form3 = new FormData(); form3.set('act', 'done');
+  await call(`/act?p=${act[1]}&k=${act[2]}`, { method: 'POST', body: form3 });
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM jobs WHERE status='done'").get().n, 1, 'job done → review follows');
+
+  // מייל שנכשל: נשמר ונשלח שוב ב-cron
+  const failing = { ...ownerEnv, __mail: async () => { throw new Error('down'); } };
+  const { sendToOwner } = await import('../src/handler.js');
+  await sendToOwner(failing, '⏰ בדיקה', t0, CUSTOMER);
+  await runEvery15(ownerEnv, new Date(t0.getTime() + 15 * 60000));
+  assert.ok(mails.some((x) => x.subject === '⏰ בדיקה'), 'retried');
+
+  // המייל עצמו: נושא בעברית מקודד, גוף ב-base64
+  const mime = buildMime({ from: 'bot@gmail.com', fromName: 'הבוט', to: 'h@x.com', subject: 'פנייה חדשה', text: 'שלום', html: '<b>שלום</b>' });
+  assert.match(mime, /Subject: =\?UTF-8\?B\?/);
+  assert.match(mime, /multipart\/alternative/);
+
+  // שיחה מול שרת Gmail מדומה
+  const { sendOwnerEmail } = await import('../src/email.js');
+  const log = [];
+  const fakeConnect = () => {
+    const replies = ['220 smtp.gmail.com ready\r\n'];
+    let pull;
+    const readable = new ReadableStream({ start(c) { pull = c; c.enqueue(new TextEncoder().encode(replies.shift())); } });
+    const writable = new WritableStream({ write(chunk) {
+      const line = new TextDecoder().decode(chunk); log.push(line.split('\r\n')[0]);
+      const r = line.startsWith('EHLO') ? '250-smtp.gmail.com\r\n250 AUTH PLAIN\r\n' : line.startsWith('AUTH') ? '235 ok\r\n' : line.startsWith('MAIL') || line.startsWith('RCPT') ? '250 ok\r\n' : line.startsWith('DATA') ? '354 go\r\n' : line.startsWith('QUIT') ? '221 bye\r\n' : '250 queued\r\n';
+      pull.enqueue(new TextEncoder().encode(r));
+    } });
+    return { readable, writable, close: async () => {} };
+  };
+  const smtpEnv = { ...ownerEnv, __mail: undefined, __connect: fakeConnect, GMAIL_USER: 'onerishon@gmail.com', GMAIL_APP_PASSWORD: 'abcd efgh ijkl mnop' };
+  const r = await sendOwnerEmail(smtpEnv, '🔔 פנייה חדשה\nשם: רון', { about: CUSTOMER, now: t0 });
+  assert.ok(r.ok, 'sent through SMTP');
+  assert.deepEqual(log.slice(0, 5).map((l) => l.split(' ')[0].split(':')[0]), ['EHLO', 'AUTH', 'MAIL FROM', 'RCPT TO', 'DATA'].map((x) => x.split(' ')[0]));
+  assert.ok(log.some((l) => l.startsWith('RCPT TO:<hanan@example.com>')));
+});
+
+test('questions: the bot answers what it knows; an unknown question gets a warm reply and reaches Hanan as "waiting for your answer"; a returning customer is answered again', async () => {
+  sent.length = 0; aiRequests = [];
+  const { flushDueSummaries } = await import('../src/handler.js');
+  const env = { ...makeEnv(), SUMMARY_SETTLE_MIN: '3' };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  const at = (min) => new Date(t0.getTime() + min * 60000);
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סטטוס' } }, 'q0'), t0);
+  const b0 = sent.filter((m) => m.to === OWNER).length;
+  // שאלה שהבוט יודע: עונה וממשיך, שום דבר לחנן
+  aiQueue = [ai({ reply: 'כן, אנחנו פותחים גם רכבים. מה הדגם?', issue: 'פריצת רכב' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'אתם פותחים רכבים?' } }, 'q1'), at(0));
+  assert.match(aiRequests[0].system, /ענה על כל שאלה של הלקוח/);
+  await flushDueSummaries(env, at(10));
+  assert.equal(sent.filter((m) => m.to === OWNER).length, b0, 'nothing to Hanan for a question the bot answered');
+  // שאלה שהבוט לא יודע: תשובה חמה ללקוח, והשאלה מגיעה לחנן גם בלי כתובת
+  aiQueue = [ai({ reply: 'שאלה מצוינת, אני בודק את זה עם חנן ותקבל תשובה בהקדם. מה הכתובת?', question_for_owner: 'יש אחריות על החלפת מנעול רכב?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'יש אחריות?' } }, 'q2'), at(11));
+  assert.ok(textsTo(CUSTOMER).at(-1).includes('אני בודק את זה עם חנן'));
+  // הלקוח ממשיך: הכתובת נכנסת לאותו סיכום
+  aiQueue = [ai({ reply: 'תודה, קיבלתי', address: 'הרצל 5 חולון' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'הרצל 5 חולון' } }, 'q3'), at(12));
+  assert.equal(sent.filter((m) => m.to === OWNER).length, b0, 'still talking: no message yet');
+  await flushDueSummaries(env, at(16));
+  const out = sent.filter((m) => m.to === OWNER).slice(b0).filter((m) => m.type === 'text');
+  assert.equal(out.length, 1, 'one message');
+  assert.match(out[0].text.body, /❓ הלקוח מחכה לתשובה ממך: יש אחריות על החלפת מנעול רכב\?/);
+  assert.match(out[0].text.body, /הרצל 5 חולון/);
+  // אחרי הסיכום: עוד שאלה שהבוט לא יודע → "לקוח מחכה לתשובה ממך"
+  aiQueue = [ai({ reply: 'אבדוק עם חנן ואחזור אליך', question_for_owner: 'אפשר לשלם בביט?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'אפשר לשלם בביט?' } }, 'q4'), at(20));
+  await flushDueSummaries(env, at(24));
+  const upd = sent.filter((m) => m.to === OWNER && /^❓ שאלה חדשה מהלקוח/.test(m.text?.body || ''));
+  assert.equal(upd.length, 1);
+  assert.match(upd[0].text.body, /❓ הלקוח מחכה לתשובה ממך: אפשר לשלם בביט\?/);
+  assert.match(upd[0].text.body, /בביט/);
+  assert.doesNotMatch(upd[0].text.body, /אחריות/, 'old question not repeated');
+  // חנן ענה ללקוח בעצמו, והשיחה שקטה יום: "אשמח לעוד טיפול" → הבוט עונה שוב
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'סיום 0541234567' } }, 'q5'), at(30));
+  const conv = env.DB.raw.prepare('SELECT id FROM conversations ORDER BY id DESC LIMIT 1').get();
+  env.DB.raw.prepare("UPDATE conversations SET state = 'handoff', owner_replied_at = ? WHERE id = ?").run(at(30).toISOString(), conv.id);
+  aiQueue = [ai({ reply: 'היי, כיף לשמוע ממך שוב! במה אפשר לעזור הפעם?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי מה נשמע, אשמח לעוד טיפול' } }, 'q6'), at(30 + 24 * 60));
+  assert.equal(textsTo(CUSTOMER).at(-1), 'היי, כיף לשמוע ממך שוב! במה אפשר לעזור הפעם?');
+  assert.match(aiRequests.at(-1).system, /לקוח חוזר/);
 });

@@ -6,7 +6,7 @@ import { isOpen, isShabbat, ilDateTimeLabel } from './util.js';
 export const SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['reply', 'language', 'category', 'urgent', 'urgent_reason', 'customer_name', 'issue', 'address', 'ready_for_handoff', 'customer_done', 'summary_for_owner'],
+  required: ['reply', 'language', 'category', 'urgent', 'urgent_reason', 'customer_name', 'issue', 'address', 'ready_for_handoff', 'customer_done', 'summary_for_owner', 'question_for_owner'],
   properties: {
     reply: { type: 'string', description: 'ההודעה שתישלח ללקוח בוואטסאפ. ריק אם category=spam.' },
     language: { type: 'string', description: 'שפת הלקוח: he / ar / ru / en' },
@@ -19,6 +19,7 @@ export const SCHEMA = {
     ready_for_handoff: { type: 'boolean' },
     customer_done: { type: 'boolean', description: 'true אם הלקוח אמר שכבר לא צריך (הסתדר, מצא מישהו אחר, טעות במספר)' },
     summary_for_owner: { type: 'string', description: 'סיכום של 1-2 שורות בעברית לבעל העסק' },
+    question_for_owner: { type: 'string', description: 'שאלה של הלקוח שאין לך תשובה עליה, בקצרה בעברית. ריק אם ענית על הכל' },
   },
 };
 
@@ -74,13 +75,15 @@ ${profileName ? `השם של הלקוח בפרופיל הוואטסאפ: ${profi
 סגנון: פשוט ואנושי, אדיב ונותן ביטחון. הודעות קצרות (1-2 משפטים), בלי רשימות ובלי ניסוחים רשמיים.
 שפה: ענה תמיד באותה שפה שבה הלקוח כתב את ההודעה האחרונה שלו (עברית, ערבית, רוסית, אנגלית או כל שפה אחרת), ורק בה. language = קוד השפה הזו.
 תמונות: אתה רואה אותן, ותשתמש במה שרואים. סרטונים: אתה לא יכול לצפות בהם, אבל ${o} מקבל${b.ownerGender === 'female' ? 'ת' : ''} אותם. אם נשלח סרטון, תגיד שהעברת אותו, ואם חסר לך מידע תבקש תיאור קצר במילים.
-שאלה שאין לך עליה תשובה מ${o} (מחיר מסוים, אחריות, אמצעי תשלום, משהו טכני): אל תמציא. תגיד שתבדוק עם ${o}, וכתוב את השאלה בסיכום ל${o} (summary_for_owner).
+שאלות: ענה על כל שאלה של הלקוח, גם כשהוא שואל כמה דברים באותה הודעה, לפי המידע על העסק ומה ש${o} לימד אותך. ענה בביטחון, בחום ובקצרה, ואז המשך את השיחה.
+שאלה שאין לך עליה תשובה (מחיר מסוים, אחריות, אמצעי תשלום, משהו טכני): אל תמציא. כתוב ללקוח משהו חם שנותן ביטחון, למשל "שאלה מצוינת, אני בודק את זה עם ${o} ותקבל תשובה בהקדם", ואם עוד חסרים פרטים המשך לאסוף אותם. את השאלה עצמה, בקצרה, כתוב ב-question_for_owner. ${o} מקבל אותה ויחזור ללקוח. כשענית על הכל, question_for_owner ריק.
 ${hananSection(b, knowledge)}
 אם שואלים אם אתה בוט: תגיד בכנות שאתה העוזר הדיגיטלי של ${o}, וש${o} מקבל את כל הפרטים.
 ספאם, פרסומות, מכירות, הודעות שלא קשורות לשירות: category=spam, reply ריק.
 ${afterHandoff ? `
 חשוב, מצב נוכחי: הפנייה של הלקוח הזה כבר הועברה ל${o} עם כל הפרטים, והוא יחזור אליו. עכשיו:
 - ענה ללקוח בקצרה ובנעימות. שאלה שאתה יודע לענות עליה: תענה. "כמה זמן?" / "מתי?": ש${o} קיבל הכל ויחזור אליו בהקדם. אל תשאל שוב פרטים שכבר נאספו.
+- אם עוד חסרים פרטים (תקלה או כתובת), המשך לאסוף אותם בנימוס.
 - אם הלקוח מוסיף פרטים או פותח בקשה חדשה (תקלה אחרת, כתובת אחרת): אסוף את כל מה שצריך כמו בפנייה רגילה, שאלה אחת בכל פעם. כל עוד אתה עדיין שואל: ready_for_handoff=false ו-summary_for_owner ריק.
 - ready_for_handoff=true רק כשיש ל${o} תמונה מלאה של מה שהשתנה (הפרטים נאספו, או תמונה שהלקוח שלח של התקלה), או כשזה דחוף, או כשהלקוח מבקש לדבר איתו, או כשהלקוח כבר לא צריך. אז summary_for_owner = סיכום מלא ומעודכן של מה שהלקוח צריך עכשיו, במשפט-שניים.
 - תודה, אוקיי, "מתי מגיעים?": ready_for_handoff=false, summary_for_owner ריק. reply יכול להיות ריק על תודה ואוקיי.` : ''}
@@ -94,6 +97,7 @@ export function fallbackResult(reason) {
     language: 'he', category: 'service', urgent: false, urgent_reason: '',
     customer_name: '', issue: '', address: '', ready_for_handoff: true, customer_done: false,
     summary_for_owner: `הבוט לא הצליח לנהל את השיחה (${reason}). כדאי לחזור ללקוח ישירות.`,
+    question_for_owner: '',
     failed: true,
   };
 }
@@ -111,5 +115,6 @@ export function normalize(r) {
     ready_for_handoff: !!r.ready_for_handoff,
     customer_done: !!r.customer_done,
     summary_for_owner: String(r.summary_for_owner || ''),
+    question_for_owner: String(r.question_for_owner || '').trim(),
   };
 }

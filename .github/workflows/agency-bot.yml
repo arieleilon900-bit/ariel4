@@ -69,11 +69,14 @@ jobs:
           ULTRAMSG_TOKEN: ${{ secrets[format('{0}_ULTRAMSG_TOKEN', matrix.client.prefix)] }}
           YESH_USERKEY: ${{ secrets[format('{0}_YESH_USERKEY', matrix.client.prefix)] }}
           YESH_SECRET: ${{ secrets[format('{0}_YESH_SECRET', matrix.client.prefix)] }}
+          OWNER_EMAIL: ${{ secrets[format('{0}_OWNER_EMAIL', matrix.client.prefix)] }}
+          GMAIL_USER: ${{ secrets[format('{0}_GMAIL_USER', matrix.client.prefix)] }}
+          GMAIL_APP_PASSWORD: ${{ secrets[format('{0}_GMAIL_APP_PASSWORD', matrix.client.prefix)] }}
           CLIENT_ANTHROPIC: ${{ secrets[format('{0}_ANTHROPIC_API_KEY', matrix.client.prefix)] }}
           SHARED_ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           ANTHROPIC_API_KEY="${CLIENT_ANTHROPIC:-$SHARED_ANTHROPIC}"
-          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET ULTRAMSG_TOKEN; do
+          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET ULTRAMSG_TOKEN OWNER_EMAIL GMAIL_USER GMAIL_APP_PASSWORD; do
             value="${!name}"
             if [ -n "$value" ]; then printf '%s' "$value" | npx wrangler secret put "$name" --config "$CONFIG"
             else echo "::notice::${{ matrix.client.prefix }}_$name not set"; fi

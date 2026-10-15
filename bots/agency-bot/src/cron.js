@@ -10,6 +10,7 @@ import { upsertLead } from './sheets.js';
 import { tableLink } from './table.js';
 import { setWindowAlwaysOpen } from './util.js';
 import { isUltra } from './whatsapp.js';
+import { ownerByEmail, retryOwnerEmails } from './email.js';
 
 // לקוח שכתב "הסר" לא מקבל הודעות יזומות
 async function optedOut(env, phone) {
@@ -40,6 +41,7 @@ export async function runEvery15(env, now = new Date()) {
 
 // הודעה לחנן שלא נשלחה (UltraMsg לא מחובר, תקלה ברשת): מנסים שוב כל 15 דקות, עד 12 שעות
 async function retryOwnerOutbox(env, now) {
+  if (ownerByEmail(env)) return retryOwnerEmails(env, now);
   if (!isUltra(env)) return; // ב-Meta ההודעות מחכות לחנן עד שהוא כותב לבוט
   const pending = (await env.DB.prepare("SELECT * FROM owner_outbox WHERE sent = 0 AND failed = 1 AND created_at >= ? ORDER BY id LIMIT 5").bind(new Date(now.getTime() - 12 * 3600000).toISOString()).all()).results;
   for (const it of pending) {

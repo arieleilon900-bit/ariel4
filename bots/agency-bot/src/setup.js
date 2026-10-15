@@ -186,7 +186,10 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   });
 
   // ---------- הגדרות ----------
-  env.OWNER_PHONE ? ok(`התראות ל${BUSINESS.ownerName}: ${env.OWNER_PHONE}`) : bad('חסר OWNER_PHONE');
+  if (env.OWNER_EMAIL) {
+    ok(`התראות ל${BUSINESS.ownerName}: במייל`);
+    if (!env.GMAIL_USER || !env.GMAIL_APP_PASSWORD) bad(`חסר GMAIL_USER או GMAIL_APP_PASSWORD: המיילים ל${BUSINESS.ownerName} לא יישלחו`);
+  } else env.OWNER_PHONE ? ok(`התראות ל${BUSINESS.ownerName}: ${env.OWNER_PHONE}`) : bad('חסר OWNER_PHONE או OWNER_EMAIL');
   env.ADMIN_PHONE ? ok(`התראות תקלה: ${env.ADMIN_PHONE}`) : warn('אין ADMIN_PHONE: התראות על תקלות לא יישלחו');
   env.REVIEW_LINK ? ok('קישור לביקורת בגוגל: מוגדר') : warn('אין REVIEW_LINK: בקשות ביקורת לא יישלחו');
 
