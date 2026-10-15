@@ -77,6 +77,10 @@ const util = await import('../src/util.js');
 const { MESSAGES, FEATURES } = await import('../src/config.js');
 // רוב הבדיקות של הקבלות רצות עם הקבלות דלוקות; הבדיקה האחרונה בודקת את המצב הכבוי (ברירת המחדל)
 FEATURES.receipts = true;
+// רוב הבדיקות בודקות את ההתנהגות הכללית (תזכורת יום לפני, בלי מצב שבת, דוח ביום ראשון). ההגדרות של חנן נבדקות בבדיקה נפרדת בסוף
+const { BUSINESS: B0, TIMING: T0 } = await import('../src/config.js');
+const HANAN = { shabbat: B0.shabbat.enabled, rem: T0.customerReminderHours, weekly: T0.weeklyReportAt, yearly: T0.yearlyAfterDays };
+B0.shabbat.enabled = false; delete T0.customerReminderHours; T0.weeklyReportAt = null; T0.yearlyAfterDays = 365;
 
 const OWNER = '972503429998';
 const CUSTOMER = '972541234567';
@@ -1445,4 +1449,40 @@ test('form: answers are saved on the server and sent to Ariel, so nothing is los
   assert.equal((await call('/admin/forms?key=nope')).status, 403);
   assert.match(await (await call('/admin/forms?key=secret')).text(), /פריצות, צילינדרים, רכבים/);
   assert.equal((await call('/form', { method: 'POST', body: '{"text":"x"}' })).status, 400, 'empty form rejected');
+});
+
+
+test("Hanan's own settings: Shabbat by sunset with his words, reminders 2h and 1h before, weekly report Friday 10:00, no yearly reminder, French falls back to English", async () => {
+  const { buildSystemPrompt } = await import('../src/prompt.js');
+  const { msg } = await import('../src/config.js');
+  B0.shabbat.enabled = HANAN.shabbat; T0.customerReminderHours = HANAN.rem; T0.weeklyReportAt = HANAN.weekly; T0.yearlyAfterDays = HANAN.yearly;
+  try {
+    assert.equal(HANAN.shabbat, true);
+    assert.deepEqual(HANAN.rem, [2, 1]);
+    assert.equal(HANAN.yearly, 0);
+    const friNight = new Date('2026-10-16T17:00:00Z'); // שישי 20:00
+    assert.match(buildSystemPrompt({ now: friNight }), /העסק סגור עכשיו בשבת/);
+    assert.match(buildSystemPrompt({ now: new Date('2027-10-11T08:00:00Z') }), /העסק סגור עכשיו בחג/, 'Yom Kippur');
+    assert.match(buildSystemPrompt({ now: new Date('2026-10-14T08:00:00Z') }), /קומה ודירה, וקוד כניסה לבניין/);
+    assert.match(msg('fr', 'reminderTwoHours', '14:30'), /Hanan will be with you today at 14:30/);
+    // תזכורות: שעתיים לפני ושעה לפני, בלי "יום לפני"
+    sent.length = 0;
+    const env = makeEnv();
+    const t0 = new Date('2026-10-14T08:00:00Z'); // רביעי 11:00
+    aiQueue = [ai({ reply: 'העברתי', issue: 'צילינדר', address: 'הרצל 5', ready_for_handoff: true })];
+    await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צילינדר הרצל 5' } }, 'hz1'), t0);
+    await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 15/10/2026 14:30 הרצל 5' } }, 'hz2'), t0);
+    sent.length = 0;
+    await runEvery15(env, new Date('2026-10-14T15:00:00Z')); // ערב לפני
+    assert.equal(sent.filter((m) => m.to === CUSTOMER).length, 0, 'no day-before reminder');
+    await runEvery15(env, new Date('2026-10-15T09:30:00Z')); // 12:30, שעתיים לפני
+    await runEvery15(env, new Date('2026-10-15T10:30:00Z')); // 13:30, שעה לפני
+    await runEvery15(env, new Date('2026-10-15T11:00:00Z'));
+    assert.equal(sent.filter((m) => m.to === CUSTOMER).length, 2, 'two reminders: 2h and 1h');
+    // דוח שבועי ביום שישי 10:00, פעם אחת
+    sent.length = 0;
+    await runEvery15(env, new Date('2026-10-16T07:00:00Z'));
+    await runEvery15(env, new Date('2026-10-16T07:15:00Z'));
+    assert.equal(sent.filter((m) => m.to === OWNER && /שבוע/.test(JSON.stringify(m))).length, 1, 'weekly report once on Friday 10:00');
+  } finally { B0.shabbat.enabled = false; delete T0.customerReminderHours; T0.weeklyReportAt = null; T0.yearlyAfterDays = 365; }
 });

@@ -32,6 +32,7 @@ export async function runEvery15(env, now = new Date()) {
   await step('invoices', invoices);
   await step('owner retry', retryOwnerOutbox);
   await step('cleanup', cleanup);
+  await step('weekly', weeklyAt);
   if (!canMessageNow(now)) return;
   await step('followups', followups);
   await step('reviews', reviews);
@@ -63,6 +64,19 @@ async function appointmentReminders(env, now) {
     const at = new Date(j.scheduled_at);
     const hoursLeft = (at.getTime() - now.getTime()) / 3600000;
     if (hoursLeft <= 0) continue;
+    // תזכורות לפי שעות לפני העבודה (חנן: שעתיים לפני ושעה לפני). תזכורת שהזמן שלה כבר עבר כשנקבעה העבודה: מדלגים
+    const hrs = TIMING.customerReminderHours;
+    if (hrs?.length) {
+      let k = j.reminders_sent;
+      if (k >= hrs.length || hoursLeft > hrs[k] + 0.25) continue;
+      while (k + 1 < hrs.length && hoursLeft <= hrs[k + 1] + 0.25) k++;
+      const hh = +ilParts(now).hh;
+      if (restNow(now) || hh < 7 || hh >= 21) continue;
+      const time = ilTime(at);
+      const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'reminderTwoHours', time), { name: TEMPLATES.reminderTwoHours, params: [time] }, now);
+      if (r.ok) { await env.DB.prepare('UPDATE jobs SET reminders_sent = ? WHERE id = ?').bind(k + 1, j.id).run(); await logEvent(env, 'reminder', j.phone, now); }
+      continue;
+    }
     // עבודה שנקבעה לאותו יום (פחות מ-12 שעות מראש): אין צורך בתזכורת "יום לפני"
     if (j.reminders_sent === 0 && (new Date(j.scheduled_at).getTime() - new Date(j.created_at).getTime()) < 12 * 3600000) {
       await env.DB.prepare('UPDATE jobs SET reminders_sent = 1 WHERE id = ?').bind(j.id).run();
@@ -177,6 +191,7 @@ async function referrals(env, now) {
 }
 
 async function yearly(env, now) {
+  if (!TIMING.yearlyAfterDays) return;
   const cutoff = new Date(now.getTime() - TIMING.yearlyAfterDays * 86400000).toISOString();
   const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND yearly_sent_at IS NULL AND done_at <= ?").bind(cutoff).all()).results;
   for (const j of jobs) {
@@ -214,6 +229,19 @@ async function invoices(env, now) {
     if (manual) { await env.DB.prepare('UPDATE jobs SET invoice_doc_id = ? WHERE id = ?').bind(d.id, manual.id).run(); continue; }
     await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, now });
   }
+}
+
+// דוח שבועי ביום ובשעה שבעל העסק בחר (TIMING.weeklyReportAt). פעם אחת בשבוע
+async function weeklyAt(env, now) {
+  const at = TIMING.weeklyReportAt;
+  if (!at) return;
+  const p = ilParts(now);
+  if (p.dow !== at.dow || +p.hh !== at.hour) return;
+  const day = `${p.y}-${p.m}-${p.d}`;
+  const last = (await env.DB.prepare("SELECT value FROM settings WHERE key = 'weekly_sent'").first())?.value;
+  if (last === day) return;
+  await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('weekly_sent', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind(day).run();
+  await weeklyReport(env, now);
 }
 
 export async function weeklyReport(env, now = new Date()) {

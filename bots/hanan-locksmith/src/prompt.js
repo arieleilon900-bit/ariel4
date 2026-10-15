@@ -1,7 +1,7 @@
 // מה ה-AI יודע ומה הוא מחזיר: ההוראות (system prompt), מבנה התשובה, וטיפול בתשובה לא תקינה.
 // משותף לבוט (ai.js) ולדף הניסיון (sim/).
 import { BUSINESS } from './config.js';
-import { isOpen, isShabbat, ilDateTimeLabel, nextOpenLabel } from './util.js';
+import { isHoliday, isOpen, isShabbat, ilDateTimeLabel, nextOpenLabel } from './util.js';
 
 export const SCHEMA = {
   type: 'object',
@@ -46,7 +46,7 @@ export function buildSystemPrompt({ now = new Date(), returningCustomer = null, 
 מה לאסוף (שאלה אחת בכל הודעה, בקצרה ובנימוס):
 1. מה התקלה (ננעל בחוץ, מנעול שבור, החלפת צילינדר, רכב, כספת וכו').
 2. תמונה של הדלת או המנעול. בקש פעם אחת. אם הלקוח לא יכול לשלוח, ממשיכים בלי.
-3. כתובת מדויקת: רחוב, מספר בית ועיר. אפשר גם לשלוח מיקום בוואטסאפ.
+3. כתובת מדויקת: עיר, רחוב ומספר בית, קומה ודירה, וקוד כניסה לבניין אם יש. אפשר גם לשלוח מיקום בוואטסאפ.
 שם הלקוח: אם הוא אמר אותו, שמור. לא חובה לשאול.
 ברכב: במקום תמונה של המנעול, בקש יצרן, דגם ושנה (למשל "מאזדה 3 2018"), ואם המפתח בפנים.
 
@@ -66,7 +66,7 @@ ${b.greeting ? `- הלקוח רק אמר שלום ("היי", "שלום", "אפש
 אזורי שירות: ${b.areas}.${b.outOfAreaMessage ? ` אם הלקוח מחוץ לאזור: ${b.outOfAreaMessage}` : ''}
 ${b.priceGuidance ? `מחירים: ${b.priceGuidance}` : 'מחירים: אל תיתן מחיר בכלל. תגיד שחנן ייתן מחיר אחרי שיראה את התמונה או את המקום.'}
 אסור: ${b.neverSay.join('; ')}.
-${shabbat ? `עכשיו שבת. ${b.shabbat.message}` : open ? '' : `עכשיו מחוץ לשעות העבודה של ${b.ownerName}${b.hours ? ` (${b.hours.from}-${b.hours.to})` : ''}. אסוף את הפרטים כרגיל, ובסוף תגיד ללקוח ש${String(b.afterHoursMessage).replace('{next}', next || 'בהקדם')}. אל תבטיח שהוא יגיע לפני כן. מקרה דחוף: תגיד שהעברת ל${b.ownerName} עכשיו, ושאם יש סכנה צריך להתקשר מיד למד"א 101 או למשטרה 100, ואל תבטיח ש${b.ownerName} יגיע.`}
+${shabbat ? `עכשיו שבת. ${b.shabbat.message}` : b.holidayMessage && isHoliday(b.holidays, now) ? `עכשיו חג. ${b.holidayMessage}` : open ? '' : `עכשיו מחוץ לשעות העבודה של ${b.ownerName}${b.hours ? ` (${b.hours.from}-${b.hours.to})` : ''}. אסוף את הפרטים כרגיל, ובסוף תגיד ללקוח ש${String(b.afterHoursMessage).replace('{next}', next || 'בהקדם')}. אל תבטיח שהוא יגיע לפני כן. מקרה דחוף: תגיד שהעברת ל${b.ownerName} עכשיו, ושאם יש סכנה צריך להתקשר מיד למד"א 101 או למשטרה 100, ואל תבטיח ש${b.ownerName} יגיע.`}
 ${returningCustomer ? `זה לקוח חוזר${returningCustomer.name ? ` בשם ${returningCustomer.name}` : ''} (עבודות קודמות: ${returningCustomer.jobs_count}). פנה אליו בחום${returningCustomer.name ? ' בשמו' : ''}.` : ''}
 
 ${b.botGender === 'female' ? 'דבר על עצמך בלשון נקבה.' : 'דבר על עצמך בלשון זכר.'}

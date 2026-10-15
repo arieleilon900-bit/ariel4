@@ -150,15 +150,16 @@ async function getOrCreateConversation(env, phone, now) {
 }
 
 export function ownerSummary(conv, result, phone, now) {
+  // הסדר שחנן ביקש: כתובת מדויקת, סוג התקלה, שם וטלפון, דחיפות, תמונות
+  const nav = conv.location || wazeLink({ address: result.address || conv.address });
   const lines = [
     result.urgent ? '🚨 פנייה דחופה!' : '🔔 פנייה חדשה',
+    `כתובת: ${result.address || conv.address || '(לא נמסרה)'}`,
+    ...(nav ? [`ניווט: ${nav}`] : []),
+    `תקלה: ${result.issue || conv.issue || '(לא פורט)'}`,
     `שם: ${result.customer_name || '(לא נמסר)'}`,
     `טלפון: ${displayPhone(phone)}`,
-    `תקלה: ${result.issue || conv.issue || '(לא פורט)'}`,
-    `כתובת: ${result.address || conv.address || '(לא נמסרה)'}`,
   ];
-  const nav = conv.location || wazeLink({ address: result.address || conv.address });
-  if (nav) lines.push(`ניווט: ${nav}`);
   if (result.urgent && result.urgent_reason) lines.push(`למה דחוף: ${result.urgent_reason}`);
   if (result.summary_for_owner) lines.push('', result.summary_for_owner);
   lines.push('', `וואטסאפ ללקוח: https://wa.me/${phone}`, `התקבל: ${ilDateTimeLabel(now)}`);

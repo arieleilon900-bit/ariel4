@@ -5,7 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 # כל 15 דקות: תזכורות, מעקבים, ביקורות. כל יום ראשון 06:00 UTC (09:00 בישראל): דוח שבועי.
 [triggers]
-crons = ["* * * * *", "*/15 * * * *", "0 6 * * SUN"]
+crons = ["* * * * *", "*/15 * * * *"]
 
 [[d1_databases]]
 binding = "DB"
@@ -45,7 +45,7 @@ ADMIN_PHONE = "972524666175"
 # ID של גיליון הלקוחות בגוגל (ריק = בלי גיליון)
 SHEET_ID = ""
 # קישור לכתיבת ביקורת בגוגל
-REVIEW_LINK = "https://share.google/YbZcFKcU6EyeKotWc"
+REVIEW_LINK = "https://g.page/r/CRb_LFlSkhYQEBI/review"
 # שמות התבניות המאושרות ב-WhatsApp Manager (להודעות מחוץ לחלון 24 שעות)
 TEMPLATE_LANG = "he"
 
