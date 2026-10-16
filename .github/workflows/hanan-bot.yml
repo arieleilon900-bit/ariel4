@@ -84,11 +84,9 @@ jobs:
           ULTRAMSG_TOKEN: ${{ secrets.ULTRAMSG_TOKEN }}
           YESH_USERKEY: ${{ secrets.YESH_USERKEY }}
           YESH_SECRET: ${{ secrets.YESH_SECRET }}
-          OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: |
-          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON YESH_USERKEY YESH_SECRET D360_API_KEY ULTRAMSG_TOKEN OWNER_EMAIL GMAIL_USER GMAIL_APP_PASSWORD; do
+          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON YESH_USERKEY YESH_SECRET D360_API_KEY ULTRAMSG_TOKEN GMAIL_APP_PASSWORD; do
             value="${!name}"
             if [ -n "$value" ]; then
               printf '%s' "$value" | npx wrangler secret put "$name"

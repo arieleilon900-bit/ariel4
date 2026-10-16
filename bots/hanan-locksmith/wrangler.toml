@@ -40,6 +40,10 @@ META_APP_ID = ""
 WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
 # הטלפון של חנן לקבלת סיכומים ופקודות (פורמט בינלאומי, בלי +)
 OWNER_PHONE = "972524666175"
+# התראות לחנן במייל. נשלחות מהג'ימייל של העסק (הסיסמה נכנסת רק כסוד GMAIL_APP_PASSWORD ב-GitHub)
+GMAIL_USER = "eliyabuis12@gmail.com"
+# בזמן הבדיקות הסיכומים מגיעים אלינו. ביום החיבור מחליפים למייל של חנן: Hananlocks@gmail.com
+OWNER_EMAIL = "eliyabuis12@gmail.com"
 # מי מקבל התראה כשיש תקלה בבוט (אריאל)
 ADMIN_PHONE = "972524666175"
 # ID של גיליון הלקוחות בגוגל (ריק = בלי גיליון)
