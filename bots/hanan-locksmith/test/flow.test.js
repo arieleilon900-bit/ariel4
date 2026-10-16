@@ -1510,3 +1510,17 @@ test('prompt caching: the fixed instructions are one cached block that is identi
   assert.deepEqual(sys[0].cache_control, { type: 'ephemeral', ttl: '1h' });
   assert.equal(sys[1].cache_control, undefined);
 });
+
+test('test email: needs the secret, sends one email to OWNER_EMAIL and reports the result', async () => {
+  const { default: worker } = await import('../src/index.js');
+  const mails = [];
+  const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', OWNER_EMAIL: 'owner@example.com', GMAIL_USER: 'bot@example.com', __mail: async (m) => { mails.push(m); } };
+  const call = (path) => worker.fetch(new Request(`https://bot.example${path}`, { method: 'POST' }), env, { waitUntil: () => {} });
+  assert.equal((await call('/admin/test-email?key=wrong')).status, 403);
+  const ok = await (await call('/admin/test-email?key=secret')).text();
+  assert.match(ok, /^OK/);
+  assert.equal(mails.length, 1);
+  assert.equal(mails[0].to, 'owner@example.com');
+  const fail = await (await worker.fetch(new Request('https://bot.example/admin/test-email?key=secret', { method: 'POST' }), { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', OWNER_EMAIL: 'owner@example.com' }, { waitUntil: () => {} })).text();
+  assert.match(fail, /^FAIL: email not configured/);
+});

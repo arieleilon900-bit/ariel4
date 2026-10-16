@@ -18,6 +18,10 @@ on:
         description: 'Print the latest owner form answers in the log'
         type: boolean
         default: false
+      test_email:
+        description: 'Send one test email to OWNER_EMAIL'
+        type: boolean
+        default: false
 
 concurrency:
   group: hanan-bot
@@ -118,6 +122,17 @@ jobs:
           url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
           key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
           curl -s -m 150 -G "$url/admin/demo" --data-urlencode "key=$key"
+
+      - name: Test email (manual)
+        if: steps.ready.outputs.go == 'true' && github.event.inputs.test_email == 'true'
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          out=$(curl -s -m 60 -X POST -G "$url/admin/test-email" --data-urlencode "key=$key")
+          echo "$out"
+          echo "$out" | grep -q '^OK'
 
       - name: Show owner form answers (manual)
         if: steps.ready.outputs.go == 'true' && github.event.inputs.show_forms == 'true'

@@ -82,6 +82,22 @@ export async function sendOwnerEmail(env, text, { about = null, media = [], now 
   return { ok };
 }
 
+// מייל בדיקה (אחרי שמכניסים את סיסמת הג'ימייל): מחזיר בדיוק מה קרה, בלי לשמור לניסיון חוזר
+export async function sendTestEmail(env, now = new Date()) {
+  const mail = {
+    to: env.OWNER_EMAIL,
+    subject: `✅ מייל בדיקה מהבוט של ${BUSINESS.shortName}`,
+    text: `אם המייל הזה הגיע, ההתראות במייל עובדות.\nנשלח מ-${env.GMAIL_USER} אל ${env.OWNER_EMAIL}, ${now.toISOString()}`,
+  };
+  mail.html = `<div dir="rtl" style="font-family:Arial,sans-serif">${mail.text.replace(/\n/g, '<br>')}</div>`;
+  try {
+    if (env.__mail) await env.__mail(mail); else await smtpSend(env, mail);
+    return `OK: נשלח מייל בדיקה אל ${env.OWNER_EMAIL}`;
+  } catch (err) {
+    return `FAIL: ${String(err?.message || err).slice(0, 300)}`;
+  }
+}
+
 // מיילים שלא יצאו: עוד ניסיון כל 15 דקות, עד 12 שעות
 export async function retryOwnerEmails(env, now = new Date()) {
   const pending = (await env.DB.prepare('SELECT * FROM owner_outbox WHERE sent = 0 AND failed = 1 AND created_at >= ? ORDER BY id LIMIT 5')

@@ -13,7 +13,7 @@ import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
 import { FORM_HTML } from './form-page.js';
 import { BUSINESS } from './config.js';
-import { actionPage, ownerByEmail, serveMedia } from './email.js';
+import { actionPage, ownerByEmail, sendTestEmail, serveMedia } from './email.js';
 
 // בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
 const withOwner = (env) => (env.OWNER_EMAIL && !env.OWNER_PHONE ? { ...env, OWNER_PHONE: 'email' } : env);
@@ -100,6 +100,13 @@ export default {
       const key = (url.searchParams.get('key') || '').trim();
       if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
       return new Response(await demoConversation(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
+
+    // מייל בדיקה לבעל העסק (רק עם מילת הסוד). מופעל ידנית מ-GitHub Actions
+    if (url.pathname === '/admin/test-email' && request.method === 'POST') {
+      const key = (url.searchParams.get('key') || '').trim();
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
+      return new Response(await sendTestEmail(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     // הגדרה ובדיקה אוטומטית (רק עם מילת הסוד)
