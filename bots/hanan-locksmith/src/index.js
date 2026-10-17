@@ -99,7 +99,9 @@ export default {
     if (url.pathname === '/admin/demo' && request.method === 'GET') {
       const key = (url.searchParams.get('key') || '').trim();
       if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
-      return new Response(await demoConversation(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      const which = url.searchParams.get('s');
+      if (which === 'list') return new Response(String(DEMOS.length));
+      return new Response(await demoConversation(env, Math.max(0, parseInt(which || '0', 10) || 0)), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     // מייל בדיקה לבעל העסק (רק עם מילת הסוד). מופעל ידנית מ-GitHub Actions
@@ -214,40 +216,45 @@ async function receiveForm(env, request) {
   return json({ ok: true, notified });
 }
 
-async function demoConversation(env) {
-  const customer = [
-    'היי',
-    'ננעלתי מחוץ לבית, המפתח נשאר בפנים',
-    'אין לי איך לצלם, הטלפון כמעט מת',
-    'הרצל 12 נתניה, קומה 3',
-    'כמה זה עולה בערך? ואפשר לשלם באשראי?',
-    'תודה רבה',
-  ];
+// שיחות לדוגמה עם המוח האמיתי (שום דבר לא נשלח ולא נשמר). ?s=מספר בוחר שיחה, ?s=list מחזיר כמה יש
+// at: זמן מדומה (שעון ישראל), כדי לראות איך הבוט עונה בשבת או בלילה
+export const DEMOS = [
+  { title: 'נעילה רגילה: שלום, תקלה, כתובת, שאלות על מחיר ותשלום, תודה', at: '2026-10-19T11:00:00+03:00', turns: ['היי', 'ננעלתי מחוץ לבית, המפתח נשאר בפנים', 'אין לי איך לצלם, הטלפון כמעט מת', 'הרצל 12 נתניה, קומה 3 דירה 9, קוד לבניין 1234', 'כמה זה עולה בערך? ואפשר לשלם באשראי?', 'תודה רבה'] },
+  { title: 'דחוף: ילד נעול ברכב', at: '2026-10-19T13:00:00+03:00', turns: ['דחוף!!! הילד שלי נעול באוטו והמפתח בפנים', 'קניון עיר ימים נתניה, חניון למטה'] },
+  { title: 'מיקוח, אחריות וזמן הגעה', at: '2026-10-19T10:00:00+03:00', turns: ['שלום, צריך להחליף צילינדר בדלת', 'כמה זה עולה? מישהו אחר אמר לי 150', 'יש אחריות?', 'תוך כמה זמן אתה יכול להגיע?', 'סמילנסקי 20 נתניה'] },
+  { title: 'לקוח באנגלית', at: '2026-10-19T16:00:00+03:00', turns: ["Hi, I'm locked out of my car, a Mazda 3 2018", 'Keys are inside. I am at Poleg beach parking, Netanya'] },
+  { title: 'מחוץ לאזור השירות', at: '2026-10-19T12:00:00+03:00', turns: ['היי, אתם מגיעים לבאר שבע? נשבר לי המנעול בדלת'] },
+  { title: 'שבת: לקוח כותב ביום שבת בצהריים', at: '2026-10-24T13:00:00+03:00', turns: ['שלום ננעלתי בחוץ, אפשר להגיע?', 'ויצמן 5 נתניה'] },
+  { title: 'אחרי שעות העבודה, ושאלה אם זה בוט', at: '2026-10-19T21:30:00+03:00', turns: ['ערב טוב, צריך להתקין מנעול חכם בדלת', 'רגע, אני מדבר עם בוט?', 'אוקיי, הכתובת היא הרצל 40 נתניה'] },
+];
+
+async function demoConversation(env, idx = 0) {
+  const demo = DEMOS[idx] || DEMOS[0];
+  const now = new Date(demo.at);
   const history = [];
-  const out = [];
+  const out = [`===== שיחה ${idx + 1} מתוך ${DEMOS.length}: ${demo.title} =====`, ''];
   let after = false;
   let usd = 0;
-  let collected = { issue: '', address: '', notes: [], questions: [] };
-  for (const text of customer) {
+  let collected = { issue: '', address: '', urgent: false, notes: [], questions: [] };
+  for (const text of demo.turns) {
     history.push({ role: 'user', text });
-    const r = await runTurn(env, { history, now: new Date(), afterHandoff: after });
+    const r = await runTurn(env, { history, now, afterHandoff: after });
     out.push(`לקוח: ${text}`, `בוט: ${r.reply || '(לא עונה)'}`);
-    if (r.usage) {
-      usd += r.usage.usd;
-      out.push(`   (עלות: ${r.usage.usd.toFixed(4)}$ | מהזיכרון: ${r.usage.read} | נכתב לזיכרון: ${r.usage.write} | רגיל: ${r.usage.input} | תשובה: ${r.usage.output})`);
-    }
+    if (r.usage) usd += r.usage.usd;
     if (r.reply) history.push({ role: 'assistant', text: r.reply });
-    collected = { issue: r.issue || collected.issue, address: r.address || collected.address, notes: r.summary_for_owner ? [r.summary_for_owner] : collected.notes, questions: r.question_for_owner ? [...collected.questions, r.question_for_owner] : collected.questions };
-    const flags = [r.ready_for_handoff && 'מעביר לחנן', r.urgent && 'דחוף', r.question_for_owner && `שאלה לחנן: ${r.question_for_owner}`].filter(Boolean);
+    collected = { issue: r.issue || collected.issue, address: r.address || collected.address, urgent: collected.urgent || r.urgent, notes: r.summary_for_owner ? [r.summary_for_owner] : collected.notes, questions: r.question_for_owner ? [...collected.questions, r.question_for_owner] : collected.questions };
+    const flags = [r.ready_for_handoff && 'מעביר לחנן', r.urgent && 'דחוף', r.question_for_owner && `שאלה לחנן: ${r.question_for_owner}`, r.failed && 'תקלה במוח'].filter(Boolean);
     if (flags.length) out.push(`   [${flags.join(' | ')}]`);
     out.push('');
     if (r.ready_for_handoff) after = true;
   }
-  out.push('--- הדוח שחנן מקבל (אחרי 3 דקות שקט) ---',
-    '🔔 פנייה חדשה',
-    ...(collected.questions.length ? [`❓ הלקוח מחכה לתשובה ממך: ${collected.questions.join(' / ')}`] : []),
-    `תקלה: ${collected.issue || '(לא פורט)'}`, `כתובת: ${collected.address || '(לא נמסרה)'}`, ...(collected.notes.length ? ['', collected.notes[0]] : []));
-  out.push('', `עלות השיחה ל-Anthropic: ${usd.toFixed(3)}$ (פנייה ראשונה של היום משלמת גם את הכתיבה לזיכרון)`);
+  if (after) {
+    out.push(`--- המייל שחנן מקבל (${collected.urgent ? 'מיד, דחוף' : 'אחרי 3 דקות שקט'}) ---`,
+      collected.urgent ? '🚨 פנייה דחופה!' : '🔔 פנייה חדשה',
+      ...(collected.questions.length ? [`❓ הלקוח מחכה לתשובה ממך: ${collected.questions.join(' / ')}`] : []),
+      `כתובת: ${collected.address || '(לא נמסרה)'}`, `תקלה: ${collected.issue || '(לא פורט)'}`, ...(collected.notes.length ? ['', collected.notes[0]] : []));
+  }
+  out.push('', `עלות השיחה ל-Anthropic: ${usd.toFixed(3)}$`, '');
   return out.join('\n');
 }
 

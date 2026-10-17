@@ -123,7 +123,11 @@ jobs:
         run: |
           url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
           key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-          curl -s -m 150 -G "$url/admin/demo" --data-urlencode "key=$key"
+          n=$(curl -s -m 20 -G "$url/admin/demo" --data-urlencode "key=$key" --data-urlencode "s=list" || echo 1)
+          case "$n" in ''|*[!0-9]*) n=1;; esac
+          for i in $(seq 0 $((n-1))); do
+            curl -s -m 120 -G "$url/admin/demo" --data-urlencode "key=$key" --data-urlencode "s=$i"
+          done
 
       - name: Test email (manual)
         if: steps.ready.outputs.go == 'true' && github.event.inputs.test_email == 'true'
