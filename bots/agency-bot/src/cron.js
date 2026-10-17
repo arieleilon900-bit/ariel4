@@ -205,7 +205,7 @@ async function invoices(env, now) {
     if (seen) continue;
     if (!d.phone || !d.pdfUrl) {
       // אין טלפון נייד במסמך: חנן שולח בעצמו
-      if (d.customerName) await sendToOwner(env, `הקבלה ל-${d.customerName} לא נשלחה בוואטסאפ, כי אין בה טלפון. אפשר להעביר לי את ה-PDF עם הטלפון שלו.`, now);
+      if (d.customerName) await sendToOwner(env, `הקבלה ל-${d.customerName} לא נשלחה בוואטסאפ, כי אין בה טלפון. ${ownerByEmail(env) ? 'בפעם הבאה כדאי לרשום בחשבונית את הטלפון של הלקוח, ואז היא תישלח לו לבד.' : 'אפשר להעביר לי את ה-PDF עם הטלפון שלו.'}`, now);
       continue;
     }
     // חנן כבר שלח את הקבלה הזו ידנית (העביר PDF לבוט) בשעות האחרונות: רק מסמנים, לא שולחים שוב

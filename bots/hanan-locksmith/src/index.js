@@ -319,7 +319,7 @@ export async function processWebhook(env, body, now = new Date(), { syncOnly = f
     for (const change of entry.changes || []) {
       const v = change.value || {};
       if (syncOnly) {
-        if (['history', 'smb_app_state_sync'].includes(change.field)) console.log(`imported ${await importKnownContacts(env, v, now)} known contacts from ${change.field}`);
+        if (change.field === 'smb_app_state_sync') console.log(`imported ${await importKnownContacts(env, v, now)} known contacts from ${change.field}`);
         continue;
       }
       const names = Object.fromEntries((v.contacts || []).map((c) => [c.wa_id, c.profile?.name]));
@@ -335,7 +335,9 @@ export async function processWebhook(env, body, now = new Date(), { syncOnly = f
         if (st.status === 'failed') await handleFailedStatus(env, st, now).catch((err) => console.error('status failed', err));
       }
       // Coexistence: סנכרון אנשי קשר והיסטוריה מהאפליקציה בזמן החיבור
-      if (['history', 'smb_app_state_sync'].includes(change.field)) {
+      // רק אנשי הקשר השמורים בטלפון (משפחה, חברים, ספקים) מסומנים כמוכרים, והבוט לא עונה להם.
+      // מי שרק דיבר פעם עם העסק (היסטוריה, כולל לקוחות ישנים) מקבל את הבוט כרגיל
+      if (change.field === 'smb_app_state_sync') {
         const n = await importKnownContacts(env, v, now);
         console.log(`imported ${n} known contacts from ${change.field}`);
       }

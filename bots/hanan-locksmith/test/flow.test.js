@@ -245,8 +245,11 @@ test('known contacts: bot stays silent', async () => {
   const t0 = new Date('2026-10-14T08:00:00Z');
   const FRIEND = '972521234567', OLD = '972531234567', NEWC = '972541111111';
 
-  // 1. סנכרון היסטוריה מהאפליקציה בזמן החיבור
-  await processWebhook(env, { entry: [{ changes: [{ field: 'history', value: { history: [{ threads: [{ id: OLD, messages: [{ from: OLD, id: 'h1' }] }] }] } }] }] }, t0);
+  // 1. סנכרון אנשי הקשר השמורים בטלפון בזמן החיבור (OLD שמור). לקוח ישן שרק מופיע בהיסטוריה לא מסומן
+  const PAST = '972551234567';
+  await processWebhook(env, { entry: [{ changes: [{ field: 'smb_app_state_sync', value: { state_sync: [{ type: 'contact', action: 'add', contact: { full_name: 'דוד', phone_number: OLD } }] } }] }] }, t0);
+  await processWebhook(env, { entry: [{ changes: [{ field: 'history', value: { history: [{ threads: [{ id: PAST, messages: [{ from: PAST, id: 'h1' }] }] }] } }] }] }, t0);
+  assert.equal((await env.DB.prepare('SELECT known FROM customers WHERE phone = ?').bind(PAST).first())?.known ?? 0, 0, 'past customers from history are answered by the bot');
   // 2. חנן מסמן חבר כמוכר
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'שקט 052-1234567' } }, 'k1'), t0);
   assert.ok(textsTo(OWNER).some((t) => t.includes('סומן כמוכר')));
@@ -1570,7 +1573,7 @@ test('Dualhook: replies go through api.dualhook.com with our key; webhooks need 
   const offEnv = { ...makeEnv(), WA_PROVIDER: 'ultramsg', BOT_OFF: '1', DUALHOOK_WEBHOOK_KEY: 'hook-secret', WA_VERIFY_TOKEN: 'admin' };
   sent.length = 0;
   const sync = { object: 'whatsapp_business_account', entry: [{ id: '555', changes: [
-    { field: 'history', value: { history: [{ threads: [{ id: '972501112233', messages: [{ from: '972501112233', id: 'h1' }] }] }] } },
+    { field: 'smb_app_state_sync', value: { state_sync: [{ type: 'contact', action: 'add', contact: { full_name: 'אמא', phone_number: '972501112233' } }] } },
     { field: 'messages', value: { messages: [{ from: '972504445566', id: 'w-off', type: 'text', text: { body: 'היי' } }] } },
   ] }] };
   const r = await worker.fetch(new Request('https://bot.example/webhook?key=hook-secret', { method: 'POST', body: JSON.stringify(sync) }), offEnv, { waitUntil: (p) => waits.push(p) });
