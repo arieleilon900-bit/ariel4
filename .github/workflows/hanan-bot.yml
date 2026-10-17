@@ -89,8 +89,10 @@ jobs:
           YESH_USERKEY: ${{ secrets.YESH_USERKEY }}
           YESH_SECRET: ${{ secrets.YESH_SECRET }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DUALHOOK_API_KEY: ${{ secrets.DUALHOOK_API_KEY }}
+          DUALHOOK_WEBHOOK_KEY: ${{ secrets.DUALHOOK_WEBHOOK_KEY }}
         run: |
-          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON YESH_USERKEY YESH_SECRET D360_API_KEY ULTRAMSG_TOKEN GMAIL_APP_PASSWORD; do
+          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON YESH_USERKEY YESH_SECRET D360_API_KEY ULTRAMSG_TOKEN GMAIL_APP_PASSWORD DUALHOOK_API_KEY DUALHOOK_WEBHOOK_KEY; do
             value="${!name}"
             if [ -n "$value" ]; then
               printf '%s' "$value" | npx wrangler secret put "$name"

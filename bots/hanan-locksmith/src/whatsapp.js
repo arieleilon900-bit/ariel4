@@ -6,9 +6,15 @@ import { TEMPLATE_DEFS } from './config.js';
 // 360dialog: ספק מורשה (בשביל מספר שעובד גם באפליקציה וגם בבוט), עם D360_API_KEY
 // ultramsg: מחובר לוואטסאפ הרגיל כמו WhatsApp Web (סריקת QR), עם ULTRAMSG_INSTANCE ו-ULTRAMSG_TOKEN.
 //   אין תבניות ואין חלון 24 שעות. לא רשמי של Meta: יש סיכון שוואטסאפ יחסמו את המספר.
+// dualhook: ספק מורשה וזול (המספר עובד גם באפליקציה וגם בבוט). ההודעות מ-Meta מגיעות ישר אלינו,
+//   ושולחים דרך api.dualhook.com באותו מבנה של Meta, עם DUALHOOK_API_KEY ו-WA_PHONE_NUMBER_ID
 const D360 = 'https://waba-v2.360dialog.io';
+export const DUAL = 'https://api.dualhook.com/v25.0';
 export const is360 = (env) => env.WA_PROVIDER === '360dialog';
 export const isUltra = (env) => env.WA_PROVIDER === 'ultramsg';
+export const isDual = (env) => env.WA_PROVIDER === 'dualhook';
+// המספר של בעל העסק עובד גם באפליקציה בטלפון שלו: הוא רואה שם את השיחות ועונה בעצמו
+export const sharesOwnerApp = (env) => isUltra(env) || is360(env) || isDual(env);
 const ultraBase = (env) => `https://api.ultramsg.com/${env.ULTRAMSG_INSTANCE}`;
 
 // UltraMsg: כל שליחה נרשמת, כדי שההודעה שחוזרת אלינו כ"נשלחה" לא תיחשב כאילו חנן ענה
@@ -30,9 +36,10 @@ async function ultra(env, path, to, fields, logBody) {
   return { ok: true, data: { messages: [{ id: String(data.id ?? '') }] } };
 }
 const graph = (env) => `https://graph.facebook.com/${env.GRAPH_VERSION || 'v24.0'}`;
-const authHeaders = (env) => (is360(env) ? { 'D360-API-KEY': env.D360_API_KEY } : { Authorization: `Bearer ${env.WA_TOKEN}` });
-// כתובת לשליחה: ב-Meta דרך מזהה המספר, ב-360dialog ישירות
-const endpoint = (env, path) => (is360(env) ? `${D360}/${path}` : `${graph(env)}/${env.WA_PHONE_NUMBER_ID}/${path}`);
+const authHeaders = (env) => (is360(env) ? { 'D360-API-KEY': env.D360_API_KEY }
+  : { Authorization: `Bearer ${isDual(env) ? env.DUALHOOK_API_KEY : env.WA_TOKEN}` });
+// כתובת לשליחה: ב-Meta וב-Dualhook דרך מזהה המספר, ב-360dialog ישירות
+const endpoint = (env, path) => (is360(env) ? `${D360}/${path}` : `${isDual(env) ? DUAL : graph(env)}/${env.WA_PHONE_NUMBER_ID}/${path}`);
 
 async function call(env, path, body) {
   const res = await fetch(endpoint(env, path), {
@@ -119,11 +126,14 @@ export async function downloadMedia(env, mediaId) {
     if (!file.ok) throw new Error(`media download ${file.status}`);
     return { bytes: new Uint8Array(await file.arrayBuffer()), mime: file.headers.get('content-type') || 'application/octet-stream' };
   }
-  const meta = await fetch(is360(env) ? `${D360}/${mediaId}` : `${graph(env)}/${mediaId}`, { headers: authHeaders(env) });
+  const meta = await fetch(is360(env) ? `${D360}/${mediaId}` : `${isDual(env) ? DUAL : graph(env)}/${mediaId}`, { headers: authHeaders(env) });
   if (!meta.ok) throw new Error(`media meta ${meta.status}`);
   const info = await meta.json();
-  // ב-360dialog מורידים דרך השרת שלהם: מחליפים את הכתובת של Meta בכתובת שלהם
-  const url = is360(env) ? String(info.url).replace(/\\/g, '').replace('https://lookaside.fbsbx.com', D360) : info.url;
+  // ב-360dialog מורידים דרך השרת שלהם: מחליפים את הכתובת של Meta בכתובת שלהם.
+  // ב-Dualhook הכתובת כבר אצלם (/content), ומורידים עם אותו מפתח
+  const url = is360(env) ? String(info.url).replace(/\\/g, '').replace('https://lookaside.fbsbx.com', D360)
+    : isDual(env) ? (String(info.url || '').startsWith('https://api.dualhook.com/') ? info.url : `${DUAL}/${mediaId}/content`)
+    : info.url;
   const file = await fetch(url, { headers: authHeaders(env) });
   if (!file.ok) throw new Error(`media download ${file.status}`);
   return { bytes: new Uint8Array(await file.arrayBuffer()), mime: info.mime_type || 'application/octet-stream' };

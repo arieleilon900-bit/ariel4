@@ -6,7 +6,7 @@ import { FEATURES, TEMPLATE_DEFS } from './config.js';
 import { MODEL } from './ai.js';
 import { ensureHeader, getAccessToken } from './sheets.js';
 import { yeshCall, yeshConfigured } from './yesh.js';
-import { is360, isUltra } from './whatsapp.js';
+import { DUAL, is360, isDual, isUltra } from './whatsapp.js';
 
 const D360 = 'https://waba-v2.360dialog.io';
 const graph = (env) => `https://graph.facebook.com/${env.GRAPH_VERSION || 'v24.0'}`;
@@ -48,6 +48,7 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   const step = async (name, fn) => { try { await fn(); } catch (e) { bad(`${name}: ${e.message}`); } };
   const bearer = { Authorization: `Bearer ${env.WA_TOKEN}` };
   const d360 = { 'D360-API-KEY': env.D360_API_KEY, 'Content-Type': 'application/json' };
+  const dual = { Authorization: `Bearer ${env.DUALHOOK_API_KEY}` };
 
   out.push(checkOnly ? 'בדיקה בלבד (לא משנה כלום)' : 'הגדרה ובדיקה', '');
 
@@ -94,6 +95,17 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
         ok(`אנשי קשר: ${n} אנשי קשר שמורים בטלפון סומנו כמוכרים. הבוט לא יענה להם (אפשר להחזיר אחד: בוט <טלפון>)`);
       });
     }
+  } else if (isDual(env)) {
+    // ב-Dualhook את כתובת השרת ומילת האימות מכניסים בלוח שלהם (פעם אחת), כאן רק בודקים
+    if (!env.DUALHOOK_API_KEY) bad('Dualhook: חסר DUALHOOK_API_KEY (נוצר ב-Dualhook: Connection ← Overview ← Outbound API key)');
+    if (!env.DUALHOOK_WEBHOOK_KEY) bad('Dualhook: חסר DUALHOOK_WEBHOOK_KEY (המילה הסודית שבכתובת השרת ובמילת האימות ב-Dualhook)');
+    if (!env.WA_PHONE_NUMBER_ID || String(env.WA_PHONE_NUMBER_ID).startsWith('REPLACE')) bad('Dualhook: חסר WA_PHONE_NUMBER_ID ב-wrangler.toml');
+    if (!env.WABA_ID) warn('Dualhook: חסר WABA_ID ב-wrangler.toml (בלי זה אי אפשר לבדוק תבניות ולוודא שההודעות שייכות לחשבון שלנו)');
+    if (env.DUALHOOK_API_KEY && env.WA_PHONE_NUMBER_ID && !String(env.WA_PHONE_NUMBER_ID).startsWith('REPLACE')) await step('המספר ב-Dualhook', async () => {
+      const p = await j(await fetch(`${DUAL}/${env.WA_PHONE_NUMBER_ID}`, { headers: dual }));
+      ok(`Dualhook: המספר ${p.display_phone_number || ''} בשם "${p.verified_name || '?'}" (איכות: ${p.quality_rating || '?'})`);
+    });
+    ok(`Dualhook: כתובת השרת שמוגדרת אצלם צריכה להיות ${origin}/webhook?key=<DUALHOOK_WEBHOOK_KEY>`);
   } else if (is360(env)) {
     if (!env.D360_API_KEY) bad('360dialog: חסר D360_API_KEY');
     else await step('360dialog webhook', async () => {
@@ -131,11 +143,13 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   }
 
   // ---------- תבניות ----------
-  const canTemplates = isUltra(env) ? false : is360(env) ? !!env.D360_API_KEY : !!(env.WABA_ID && env.WA_TOKEN);
+  const canTemplates = isUltra(env) ? false : is360(env) ? !!env.D360_API_KEY : isDual(env) ? !!(env.WABA_ID && env.DUALHOOK_API_KEY) : !!(env.WABA_ID && env.WA_TOKEN);
+  const tplBase = isDual(env) ? `${DUAL}/${env.WABA_ID}/message_templates` : `${graph(env)}/${env.WABA_ID}/message_templates`;
+  const tplHeaders = isDual(env) ? dual : bearer;
   if (isUltra(env)) ok('תבניות: לא צריך ב-UltraMsg (כל ההודעות נשלחות כטקסט רגיל)');
   if (canTemplates) await step('תבניות', async () => {
-    const listUrl = is360(env) ? `${D360}/message_templates?limit=200` : `${graph(env)}/${env.WABA_ID}/message_templates?fields=name,status,language&limit=200`;
-    const listed = await j(await fetch(listUrl, { headers: is360(env) ? d360 : bearer }));
+    const listUrl = is360(env) ? `${D360}/message_templates?limit=200` : `${tplBase}?fields=name,status,language&limit=100`;
+    const listed = await j(await fetch(listUrl, { headers: is360(env) ? d360 : tplHeaders }));
     const existing = listed.waba_templates || listed.data || [];
     const lang = env.TEMPLATE_LANG || 'he';
     for (const def of TEMPLATE_DEFS.filter((d) => FEATURES.receipts || !d.documentHeader)) {
@@ -145,16 +159,16 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
       try {
         const components = [];
         if (def.documentHeader) {
-          if (is360(env) || !env.META_APP_ID) { warn(`תבנית ${def.name}: עם מסמך (קבלה) צריך ליצור ידנית ב-WhatsApp Manager. הטקסט: ${def.body}`); continue; }
-          components.push({ type: 'HEADER', format: 'DOCUMENT', example: { header_handle: [await uploadSample(env)] } });
+          if (is360(env) || (!isDual(env) && !env.META_APP_ID)) { warn(`תבנית ${def.name}: עם מסמך (קבלה) צריך ליצור ידנית ב-WhatsApp Manager. הטקסט: ${def.body}`); continue; }
+          components.push({ type: 'HEADER', format: 'DOCUMENT', example: { header_handle: [isDual(env) ? await uploadSampleDual(env) : await uploadSample(env)] } });
         }
         const body = { type: 'BODY', text: def.body };
         if (def.examples?.length) body.example = { body_text: [def.examples] };
         components.push(body);
         if (def.quickReplies?.length) components.push({ type: 'BUTTONS', buttons: def.quickReplies.map((text) => ({ type: 'QUICK_REPLY', text })) });
-        const url = is360(env) ? `${D360}/message_templates` : `${graph(env)}/${env.WABA_ID}/message_templates`;
+        const url = is360(env) ? `${D360}/message_templates` : tplBase;
         const r = await j(await fetch(url, {
-          method: 'POST', headers: is360(env) ? d360 : { ...bearer, 'Content-Type': 'application/json' },
+          method: 'POST', headers: is360(env) ? d360 : { ...tplHeaders, 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: def.name, language: lang, category: def.category, allow_category_change: true, components }),
         }));
         ok(`תבנית ${def.name}: נוצרה, ${statusHe(r.status)}`);
@@ -200,6 +214,16 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
 
 function statusHe(s) {
   return { APPROVED: 'מאושרת', PENDING: 'מחכה לאישור של Meta', REJECTED: 'נדחתה (צריך לשנות את הטקסט)', PAUSED: 'מושהית', DISABLED: 'מושבתת' }[s] || s || 'נשלחה';
+}
+
+// Dualhook: אותו קובץ דוגמה, דרך הנתיב שלהם להעלאת דוגמאות לתבניות
+async function uploadSampleDual(env) {
+  const bytes = new TextEncoder().encode(SAMPLE_PDF);
+  const q = new URLSearchParams({ file_length: String(bytes.length), file_type: 'application/pdf' });
+  const up = await j(await fetch(`${DUAL}/${env.WABA_ID}/message_template_media?${q}`, {
+    method: 'POST', headers: { Authorization: `Bearer ${env.DUALHOOK_API_KEY}`, 'Content-Type': 'application/pdf' }, body: bytes,
+  }));
+  return up.h;
 }
 
 // Meta: העלאת קובץ דוגמה כדי לקבל "handle" לתבנית עם מסמך

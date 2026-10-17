@@ -32,6 +32,7 @@ let aiRequests = [];
 const sysText = (req) => req.system.map((b) => b.text).join('\n');
 let outSeq = 0;
 let yeshQueue = [], yeshRequests = [];
+const dualRequests = [];
 const sheet = [];        // גיליון הגוגל המדומה
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
@@ -69,6 +70,13 @@ globalThis.fetch = async (url, init = {}) => {
     return Response.json({});
   }
   if (url.includes('api.yeshinvoice.co.il')) { yeshRequests.push({ url, auth: init.headers.Authorization, body: JSON.parse(init.body) }); return Response.json(yeshQueue.shift() || { Success: true, ReturnValue: [], totalpage: 1 }); }
+  if (url.startsWith('https://api.dualhook.com/')) {
+    dualRequests.push({ url, auth: (init.headers || {}).Authorization, method: init.method || 'GET' });
+    if (url.endsWith('/messages')) { sent.push(JSON.parse(init.body)); return Response.json({ messages: [{ id: `wamid.out${++outSeq}` }] }); }
+    if (url.endsWith('/content')) return new Response(new Uint8Array([4, 5, 6]), { status: 200 });
+    if (url.endsWith('/media')) return Response.json({ id: 'dual-media' });
+    return Response.json({ url: `${url}/content`, mime_type: 'image/jpeg' });
+  }
   throw new Error('unexpected fetch ' + url);
 };
 
@@ -1437,4 +1445,52 @@ test('prompt caching: the fixed instructions are one cached block that is identi
   const sys = aiRequests.at(-1).system;
   assert.deepEqual(sys[0].cache_control, { type: 'ephemeral', ttl: '1h' });
   assert.equal(sys[1].cache_control, undefined);
+});
+
+test('Dualhook: replies go through api.dualhook.com with our key; webhooks need the key in the address and must belong to our account', async () => {
+  const { default: worker } = await import('../src/index.js');
+  const wa = await import('../src/whatsapp.js');
+  const env = { ...makeEnv(), WA_PROVIDER: 'dualhook', DUALHOOK_API_KEY: 'dh_live_x', DUALHOOK_WEBHOOK_KEY: 'hook-secret', WABA_ID: '555', WA_PHONE_NUMBER_ID: '777', WA_VERIFY_TOKEN: 'admin' };
+  const ctx = { waitUntil: () => {} };
+  const post = (q, body) => worker.fetch(new Request(`https://bot.example/webhook${q}`, { method: 'POST', body: JSON.stringify(body) }), env, ctx);
+
+  // שליחה
+  sent.length = 0; dualRequests.length = 0;
+  assert.equal((await wa.sendText(env, CUSTOMER, 'שלום')).ok, true);
+  assert.equal(dualRequests[0].url, 'https://api.dualhook.com/v25.0/777/messages');
+  assert.equal(dualRequests[0].auth, 'Bearer dh_live_x');
+  assert.equal(sent[0].text.body, 'שלום');
+
+  // תמונה מלקוח: מורידים דרך Dualhook עם אותו מפתח
+  const media = await wa.downloadMedia(env, 'm1');
+  assert.deepEqual([...media.bytes], [4, 5, 6]);
+  assert.ok(dualRequests.slice(-2).every((r) => r.auth === 'Bearer dh_live_x' && r.url.startsWith('https://api.dualhook.com/v25.0/m1')));
+
+  // אימות החיבור (GET): עובד עם המילה של Dualhook
+  const verify = await worker.fetch(new Request('https://bot.example/webhook?hub.mode=subscribe&hub.verify_token=hook-secret&hub.challenge=42'), env, ctx);
+  assert.equal(await verify.text(), '42');
+
+  // הודעה נכנסת
+  const good = { object: 'whatsapp_business_account', entry: [{ id: '555', changes: [{ field: 'messages', value: { metadata: { phone_number_id: '777' }, messages: [] } }] }] };
+  assert.equal((await post('', good)).status, 401, 'no key');
+  assert.equal((await post('?key=wrong', good)).status, 401, 'wrong key');
+  assert.equal((await post('?key=hook-secret', { ...good, entry: [{ ...good.entry[0], id: '999' }] })).status, 403, 'another account');
+  const otherPhone = { object: 'whatsapp_business_account', entry: [{ id: '555', changes: [{ field: 'messages', value: { metadata: { phone_number_id: '888' }, messages: [] } }] }] };
+  assert.equal((await post('?key=hook-secret', otherPhone)).status, 403, 'another number');
+  assert.equal((await post('?key=hook-secret', good)).status, 200);
+
+  // בזמן החיבור (הבוט כבוי ועוד לא עבר ל-Dualhook): אנשי הקשר מהאפליקציה נשמרים, ולאף אחד לא עונים
+  const waits = [];
+  const offEnv = { ...makeEnv(), WA_PROVIDER: 'ultramsg', BOT_OFF: '1', DUALHOOK_WEBHOOK_KEY: 'hook-secret', WA_VERIFY_TOKEN: 'admin' };
+  sent.length = 0;
+  const sync = { object: 'whatsapp_business_account', entry: [{ id: '555', changes: [
+    { field: 'history', value: { history: [{ threads: [{ id: '972501112233', messages: [{ from: '972501112233', id: 'h1' }] }] }] } },
+    { field: 'messages', value: { messages: [{ from: '972504445566', id: 'w-off', type: 'text', text: { body: 'היי' } }] } },
+  ] }] };
+  const r = await worker.fetch(new Request('https://bot.example/webhook?key=hook-secret', { method: 'POST', body: JSON.stringify(sync) }), offEnv, { waitUntil: (p) => waits.push(p) });
+  assert.equal(r.status, 200);
+  await Promise.all(waits);
+  assert.equal((await offEnv.DB.prepare('SELECT known FROM customers WHERE phone = ?').bind('972501112233').first())?.known, 1);
+  assert.equal(await offEnv.DB.prepare('SELECT * FROM customers WHERE phone = ?').bind('972504445566').first(), null, 'messages are ignored while off');
+  assert.equal(sent.length, 0);
 });

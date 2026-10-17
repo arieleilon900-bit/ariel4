@@ -5,7 +5,7 @@
 import { flushDueSummaries, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
-import { is360, isUltra, verifySignature } from './whatsapp.js';
+import { is360, isDual, isUltra, verifySignature } from './whatsapp.js';
 import { ultraToMeta } from './ultramsg.js';
 import { renderTable, tableAction, tableKey } from './table.js';
 import { handleOwnerCommand } from './owner.js';
@@ -88,8 +88,22 @@ export default {
       const mode = url.searchParams.get('hub.mode');
       const token = url.searchParams.get('hub.verify_token');
       const challenge = url.searchParams.get('hub.challenge');
-      if (mode === 'subscribe' && token && token === env.WA_VERIFY_TOKEN) return new Response(challenge || '');
+      // Dualhook: מילת האימות היא DUALHOOK_WEBHOOK_KEY (מוגדרת ב-Dualhook ובגיטהאב), גם לפני שעוברים ל-dualhook
+      const dualOk = !!env.DUALHOOK_WEBHOOK_KEY && !!token && safeEqual(token, env.DUALHOOK_WEBHOOK_KEY);
+      if (mode === 'subscribe' && token && (token === env.WA_VERIFY_TOKEN || dualOk)) return new Response(challenge || '');
       return new Response('forbidden', { status: 403 });
+    }
+
+    // Dualhook (מזוהה לפי המפתח בכתובת). בזמן החיבור Meta שולחים פעם אחת את אנשי הקשר וההיסטוריה מהאפליקציה:
+    // שומרים אותם גם כשהבוט כבוי או עוד לא עבר ל-Dualhook, כדי שהבוט לא יענה אחר כך למשפחה ולחברים
+    if (url.pathname === '/webhook' && request.method === 'POST' && env.DUALHOOK_WEBHOOK_KEY
+      && safeEqual(url.searchParams.get('key') || '', env.DUALHOOK_WEBHOOK_KEY)) {
+      let body;
+      try { body = JSON.parse(await request.text()); } catch { return new Response('bad json', { status: 400 }); }
+      if (!dualhookTrusted(env, body)) return new Response('wrong account', { status: 403 });
+      const syncOnly = env.BOT_OFF === '1' || !isDual(env);
+      ctx.waitUntil(processWebhook(env, body, new Date(), { syncOnly }).catch((err) => console.error('dualhook webhook failed', err)));
+      return new Response('ok');
     }
 
     // UltraMsg: אין חתימה, אז מילת הסוד נמצאת בכתובת (/webhook?key=WA_VERIFY_TOKEN). /admin/setup מגדיר את זה לבד
@@ -108,7 +122,11 @@ export default {
       const raw = await request.text();
       // בלי סוד: לא מקבלים כלום (חוץ מבדיקה מקומית עם ALLOW_UNSIGNED=1), כדי שאף אחד לא יתחזה ל-Meta.
       // דרך 360dialog אין חתימה של Meta: הם שולחים כותרת עם מילת סוד שהגדרנו (X-Bot-Secret = WA_VERIFY_TOKEN)
-      const ok = is360(env)
+      // דרך Dualhook: Meta שולחים ישר אלינו, חתומים בסוד של Dualhook שלא נמסר ללקוחות. לכן המפתח נמצא בכתובת
+      // (/webhook?key=DUALHOOK_WEBHOOK_KEY), ובנוסף בודקים שההודעה שייכת לחשבון ולמספר שלנו (dualhookTrusted למטה)
+      const ok = isDual(env)
+        ? !!env.DUALHOOK_WEBHOOK_KEY && safeEqual(url.searchParams.get('key') || '', env.DUALHOOK_WEBHOOK_KEY)
+        : is360(env)
         ? !!env.WA_VERIFY_TOKEN && safeEqual(request.headers.get('x-bot-secret') || '', env.WA_VERIFY_TOKEN)
         : env.WA_APP_SECRET
           ? await verifySignature(env.WA_APP_SECRET, raw, request.headers.get('x-hub-signature-256'))
@@ -116,6 +134,7 @@ export default {
       if (!ok) return new Response('bad signature', { status: 401 });
       let body;
       try { body = JSON.parse(raw); } catch { return new Response('bad json', { status: 400 }); }
+      if (isDual(env) && !dualhookTrusted(env, body)) return new Response('wrong account', { status: 403 });
       // עונים ל-Meta מיד, ומטפלים ברקע
       ctx.waitUntil(processWebhook(env, body).catch((err) => console.error('webhook processing failed', err)));
       return new Response('ok');
@@ -196,12 +215,28 @@ async function selfTest(env) {
   return out.join('\n');
 }
 
+// Dualhook: ההודעה צריכה להיות של חשבון הוואטסאפ שלנו (WABA_ID) ושל המספר שלנו (WA_PHONE_NUMBER_ID)
+export function dualhookTrusted(env, body) {
+  if (body?.object !== 'whatsapp_business_account' || !Array.isArray(body.entry)) return false;
+  return body.entry.every((e) => (!env.WABA_ID || String(e.id) === String(env.WABA_ID))
+    && (e.changes || []).every((c) => {
+      const pid = c.value?.metadata?.phone_number_id;
+      return !pid || !env.WA_PHONE_NUMBER_ID || String(pid) === String(env.WA_PHONE_NUMBER_ID);
+    }));
+}
+
 // מה חסר בהגדרות (רק שמות, אף פעם לא ערכים)
 export function healthText(env) {
   const need = isUltra(env)
     ? { ULTRAMSG_INSTANCE: env.ULTRAMSG_INSTANCE, ULTRAMSG_TOKEN: env.ULTRAMSG_TOKEN, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE }
     : is360(env)
     ? { D360_API_KEY: env.D360_API_KEY, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE }
+    : isDual(env)
+    ? {
+      DUALHOOK_API_KEY: env.DUALHOOK_API_KEY, DUALHOOK_WEBHOOK_KEY: env.DUALHOOK_WEBHOOK_KEY, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN,
+      ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE, WABA_ID: env.WABA_ID,
+      WA_PHONE_NUMBER_ID: env.WA_PHONE_NUMBER_ID && !String(env.WA_PHONE_NUMBER_ID).startsWith('REPLACE'),
+    }
     : {
       WA_TOKEN: env.WA_TOKEN, WA_VERIFY_TOKEN: env.WA_VERIFY_TOKEN, WA_APP_SECRET: env.WA_APP_SECRET,
       ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY, OWNER_PHONE: env.OWNER_PHONE,
@@ -217,11 +252,16 @@ export function healthText(env) {
   ].filter(Boolean).join('\n');
 }
 
-export async function processWebhook(env, body, now = new Date()) {
+// syncOnly: רק שמירת אנשי הקשר מהסנכרון של החיבור, בלי לענות לאף אחד (הבוט כבוי)
+export async function processWebhook(env, body, now = new Date(), { syncOnly = false } = {}) {
   setWindowAlwaysOpen(isUltra(env));
   for (const entry of body.entry || []) {
     for (const change of entry.changes || []) {
       const v = change.value || {};
+      if (syncOnly) {
+        if (['history', 'smb_app_state_sync'].includes(change.field)) console.log(`imported ${await importKnownContacts(env, v, now)} known contacts from ${change.field}`);
+        continue;
+      }
       const names = Object.fromEntries((v.contacts || []).map((c) => [c.wa_id, c.profile?.name]));
       // כמה הודעות באותה משלוחה: במקביל, כדי שהבוט יענה עליהן ביחד ולא אחת אחת
       await Promise.all((v.messages || []).map((msg) => handleInbound(env, msg, names[msg.from], now)

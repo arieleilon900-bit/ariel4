@@ -296,9 +296,9 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
 
   // אחרי ההעברה לחנן:
   // - חנן עוד לא ענה: הבוט ממשיך לדבר עם הלקוח (ממשיך למטה), ושולח לחנן רק עדכון כשיש משהו חדש וחשוב
-  // - חנן כבר ענה ללקוח: הוא מטפל. כשהמספר משותף לאפליקציה שלו (UltraMsg / 360dialog) הוא רואה את ההודעות שם, אז הבוט שותק
+  // - חנן כבר ענה ללקוח: הוא מטפל. כשהמספר משותף לאפליקציה שלו (UltraMsg / 360dialog / Dualhook) הוא רואה את ההודעות שם, אז הבוט שותק
   const paused = await isPaused(env);
-  if (!paused && conv.state === 'handoff' && conv.owner_replied_at && (wa.isUltra(env) || wa.is360(env))) return;
+  if (!paused && conv.state === 'handoff' && conv.owner_replied_at && wa.sharesOwnerApp(env)) return;
   // בוט בהפסקה, או חנן ענה בלי אפליקציה משותפת: כל הודעה מגיעה אליו כמו שהיא
   if (paused || (conv.state === 'handoff' && conv.owner_replied_at)) {
     await sendToOwner(env, `💬 ${customer?.name || ''} ${displayPhone(phone)} כתב/ה: ${content.text}`.trim(), now, phone);
@@ -452,7 +452,7 @@ async function afterHandoffTurn(env, { conv, phone, customer, contactName, conte
     return;
   }
   // חנן ענה בזמן שה-AI חשב: הוא מטפל
-  if (fresh.owner_replied_at && (wa.isUltra(env) || wa.is360(env))) return;
+  if (fresh.owner_replied_at && wa.sharesOwnerApp(env)) return;
   if (result.reply) {
     const sentReply = await wa.sendText(env, phone, result.reply);
     if (sentReply.ok) await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, result.reply, nowIso(now)).run();
