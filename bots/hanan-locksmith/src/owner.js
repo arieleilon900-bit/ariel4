@@ -352,7 +352,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       await sendToOwner(env, `✓ הבוט חזר לטפל ב-${displayPhone(c.phone)}.`, now);
       // פותחים מחדש רק שיחה מהימים האחרונים (למשל הודעה שסומנה בטעות כספאם). שיחה ישנה: הלקוח פשוט יקבל מענה כשיכתוב שוב
       if (!conv || (now.getTime() - new Date(conv.updated_at).getTime()) > 72 * 3600000 || !['spam', 'handoff', 'bot'].includes(conv.state)) return;
-      await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ?, owner_replied_at = NULL, customer_nudges = 2, owner_nudges = 0 WHERE id = ?").bind(nowIso(now), conv.id).run();
+      await env.DB.prepare("UPDATE conversations SET state = 'bot', updated_at = ?, owner_replied_at = NULL, customer_nudges = 9, owner_nudges = 0 WHERE id = ?").bind(nowIso(now), conv.id).run();
       // הלקוח כתב ולא קיבל תשובה (למשל סומן בטעות כספאם): הבוט עונה לו עכשיו
       const last = await env.DB.prepare("SELECT id, role, text FROM messages WHERE conv_id = ? AND role IN ('user','assistant','owner') ORDER BY id DESC LIMIT 1").bind(conv.id).first();
       if (last?.role === 'user') {

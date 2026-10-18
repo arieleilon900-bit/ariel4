@@ -20,7 +20,7 @@ export async function runNudges(env, now = new Date()) {
 
 // 1. לקוח שהפסיק לענות באמצע השיחה עם הבוט, או שיחה שנתקעה (הבוט לא הספיק לענות)
 async function customerNudges(env, now) {
-  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'bot' AND customer_nudges < 2 AND updated_at >= ?")
+  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'bot' AND customer_nudges < 9 AND updated_at >= ?")
     .bind(new Date(now.getTime() - 7 * 86400000).toISOString()).all()).results;
   for (const conv of convs) {
     // חנן כבר מטפל, או שהמספר חסום / מוכר / ביקש הסרה: לא נוגעים
@@ -37,12 +37,13 @@ async function customerNudges(env, now) {
       continue;
     }
 
-    const canNudge = conv.customer_nudges === 0 && !cust?.opted_out && customerHours(now) && inServiceWindow(
+    // customer_nudges: כמה תזכורות הלקוח כבר קיבל. 9 = סיימנו איתו (הועבר לחנן / נסגר)
+    const canNudge = conv.customer_nudges < (TIMING.customerNudges ?? 1) && !cust?.opted_out && customerHours(now) && inServiceWindow(
       (await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first())?.last_inbound_at, now);
     if (canNudge && age >= TIMING.customerNudgeMinutes) {
       const nudgeText = tmsg(await customerLang(env, conv.phone), 'customerNudge');
       const r = await wa.sendText(env, conv.phone, nudgeText);
-      await env.DB.prepare('UPDATE conversations SET customer_nudges = 1 WHERE id = ?').bind(conv.id).run();
+      await env.DB.prepare('UPDATE conversations SET customer_nudges = customer_nudges + 1 WHERE id = ?').bind(conv.id).run();
       if (r.ok) {
         await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, nudgeText, nowIso(now)).run();
         await logEvent(env, 'customer_nudge', conv.phone, now);
@@ -50,13 +51,13 @@ async function customerNudges(env, now) {
       continue;
     }
     // גם אחרי התזכורת לא ענה, או שלא היה אפשר להזכיר לו (לילה, שבת, עברו 24 שעות): חנן מקבל את מה שיש
-    const giveUp = conv.customer_nudges === 1 ? age >= TIMING.customerGiveUpHours * 60 : age >= (TIMING.customerGiveUpHours + 3) * 60;
+    const giveUp = conv.customer_nudges >= 1 ? age >= TIMING.customerGiveUpHours * 60 : age >= (TIMING.customerGiveUpHours + 3) * 60;
     if (giveUp && ownerHours(now)) await partialHandoff(env, conv, now);
   }
 }
 
 async function partialHandoff(env, conv, now, title = 'לקוח התחיל לכתוב ולא סיים. שווה להתקשר אליו') {
-  const moved = await env.DB.prepare("UPDATE conversations SET customer_nudges = 2, state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ? AND state = 'bot'")
+  const moved = await env.DB.prepare("UPDATE conversations SET customer_nudges = 9, state = 'handoff', handed_off_at = ?, followup_at = ? WHERE id = ? AND state = 'bot'")
     .bind(nowIso(now), nowIso(addHours(now, TIMING.followupAfterHours)), conv.id).run();
   if (!moved.meta?.changes) return;
   const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(conv.phone).first();

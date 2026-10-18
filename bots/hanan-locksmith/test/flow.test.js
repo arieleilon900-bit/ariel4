@@ -353,29 +353,38 @@ test('nobody left hanging: customer nudge, partial handoff, owner nudges, done c
   // לקוח א' עונה פעם אחת ונעלם
   aiQueue = [ai({ reply: 'מה הכתובת?', issue: 'נעול בחוץ', customer_name: 'משה' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ' } }, 'n1'), at(10));
-  await runEvery15(env, at(10, 15));
-  assert.ok(!textsTo(CUSTOMER).includes(MESSAGES.customerNudge), 'not before 30 min');
-  await runEvery15(env, at(10, 30));
+  // לקוח שנעלם: תזכורת אחרי שעה, ועוד אחת אחרי שעתיים
+  const custNudges = () => textsTo(CUSTOMER).filter((t) => t === MESSAGES.customerNudge).length;
   await runEvery15(env, at(10, 45));
-  assert.equal(textsTo(CUSTOMER).filter((t) => t === MESSAGES.customerNudge).length, 1, 'one nudge only');
-  // 3 שעות אחרי התזכורת: חנן מקבל את מה שיש
-  await runEvery15(env, at(13, 30));
+  assert.equal(custNudges(), 0, 'not before an hour');
+  await runEvery15(env, at(11));
+  assert.equal(custNudges(), 1, 'first nudge after an hour');
+  await runEvery15(env, at(11, 45));
+  assert.equal(custNudges(), 1);
+  await runEvery15(env, at(12));
+  assert.equal(custNudges(), 2, 'second nudge after two hours');
+  await runEvery15(env, at(12, 45));
+  assert.equal(custNudges(), 2, 'two nudges only');
+  // שעה אחרי התזכורת האחרונה: חנן מקבל את מה שיש
+  await runEvery15(env, at(13));
   assert.ok(textsTo(OWNER).some((t) => t.includes('התחיל לכתוב ולא סיים') && t.includes('נעול בחוץ')));
 
   // חנן כותב "טופל" על לקוח א' → אין תזכורות עליו
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'טופל 054-1234567' } }, 'n3'), at(13, 40));
   assert.ok(!textsTo(OWNER).some((t) => t.includes('עדיין לא חזרת') && t.includes('054-1234567')));
 
-  // לקוח ב' מגיע עד הסוף, חנן לא מגיב
+  // לקוח ב' מגיע עד הסוף, חנן לא מגיב: תזכורת לחנן אחרי שעה ואחרי שעתיים
   aiQueue = [ai({ reply: 'מעביר לחנן', issue: 'צילינדר', address: 'הרצל 1', ready_for_handoff: true })];
   await processWebhook(env, inbound(C2, { type: 'text', text: { body: 'צריך צילינדר בהרצל 1' } }, 'n2'), at(14));
   const nudges = () => textsTo(OWNER).filter((t) => t.includes('עדיין לא חזרת')).length;
-  await runEvery15(env, at(14, 15));
+  await runEvery15(env, at(14, 45));
   assert.equal(nudges(), 0);
-  await runEvery15(env, at(14, 30));
+  await runEvery15(env, at(15));
+  assert.equal(nudges(), 1, 'owner reminded after an hour');
+  await runEvery15(env, at(15, 45));
   assert.equal(nudges(), 1);
-  await runEvery15(env, at(15, 30));
-  assert.equal(nudges(), 2);
+  await runEvery15(env, at(16));
+  assert.equal(nudges(), 2, 'and again after two hours');
   assert.ok(textsTo(C2).includes(MESSAGES.customerReassure), 'customer reassured on second nudge');
   await runEvery15(env, at(17));
   assert.equal(nudges(), 2, 'max two');
@@ -383,9 +392,10 @@ test('nobody left hanging: customer nudge, partial handoff, owner nudges, done c
 
 
   // עבודה שעבר זמנה ולא סומנה
-  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0547777777 13/10/2026 16:00' } }, 'n4'), at(15, 40));
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0547777777 13/10/2026 16:30' } }, 'n4'), at(16, 5));
   await runEvery15(env, at(19, 15));
   await runEvery15(env, at(19, 30));
+  await runEvery15(env, at(19, 45));
   assert.equal(textsTo(OWNER).filter((t) => t.startsWith('מה קרה עם העבודה')).length, 1);
 });
 

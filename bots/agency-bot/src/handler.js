@@ -412,7 +412,7 @@ export async function aiRespond(env, { conv, phone, customer, contactName = '', 
 
   // הלקוח כבר לא צריך: סוגרים בלי תזכורות ובלי מעקב
   if (result.customer_done && !result.ready_for_handoff) {
-    await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1, customer_nudges = 2 WHERE id = ?").bind(conv.id).run();
+    await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1, customer_nudges = 9 WHERE id = ?").bind(conv.id).run();
     await logEvent(env, 'customer_done', phone, now);
     await upsertLead(env, phone, { status: 'הלקוח ויתר', name: customer?.name || contactName || '', issue: result.issue, address: result.address, note: result.summary_for_owner }, now);
     return;
@@ -469,7 +469,7 @@ async function afterHandoffTurn(env, { conv, phone, customer, contactName, conte
   if (fresh.summary_due_at) {
     if (result.customer_done && fresh.summary_kind === 'new') {
       // הלקוח ויתר לפני שחנן שמע עליו: לא מטרידים את חנן בכלל
-      await env.DB.prepare("UPDATE conversations SET summary_due_at = NULL, state = 'closed', followup_sent = 1, customer_nudges = 2 WHERE id = ?").bind(conv.id).run();
+      await env.DB.prepare("UPDATE conversations SET summary_due_at = NULL, state = 'closed', followup_sent = 1, customer_nudges = 9 WHERE id = ?").bind(conv.id).run();
       await logEvent(env, 'customer_done', phone, now);
       await upsertLead(env, phone, { status: 'הלקוח ויתר', name, issue: updatedIssue(fresh, result), address: result.address || fresh.address, note: result.summary_for_owner }, now);
       return;
