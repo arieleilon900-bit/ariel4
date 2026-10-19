@@ -157,8 +157,15 @@ async function followups(env, now) {
   }
 }
 
+// רץ כל דקה (וגם ברבע שעה): כל עבודה "תופסת" את הבקשה שלה לפני השליחה, כדי שלא תישלח פעמיים
+export async function sendDueReviews(env, now = new Date()) {
+  if (!canMessageNow(now)) return;
+  await reviews(env, now);
+}
+
 async function reviews(env, now) {
-  const cutoff = new Date(now.getTime() - TIMING.reviewAfterHours * 3600000).toISOString();
+  const mins = TIMING.reviewAfterMinutes ?? (TIMING.reviewAfterHours ?? 3) * 60;
+  const cutoff = new Date(now.getTime() - mins * 60000).toISOString();
   const jobs = (await env.DB.prepare("SELECT * FROM jobs WHERE status = 'done' AND review_sent_at IS NULL AND done_at <= ?").bind(cutoff).all()).results;
   for (const j of jobs) {
     // לא מבקשים ביקורת פעמיים מאותו לקוח בחצי שנה
@@ -173,8 +180,9 @@ async function reviews(env, now) {
       await logEvent(env, 'review_skipped', j.phone, now);
       continue;
     }
+    const claimed = await env.DB.prepare('UPDATE jobs SET review_sent_at = ? WHERE id = ? AND review_sent_at IS NULL').bind(nowIso(now), j.id).run();
+    if (!claimed.meta?.changes) continue;
     const r = await sendToCustomer(env, j.phone, tmsg(await customerLang(env, j.phone), 'review', env.REVIEW_LINK), { name: TEMPLATES.review, params: [env.REVIEW_LINK] }, now);
-    await env.DB.prepare('UPDATE jobs SET review_sent_at = ? WHERE id = ?').bind(nowIso(now), j.id).run();
     if (r.ok) { await logEvent(env, 'review', j.phone, now); await upsertLead(env, j.phone, { status: 'עבודה הסתיימה, נשלחה בקשת ביקורת' }, now); }
   }
 }

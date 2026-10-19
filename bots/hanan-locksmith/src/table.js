@@ -89,5 +89,5 @@ export async function tableAction(env, request, url, runCommand) {
   if (!known) return back('');
   const local = phone.startsWith('972') ? `0${phone.slice(3)}` : `+${phone}`;
   await runCommand(env, `${cmd} ${local}`, new Date(), null, env.OWNER_PHONE);
-  return back(cmd === 'סיום' ? `סומן כגמור: ${displayPhone(phone)}. בעוד כמה שעות הלקוח יקבל בקשה לביקורת` : `נסגר: ${displayPhone(phone)}`);
+  return back(cmd === 'סיום' ? `סומן כגמור: ${displayPhone(phone)}. בעוד דקה הלקוח יקבל בקשה לביקורת (בין 08:00 ל-21:00, לא בשבת)` : `נסגר: ${displayPhone(phone)}`);
 }

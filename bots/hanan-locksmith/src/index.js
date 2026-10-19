@@ -3,7 +3,7 @@
 // POST /webhook ← הודעות נכנסות מוואטסאפ
 // cron          ← תזכורות, מעקבים ודוח שבועי
 import { flushDueSummaries, sameQuestion, sendToOwner, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
-import { runEvery15, weeklyReport } from './cron.js';
+import { runEvery15, sendDueReviews, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isDual, isUltra, verifySignature } from './whatsapp.js';
 import { ultraToMeta } from './ultramsg.js';
@@ -193,7 +193,7 @@ export default {
     setWindowAlwaysOpen(isUltra(env));
     if (env.BOT_OFF === '1') return;
     // כל דקה: רק הסיכומים לחנן שהגיע הזמן שלהם (הלקוח סיים לכתוב)
-    if (event.cron === '* * * * *') { ctx.waitUntil(flushDueSummaries(env, now)); return; }
+    if (event.cron === '* * * * *') { ctx.waitUntil(flushDueSummaries(env, now).then(() => sendDueReviews(env, now))); return; }
     if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
     if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));

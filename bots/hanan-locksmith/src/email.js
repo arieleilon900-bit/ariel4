@@ -272,7 +272,7 @@ ${[15, 30, 45, 60].map((m) => f('eta', `${m} דק'`, '', `<input type="hidden" n
 <div class="card"><h2>קבעתי תור. הלקוח מקבל תזכורת יום לפני ושעתיים לפני</h2>
 <form method="post" class="row"><input type="hidden" name="act" value="appt"><input type="date" name="date" value="${today}" aria-label="תאריך"><input type="time" name="time" value="10:00" aria-label="שעה"><input name="address" value="${esc(conv?.address || '')}" placeholder="כתובת" aria-label="כתובת"><button>קבע תור</button></form></div>
 <div class="card"><h2>סיימתי</h2><div class="row">
-${f('done', '✓ סיימתי את העבודה', 'g')}</div><div style="color:var(--mute);font-size:14px">אחרי 3 שעות הלקוח מקבל בקשה לביקורת בגוגל.</div></div>
+${f('done', '✓ סיימתי את העבודה', 'g')}</div><div style="color:var(--mute);font-size:14px">דקה אחרי זה הלקוח מקבל בקשה לביקורת בגוגל (בין 08:00 ל-21:00, לא בשבת).</div></div>
 <div class="card"><h2>עוד</h2><div class="row">
 ${f('handled', 'חזרתי אליו בטלפון', 'n')}${f('irrelevant', 'לא רלוונטי', 'n')}${f('cancel', 'העבודה בוטלה', 'n')}${f('quiet', 'מכיר אותו: שהבוט לא יענה לו', 'n')}${f('bot', 'שהבוט יענה לו', 'n')}${f('block', 'ספאם, לחסום', 'n')}</div></div>
 <div class="card"><h2>ללמד את הבוט (מעכשיו הוא עונה ככה לכל הלקוחות)</h2>

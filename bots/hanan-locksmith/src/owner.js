@@ -158,7 +158,7 @@ async function sendReceiptFile(env, phone, fileId, filename, now) {
     const mediaId = await wa.uploadMedia(env, media.bytes, media.mime.split(';')[0]);
     await markOwnerReplied(env, phone, now);
     const r = await deliverReceipt(env, phone, mediaId, { filename: filename || 'קבלה.pdf', now });
-    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)}${filename ? ` (${filename})` : ''} והעבודה סומנה כגמורה. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
+    return sendToOwner(env, r.ok ? `✓ הקבלה נשלחה ל-${displayPhone(phone)}${filename ? ` (${filename})` : ''} והעבודה סומנה כגמורה. בעוד דקה הלקוח יקבל בקשה לביקורת (בין 08:00 ל-21:00, לא בשבת).` : `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
   } catch (err) {
     console.error('owner receipt failed', err);
     return sendToOwner(env, `לא הצלחתי לשלוח את הקבלה ל-${displayPhone(phone)}. נסה שוב בעוד כמה דקות.`, now, phone);
@@ -306,7 +306,7 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       await env.DB.prepare('UPDATE customers SET jobs_count = jobs_count + 1 WHERE phone = ?').bind(c.phone).run();
       if (conv) await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE id = ?").bind(conv.id).run();
       await upsertLead(env, c.phone, { status: 'עבודה הסתיימה', issue: job.issue, address: job.address }, now);
-      return sendToOwner(env, `✓ סומן כגמור: ${displayPhone(c.phone)}. בעוד כמה שעות הלקוח יקבל בקשה לביקורת.`, now);
+      return sendToOwner(env, `✓ סומן כגמור: ${displayPhone(c.phone)}. בעוד דקה הלקוח יקבל בקשה לביקורת (בין 08:00 ל-21:00, לא בשבת).`, now);
     }
 
     case 'receipt': {
