@@ -1472,6 +1472,11 @@ test('Dualhook: replies go through api.dualhook.com with our key; webhooks need 
   // אימות החיבור (GET): עובד עם המילה של Dualhook
   const verify = await worker.fetch(new Request('https://bot.example/webhook?hub.mode=subscribe&hub.verify_token=hook-secret&hub.challenge=42'), env, ctx);
   assert.equal(await verify.text(), '42');
+  // מילה עם רווח בסוף (הודבקה ככה בגיטהאב), או מילת אימות שגויה אבל המילה בכתובת נכונה: עובר
+  const spaced = { ...env, DUALHOOK_WEBHOOK_KEY: 'hook-secret \n' };
+  assert.equal(await (await worker.fetch(new Request('https://bot.example/webhook?hub.mode=subscribe&hub.verify_token=hook-secret&hub.challenge=7'), spaced, ctx)).text(), '7');
+  assert.equal(await (await worker.fetch(new Request('https://bot.example/webhook?key=hook-secret&hub.mode=subscribe&hub.verify_token=typo&hub.challenge=8'), env, ctx)).text(), '8');
+  assert.equal((await worker.fetch(new Request('https://bot.example/webhook?key=nope&hub.mode=subscribe&hub.verify_token=typo&hub.challenge=9'), env, ctx)).status, 403);
 
   // הודעה נכנסת
   const good = { object: 'whatsapp_business_account', entry: [{ id: '555', changes: [{ field: 'messages', value: { metadata: { phone_number_id: '777' }, messages: [] } }] }] };
