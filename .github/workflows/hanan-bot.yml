@@ -22,6 +22,10 @@ on:
         description: 'Send one test email to OWNER_EMAIL'
         type: boolean
         default: false
+      run_setup:
+        description: 'Check the WhatsApp connection and create the message templates (connection day)'
+        type: boolean
+        default: false
 
 concurrency:
   group: hanan-bot
@@ -100,6 +104,16 @@ jobs:
               echo "::notice::$name is not set in GitHub secrets yet"
             fi
           done
+
+      - name: Connection check and message templates
+        if: steps.ready.outputs.go == 'true' && github.event.inputs.run_setup == 'true'
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          sleep 20
+          curl -s -m 120 -G "$url/admin/setup" --data-urlencode "key=$key"
 
       - name: Self-test (the real AI answers sample customers, nothing is sent)
         if: steps.ready.outputs.go == 'true'
