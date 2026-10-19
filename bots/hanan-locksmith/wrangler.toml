@@ -20,13 +20,14 @@ binding = "AI"
 [vars]
 # meta = ישירות מול Meta. 360dialog = דרך הספק (למספר האמיתי, שעובד גם באפליקציה)
 # ultramsg = וואטסאפ רגיל דרך UltraMsg (סריקת QR). לא רשמי: יש סיכון לחסימת המספר
-WA_PROVIDER = "ultramsg"
+# dualhook = ספק רשמי וזול: המספר עובד גם באפליקציה וגם בבוט (סודות: DUALHOOK_API_KEY, DUALHOOK_WEBHOOK_KEY)
+WA_PROVIDER = "dualhook"
 # UltraMsg: מספר ה-Instance (לא סוד). הטוקן נכנס כסוד ULTRAMSG_TOKEN
 ULTRAMSG_INSTANCE = "instance194049"
 # מצב בדיקה: הבוט עונה רק למספרים האלה (ולחנן). "none" = לא עונה לאף לקוח. ריק = עונה לכולם
-TEST_PHONES = "none"
+TEST_PHONES = "972533776774"
 # "1" = הבוט כבוי לגמרי: לא עונה לאף אחד ולא שולח כלום
-BOT_OFF = "1"
+BOT_OFF = "0"
 # כמה דקות של שקט מהלקוח לפני שחנן מקבל סיכום אחד של כל השיחה (דחוף: מיד)
 SUMMARY_SETTLE_MIN = "3"
 # "1" = הודעה מבעל העסק שהיא לא פקודה לא מקבלת תגובה (כשהמספר שלו משמש גם לשיחות רגילות)
@@ -34,18 +35,18 @@ OWNER_QUIET = "1"
 # הכתובת של הבוט (בשביל חיבור אוטומטי של UltraMsg)
 WORKER_URL = "https://hanan-locksmith-bot.eliyabuis12.workers.dev"
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
-WABA_ID = ""
+WABA_ID = "648450448049057"
 META_APP_ID = ""
-# מספר הבדיקה של Meta בהתחלה, ואחר כך המספר האמיתי
-WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
-# הטלפון של חנן לקבלת סיכומים ופקודות (פורמט בינלאומי, בלי +)
-OWNER_PHONE = "972524666175"
+# בבדיקה: המספר של אריאל (052-4666175) דרך Dualhook. ביום החיבור: המספר של חנן
+WA_PHONE_NUMBER_ID = "615198711679818"
+# הטלפון של חנן לקבלת סיכומים ופקודות בוואטסאפ (פורמט בינלאומי, בלי +). ריק = הכל במייל (OWNER_EMAIL)
+OWNER_PHONE = ""
 # התראות לחנן במייל. נשלחות מהג'ימייל של העסק (הסיסמה נכנסת רק כסוד GMAIL_APP_PASSWORD ב-GitHub)
 GMAIL_USER = "eliyabuis12@gmail.com"
 # בזמן הבדיקות הסיכומים מגיעים אלינו. ביום החיבור מחליפים למייל של חנן: Hananlocks@gmail.com
 OWNER_EMAIL = "eliyabuis12@gmail.com"
-# מי מקבל התראה כשיש תקלה בבוט (אריאל)
-ADMIN_PHONE = "972524666175"
+# מי מקבל התראה בוואטסאפ כשיש תקלה בבוט. ריק בבדיקה: המספר של אריאל הוא עכשיו המספר של הבוט
+ADMIN_PHONE = ""
 # ID של גיליון הלקוחות בגוגל (ריק = בלי גיליון)
 SHEET_ID = ""
 # קישור לכתיבת ביקורת בגוגל
