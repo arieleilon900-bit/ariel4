@@ -137,7 +137,8 @@ export const TIMING = {
   followupAfterHours: 24,      // מעקב אחרי לקוח שקיבל סיכום ולא נפתחה לו עבודה
   reviewAfterMinutes: 1,       // בקשת ביקורת דקה אחרי שחנן מסמן שהעבודה הסתיימה (אריאל). רק בשעות 07:00-21:00 ולא בשבת
   referralAfterDays: 7,        // בקשת המלצה אחרי הביקורת
-  yearlyAfterDays: 0,          // תזכורת שנתית (0 = כבוי: חנן ביקש להוריד)
+  yearlyAfterDays: 0,          // בדיקה תקופתית: כבוי (חנן ביקש להוריד בטופס, אריאל אישר)
+  photoNudgeMinutes: 5,        // פנייה שהועברה לחנן בלי תמונה: אחרי 5 דקות הבוט מבקש תמונה פעם אחת
   customerReminderHours: [2, 1], // תזכורות ללקוח לפני עבודה: שעתיים לפני ושעה לפני (חנן). בלי זה: יום לפני ושעתיים לפני
   weeklyReportAt: { dow: 5, hour: 10 }, // דוח שבועי לחנן: יום שישי 10:00
   reminderDayBeforeHours: 24,
@@ -168,6 +169,8 @@ export const MESSAGES = {
   invoice: 'מצורפת הקבלה על העבודה. תודה!',
   optedOut: 'הוסרת. לא נשלח לך יותר תזכורות או עדכונים. אם תצטרך מנעולן, פשוט כתוב כאן.',
   customerNudge: 'היי, עדיין צריך עזרה? אפשר להמשיך מאיפה שעצרנו, ואני מעביר הכל לחנן.',
+  photoNudge: 'אם יש לך תמונה או סרטון קצר של הדלת או המנעול, תשלח לי בבקשה. זה יעזור לחנן להגיע עם הכלים הנכונים 🙏',
+  apptConfirm: (when, address) => `נקבע לך תור עם חנן ${when}${address ? ` בכתובת ${address}` : ''}. אם משהו משתנה, אפשר לכתוב כאן 🙏`,
   customerReassure: 'חנן עדיין באמצע עבודה. הפנייה שלך אצלו, והוא יחזור אליך בהקדם.',
 };
 
@@ -187,6 +190,8 @@ export const MESSAGES_I18N = {
     reminderTwoHours: (time) => `${O()} will be with you today at ${time}. See you soon 🙂`,
     optedOut: () => "You've been removed and won't get any more reminders or updates. If you ever need a locksmith, just write here.",
     customerNudge: () => `Hi, do you still need help? We can pick up where we left off, and I'll pass everything on to ${O()}.`,
+    photoNudge: () => `If you have a photo or a short video of the door or the lock, please send it. It helps ${O()} bring the right tools 🙏`,
+    apptConfirm: (when, address) => `Your appointment with ${O()} is set for ${when}${address ? ` at ${address}` : ''}. If anything changes, just write here 🙏`,
     customerReassure: () => `${O()} is still in the middle of a job. Your request is with him and he'll get back to you shortly.`,
   },
   ru: {

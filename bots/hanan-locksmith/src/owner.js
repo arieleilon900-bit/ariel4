@@ -291,7 +291,10 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
         .bind(c.phone, conv?.id || null, conv?.issue || null, c.address || conv?.address || null, at.toISOString(), nowIso(now)).run();
       if (conv) await env.DB.prepare("UPDATE conversations SET followup_sent = 1 WHERE id = ?").bind(conv.id).run();
       await upsertLead(env, c.phone, { status: `תור נקבע: ${whenLabel(at, now)}`, address: c.address }, now);
-      return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.`, now);
+      // אישור ללקוח מיד (בתוך 24 שעות: הודעה רגילה, אחרת תבנית התזכורת)
+      const addr = c.address || conv?.address || '';
+      const sent = await sendToCustomer(env, c.phone, tmsg(await customerLang(env, c.phone), 'apptConfirm', whenLabel(at, now), addr), { name: TEMPLATES.reminderDayBefore, params: [whenLabel(at, now), addr || 'שנמסרה'] }, now);
+      return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. ${sent.ok ? 'הלקוח קיבל אישור, ' : 'הלקוח '}יקבל תזכורות לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.`, now);
     }
 
     case 'done': {

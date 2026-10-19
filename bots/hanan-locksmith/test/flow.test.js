@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_photo_nudge.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -611,6 +611,8 @@ test('review: no 2h reminder at night, no day-before for same-day jobs, no past 
   aiQueue = [ai({ reply: 'היי, מה קרה?' })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'r0'), t0);
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 15/10/2026 06:30' } }, 'r1'), t0);
+  assert.ok(textsTo(CUSTOMER).some((t) => t.startsWith('נקבע לך תור עם חנן')), 'customer got appointment confirmation');
+  sent.length = 0;
   await runEvery15(env, new Date('2026-10-15T01:15:00Z')); // 04:15
   assert.ok(!sent.some((m) => m.to === CUSTOMER && (m.template?.name === 'appt_today_v1' || (m.text?.body || '').includes('06:30'))), 'no reminder at 04:15');
 
@@ -1599,4 +1601,25 @@ test('Dualhook: replies go through api.dualhook.com with our key; webhooks need 
   assert.equal((await offEnv.DB.prepare('SELECT known FROM customers WHERE phone = ?').bind('972501112233').first())?.known, 1);
   assert.equal(await offEnv.DB.prepare('SELECT * FROM customers WHERE phone = ?').bind('972504445566').first(), null, 'messages are ignored while off');
   assert.equal(sent.length, 0);
+});
+
+test('photo nudge: 5 minutes after handoff without a photo the customer is asked for one, once; not for cars', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0;
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'מעביר לחנן', issue: 'צילינדר תקוע', address: 'הרצל 5', ready_for_handoff: true })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צילינדר תקוע, הרצל 5' } }, 'ph1'), t0);
+  await runEvery15(env, new Date(t0.getTime() + 2 * 60000));
+  assert.ok(!textsTo(CUSTOMER).some((t) => t.includes('תמונה')), 'not before 5 minutes');
+  await runEvery15(env, new Date(t0.getTime() + 6 * 60000));
+  assert.equal(textsTo(CUSTOMER).filter((t) => t.includes('תמונה או סרטון')).length, 1);
+  await runEvery15(env, new Date(t0.getTime() + 20 * 60000));
+  assert.equal(textsTo(CUSTOMER).filter((t) => t.includes('תמונה או סרטון')).length, 1, 'only once');
+
+  sent.length = 0;
+  const env2 = makeEnv();
+  aiQueue = [ai({ reply: 'מעביר לחנן', issue: 'ננעלו המפתחות ברכב', address: 'הרצל 5', ready_for_handoff: true })];
+  await processWebhook(env2, inbound(CUSTOMER, { type: 'text', text: { body: 'מפתחות ברכב' } }, 'ph2'), t0);
+  await runEvery15(env2, new Date(t0.getTime() + 6 * 60000));
+  assert.ok(!textsTo(CUSTOMER).some((t) => t.includes('תמונה או סרטון')), 'no photo nudge for cars');
 });

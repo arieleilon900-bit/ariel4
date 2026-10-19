@@ -15,7 +15,25 @@ export async function runNudges(env, now = new Date()) {
   await customerNudges(env, now);
   await unfinishedUpdates(env, now);
   await ownerNudges(env, now);
+  await photoNudges(env, now);
   await doneChecks(env, now);
+}
+
+// 3. הפנייה הועברה לחנן בלי תמונה: אחרי כמה דקות הבוט מבקש תמונה פעם אחת (לא ברכב, לא בדחוף, לא אם חנן כבר ענה)
+async function photoNudges(env, now) {
+  const wait = TIMING.photoNudgeMinutes;
+  if (!wait) return;
+  const convs = (await env.DB.prepare("SELECT * FROM conversations WHERE state = 'handoff' AND photo_nudged = 0 AND owner_replied_at IS NULL AND (urgent IS NULL OR urgent = 0) AND (photos IS NULL OR photos = '' OR photos = '[]') AND handed_off_at <= ? AND handed_off_at >= ?")
+    .bind(new Date(now.getTime() - wait * 60000).toISOString(), new Date(now.getTime() - 2 * 3600000).toISOString()).all()).results;
+  for (const conv of convs) {
+    await env.DB.prepare('UPDATE conversations SET photo_nudged = 1 WHERE id = ?').bind(conv.id).run();
+    if (/רכב|אוטו|car|машин|سيار/i.test(String(conv.issue || ''))) continue;
+    const cust = await env.DB.prepare('SELECT blocked, known, opted_out, last_inbound_at FROM customers WHERE phone = ?').bind(conv.phone).first();
+    if (cust?.blocked || cust?.known || cust?.opted_out || !inServiceWindow(cust?.last_inbound_at, now)) continue;
+    const text = tmsg(await customerLang(env, conv.phone), 'photoNudge');
+    const r = await wa.sendText(env, conv.phone, text);
+    if (r.ok) await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, text, nowIso(now)).run();
+  }
 }
 
 // 1. לקוח שהפסיק לענות באמצע השיחה עם הבוט, או שיחה שנתקעה (הבוט לא הספיק לענות)
