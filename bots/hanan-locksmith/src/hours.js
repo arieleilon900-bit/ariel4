@@ -8,10 +8,10 @@ export function restNow(now = new Date()) {
   return BUSINESS.shabbat?.enabled ? isShabbat(now) : ilParts(now).dow === 6;
 }
 
-// הודעות יזומות ללקוחות: 08:00-21:00
+// הודעות יזומות ללקוחות: 07:00-21:00 (אריאל)
 export function customerHours(now = new Date()) {
   const hh = +ilParts(now).hh;
-  return !restNow(now) && hh >= 8 && hh < 21;
+  return !restNow(now) && hh >= 7 && hh < 21;
 }
 
 // תזכורות לחנן: 07:00-22:00, רק בימים שהוא עובד (לא בשישי, שבת וחגים). דחוף מגיע אליו תמיד

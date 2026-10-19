@@ -17,7 +17,7 @@ async function optedOut(env, phone) {
   return !!(await env.DB.prepare('SELECT opted_out FROM customers WHERE phone = ?').bind(phone).first())?.opted_out;
 }
 
-// הודעות מתוזמנות ללקוחות רק בין 08:00 ל-21:00, ולא בשבת
+// הודעות מתוזמנות ללקוחות רק בין 07:00 ל-21:00, ולא בשבת
 const canMessageNow = customerHours;
 
 export async function runEvery15(env, now = new Date()) {
