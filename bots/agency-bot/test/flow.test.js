@@ -1477,6 +1477,8 @@ test('Dualhook: replies go through api.dualhook.com with our key; webhooks need 
   assert.equal(await (await worker.fetch(new Request('https://bot.example/webhook?hub.mode=subscribe&hub.verify_token=hook-secret&hub.challenge=7'), spaced, ctx)).text(), '7');
   assert.equal(await (await worker.fetch(new Request('https://bot.example/webhook?key=hook-secret&hub.mode=subscribe&hub.verify_token=typo&hub.challenge=8'), env, ctx)).text(), '8');
   assert.equal((await worker.fetch(new Request('https://bot.example/webhook?key=nope&hub.mode=subscribe&hub.verify_token=typo&hub.challenge=9'), env, ctx)).status, 403);
+  assert.equal(await (await worker.fetch(new Request('https://bot.example/webhook?hub.mode=subscribe&hub.verify_token=Hook-Secret&hub.challenge=10'), env, ctx)).text(), '10', 'capital letters do not matter');
+  assert.match(await (await worker.fetch(new Request('https://bot.example/webhook?key=nope&hub.mode=subscribe&hub.verify_token=typo&hub.challenge=9'), env, ctx)).text(), /GitHub word: 11 chars, verify token: 4, address key: 4/);
 
   // הודעה נכנסת
   const good = { object: 'whatsapp_business_account', entry: [{ id: '555', changes: [{ field: 'messages', value: { metadata: { phone_number_id: '777' }, messages: [] } }] }] };

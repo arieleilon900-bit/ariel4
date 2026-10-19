@@ -19,6 +19,9 @@ const withOwner = (env) => (env.OWNER_EMAIL && !env.OWNER_PHONE ? { ...env, OWNE
 // לחיצה על כפתור (בטבלה או במייל) כשההתראות במייל: האישור מוצג בדף, לא נשלח עוד מייל
 const quietCommand = (e, ...a) => handleOwnerCommand(ownerByEmail(e) ? { ...e, __capture: [] } : e, ...a);
 
+// המילה הסודית של Dualhook: בלי רווחים, בלי הבדל בין אותיות גדולות לקטנות
+const normKey = (s) => String(s || '').replace(/\s+/g, '').toLowerCase();
+
 // השוואה בזמן קבוע (שלא יהיה אפשר לנחש את הסוד אות אחרי אות)
 function safeEqual(a, b) {
   if (a.length !== b.length) return false;
@@ -89,17 +92,18 @@ export default {
       const token = url.searchParams.get('hub.verify_token');
       const challenge = url.searchParams.get('hub.challenge');
       // Dualhook: מילת האימות היא DUALHOOK_WEBHOOK_KEY (מוגדרת ב-Dualhook ובגיטהאב), גם לפני שעוברים ל-dualhook
-      // מספיק שאחד מהם נכון: המילה בכתובת (?key=) או מילת האימות. רווחים בהתחלה ובסוף לא נחשבים
-      const dualKey = String(env.DUALHOOK_WEBHOOK_KEY || '').trim();
-      const dualOk = !!dualKey && (safeEqual(String(token || '').trim(), dualKey) || safeEqual(String(url.searchParams.get('key') || '').trim(), dualKey));
+      // מספיק שאחד מהם נכון: המילה בכתובת (?key=) או מילת האימות. רווחים ואותיות גדולות/קטנות לא משנים (המילה מוקראת בטלפון)
+      const dualKey = normKey(env.DUALHOOK_WEBHOOK_KEY);
+      const dualOk = !!dualKey && (safeEqual(normKey(token), dualKey) || safeEqual(normKey(url.searchParams.get('key')), dualKey));
       if (mode === 'subscribe' && token && (token === env.WA_VERIFY_TOKEN || dualOk)) return new Response(challenge || '');
-      return new Response(env.DUALHOOK_WEBHOOK_KEY ? 'forbidden: the word in the address and the verify token both differ from DUALHOOK_WEBHOOK_KEY' : 'forbidden', { status: 403 });
+      // רק אורכים (לא המילה עצמה), כדי לראות אם חסרה או נוספה אות
+      return new Response(dualKey ? `forbidden: word differs. GitHub word: ${dualKey.length} chars, verify token: ${normKey(token).length}, address key: ${normKey(url.searchParams.get('key')).length}` : 'forbidden', { status: 403 });
     }
 
     // Dualhook (מזוהה לפי המפתח בכתובת). בזמן החיבור Meta שולחים פעם אחת את אנשי הקשר וההיסטוריה מהאפליקציה:
     // שומרים אותם גם כשהבוט כבוי או עוד לא עבר ל-Dualhook, כדי שהבוט לא יענה אחר כך למשפחה ולחברים
-    if (url.pathname === '/webhook' && request.method === 'POST' && String(env.DUALHOOK_WEBHOOK_KEY || '').trim()
-      && safeEqual(String(url.searchParams.get('key') || '').trim(), String(env.DUALHOOK_WEBHOOK_KEY).trim())) {
+    if (url.pathname === '/webhook' && request.method === 'POST' && normKey(env.DUALHOOK_WEBHOOK_KEY)
+      && safeEqual(normKey(url.searchParams.get('key')), normKey(env.DUALHOOK_WEBHOOK_KEY))) {
       let body;
       try { body = JSON.parse(await request.text()); } catch { return new Response('bad json', { status: 400 }); }
       if (!dualhookTrusted(env, body)) return new Response('wrong account', { status: 403 });
@@ -127,7 +131,7 @@ export default {
       // דרך Dualhook: Meta שולחים ישר אלינו, חתומים בסוד של Dualhook שלא נמסר ללקוחות. לכן המפתח נמצא בכתובת
       // (/webhook?key=DUALHOOK_WEBHOOK_KEY), ובנוסף בודקים שההודעה שייכת לחשבון ולמספר שלנו (dualhookTrusted למטה)
       const ok = isDual(env)
-        ? !!String(env.DUALHOOK_WEBHOOK_KEY || '').trim() && safeEqual(String(url.searchParams.get('key') || '').trim(), String(env.DUALHOOK_WEBHOOK_KEY).trim())
+        ? !!normKey(env.DUALHOOK_WEBHOOK_KEY) && safeEqual(normKey(url.searchParams.get('key')), normKey(env.DUALHOOK_WEBHOOK_KEY))
         : is360(env)
         ? !!env.WA_VERIFY_TOKEN && safeEqual(request.headers.get('x-bot-secret') || '', env.WA_VERIFY_TOKEN)
         : env.WA_APP_SECRET
