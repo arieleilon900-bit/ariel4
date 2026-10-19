@@ -2,7 +2,7 @@
 // GET /webhook  ← אימות של Meta בזמן החיבור
 // POST /webhook ← הודעות נכנסות מוואטסאפ
 // cron          ← תזכורות, מעקבים ודוח שבועי
-import { flushDueSummaries, sendToOwner, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
+import { flushDueSummaries, sameQuestion, sendToOwner, handleFailedStatus, handleInbound, handleOwnerEcho, importKnownContacts } from './handler.js';
 import { runEvery15, weeklyReport } from './cron.js';
 import { ensureUltraWebhook, runSetup } from './setup.js';
 import { is360, isDual, isUltra, verifySignature } from './whatsapp.js';
@@ -242,7 +242,7 @@ async function demoConversation(env, idx = 0) {
     out.push(`לקוח: ${text}`, `בוט: ${r.reply || '(לא עונה)'}`);
     if (r.usage) usd += r.usage.usd;
     if (r.reply) history.push({ role: 'assistant', text: r.reply });
-    collected = { issue: r.issue || collected.issue, address: r.address || collected.address, urgent: collected.urgent || r.urgent, notes: r.summary_for_owner ? [r.summary_for_owner] : collected.notes, questions: r.question_for_owner ? [...collected.questions, r.question_for_owner] : collected.questions };
+    collected = { issue: r.issue || collected.issue, address: r.address || collected.address, urgent: collected.urgent || r.urgent, notes: r.summary_for_owner ? [r.summary_for_owner] : collected.notes, questions: r.question_for_owner && !collected.questions.some((q) => sameQuestion(q, r.question_for_owner)) ? [...collected.questions, r.question_for_owner] : collected.questions };
     const flags = [r.ready_for_handoff && 'מעביר לחנן', r.urgent && 'דחוף', r.question_for_owner && `שאלה לחנן: ${r.question_for_owner}`, r.failed && 'תקלה במוח'].filter(Boolean);
     if (flags.length) out.push(`   [${flags.join(' | ')}]`);
     out.push('');

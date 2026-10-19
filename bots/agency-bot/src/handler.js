@@ -486,7 +486,19 @@ async function afterHandoffTurn(env, { conv, phone, customer, contactName, conte
 
 const updatedIssue = (conv, result) => result.issue || conv.issue || '';
 
+// אותה שאלה בניסוח קצת אחר ("כמה עולה צילינדר?" / "שואל על מחיר צילינדר") נחשבת כפולה
+const words = (t) => new Set(String(t).replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter((w) => w.length > 1));
+export function sameQuestion(a, b) {
+  const A = words(a), B = words(b);
+  if (!A.size || !B.size) return false;
+  let both = 0;
+  for (const w of A) if (B.has(w)) both++;
+  return both / Math.min(A.size, B.size) >= 0.6;
+}
+
 async function addOwnerQuestion(env, convId, q) {
+  const cur = await env.DB.prepare('SELECT owner_questions FROM conversations WHERE id = ?').bind(convId).first();
+  if (String(cur?.owner_questions || '').split('\n').some((x) => x.trim() && sameQuestion(x, q))) return;
   await env.DB.prepare("UPDATE conversations SET owner_questions = CASE WHEN owner_questions IS NULL OR owner_questions = '' THEN ? ELSE owner_questions || char(10) || ? END WHERE id = ?")
     .bind(String(q).slice(0, 300), String(q).slice(0, 300), convId).run();
 }
