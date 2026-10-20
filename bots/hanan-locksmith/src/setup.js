@@ -197,6 +197,8 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   else await step('יש חשבונית', async () => {
     await yeshCall(env, 'getInvoices', { CustomerID: -1, PageSize: 1, PageNumber: 1, docTypes: [], Search: '', from: '2020-01-01 00:00', to: '2100-01-01 00:00' });
     ok('יש חשבונית: המפתחות עובדים, קבלות חדשות יישלחו ללקוחות לבד');
+    const f = (await env.DB.prepare("SELECT value FROM settings WHERE key = 'yesh_doc_fields'").first())?.value;
+    if (f) { const x = JSON.parse(f); warn(`יש חשבונית: במסמך האחרון שלא נשלח (${x.at}) חסר ${!x.phone ? 'טלפון' : ''}${!x.phone && !x.pdf ? ' וגם ' : ''}${!x.pdf ? 'קישור ל-PDF' : ''}. שדות במסמך: ${x.fields.join(', ')}`); }
   });
 
   // ---------- הגדרות ----------

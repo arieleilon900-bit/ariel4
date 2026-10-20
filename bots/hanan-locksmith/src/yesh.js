@@ -46,11 +46,18 @@ export async function fetchNewDocuments(env, now = new Date()) {
       CustomerID: -1, PageSize: 50, PageNumber: page, docTypes, Search: '', from: ilStamp(from), to: ilStamp(now),
     });
     for (const d of data.ReturnValue || []) {
+      const phone = findPhone(d);
+      const pdfUrl = findPdf(d);
+      // לבדיקה: אילו שדות יש במסמך (רק השמות, בלי הערכים), כשחסר טלפון או קישור
+      if (!phone || !pdfUrl) {
+        await env.DB.prepare("INSERT INTO settings (key, value) VALUES ('yesh_doc_fields', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")
+          .bind(JSON.stringify({ at: nowIso(now), phone: !!phone, pdf: !!pdfUrl, fields: Object.keys(d) })).run();
+      }
       docs.push({
         id: `${d.DocumentType}-${d.DocumentNumber}`,
         type: Number(d.DocumentType),
-        phone: normalizePhone(d.CustomerPhone),
-        pdfUrl: d.pdfUrl && /^https?:\/\/\S+$/.test(d.pdfUrl) ? d.pdfUrl : '',
+        phone,
+        pdfUrl,
         customerName: d.CustomerName || '',
         total: d.TotalPrice,
       });
@@ -59,4 +66,22 @@ export async function fetchNewDocuments(env, now = new Date()) {
   }
   await save();
   return docs;
+}
+
+// הטלפון של הלקוח: קודם בשדות המוכרים, ואחר כך בכל שדה שיש בשמו phone / mobile / cell / tel
+const PHONE_FIELDS = ['CustomerPhone', 'CustomerMobile', 'CustomerCell', 'Mobile', 'Phone', 'Cellular', 'ClientPhone', 'ClientMobile'];
+export function findPhone(d) {
+  const keys = [...PHONE_FIELDS.filter((k) => k in d), ...Object.keys(d).filter((k) => !PHONE_FIELDS.includes(k) && /phone|mobile|cell|tel/i.test(k))];
+  const mobiles = keys.map((k) => normalizePhone(d[k])).filter(Boolean);
+  // עדיף נייד ישראלי (972 5x), כי לנייח אין וואטסאפ
+  return mobiles.find((p) => /^9725\d{8}$/.test(p)) || mobiles[0] || '';
+}
+
+// הקישור ל-PDF: בשדות המוכרים, ואחר כך כל קישור שנראה כמו מסמך
+const PDF_FIELDS = ['pdfUrl', 'PdfUrl', 'pdfurl', 'PDFUrl', 'PdfLink', 'pdfLink', 'DocumentUrl', 'Url', 'url', 'Link'];
+export function findPdf(d) {
+  const ok = (v) => typeof v === 'string' && /^https?:\/\/\S+$/.test(v);
+  for (const k of PDF_FIELDS) if (ok(d[k])) return d[k];
+  const any = Object.entries(d).find(([k, v]) => ok(v) && /pdf|url|link|doc/i.test(k));
+  return any ? any[1] : '';
 }

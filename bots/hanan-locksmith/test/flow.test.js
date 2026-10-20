@@ -1687,3 +1687,13 @@ test('Yesh Invoice: tax invoice now, receipt a month later: both reach the custo
   assert.equal(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM jobs WHERE status = 'done'").get().n, 1);
   assert.equal(env.DB.raw.prepare('SELECT jobs_count FROM customers WHERE phone = ?').get(CUSTOMER).jobs_count, 1);
 });
+
+test('Yesh Invoice: the customer phone and PDF link are found even under other field names', async () => {
+  const { findPhone, findPdf } = await import('../src/yesh.js');
+  assert.equal(findPhone({ CustomerPhone: '' , CustomerMobile: '053-3776774' }), '972533776774');
+  assert.equal(findPhone({ CustomerPhone: '09-8887777', Customer_Cell: '0533776774' }), '972533776774');
+  assert.equal(findPhone({ Name: 'x' }), '');
+  assert.equal(findPdf({ PdfLink: 'https://yesh.example/a.pdf' }), 'https://yesh.example/a.pdf');
+  assert.equal(findPdf({ docURL: 'https://yesh.example/b' }), 'https://yesh.example/b');
+  assert.equal(findPdf({ pdfUrl: 'not a link' }), '');
+});
