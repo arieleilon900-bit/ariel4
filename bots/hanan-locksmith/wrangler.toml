@@ -66,3 +66,7 @@ CLAUDE_MODEL = "claude-haiku-5-5"
 # YESH_SECRET         יש חשבונית: Secret
 # D360_API_KEY        360dialog (רק אם WA_PROVIDER = "360dialog")
 # ULTRAMSG_TOKEN      UltraMsg (רק אם WA_PROVIDER = "ultramsg")
+
+# יומן הבוט ב-Cloudflare (Workers Logs): Cloudflare ← הבוט ← Observability
+[observability]
+enabled = true
