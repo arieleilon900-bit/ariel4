@@ -1697,3 +1697,20 @@ test('Yesh Invoice: the customer phone and PDF link are found even under other f
   assert.equal(findPdf({ docURL: 'https://yesh.example/b' }), 'https://yesh.example/b');
   assert.equal(findPdf({ pdfUrl: 'not a link' }), '');
 });
+
+test('Yesh Invoice: Hanan gets "sent successfully"; a duplicate copy of the same document without a phone does not trigger "not sent"', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
+  const mails = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk', OWNER_PHONE: 'email', OWNER_EMAIL: 'h@example.com', GMAIL_USER: 'b@example.com', GMAIL_APP_PASSWORD: 'x', __mail: async (m) => { mails.push(m); } };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  await runEvery15(env, t0);
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [
+    { DocumentType: 9, DocumentNumber: 900, CustomerName: 'בדיקה', CustomerPhone: '', pdfUrl: 'https://yesh.example/900.pdf' },
+    { DocumentType: 9, DocumentNumber: 901, CustomerName: 'בדיקה', CustomerPhone: '0533776774', pdfUrl: 'https://yesh.example/901.pdf' },
+  ] }];
+  await runEvery15(env, new Date(t0.getTime() + 15 * 60000));
+  assert.equal(sent.filter((m) => m.to === '972533776774' && (m.type === 'document' || m.template)).length, 1);
+  const bodies = mails.map((m) => m.text).join('\n');
+  assert.match(bodies, /נשלחה בהצלחה/);
+  assert.doesNotMatch(bodies, /לא נשלח/);
+});

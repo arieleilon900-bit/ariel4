@@ -228,20 +228,40 @@ async function invoices(env, now) {
     await logEvent(env, 'yesh_error', null, now);
     return;
   }
+  // לקוחות שקיבלו מסמך לאחרונה (24 שעות), לפי שם: יש חשבונית מחזירים לפעמים את אותה עבודה גם כמסמך נוסף בלי טלפון,
+  // ואז לא מטרידים את חנן ב"לא נשלח" על משהו שכבר הגיע ללקוח
+  const sentKey = 'yesh_sent_names';
+  const dayAgo = now.getTime() - 24 * 3600000;
+  let sentNames = {};
+  try { sentNames = JSON.parse((await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(sentKey).first())?.value || '{}'); } catch { sentNames = {}; }
+  for (const k of Object.keys(sentNames)) if (sentNames[k] < dayAgo) delete sentNames[k];
+  const nameKey = (n) => String(n || '').replace(/\s+/g, ' ').trim();
+
+  // קודם המסמכים שאפשר לשלוח, ואחר כך מה שחסר בו טלפון
+  const fresh = [];
   for (const d of docs) {
-    const seen = await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(d.id).first();
-    if (seen) continue;
-    if (!d.phone || !d.pdfUrl) {
-      // אין טלפון נייד במסמך: חנן שולח בעצמו
-      if (d.customerName) await sendToOwner(env, `המסמך ל-${d.customerName} לא נשלח בוואטסאפ, כי אין בו טלפון נייד. ${ownerByEmail(env) ? 'בפעם הבאה כדאי לרשום בחשבונית את הטלפון של הלקוח, ואז היא תישלח לו לבד.' : 'אפשר להעביר לי את ה-PDF עם הטלפון שלו.'}`, now);
-      continue;
-    }
+    if (!(await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(d.id).first())) fresh.push(d);
+  }
+  for (const d of fresh.filter((x) => x.phone && x.pdfUrl)) {
     // חנן כבר שלח את הקבלה הזו ידנית (העביר PDF לבוט) בשעות האחרונות: רק מסמנים, לא שולחים שוב
     const manual = await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_doc_id IS NULL AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
       .bind(d.phone, new Date(now.getTime() - 12 * 3600000).toISOString()).first();
     if (manual) { await env.DB.prepare('UPDATE jobs SET invoice_doc_id = ? WHERE id = ?').bind(d.id, manual.id).run(); continue; }
-    await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, label: DOC_LABELS[d.type], filename: `${DOC_LABELS[d.type] || 'מסמך'}.pdf`, now });
+    const label = DOC_LABELS[d.type] || 'מסמך';
+    const r = await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, label: DOC_LABELS[d.type], filename: `${label}.pdf`, now });
+    if (r?.ok) {
+      if (nameKey(d.customerName)) sentNames[nameKey(d.customerName)] = now.getTime();
+      await sendToOwner(env, `✓ ה${label} נשלחה בהצלחה ל${d.customerName ? `${d.customerName} ` : ''}(${displayPhone(d.phone)}) בוואטסאפ.`, now);
+    } else {
+      await sendToOwner(env, `לא הצלחתי לשלוח את ה${label} ל-${displayPhone(d.phone)} בוואטסאפ. כדאי לשלוח לו בעצמך.`, now);
+    }
   }
+  for (const d of fresh.filter((x) => !x.phone || !x.pdfUrl)) {
+    if (!d.customerName || sentNames[nameKey(d.customerName)]) continue;
+    // אין טלפון נייד במסמך: חנן שולח בעצמו
+    await sendToOwner(env, `המסמך ל-${d.customerName} לא נשלח בוואטסאפ, כי אין בו טלפון נייד. ${ownerByEmail(env) ? 'בפעם הבאה כדאי לרשום בפרטי הלקוח בחשבונית את הנייד שלו, ואז הוא יישלח לו לבד.' : 'אפשר להעביר לי את ה-PDF עם הטלפון שלו.'}`, now);
+  }
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(sentKey, JSON.stringify(sentNames)).run();
 }
 
 // דוח שבועי ביום ובשעה שבעל העסק בחר (TIMING.weeklyReportAt). פעם אחת בשבוע
