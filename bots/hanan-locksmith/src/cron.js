@@ -212,7 +212,12 @@ async function yearly(env, now) {
   }
 }
 
-// קבלות מיש חשבונית: כל מסמך חדש נשלח ללקוח, והעבודה מסומנת כגמורה (מה שמפעיל בקשת ביקורת)
+// סוגי המסמכים ביש חשבונית שנשלחים ללקוח
+const DOC_LABELS = { 6: 'קבלה', 8: 'חשבונית מס', 9: 'חשבונית מס קבלה' };
+
+// מסמכים מיש חשבונית (קבלה, חשבונית מס, חשבונית מס קבלה): כל מסמך חדש נשלח ללקוח.
+// המסמך הראשון של עבודה סוגר אותה (ומפעיל בקשת ביקורת). קבלה שמגיעה אחר כך על אותה עבודה
+// (חשבונית מס היום, קבלה כשהלקוח משלם, גם אחרי חודש) רק נשלחת ללקוח, בלי עוד ביקורת ובלי לספור עבודה נוספת
 async function invoices(env, now) {
   if (!FEATURES.receipts) return;
   let docs = [];
@@ -228,14 +233,14 @@ async function invoices(env, now) {
     if (seen) continue;
     if (!d.phone || !d.pdfUrl) {
       // אין טלפון נייד במסמך: חנן שולח בעצמו
-      if (d.customerName) await sendToOwner(env, `הקבלה ל-${d.customerName} לא נשלחה בוואטסאפ, כי אין בה טלפון. ${ownerByEmail(env) ? 'בפעם הבאה כדאי לרשום בחשבונית את הטלפון של הלקוח, ואז היא תישלח לו לבד.' : 'אפשר להעביר לי את ה-PDF עם הטלפון שלו.'}`, now);
+      if (d.customerName) await sendToOwner(env, `המסמך ל-${d.customerName} לא נשלח בוואטסאפ, כי אין בו טלפון נייד. ${ownerByEmail(env) ? 'בפעם הבאה כדאי לרשום בחשבונית את הטלפון של הלקוח, ואז היא תישלח לו לבד.' : 'אפשר להעביר לי את ה-PDF עם הטלפון שלו.'}`, now);
       continue;
     }
     // חנן כבר שלח את הקבלה הזו ידנית (העביר PDF לבוט) בשעות האחרונות: רק מסמנים, לא שולחים שוב
     const manual = await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_doc_id IS NULL AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
       .bind(d.phone, new Date(now.getTime() - 12 * 3600000).toISOString()).first();
     if (manual) { await env.DB.prepare('UPDATE jobs SET invoice_doc_id = ? WHERE id = ?').bind(d.id, manual.id).run(); continue; }
-    await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, now });
+    await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, label: DOC_LABELS[d.type], filename: `${DOC_LABELS[d.type] || 'מסמך'}.pdf`, now });
   }
 }
 

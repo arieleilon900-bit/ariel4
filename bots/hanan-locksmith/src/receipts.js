@@ -7,11 +7,27 @@ import { upsertLead } from './sheets.js';
 import * as wa from './whatsapp.js';
 
 // doc = קישור ל-PDF או מזהה מדיה; docId = מזהה המסמך ביש חשבונית (אם יש), כדי לא לשלוח פעמיים
-export async function deliverReceipt(env, phone, doc, { docId = null, filename = 'קבלה.pdf', now = new Date() } = {}) {
+// מסמך המשך (למשל קבלה אחרי חשבונית מס) על עבודה שכבר קיבלה מסמך בתקופה הזו
+const FOLLOW_UP_DAYS = 120;
+
+export async function deliverReceipt(env, phone, doc, { docId = null, label = '', filename = 'קבלה.pdf', now = new Date() } = {}) {
   const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(phone).first();
+  const caption = label ? `מצורפת ${label} על העבודה. תודה!` : MESSAGES.invoice;
   const r = inServiceWindow(c?.last_inbound_at, now)
-    ? await wa.sendDocument(env, phone, doc, filename, MESSAGES.invoice)
+    ? await wa.sendDocument(env, phone, doc, filename, caption)
     : await wa.sendTemplate(env, phone, TEMPLATES.invoice, [], doc, filename);
+
+  // אין עבודה פתוחה, אבל כבר נשלח ללקוח מסמך לאחרונה: זה מסמך המשך על אותה עבודה
+  const openJob = await env.DB.prepare("SELECT id FROM jobs WHERE phone = ? AND status IN ('open','done') AND invoice_sent_at IS NULL LIMIT 1").bind(phone).first();
+  const recentDoc = !openJob && await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
+    .bind(phone, new Date(now.getTime() - FOLLOW_UP_DAYS * 86400000).toISOString()).first();
+  if (recentDoc) {
+    const t = nowIso(now);
+    await env.DB.prepare("INSERT INTO jobs (phone, status, done_at, created_at, invoice_doc_id, invoice_sent_at, review_sent_at, referral_sent_at, yearly_sent_at) VALUES (?, 'followup_doc', ?, ?, ?, ?, ?, ?, ?)")
+      .bind(phone, t, t, docId, t, t, t, t).run();
+    if (r.ok) await logEvent(env, 'invoice', phone, now);
+    return r;
+  }
 
   let job = await env.DB.prepare("SELECT * FROM jobs WHERE phone = ? AND status IN ('open','done') AND invoice_sent_at IS NULL ORDER BY id DESC LIMIT 1").bind(phone).first();
   if (!job) {

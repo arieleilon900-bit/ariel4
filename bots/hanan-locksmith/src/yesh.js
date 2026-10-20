@@ -48,6 +48,7 @@ export async function fetchNewDocuments(env, now = new Date()) {
     for (const d of data.ReturnValue || []) {
       docs.push({
         id: `${d.DocumentType}-${d.DocumentNumber}`,
+        type: Number(d.DocumentType),
         phone: normalizePhone(d.CustomerPhone),
         pdfUrl: d.pdfUrl && /^https?:\/\/\S+$/.test(d.pdfUrl) ? d.pdfUrl : '',
         customerName: d.CustomerName || '',

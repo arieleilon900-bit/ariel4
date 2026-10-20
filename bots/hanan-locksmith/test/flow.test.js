@@ -1655,3 +1655,35 @@ test('owner app auto-reply (greeting / away) a few seconds after the customer wr
   assert.ok(textsTo(CUSTOMER).includes('יש מישהו בפנים?'), 'bot keeps answering');
   assert.ok(!env.DB.raw.prepare('SELECT known FROM customers WHERE phone = ?').get(CUSTOMER).known);
 });
+
+test('Yesh Invoice: tax invoice now, receipt a month later: both reach the customer with the right name, one job, one review', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk' };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'צריך להחליף צילינדר' } }, 'tx0'), t0);
+  await runEvery15(env, t0); // נקודת התחלה
+
+  // חשבונית מס (8) בסוף העבודה
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 8, DocumentNumber: 500, CustomerPhone: '0541234567', pdfUrl: 'https://yesh.example/500.pdf' }] }];
+  const t1 = new Date(t0.getTime() + 15 * 60000);
+  await runEvery15(env, t1);
+  const first = sent.filter((m) => m.to === CUSTOMER && m.type === 'document');
+  assert.equal(first.length, 1);
+  assert.equal(first[0].document.caption, 'מצורפת חשבונית מס על העבודה. תודה!');
+  assert.equal(first[0].document.filename, 'חשבונית מס.pdf');
+  await runEvery15(env, new Date(t1.getTime() + 20 * 60000));
+  const reviews = () => sent.filter((m) => m.to === CUSTOMER && ((m.text?.body || '').includes('g.page') || m.template?.name === 'review_request_v1')).length;
+  assert.equal(reviews(), 1);
+
+  // קבלה (6) חודש אחרי, כשהלקוח שילם: נשלחת, בלי עוד ביקורת ובלי עבודה נוספת
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 6, DocumentNumber: 77, CustomerPhone: '0541234567', pdfUrl: 'https://yesh.example/r77.pdf' }] }];
+  const t2 = new Date(t1.getTime() + 30 * 86400000);
+  await runEvery15(env, t2);
+  await runEvery15(env, new Date(t2.getTime() + 20 * 60000));
+  const docs = sent.filter((m) => m.to === CUSTOMER && (m.type === 'document' || m.template?.name === 'invoice_v1'));
+  assert.equal(docs.length, 2, 'receipt sent too');
+  assert.equal(reviews(), 1, 'no second review');
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) AS n FROM jobs WHERE status = 'done'").get().n, 1);
+  assert.equal(env.DB.raw.prepare('SELECT jobs_count FROM customers WHERE phone = ?').get(CUSTOMER).jobs_count, 1);
+});
