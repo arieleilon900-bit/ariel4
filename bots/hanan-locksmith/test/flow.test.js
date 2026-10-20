@@ -1551,16 +1551,18 @@ test('prompt caching: the fixed instructions are one cached block that is identi
   assert.equal(sys[1].cache_control, undefined);
 });
 
-test('test email: needs the secret, sends one email to OWNER_EMAIL and reports the result', async () => {
+test('test email: needs the secret, goes to Hanan and to us, with a real buttons link for the test phone', async () => {
   const { default: worker } = await import('../src/index.js');
   const mails = [];
-  const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', OWNER_EMAIL: 'owner@example.com', GMAIL_USER: 'bot@example.com', __mail: async (m) => { mails.push(m); } };
+  const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', OWNER_EMAIL: 'owner@example.com', GMAIL_USER: 'bot@example.com', WORKER_URL: 'https://bot.example', TEST_PHONES: '972533776774', __mail: async (m) => { mails.push(m); } };
   const call = (path) => worker.fetch(new Request(`https://bot.example${path}`, { method: 'POST' }), env, { waitUntil: () => {} });
   assert.equal((await call('/admin/test-email?key=wrong')).status, 403);
   const ok = await (await call('/admin/test-email?key=secret')).text();
   assert.match(ok, /^OK/);
-  assert.equal(mails.length, 1);
-  assert.equal(mails[0].to, 'owner@example.com');
+  assert.deepEqual(mails.map((m) => m.to), ['owner@example.com', 'bot@example.com']);
+  const link = mails[0].html.match(/href="([^"]+)"/)[1].replace(/&amp;/g, '&');
+  assert.match(link, /^https:\/\/bot\.example\/act\?p=972533776774&k=/);
+  assert.equal((await worker.fetch(new Request(link), env, { waitUntil: () => {} })).status, 200, 'the button opens the real page');
   const fail = await (await worker.fetch(new Request('https://bot.example/admin/test-email?key=secret', { method: 'POST' }), { ...makeEnv(), WA_VERIFY_TOKEN: 'secret', OWNER_EMAIL: 'owner@example.com' }, { waitUntil: () => {} })).text();
   assert.match(fail, /^FAIL: email not configured/);
 });

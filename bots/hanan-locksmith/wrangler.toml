@@ -2,6 +2,10 @@ name = "hanan-locksmith-bot"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
+# הכתובת שלנו (קישורים במיילים לחנן): workers.dev נחסם אצל ספקי אינטרנט ובנטפרי.
+# הכתובת הישנה נשארת דלוקה: ה-webhook של Dualhook עדיין שולח אליה
+workers_dev = true
+routes = [{ pattern = "bot.onerishon.com", custom_domain = true }]
 
 # כל 15 דקות: תזכורות, מעקבים, ביקורות. כל יום ראשון 06:00 UTC (09:00 בישראל): דוח שבועי.
 [triggers]
@@ -33,7 +37,7 @@ SUMMARY_SETTLE_MIN = "3"
 # "1" = הודעה מבעל העסק שהיא לא פקודה לא מקבלת תגובה (כשהמספר שלו משמש גם לשיחות רגילות)
 OWNER_QUIET = "1"
 # הכתובת של הבוט (בשביל חיבור אוטומטי של UltraMsg)
-WORKER_URL = "https://hanan-locksmith-bot.eliyabuis12.workers.dev"
+WORKER_URL = "https://bot.onerishon.com"
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
 WABA_ID = "1121041376942376"
 META_APP_ID = ""

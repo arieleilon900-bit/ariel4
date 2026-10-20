@@ -83,16 +83,21 @@ export async function sendOwnerEmail(env, text, { about = null, media = [], now 
 }
 
 // מייל בדיקה (אחרי שמכניסים את סיסמת הג'ימייל): מחזיר בדיוק מה קרה, בלי לשמור לניסיון חוזר
+// מייל בדיקה לחנן וגם לשולח (שלנו), עם כפתור אמיתי לדף "בדרך / תור / סיימתי" של טלפון הבדיקה,
+// כדי לבדוק מהטלפון שהכתובת של הבוט נפתחת (למשל עם סינון כמו נטפרי)
 export async function sendTestEmail(env, now = new Date()) {
-  const mail = {
-    to: env.OWNER_EMAIL,
-    subject: `✅ מייל בדיקה מהבוט של ${BUSINESS.shortName}`,
-    text: `אם המייל הזה הגיע, ההתראות במייל עובדות.\nנשלח מ-${env.GMAIL_USER} אל ${env.OWNER_EMAIL}, ${now.toISOString()}`,
-  };
-  mail.html = `<div dir="rtl" style="font-family:Arial,sans-serif">${mail.text.replace(/\n/g, '<br>')}</div>`;
+  const origin = env.WORKER_URL || '';
+  const testPhone = String(env.TEST_PHONES || '').split(',').map((p) => p.trim()).find((p) => /^\d{11,13}$/.test(p));
+  const href = origin && testPhone ? `${origin}/act?p=${testPhone}&k=${await sign(env, `act:${testPhone}`)}` : origin ? `${origin}/health` : '';
+  const text = `אם המייל הזה הגיע, ההתראות במייל עובדות.${href ? '\nלבדיקה: לחץ על הכפתור. אם נפתח דף, הכפתורים במיילים יעבדו גם אצלך.' : ''}\nנשלח מ-${env.GMAIL_USER} אל ${env.OWNER_EMAIL}, ${now.toISOString()}`;
+  const html = `<div dir="rtl" style="font-family:Arial,sans-serif">${esc(text).replace(/\n/g, '<br>')}${href ? `<p><a href="${href}" style="display:inline-block;margin:4px;padding:12px 18px;border-radius:10px;background:#0b6bcb;color:#fff;text-decoration:none;font-weight:700;font-size:16px">בדרך / תור / סיימתי (בדיקה)</a></p>` : ''}</div>`;
+  const to = [...new Set([env.OWNER_EMAIL, env.GMAIL_USER].filter(Boolean).map((e) => e.toLowerCase()))];
   try {
-    if (env.__mail) await env.__mail(mail); else await smtpSend(env, mail);
-    return `OK: נשלח מייל בדיקה אל ${env.OWNER_EMAIL}`;
+    for (const addr of to) {
+      const mail = { to: addr, subject: `✅ מייל בדיקה מהבוט של ${BUSINESS.shortName}`, text: href ? `${text}\n${href}` : text, html };
+      if (env.__mail) await env.__mail(mail); else await smtpSend(env, mail);
+    }
+    return `OK: נשלח מייל בדיקה אל ${to.join(', ')}`;
   } catch (err) {
     return `FAIL: ${String(err?.message || err).slice(0, 300)}`;
   }
