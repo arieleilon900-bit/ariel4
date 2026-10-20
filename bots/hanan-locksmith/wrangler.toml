@@ -35,16 +35,16 @@ OWNER_QUIET = "1"
 # הכתובת של הבוט (בשביל חיבור אוטומטי של UltraMsg)
 WORKER_URL = "https://hanan-locksmith-bot.eliyabuis12.workers.dev"
 # מזהה חשבון הוואטסאפ העסקי ומזהה האפליקציה ב-Meta (לא סודות). בשביל /admin/setup
-WABA_ID = "648450448049057"
+WABA_ID = "1121041376942376"
 META_APP_ID = ""
 # בבדיקה: המספר של אריאל (052-4666175) דרך Dualhook. ביום החיבור: המספר של חנן
-WA_PHONE_NUMBER_ID = "615198711679818"
+WA_PHONE_NUMBER_ID = "1308345192370593"
 # הטלפון של חנן לקבלת סיכומים ופקודות בוואטסאפ (פורמט בינלאומי, בלי +). ריק = הכל במייל (OWNER_EMAIL)
 OWNER_PHONE = ""
 # התראות לחנן במייל. נשלחות מהג'ימייל של העסק (הסיסמה נכנסת רק כסוד GMAIL_APP_PASSWORD ב-GitHub)
 GMAIL_USER = "eliyabuis12@gmail.com"
 # בזמן הבדיקות הסיכומים מגיעים אלינו. ביום החיבור מחליפים למייל של חנן: Hananlocks@gmail.com
-OWNER_EMAIL = "eliyabuis12@gmail.com"
+OWNER_EMAIL = "Hananlocks@gmail.com"
 # מי מקבל התראה בוואטסאפ כשיש תקלה בבוט. ריק בבדיקה: המספר של אריאל הוא עכשיו המספר של הבוט
 ADMIN_PHONE = ""
 # ID של גיליון הלקוחות בגוגל (ריק = בלי גיליון)
