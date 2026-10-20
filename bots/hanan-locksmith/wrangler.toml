@@ -53,8 +53,8 @@ SHEET_ID = ""
 REVIEW_LINK = "https://g.page/r/CRb_LFlSkhYQEBI/review"
 # שמות התבניות המאושרות ב-WhatsApp Manager (להודעות מחוץ לחלון 24 שעות)
 TEMPLATE_LANG = "he"
-# המוח של הבוט. Haiku זול פי 40 מ-Opus. לחזור ל-Opus: claude-opus-5-5
-CLAUDE_MODEL = "claude-haiku-5-5"
+# המוח של הבוט. Sonnet: חצי מחיר מ-Opus ומדויק. זול יותר: claude-haiku-5-5. הכי חזק: claude-opus-5-5
+CLAUDE_MODEL = "claude-sonnet-5-5"
 
 # סודות (לא כאן! מכניסים עם: wrangler secret put <NAME>)
 # WA_TOKEN            טוקן קבוע של System User ב-Meta
