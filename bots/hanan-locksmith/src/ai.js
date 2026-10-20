@@ -70,7 +70,10 @@ export async function runTurn(env, { history, image = null, now = new Date(), re
     if (response.stop_reason === 'refusal') return fallbackResult('refusal');
     if (response.stop_reason === 'max_tokens') return fallbackResult('max_tokens');
     const text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
-    return { ...normalize(JSON.parse(text)), usage: usageOf(response.usage, model) };
+    const result = normalize(JSON.parse(text));
+    const usage = usageOf(response.usage, model);
+    await ensureHebrew(client, model, result, usage);
+    return { ...result, usage };
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) console.error('Claude rate limited');
     else if (err instanceof Anthropic.APIError) console.error(`Claude API error ${err.status}: ${err.message}`);
@@ -79,3 +82,29 @@ export async function runTurn(env, { history, image = null, now = new Date(), re
   }
 }
 
+
+// חנן קורא עברית: מה שנכתב בשבילו (תקלה, סיכום, שאלה, סיבת דחיפות) חייב להיות בעברית,
+// גם אם הלקוח כתב בשפה אחרת וה-AI שכח לתרגם. בודקים בקוד, ואם צריך מתרגמים בקריאה קצרה נוספת
+const OWNER_FIELDS = ['issue', 'summary_for_owner', 'question_for_owner', 'urgent_reason'];
+export const needsHebrew = (t) => /[A-Za-z\u0400-\u04FF\u0600-\u06FF]{3}/.test(t || '') && !/[\u0590-\u05FF]/.test(t || '');
+const TRANSLATE_SCHEMA = { type: 'object', additionalProperties: false, required: OWNER_FIELDS, properties: Object.fromEntries(OWNER_FIELDS.map((k) => [k, { type: 'string' }])) };
+
+async function ensureHebrew(client, model, result, usage) {
+  const todo = OWNER_FIELDS.filter((k) => needsHebrew(result[k]));
+  if (!todo.length) return;
+  try {
+    const src = Object.fromEntries(OWNER_FIELDS.map((k) => [k, todo.includes(k) ? result[k] : '']));
+    const r = await client.messages.create({
+      model, max_tokens: 2000,
+      system: 'תרגם לעברית פשוטה כל שדה ב-JSON. שמות, כתובות ודגמי רכב נשארים כמו שהם. שדה ריק נשאר ריק.',
+      messages: [{ role: 'user', content: JSON.stringify(src) }],
+      output_config: { effort: 'low', format: { type: 'json_schema', schema: TRANSLATE_SCHEMA } },
+    }, { timeout: 8000 });
+    const out = JSON.parse(r.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
+    for (const k of todo) if (out[k] && !needsHebrew(out[k])) result[k] = String(out[k]);
+    const extra = usageOf(r.usage, model);
+    for (const k of Object.keys(extra)) usage[k] += extra[k];
+  } catch (err) {
+    console.error('owner fields translation failed', err);
+  }
+}

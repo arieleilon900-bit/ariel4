@@ -28,6 +28,7 @@ function makeD1() {
 const sent = [];           // הודעות שנשלחו ב-WhatsApp
 let aiQueue = [];          // תשובות שה-AI "יחזיר" לפי הסדר
 let aiRequests = [];
+const translateRequests = [];
 // ההוראות נשלחות כשני חלקים: קבוע (נשמר בזיכרון הזמני) ומשתנה
 const sysText = (req) => req.system.map((b) => b.text).join('\n');
 let outSeq = 0;
@@ -37,7 +38,16 @@ const sheet = [];        // גיליון הגוגל המדומה
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
   if (url.includes('api.anthropic.com')) {
-    aiRequests.push(JSON.parse(init.body));
+    const req = JSON.parse(init.body);
+    // תרגום שדות לחנן לעברית: לא צורך תשובה מהתור
+    if (String(req.system).startsWith('תרגם לעברית')) {
+      translateRequests.push(req);
+      const src = JSON.parse(req.messages[0].content);
+      const he = Object.fromEntries(Object.entries(src).map(([k, v]) => [k, v ? `בעברית: ${v}` : '']));
+      return new Response(JSON.stringify({ id: 'msg_tr', type: 'message', role: 'assistant', model: 'claude-haiku-5-5', stop_reason: 'end_turn',
+        content: [{ type: 'text', text: JSON.stringify(he) }], usage: { input_tokens: 5, output_tokens: 5 } }), { status: 200, headers: { 'content-type': 'application/json', 'request-id': 'req_tr' } });
+    }
+    aiRequests.push(req);
     const out = aiQueue.shift();
     return new Response(JSON.stringify({
       id: 'msg_test', type: 'message', role: 'assistant', model: 'claude-opus-5-5', stop_reason: 'end_turn',
@@ -1001,6 +1011,13 @@ test('language: an English-speaking customer gets the fixed messages in English;
   const t0 = new Date('2026-10-14T08:00:00Z');
   aiQueue = [ai({ reply: 'Got it, I passed it to Hanan', language: 'en', issue: 'locked out', address: '5 Herzl St Holon', ready_for_handoff: true })];
   await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: "Hi, I'm locked out, 5 Herzl St Holon" } }, 'l1'), t0);
+  // מה שנכתב לחנן תורגם לעברית, והכתובת נשארה כמו שהיא
+  const conv = env.DB.raw.prepare('SELECT issue, address FROM conversations WHERE phone = ? ORDER BY id DESC LIMIT 1').get(CUSTOMER);
+  assert.equal(conv.issue, 'בעברית: locked out');
+  assert.equal(conv.address, '5 Herzl St Holon');
+  assert.equal(translateRequests.length, 1);
+  const { needsHebrew } = await import('../src/ai.js');
+  assert.ok(needsHebrew('Car lockout, Mazda 3') && needsHebrew('Заперт снаружи') && !needsHebrew('ננעל ברכב Mazda 3') && !needsHebrew('') && !needsHebrew('5'));
   await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'בדרך 0541234567 20' } }, 'l3'), t0);
   assert.ok(textsTo(CUSTOMER).some((t) => t.includes('about 20 minutes')));
 
