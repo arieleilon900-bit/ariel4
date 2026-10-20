@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_photo_nudge.sql', '0010_fresh_start.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_photo_nudge.sql', '0010_fresh_start.sql', '0011_reset_test_phone.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -107,7 +107,7 @@ const CUSTOMER = '972541234567';
 function makeEnv() {
   return {
     DB: makeD1(), WA_TOKEN: 't', WA_PHONE_NUMBER_ID: '123', OWNER_PHONE: OWNER, ANTHROPIC_API_KEY: 'k',
-    REVIEW_LINK: 'https://g.page/r/test/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '0', SUMMARY_SETTLE_MIN: '0',
+    REVIEW_LINK: 'https://g.page/r/test/review', TEMPLATE_LANG: 'he', BURST_WAIT_MS: '0', SUMMARY_SETTLE_MIN: '0', ECHO_WAIT_MS: '0',
     AI: { run: async () => ({ text: 'ננעלתי בחוץ ברחוב הרצל' }) },
   };
 }
@@ -1639,4 +1639,17 @@ test('photo nudge: 5 minutes after handoff without a photo the customer is asked
   await processWebhook(env2, inbound(CUSTOMER, { type: 'text', text: { body: 'מפתחות ברכב' } }, 'ph2'), t0);
   await runEvery15(env2, new Date(t0.getTime() + 6 * 60000));
   assert.ok(!textsTo(CUSTOMER).some((t) => t.includes('תמונה או סרטון')), 'no photo nudge for cars');
+});
+
+test('owner app auto-reply (greeting / away) a few seconds after the customer wrote does not silence the bot or mark the customer known', async () => {
+  sent.length = 0; aiRequests = [];
+  const env = makeEnv();
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'אהלן, מה נשמע? במה אפשר לעזור?' }), ai({ reply: 'יש מישהו בפנים?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'au1'), t0);
+  // הודעת הפתיחה של האפליקציה יוצאת 2 שניות אחרי
+  await processWebhook(env, { entry: [{ changes: [{ value: { message_echoes: [{ from: '123', to: CUSTOMER, type: 'text', text: { body: 'שלום, הגעת לחנן המנעולן' } }] } }] }] }, new Date(t0.getTime() + 2000));
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי בחוץ' } }, 'au2'), new Date(t0.getTime() + 60000));
+  assert.ok(textsTo(CUSTOMER).includes('יש מישהו בפנים?'), 'bot keeps answering');
+  assert.ok(!env.DB.raw.prepare('SELECT known FROM customers WHERE phone = ?').get(CUSTOMER).known);
 });

@@ -622,9 +622,24 @@ async function reportAiFailure(env, phone, reason, now) {
 }
 
 // חנן ענה ללקוח מהאפליקציה (Coexistence): הבוט מפסיק לנהל את השיחה הזו
+// הודעה אוטומטית מהאפליקציה של חנן (הודעת פתיחה / היעדרות / מענה מהיר) יוצאת שניות אחרי שהלקוח כתב.
+// אדם לא עונה כל כך מהר, אז הודעה כזו לא נחשבת "חנן ענה": הבוט ממשיך, והלקוח לא הופך ל"מוכר"
+const AUTO_ECHO_MS = 20000;
+
 export async function handleOwnerEcho(env, echo, now = new Date()) {
   const phone = echo.to;
   if (!phone) return;
+  // ההודעה של הלקוח וההודעה האוטומטית מגיעות כמעט יחד: מחכים רגע שההודעה של הלקוח תירשם קודם
+  const waitMs = Number(env.ECHO_WAIT_MS ?? 4000);
+  if (waitMs > 0) await sleep(waitMs);
+  const sentAt = echo.timestamp ? new Date(Number(echo.timestamp) * 1000) : now;
+  const lastIn = (await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(phone).first())?.last_inbound_at;
+  const gap = lastIn ? sentAt.getTime() - new Date(lastIn).getTime() : -1;
+  // ב-UltraMsg (לא רשמי, כבר לא בשימוש) אין הודעות אוטומטיות של האפליקציה דרך החיבור
+  if (!wa.isUltra(env) && gap > 0 && gap < AUTO_ECHO_MS) {
+    console.log('owner app auto-reply ignored', phone);
+    return;
+  }
   const conv = await env.DB.prepare("SELECT * FROM conversations WHERE phone = ? AND state IN ('bot','handoff') ORDER BY id DESC LIMIT 1").bind(phone).first();
   // מי שחנן כתב לו בעצמו, ואין איתו פנייה פתוחה (חבר, ספק, לקוח קבוע): נחשב "מוכר", והבוט לא יפנה אליו.
   // לקוח עם פנייה פתוחה לא הופך ל"מוכר": חנן פשוט לוקח את השיחה הזו
