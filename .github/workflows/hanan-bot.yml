@@ -22,6 +22,10 @@ on:
         description: 'Send one test email to OWNER_EMAIL'
         type: boolean
         default: false
+      run_demos:
+        description: 'Run all demo conversations with the real AI (costs a little; on a normal deploy only the first one runs)'
+        type: boolean
+        default: false
       run_setup:
         description: 'Check the WhatsApp connection and create the message templates (connection day)'
         type: boolean
@@ -129,7 +133,7 @@ jobs:
           curl -s -m 20 "$url/health"
           echo "$out" | grep -q '^OK מסד' && ! echo "$out" | grep -q '^FAIL'
 
-      - name: Demo conversation (real AI, nothing is sent)
+      - name: Demo conversations (real AI, nothing is sent; all of them only with run_demos)
         if: steps.ready.outputs.go == 'true'
         continue-on-error: true
         env:
@@ -139,6 +143,8 @@ jobs:
           key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
           n=$(curl -s -m 20 -G "$url/admin/demo" --data-urlencode "key=$key" --data-urlencode "s=list" || echo 1)
           case "$n" in ''|*[!0-9]*) n=1;; esac
+          # כל ההעלאה הרגילה: רק שיחה אחת לדוגמה (חוסך כסף). כל השיחות רק כשמבקשים
+          [ "${{ github.event.inputs.run_demos }}" = "true" ] || n=1
           for i in $(seq 0 $((n-1))); do
             curl -s -m 120 -G "$url/admin/demo" --data-urlencode "key=$key" --data-urlencode "s=$i"
           done

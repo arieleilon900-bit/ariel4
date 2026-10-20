@@ -18,10 +18,16 @@ function systemBlocks({ stable, live }) {
   return blocks;
 }
 
-// מחיר לפי מיליון טוקנים בדולרים (Opus 5.5): רגיל, כתיבה לזיכרון לשעה (פי 2), קריאה מהזיכרון, תשובה
-const PRICE = { input: 4, write1h: 8, read: 0.2, output: 20 };
+// מחיר לפי מיליון טוקנים בדולרים: רגיל, כתיבה לזיכרון לשעה (פי 2), קריאה מהזיכרון, תשובה
+const PRICES = {
+  opus: { input: 4, write1h: 8, read: 0.2, output: 20 },
+  sonnet: { input: 2, write1h: 4, read: 0.2, output: 10 },
+  haiku: { input: 0.1, write1h: 0.2, read: 0.01, output: 0.5 },
+};
+const priceOf = (model = MODEL) => PRICES[Object.keys(PRICES).find((k) => String(model).includes(k)) || 'opus'];
 
-export function usageOf(u = {}) {
+export function usageOf(u = {}, model = MODEL) {
+  const PRICE = priceOf(model);
   const input = u.input_tokens || 0;
   const write = u.cache_creation_input_tokens || 0;
   const read = u.cache_read_input_tokens || 0;
@@ -49,11 +55,13 @@ export async function runTurn(env, { history, image = null, now = new Date(), re
   }
 
   try {
+    const model = env.CLAUDE_MODEL || MODEL;
+    // מודל גיבוי בצד של Anthropic קיים רק ל-Opus (ל-Haiku אין)
+    const fallback = model.includes('opus') ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' } : {};
     const response = await client.beta.messages.create({
-      model: env.CLAUDE_MODEL || MODEL,
+      model,
       max_tokens: 8000,
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
+      ...fallback,
       system: systemBlocks(buildSystemParts({ now, returningCustomer, profileName, knowledge, afterHandoff })),
       messages,
       // שיחת קבלת פנייה קצרה: חשיבה קלה מספיקה, ועונה מהר יותר
@@ -62,7 +70,7 @@ export async function runTurn(env, { history, image = null, now = new Date(), re
     if (response.stop_reason === 'refusal') return fallbackResult('refusal');
     if (response.stop_reason === 'max_tokens') return fallbackResult('max_tokens');
     const text = response.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
-    return { ...normalize(JSON.parse(text)), usage: usageOf(response.usage) };
+    return { ...normalize(JSON.parse(text)), usage: usageOf(response.usage, model) };
   } catch (err) {
     if (err instanceof Anthropic.RateLimitError) console.error('Claude rate limited');
     else if (err instanceof Anthropic.APIError) console.error(`Claude API error ${err.status}: ${err.message}`);
