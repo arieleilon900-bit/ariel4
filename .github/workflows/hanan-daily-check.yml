@@ -1,0 +1,27 @@
+name: Hanan bot daily check
+
+# בדיקה יומית של הבוט של חנן: לא מעלה כלום ולא שולח כלום לאף אחד, רק קורא את מצב הבוט ומדפיס בלוג.
+# מופעל כל בוקר על ידי Claude (וגם ידנית: Actions ← Hanan bot daily check ← Run workflow)
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bots/hanan-locksmith
+    steps:
+      - uses: actions/checkout@v4
+      - name: Daily report and connection check (nothing is sent)
+        env:
+          WA_VERIFY_TOKEN: ${{ secrets.WA_VERIFY_TOKEN }}
+        run: |
+          url=$(grep -E '^WORKER_URL' wrangler.toml | cut -d'"' -f2)
+          key=$(printf '%s' "$WA_VERIFY_TOKEN" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          echo "===== health ====="
+          curl -s -m 20 "$url/health"; echo
+          echo "===== daily report ====="
+          curl -s -m 60 -G "$url/admin/daily" --data-urlencode "key=$key"; echo
+          echo "===== connection check (read only) ====="
+          curl -s -m 120 -G "$url/admin/setup" --data-urlencode "key=$key" --data-urlencode "check=1"; echo
