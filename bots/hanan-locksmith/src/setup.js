@@ -106,6 +106,11 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
       ok(`Dualhook: המספר ${p.display_phone_number || ''} בשם "${p.verified_name || '?'}" (איכות: ${p.quality_rating || '?'})`);
     });
     ok(`Dualhook: כתובת השרת שמוגדרת אצלם צריכה להיות ${origin}/webhook?key=<DUALHOOK_WEBHOOK_KEY>`);
+    // אנשי הקשר של בעל העסק (מהחיבור): להם הבוט לא עונה. 0 = עוד לא הגיעו, והבוט עלול לענות גם למשפחה ולחברים
+    await step('אנשי קשר', async () => {
+      const n = (await env.DB.prepare('SELECT COUNT(*) AS n FROM customers WHERE known = 1').first())?.n || 0;
+      (n ? ok : warn)(n ? `אנשי קשר: ${n} אנשי קשר שמורים, הבוט לא עונה להם` : 'אנשי קשר: עוד לא הגיעו מהטלפון של בעל העסק. עד שיגיעו, הבוט עלול לענות גם למשפחה ולחברים');
+    });
   } else if (is360(env)) {
     if (!env.D360_API_KEY) bad('360dialog: חסר D360_API_KEY');
     else await step('360dialog webhook', async () => {
