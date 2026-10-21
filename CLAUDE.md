@@ -46,6 +46,6 @@
 ## מצב נוכחי (21/10/2026)
 - **חנן באוויר:** הבוט עונה לכל הלקוחות שלו מ-21/10/2026. הכל בתיק: `automation-agency/clients/hanan-locksmith/client-summary.md`.
 - `wrangler.toml`: `BOT_OFF = "0"`, `TEST_PHONES = ""` (פתוח לכולם), `OWNER_EMAIL = "Hananlocks@gmail.com"`, `CLAUDE_MODEL = "claude-sonnet-5-5"`, `WORKER_URL = "https://bot.onerishon.com"`.
-- בדיקה יומית אוטומטית כל בוקר ב-07:56 (`.github/workflows/hanan-daily-check.yml`), התוצאה נכתבת לאריאל.
+- בדיקה יומית אוטומטית כל בוקר ב-07:56 (`hanan-bot.yml` עם `daily_check`), התוצאה נכתבת לאריאל.
 - חירום: אריאל כותב "תכבה ותעלה" ← `BOT_OFF = "1"`.
 - פתוח: גבייה של 1,500 ₪, אישור נטפרי, 4 תבניות Meta, החלפת המילה הסודית של Dualhook, ביטול החיבור של המספר של אריאל ב-Dualhook.

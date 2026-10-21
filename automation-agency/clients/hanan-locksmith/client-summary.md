@@ -70,7 +70,7 @@
 
 ## 5. איך מטפלים בתקלה
 1. **חירום (הבוט עונה לא טוב):** `BOT_OFF = "1"` ב-`wrangler.toml` ← "תעלה" ← תוך 2 דקות הבוט שותק, וחנן עובד באפליקציה כרגיל.
-2. **לבדוק מצב:** Actions ← **Hanan bot daily check** ← Run workflow. מדפיס: בריאות, דוח 24 שעות, בדיקת חיבור. רץ אוטומטית כל בוקר ב-07:56.
+2. **לבדוק מצב:** Actions ← Deploy Hanan bot ← Run workflow ← לסמן רק `daily_check`. מדפיס: בריאות, דוח 24 שעות, בדיקת חיבור. רץ אוטומטית כל בוקר ב-07:56.
 3. **בדיקה עם ה-AI האמיתי:** Actions ← Deploy Hanan bot ← `run_demos` או `demo_list` (מעלה מחדש את אותו קוד, לכן רק באישור).
 4. **יומן הבוט:** Cloudflare ← hanan-locksmith-bot ← Observability (Workers Logs).
 5. **תקלות שכבר היו ואיך זיהינו אותן:**
