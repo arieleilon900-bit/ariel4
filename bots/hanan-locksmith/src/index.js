@@ -10,6 +10,7 @@ import { ultraToMeta } from './ultramsg.js';
 import { renderTable, tableAction, tableKey } from './table.js';
 import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
+import { dailyReport } from './daily.js';
 import { setWindowAlwaysOpen } from './util.js';
 import { FORM_HTML } from './form-page.js';
 import { BUSINESS } from './config.js';
@@ -105,6 +106,13 @@ export default {
       const which = url.searchParams.get('s');
       if (which === 'list') return new Response(String(DEMOS.length));
       return new Response(await demoConversation(env, Math.max(0, parseInt(which || '0', 10) || 0)), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    }
+
+    // דוח בדיקה יומי (רק עם מילת הסוד). מופעל כל בוקר מ-GitHub Actions, בלי לשלוח כלום לאף אחד
+    if (url.pathname === '/admin/daily' && request.method === 'GET') {
+      const key = (url.searchParams.get('key') || '').trim();
+      if (!env.WA_VERIFY_TOKEN || !safeEqual(key, String(env.WA_VERIFY_TOKEN).trim())) return new Response('forbidden', { status: 403 });
+      return new Response(await dailyReport(env), { headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
 
     // מייל בדיקה לבעל העסק (רק עם מילת הסוד). מופעל ידנית מ-GitHub Actions

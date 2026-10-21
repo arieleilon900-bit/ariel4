@@ -1725,3 +1725,21 @@ test('Yesh Invoice: a document without a phone that Yesh keeps returning is repo
   for (let i = 1; i <= 4; i++) { yeshQueue = noPhone(); await runEvery15(env, new Date(t0.getTime() + i * 15 * 60000)); }
   assert.equal(mails.filter((m) => /לא נשלח/.test(m.text)).length, 1);
 });
+
+test('daily report: needs the secret; counts the last 24 hours and flags customers who got no answer and emails that failed', async () => {
+  const { default: worker } = await import('../src/index.js');
+  const { dailyReport } = await import('../src/daily.js');
+  const env = { ...makeEnv(), WA_VERIFY_TOKEN: 'secret' };
+  const res = await worker.fetch(new Request('https://bot.example/admin/daily?key=wrong'), env, { waitUntil: () => {} });
+  assert.equal(res.status, 403);
+  const now = new Date('2026-10-14T05:00:00Z');
+  aiQueue = [ai({ reply: 'אהלן, מה נשמע?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'היי' } }, 'dr1'), new Date(now.getTime() - 3600000));
+  let r = await dailyReport(env, now);
+  assert.match(r, /ALL OK/);
+  assert.match(r, /לקוחות שכתבו: 1/);
+  env.DB.raw.prepare("INSERT INTO events (type, phone, created_at) VALUES ('owner_email_failed', NULL, ?)").run(new Date(now.getTime() - 600000).toISOString());
+  r = await dailyReport(env, now);
+  assert.match(r, /PROBLEMS: 1/);
+  assert.match(r, /מיילים לחנן שלא יצאו: 1/);
+});

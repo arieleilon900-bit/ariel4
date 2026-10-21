@@ -75,6 +75,8 @@ export async function sendOwnerEmail(env, text, { about = null, media = [], now 
   } catch (err) {
     console.error('owner email failed', err);
   }
+  // לדוח היומי: כמה מיילים יצאו לחנן וכמה נכשלו
+  await env.DB.prepare('INSERT INTO events (type, phone, created_at) VALUES (?, ?, ?)').bind(ok ? 'owner_email' : 'owner_email_failed', about || null, nowIso(now)).run().catch(() => {});
   if (!ok && !retry) {
     await env.DB.prepare('INSERT INTO owner_outbox (text, about, media, created_at, failed) VALUES (?, ?, ?, ?, 1)')
       .bind(text, about, media.length ? JSON.stringify(media) : null, nowIso(now)).run();
