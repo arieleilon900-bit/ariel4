@@ -1714,3 +1714,14 @@ test('Yesh Invoice: Hanan gets "sent successfully"; a duplicate copy of the same
   assert.match(bodies, /נשלחה בהצלחה/);
   assert.doesNotMatch(bodies, /לא נשלח/);
 });
+
+test('Yesh Invoice: a document without a phone that Yesh keeps returning is reported to Hanan only once', async () => {
+  sent.length = 0; yeshRequests = [];
+  const mails = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk', OWNER_PHONE: 'email', OWNER_EMAIL: 'h@example.com', GMAIL_USER: 'b@example.com', GMAIL_APP_PASSWORD: 'x', __mail: async (m) => { mails.push(m); } };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  await runEvery15(env, t0);
+  const noPhone = () => [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 9, DocumentNumber: 950, CustomerName: 'יוסי', CustomerPhone: '', pdfUrl: 'https://yesh.example/950.pdf' }] }];
+  for (let i = 1; i <= 4; i++) { yeshQueue = noPhone(); await runEvery15(env, new Date(t0.getTime() + i * 15 * 60000)); }
+  assert.equal(mails.filter((m) => /לא נשלח/.test(m.text)).length, 1);
+});

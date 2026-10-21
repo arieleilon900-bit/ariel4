@@ -241,7 +241,15 @@ async function invoices(env, now) {
   const fresh = [];
   for (const d of docs) {
     if (!(await env.DB.prepare('SELECT 1 FROM jobs WHERE invoice_doc_id = ?').bind(d.id).first())) fresh.push(d);
+    // מסמך שכבר נשלח בעבר: גם הוא נחשב "הלקוח כבר קיבל"
+    else if (nameKey(d.customerName)) sentNames[nameKey(d.customerName)] = sentNames[nameKey(d.customerName)] || now.getTime();
   }
+  // מסמכים בלי טלפון שכבר הודענו עליהם: יש חשבונית מחזירים את מסמכי היום שוב ושוב, אז מודיעים על כל מסמך רק פעם אחת
+  const notifiedKey = 'yesh_notified_docs';
+  let notified = {};
+  try { notified = JSON.parse((await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(notifiedKey).first())?.value || '{}'); } catch { notified = {}; }
+  const monthAgo = now.getTime() - 30 * 86400000;
+  for (const k of Object.keys(notified)) if (notified[k] < monthAgo) delete notified[k];
   for (const d of fresh.filter((x) => x.phone && x.pdfUrl)) {
     // חנן כבר שלח את הקבלה הזו ידנית (העביר PDF לבוט) בשעות האחרונות: רק מסמנים, לא שולחים שוב
     const manual = await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_doc_id IS NULL AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
@@ -257,11 +265,14 @@ async function invoices(env, now) {
     }
   }
   for (const d of fresh.filter((x) => !x.phone || !x.pdfUrl)) {
+    if (notified[d.id]) continue;
+    notified[d.id] = now.getTime();
     if (!d.customerName || sentNames[nameKey(d.customerName)]) continue;
     // אין טלפון נייד במסמך: חנן שולח בעצמו
     await sendToOwner(env, `המסמך ל-${d.customerName} לא נשלח בוואטסאפ, כי אין בו טלפון נייד. ${ownerByEmail(env) ? 'בפעם הבאה כדאי לרשום בפרטי הלקוח בחשבונית את הנייד שלו, ואז הוא יישלח לו לבד.' : 'אפשר להעביר לי את ה-PDF עם הטלפון שלו.'}`, now);
   }
   await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(sentKey, JSON.stringify(sentNames)).run();
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(notifiedKey, JSON.stringify(notified)).run();
 }
 
 // דוח שבועי ביום ובשעה שבעל העסק בחר (TIMING.weeklyReportAt). פעם אחת בשבוע
