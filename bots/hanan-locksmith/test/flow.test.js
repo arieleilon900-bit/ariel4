@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_photo_nudge.sql', '0010_fresh_start.sql', '0011_reset_test_phone.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_photo_nudge.sql', '0010_fresh_start.sql', '0011_reset_test_phone.sql', '0012_event_detail.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -1742,4 +1742,15 @@ test('daily report: needs the secret; counts the last 24 hours and flags custome
   r = await dailyReport(env, now);
   assert.match(r, /PROBLEMS: 1/);
   assert.match(r, /מיילים לחנן שלא יצאו: 1/);
+});
+
+test('daily report: says why a WhatsApp message was not delivered, in plain Hebrew', async () => {
+  const { dailyReport } = await import('../src/daily.js');
+  const { handleFailedStatus } = await import('../src/handler.js');
+  const env = makeEnv();
+  const now = new Date('2026-10-14T05:00:00Z');
+  await handleFailedStatus(env, { recipient_id: '972541234567', errors: [{ code: 131047, title: 'Re-engagement message' }] }, new Date(now.getTime() - 3600000));
+  const r = await dailyReport(env, now);
+  assert.match(r, /הודעות וואטסאפ שלא נמסרו: 1/);
+  assert.match(r, /\.\.\.4567: הלקוח לא כתב לעסק ב-24 השעות האחרונות/);
 });

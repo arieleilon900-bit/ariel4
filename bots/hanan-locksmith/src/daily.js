@@ -40,7 +40,11 @@ export async function dailyReport(env, now = new Date()) {
   if (stuckSummaries) problems.push(`סיכומים שהיו צריכים לצאת לחנן ותקועים: ${stuckSummaries}`);
   if (unanswered) problems.push(`לקוחות שכתבו ולא קיבלו שום תשובה מהבוט: ${unanswered}`);
   if (aiErrors) problems.push(`תקלות AI (הלקוח קיבל תשובה כללית והועבר לחנן): ${aiErrors}. לבדוק את הקרדיט ב-Anthropic`);
-  if (sendFailed) problems.push(`הודעות וואטסאפ שלא נשלחו: ${sendFailed}`);
+  if (sendFailed) {
+    const rows = (await env.DB.prepare("SELECT detail, phone, COUNT(*) AS n FROM events WHERE type = 'send_failed' AND created_at >= ? GROUP BY detail, phone ORDER BY n DESC LIMIT 6").bind(since).all()).results;
+    const why = rows.map((r) => `${r.n} ל-...${String(r.phone || '').slice(-4)}: ${explainFailure(r.detail)}`).join('; ');
+    problems.push(`הודעות וואטסאפ שלא נמסרו: ${sendFailed} (${why})`);
+  }
   if (yeshErrors) problems.push(`תקלות בחיבור ליש חשבונית: ${yeshErrors}`);
   if (weeklyLate) problems.push('הדוח השבועי לחנן לא יצא בזמן');
 
@@ -56,4 +60,20 @@ export async function dailyReport(env, now = new Date()) {
     `מסמכים מיש חשבונית שנשלחו: ${await ev('invoice')}, בקשות ביקורת: ${await ev('review')}, ספאם שסונן: ${await ev('spam')}`,
     weekly,
   ].join('\n');
+}
+
+// הסברים בעברית לשגיאות הנפוצות של Meta
+const FAILURES = {
+  131047: 'הלקוח לא כתב לעסק ב-24 השעות האחרונות, וצריך תבנית מאושרת של Meta',
+  132001: 'התבנית לא קיימת או עוד לא אושרה ב-Meta',
+  132000: 'מספר המשתנים בתבנית לא תואם',
+  131026: 'המספר לא בוואטסאפ, או שהלקוח חסם',
+  131049: 'Meta עצרה הודעה שיווקית ללקוח הזה (הגבלה של Meta)',
+  131042: 'בעיית תשלום בחשבון ה-WhatsApp ב-Meta',
+  130472: 'הלקוח בניסוי של Meta שמגביל הודעות שיווקיות',
+  131051: 'סוג הודעה שלא נתמך',
+};
+function explainFailure(detail) {
+  const code = Number(String(detail || '').split(' ')[0]);
+  return FAILURES[code] ? `${FAILURES[code]} (${code})` : (detail || 'סיבה לא ידועה');
 }

@@ -605,7 +605,8 @@ async function imageForAi(env, mediaId) {
 export async function handleFailedStatus(env, st, now = new Date()) {
   const err = st.errors?.[0] || {};
   console.error('message not delivered', st.recipient_id, err.code, err.title);
-  await logEvent(env, 'send_failed', st.recipient_id, now);
+  await env.DB.prepare('INSERT INTO events (type, phone, created_at, detail) VALUES (?, ?, ?, ?)')
+    .bind('send_failed', st.recipient_id || null, nowIso(now), `${err.code || ''} ${err.title || err.message || ''}`.trim().slice(0, 200)).run();
   await adminAlert(env, `הודעה ל-${displayPhone(st.recipient_id)} לא נמסרה (${err.code || ''} ${err.title || ''}).`.replace(/\s+\)/, ')'), now);
 }
 
