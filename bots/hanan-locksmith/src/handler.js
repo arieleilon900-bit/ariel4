@@ -488,7 +488,10 @@ const updatedIssue = (conv, result) => result.issue || conv.issue || '';
 
 // אותה שאלה בניסוח קצת אחר ("כמה עולה צילינדר?" / "שואל על מחיר צילינדר") נחשבת כפולה
 const words = (t) => new Set(String(t).replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter((w) => w.length > 1));
+// נושאים שחוזרים בניסוחים שונים (בעיקר מחיר): אותו נושא = אותה שאלה
+const TOPICS = [/מחיר|כמה (זה )?עול|עלות|הצעת מחיר|₪|שקל/];
 export function sameQuestion(a, b) {
+  if (TOPICS.some((t) => t.test(a || '') && t.test(b || ''))) return true;
   const A = words(a), B = words(b);
   if (!A.size || !B.size) return false;
   let both = 0;
