@@ -1,0 +1,11 @@
+import { chromium } from '/opt/node-tools/node_modules/playwright/index.mjs';
+import fs from 'fs';
+const [,, src, out, biz, owner, sender, phone, date] = process.argv;
+let h = fs.readFileSync(src,'utf8').replaceAll('__BIZ__',biz).replaceAll('__OWNER__',owner).replaceAll('__SENDER__',sender).replaceAll('__PHONE__',phone).replaceAll('__DATE__',date);
+fs.writeFileSync('prop_render.html', h);
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }).catch(() => chromium.launch());
+const p = await b.newPage();
+await p.goto('file://' + process.cwd() + '/prop_render.html', { waitUntil: 'networkidle' }).catch(()=>{});
+await p.waitForTimeout(800);
+await p.pdf({ path: out, format: 'A4', printBackground: true, margin: {top:0,bottom:0,left:0,right:0} });
+await b.close();
