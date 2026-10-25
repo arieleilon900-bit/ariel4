@@ -85,6 +85,19 @@ th{font-family:Rubik;font-weight:700;background:var(--soft)}
 .next div{flex:1;background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13.5px}
 .next b{font-family:Rubik;font-weight:900;font-size:18px;display:block}
 .sign{margin-top:14px;font-size:14px}
+
+.stack td{padding:7px 10px}.stack td:last-child{font-family:Rubik;font-weight:700;text-align:left;white-space:nowrap;color:var(--muted)}
+.stack tr.tot td{border-top:2px solid var(--ink);font-size:15.5px;color:var(--ink)}
+.offerbox{background:var(--y);border:2px solid var(--ink);border-radius:16px;padding:12px 18px;margin-top:10px;box-shadow:6px 6px 0 var(--ink)}
+.offerbox h3{font-size:20px;font-weight:900}
+.offerbox .line{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(0,0,0,.15);padding:8px 0;gap:12px}
+.offerbox .line:last-child{border-bottom:0}
+.offerbox .line b{font-family:Rubik;font-weight:900;font-size:22px;white-space:nowrap}
+.offerbox .line span{font-size:14.5px}
+.offerbox small{display:block;font-size:12.5px;color:#4a4300}
+.why{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+.why div{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13.5px}
+.why b{font-family:Rubik;font-weight:700;display:block;font-size:15px}
 </style></head><body>
 
 <!-- 1 cover -->
@@ -203,45 +216,56 @@ th{font-family:Rubik;font-weight:700;background:var(--soft)}
   <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>4</span></div>
 </section>
 
-<!-- 5 faq + price -->
+<!-- 5 faq -->
 <section class="page">
   <h2><span class="n">6</span>שאלות נפוצות</h2>
   <div class="faq">
-    <h3>הלקוחות ירגישו שזה רובוט?</h3><p>היא כותבת בסגנון שלך, קצר ואנושי, בשם העסק. מי ששואל ישירות "אתה בוט?" מקבל תשובה כנה.</p>
-    <h3>יחסמו לי את הוואטסאפ?</h3><p>לא. מתחברים רק בדרך הרשמית של Meta (החברה של וואטסאפ). המספר והאפליקציה נשארים שלך.</p>
-    <h3>אני צריך להבין בטכנולוגיה?</h3><p>לא. אנחנו מחברים הכל בשיחה של חצי שעה, גם מרחוק. אתה ממשיך לענות ללקוחות כמו היום.</p>
+    <h3>הלקוחות ירגישו שזה רובוט?</h3><p>היא כותבת בסגנון שלך, קצר ואנושי, בשם העסק. מי ששואל ישירות "אתה בוט?" מקבל תשובה כנה. אצל המנעולן שלנו הלקוחות פשוט שמחים שענו להם מיד.</p>
+    <h3>יחסמו לי את הוואטסאפ?</h3><p>לא. מתחברים רק בדרך הרשמית של Meta (החברה של וואטסאפ). המספר והאפליקציה נשארים שלך, ואתה ממשיך לעבוד מהם כרגיל.</p>
+    <h3>אני צריך להבין בטכנולוגיה?</h3><p>לא. אנחנו מחברים הכל בשיחה קצרה, גם מרחוק. אתה ממשיך לענות ללקוחות כמו היום, רק שאף אחד לא מחכה.</p>
     <h3>מה אם אני רוצה לענות בעצמי?</h3><p>עונים כרגיל מהטלפון. ברגע שענית ללקוח, היא יוצאת מהשיחה איתו.</p>
+    <h3>היא תיתן ללקוח מחיר לא נכון?</h3><p>היא לא נותנת מחירים בכלל. כל שאלה על מחיר מגיעה אליך, כתובה בראש ההודעה.</p>
+    <h3>ואם זה לא מתאים לי?</h3><p>שולחים הודעה אחת ומפרקים. אין חוזה ואין התחייבות. וב-30 הימים הראשונים זה גם לא עולה לך כלום (ראה בעמוד הבא).</p>
   </div>
 
-  <h2 style="margin-top:18px"><span class="n">7</span>הצעת המחיר</h2>
-  <div class="price">
-    <div class="plan hot"><span class="tagx">מחיר מייסדים · 3 הראשונים</span>
-      <h3>מחיר מייסדים</h3>
-      <div class="amt">1,500 ₪ <small>הקמה, חד-פעמי</small></div>
-      <div class="was">במקום 2,500 ₪</div>
-      <div class="amt" style="font-size:26px">490 ₪ <small>לחודש, נעול לשנה</small></div>
-      <div class="was">במקום 590 ₪</div>
-      <p style="margin-top:6px"><b>החודש הראשון חינם.</b></p>
-    </div>
-    <div class="plan">
-      <h3>מה כלול</h3>
-      <p>חיבור למספר שלך והגדרה לפי העסק שלך</p>
-      <p>התאמה לסגנון הכתיבה שלך</p>
-      <p>כל העלויות של השרת וה-AI</p>
-      <p>תחזוקה ושינויים קטנים כל חודש</p>
-      <p>מענה אישי אם משהו לא ברור</p>
-      <p style="color:var(--muted);font-size:12.5px">בלי מע"מ (עוסק פטור). בלי התחייבות: עוזבים בהודעה אחת.</p>
-    </div>
+  <h2 style="margin-top:20px">למה דווקא עכשיו</h2>
+  <div class="why">
+    <div><b>החורף מתחיל</b>סתימות, דודים ונזילות. העונה שבה הכי הרבה לקוחות כותבים, והכי הרבה הולכים לאיבוד.</div>
+    <div><b>מקום אחד לאזור</b>אנחנו לוקחים אינסטלטור אחד בכל אזור, כדי שלא נעבוד בשביל המתחרה שלך.</div>
+    <div><b>כל יום בלי זה עולה כסף</b>כל לקוח שלא קיבל תשובה היום כבר הזמין מישהו אחר.</div>
   </div>
-  <div class="guar"><h3>ההבטחה שלנו</h3><p>אם אחרי 30 יום לא ראית לפחות עבודה אחת שהייתה הולכת לאיבוד, מפרקים הכל ואתה לא משלם שקל. לא על ההקמה ולא על החודש.</p></div>
-
-  <h2 style="margin-top:18px"><span class="n">8</span>איך מתחילים</h2>
-  <div class="next">
-    <div><b>1.</b>אומרים "כן" בוואטסאפ</div>
-    <div><b>2.</b>ממלאים טופס קצר על העסק (5 דקות)</div>
-    <div><b>3.</b>שיחת חיבור של חצי שעה, ומאותו רגע זה עובד</div>
-  </div>
-  <p class="sign">ההצעה בתוקף 14 יום.<br><b>__SENDER__</b> · עונה ראשון · __PHONE__</p>
   <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>5</span></div>
+</section>
+
+<!-- 6 price -->
+<section class="page">
+  <h2><span class="n">7</span>הצעת המחיר</h2>
+  <p class="lead">קודם מה זה שווה, אחר כך כמה זה עולה לך.</p>
+  <table class="stack">
+    <tr><td>מזכירה שעונה לכל לקוח 24 שעות, 7 ימים בשבוע (מזכירה אמיתית עולה 6,000 ₪ בחודש ויותר, ולא עובדת בלילה)</td><td>6,000 ₪ לחודש</td></tr>
+    <tr><td>כל לקוח שנשאר אצלך במקום ללכת לאחר (לפי עבודה אחת בשבוע)</td><td>2,000 ₪ לחודש</td></tr>
+    <tr><td>12 שעות בחודש שחוזרות אליך במקום שאלות בטלפון</td><td>12 שעות</td></tr>
+    <tr><td>ביקורות בגוגל שמגיעות לבד אחרי כל עבודה, ושיחות חדשות בלי לשלם על פרסום</td><td>לא נמדד בכסף</td></tr>
+    <tr class="tot"><td>מה זה עולה לך</td><td>490 ₪ לחודש</td></tr>
+  </table>
+
+  <div class="offerbox">
+    <h3>ההצעה ל__OWNER__</h3>
+    <div class="line"><span><b style="font-size:16px">30 יום ראשונים: 0 ₪</b><small>מחברים, אתה רואה בעצמך כמה לקוחות נענו, ורק אז מחליט.</small></span><b>0 ₪</b></div>
+    <div class="line"><span>הקמה והתאמה לעסק שלך<small>משלמים רק אחרי 30 יום, ורק אם החלטת להמשיך. אפשר ב-3 תשלומים של 834 ₪.</small></span><b>2,500 ₪</b></div>
+    <div class="line"><span>מנוי חודשי, נעול לשנה<small>כולל שרת, AI, תחזוקה ושינויים קטנים. בלי מע"מ (עוסק פטור).</small></span><b>490 ₪</b></div>
+    <div class="line"><span>בונוס: מלמדים אותה את התשובות שלך<small>אחריות, אזורים, תשלום, שעות. היא עונה עליהן לבד בדיוק כמו שאתה היית עונה.</small></span><b>מתנה</b></div>
+  </div>
+
+  <div class="guar"><h3>ההבטחה שלנו: אין לך מה להפסיד</h3><p>אם אחרי 30 יום לא ראית בעצמך לפחות עבודה אחת שהייתה הולכת לאיבוד, מפרקים הכל ואתה לא משלם שקל. לא על ההקמה ולא על החודש. את כל הסיכון לוקחים אנחנו.</p></div>
+
+  <h2 style="margin-top:12px"><span class="n">8</span>איך מתחילים</h2>
+  <div class="next">
+    <div><b>1.</b>עונים "כן" להודעה הזו</div>
+    <div><b>2.</b>ממלאים טופס קצר על העסק (5 דקות)</div>
+    <div><b>3.</b>שיחת חיבור קצרה, ומאותו רגע אף לקוח לא מחכה</div>
+  </div>
+  <p class="sign">ההצעה בתוקף 7 ימים, כי יש לנו מקום לאינסטלטור אחד בכל אזור.<br><b>__SENDER__</b> · עונה ראשון · לשאלות פשוט ענה להודעה הזו</p>
+  <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>6</span></div>
 </section>
 </body></html>
