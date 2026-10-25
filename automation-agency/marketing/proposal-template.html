@@ -48,6 +48,17 @@ tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
 .box table{margin:0}
 .sig{margin-top:22px;line-height:1.5}
 .sig b{font-size:16px}
+
+.call{background:#f2f5f8;border-right:4px solid var(--acc);padding:10px 14px;margin:10px 0}
+.call h3{font-size:16px;font-weight:800;margin-bottom:6px}
+.nums{display:flex;gap:28px;margin:6px 0 4px}
+.nums div{font-size:13.5px;line-height:1.3}
+.nums b{display:block;font-size:30px;font-weight:800;color:var(--acc);line-height:1.1}
+.save{display:flex;gap:12px;margin:10px 0}
+.save div{flex:1;border:1px solid var(--line);padding:10px 12px;font-size:13.5px}
+.save b{display:block;font-size:22px;font-weight:800}
+s.old{color:#999;font-weight:400;margin-left:6px}
+.green{color:#1b6e3a}
 </style></head><body>
 
 <section class="page">
@@ -64,15 +75,21 @@ tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
 
   <h2>מה אנחנו עושים</h2>
   <p>אנחנו מחברים למספר הוואטסאפ שלך מענה אוטומטי שעונה ללקוחות שלך תוך שניות, בשם העסק ובסגנון שלך. הוא שואל מה קרה, מבקש תמונה וכתובת, ושולח לך את כל הפרטים בהודעה אחת מסודרת. אתה רק מתקשר וסוגר את העבודה.</p>
+  <div class="call"><h3>בשורה התחתונה, מה זה נותן לך</h3>
+    <div class="save" style="margin:4px 0 0">
+      <div><b class="green">כ-2,000 ₪</b>בחודש של עבודות שלא הולכות יותר לאינסטלטור אחר</div>
+      <div><b class="green">כ-12 שעות</b>בחודש שאתה לא מבזבז על שאלות בטלפון</div>
+      <div><b class="green">יותר ביקורות</b>בגוגל, ויותר שיחות חדשות בלי לשלם על פרסום</div>
+    </div>
+  </div>
 
   <h2>איך זה עובד ביום-יום</h2>
   <ol>
     <li>לקוח כותב למספר הרגיל שלך. לא צריך מספר חדש או אפליקציה חדשה.</li>
     <li>הוא מקבל תשובה תוך שניות, גם בערב ובשבת. מחוץ לשעות העבודה שלך הוא מקבל הודעה מתי תחזור אליו.</li>
     <li>אתה מקבל הודעה אחת עם שם, טלפון, הבעיה, כתובת עם קישור לוויז, והתמונות. מקרה דחוף כמו הצפה מגיע אליך מיד.</li>
-    <li>ברגע שאתה עונה ללקוח בעצמך, המענה האוטומטי יוצא מהשיחה. למשפחה, לחברים ולספקים שלך הוא לא עונה בכלל.</li>
+    <li>ברגע שאתה עונה ללקוח בעצמך, המענה האוטומטי יוצא מהשיחה. למשפחה, לחברים ולספקים שלך הוא לא עונה בכלל. ומחירים הוא לא נותן אף פעם, כל שאלה על מחיר מגיעה אליך.</li>
   </ol>
-  <p>מחירים הוא לא נותן אף פעם. כל שאלה על מחיר מגיעה אליך.</p>
   <div class="foot"><span>עונה ראשון · 052-4666175</span><span>1</span></div>
 </section>
 
@@ -124,8 +141,15 @@ tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
 
 <section class="page">
   <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
-  <h2 style="margin-top:0">זה כבר עובד</h2>
-  <p>המערכת עובדת אצל מנעולן בנתניה. ב-4 הימים הראשונים היא ענתה ל-19 פניות חדשות, שלחה 11 חשבוניות ללקוחות ושלחה 6 בקשות לביקורת בגוגל, בלי שהוא היה צריך לעשות משהו.</p>
+  <h2 style="margin-top:0">זה כבר עובד אצל בעלי מקצוע</h2>
+  <div class="call"><h3>מנעולן בנתניה, 4 הימים הראשונים אחרי החיבור:</h3>
+    <div class="nums">
+      <div><b>19</b>פניות חדשות קיבלו תשובה תוך שניות</div>
+      <div><b>11</b>חשבוניות נשלחו ללקוחות לבד</div>
+      <div><b>6</b>בקשות לביקורת בגוגל יצאו</div>
+    </div>
+    <p style="margin:6px 0 0;font-size:13.5px">וכל זה בלי שהוא היה צריך לעשות שום דבר חוץ מלהגיע לעבודות.</p>
+  </div>
 
   <h2>החשבון</h2>
   <p>דוגמה עם מספרים זהירים. כדאי לשים במקום את המספרים שלך:</p>
@@ -158,10 +182,11 @@ tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
     <table>
       <tr><td>30 הימים הראשונים</td><td>ללא תשלום</td></tr>
       <tr><td>הקמה והתאמה לעסק שלך (חד-פעמי)<br><span style="color:var(--muted);font-size:13px">משולם רק אחרי 30 יום, ורק אם החלטת להמשיך. אפשר ב-3 תשלומים של 834 ₪.</span></td><td>2,500 ₪</td></tr>
-      <tr><td>מנוי חודשי, מחיר נעול לשנה<br><span style="color:var(--muted);font-size:13px">כולל שרת, תחזוקה ושינויים קטנים.</span></td><td>490 ₪</td></tr>
+      <tr><td>מנוי חודשי, מחיר נעול לשנה<br><span style="color:var(--muted);font-size:13px">כולל שרת, תחזוקה ושינויים קטנים. מחיר מיוחד לאינסטלטורים הראשונים.</span></td><td><s class="old">590 ₪</s> 490 ₪</td></tr>
       <tr><td>לימוד התשובות שלך (אחריות, אזורים, תשלום, שעות), כדי שהלקוחות יקבלו בדיוק את מה שאתה היית עונה</td><td>ללא תוספת</td></tr>
     </table>
   </div>
+  <p style="font-weight:700" class="green">החיסכון שלך: 1,200 ₪ בשנה על המנוי, ו-30 יום ראשונים בלי לשלם שקל.</p>
   <p style="font-size:13.5px;color:var(--muted)">המחירים ללא מע"מ (עוסק פטור). אין התחייבות, אפשר להפסיק בכל חודש.</p>
 
   <h2>ההתחייבות שלנו</h2>
