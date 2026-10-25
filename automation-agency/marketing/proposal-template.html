@@ -1,271 +1,188 @@
 <!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>הצעה ל__BIZ__</title>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;900&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--y:#FFD60A;--ink:#111418;--muted:#5b6670;--line:#e3e6ea;--soft:#f6f7f8;--wa:#25D366;--wadark:#075E54;--bubble:#DCF8C6}
 @page{size:A4;margin:0}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Heebo,Arial,sans-serif;color:var(--ink);font-size:14.5px;line-height:1.55}
-.page{width:210mm;height:297mm;padding:18mm 17mm 16mm;position:relative;page-break-after:always;overflow:hidden}
+:root{--ink:#1c1c1c;--muted:#666;--line:#d9d9d9;--acc:#1f4e79}
+body{font-family:Assistant,Arial,sans-serif;color:var(--ink);font-size:15px;line-height:1.6}
+.page{width:210mm;height:297mm;padding:20mm 22mm 18mm;position:relative;page-break-after:always;overflow:hidden}
 .page:last-child{page-break-after:auto}
-h1,h2,h3{font-family:Rubik,Arial,sans-serif}
-h2{font-size:25px;font-weight:900;margin-bottom:6px;letter-spacing:-.3px}
-h2 .n{display:inline-block;background:var(--ink);color:var(--y);border-radius:8px;padding:0 9px;margin-left:8px;font-size:20px;vertical-align:3px}
-.lead{font-size:16px;color:var(--muted);margin-bottom:14px;max-width:150mm}
-p{margin:6px 0}
-.foot{position:absolute;bottom:9mm;left:17mm;right:17mm;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:6px}
-/* cover */
-.cover{background:var(--y)}
-.cover .brand{font-family:Rubik;font-weight:900;font-size:20px;display:flex;align-items:center;gap:10px}
-.cover .brand span{background:var(--ink);color:var(--y);border-radius:10px;padding:4px 12px}
-.cover h1{font-size:50px;font-weight:900;line-height:1.05;margin-top:42mm;letter-spacing:-1px}
-.cover h1 em{font-style:normal;background:var(--ink);color:var(--y);padding:0 10px;border-radius:10px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.cover .for{font-size:20px;margin-top:16px;font-weight:500}
-.cover .for b{font-family:Rubik;font-weight:900}
-.cover .toc{position:absolute;bottom:22mm;right:17mm;left:17mm;display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;font-size:14px;font-weight:500}
-.cover .toc div{border-top:2px solid var(--ink);padding-top:6px}
-.cover .meta{position:absolute;top:18mm;left:17mm;font-size:12.5px;text-align:left}
-/* blocks */
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.card{background:var(--soft);border-radius:12px;padding:12px 14px}
-.card h3{font-size:16px;font-weight:700;margin-bottom:3px}
-.big{font-family:Rubik;font-weight:900;font-size:34px;line-height:1}
-.steps{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-.step{display:flex;gap:14px;align-items:flex-start}
-.step .k{flex:none;width:38px;height:38px;border-radius:10px;background:var(--y);display:grid;place-items:center;font-family:Rubik;font-weight:900;font-size:19px;border:2px solid var(--ink)}
-.step h3{font-size:16.5px;font-weight:700}
-.step p{margin:2px 0 0;color:#333}
+header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:26px}
+header .logo{font-weight:800;font-size:19px;letter-spacing:.2px}
+header .logo small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+header .d{font-size:12.5px;color:var(--muted);text-align:left}
+h1{font-size:23px;font-weight:800;margin:14px 0 14px;line-height:1.3}
+h2{font-size:18px;font-weight:700;margin:22px 0 6px;color:var(--acc)}
+p{margin:0 0 10px}
+.to{font-size:14.5px;line-height:1.5}
+ol,ul{margin:4px 22px 10px 0}
+li{margin:4px 0}
+.foot{position:absolute;bottom:10mm;right:22mm;left:22mm;font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
 /* chat */
-.demo{display:flex;gap:14px;margin-top:8px}
-.phone{flex:1.15;background:#ECE5DD;border:6px solid var(--ink);border-radius:26px;overflow:hidden}
-.bar{background:var(--wadark);color:#fff;padding:9px 12px;font-family:Rubik;font-weight:700;font-size:13.5px}
-.bar small{display:block;font-family:Heebo;font-weight:400;font-size:11px;opacity:.85}
-.chat{padding:9px 9px 11px;display:flex;flex-direction:column;gap:6px}
-.m{max-width:86%;padding:6px 9px 15px;border-radius:9px;font-size:12px;line-height:1.35;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.1)}
-.m i{position:absolute;bottom:2px;left:7px;font-size:9.5px;color:#6b7b85;font-style:normal}
+.demo{display:flex;gap:22px;align-items:flex-start;margin-top:10px}
+.phone{width:78mm;flex:none;border:1px solid #bbb;border-radius:18px;overflow:hidden;background:#efeae2}
+.bar{background:#f6f6f6;border-bottom:1px solid #ddd;padding:8px 10px;display:flex;align-items:center;gap:8px;font-size:13px}
+.bar .av{width:28px;height:28px;border-radius:50%;background:#c8d6e5;display:grid;place-items:center;font-weight:700;font-size:13px;color:#30475e}
+.bar b{display:block;font-size:13.5px}
+.bar small{color:#888;font-size:10.5px}
+.chat{padding:10px 8px 12px;display:flex;flex-direction:column;gap:5px}
+.day{align-self:center;background:#fff;color:#777;font-size:10px;padding:2px 8px;border-radius:6px;margin-bottom:3px}
+.m{max-width:85%;padding:5px 8px 14px;border-radius:7px;font-size:11.8px;line-height:1.35;position:relative}
+.m i{position:absolute;bottom:2px;left:6px;font-size:9px;color:#8a8a8a;font-style:normal}
 .in{background:#fff;align-self:flex-start}
-.out{background:var(--bubble);align-self:flex-end}
-.note{align-self:center;background:#FFF5C4;font-size:10.5px;padding:3px 8px;border-radius:6px;color:#5a4b00}
-.mail{flex:1;border:2px solid var(--ink);border-radius:14px;overflow:hidden;background:#fff;align-self:flex-start}
-.mail .h{background:var(--ink);color:#fff;padding:8px 12px;font-size:12px}
-.mail .h b{font-family:Rubik;color:var(--y);font-size:14px;display:block}
-.mail .b{padding:10px 12px;font-size:12px;line-height:1.5}
-.mail .row{display:flex;gap:6px;border-bottom:1px solid var(--line);padding:4px 0}
-.mail .row span:first-child{color:var(--muted);min-width:46px}
-.btn{display:inline-block;border-radius:8px;padding:6px 10px;font-weight:700;font-size:11.5px;margin:8px 0 0 6px}
-.btn.g{background:var(--wa);color:#fff}.btn.b{background:#1a73e8;color:#fff}
-.cap{font-size:12px;color:var(--muted);margin-top:8px}
-/* list */
-ul.check{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:8px}
-ul.check li{padding-right:24px;position:relative}
-ul.check li::before{content:"✓";position:absolute;right:0;top:0;width:18px;height:18px;border-radius:5px;background:var(--y);border:1.5px solid var(--ink);font-size:12px;font-weight:900;display:grid;place-items:center;line-height:1}
-ul.check b{font-family:Rubik;font-weight:700}
-.proof{background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;margin-top:14px}
-.proof .grid{display:flex;gap:26px;margin-top:8px}
-.proof .grid .big{color:var(--y)}
-.proof .grid div div:last-child{font-size:12.5px}
-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
-td,th{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
-th{font-family:Rubik;font-weight:700;background:var(--soft)}
-.calc td:last-child{font-family:Rubik;font-weight:700;text-align:left;white-space:nowrap}
-.calc tr.tot td{border-top:2px solid var(--ink);font-size:16px}
-.faq h3{font-size:15px;font-weight:700;margin-top:10px}
-.faq p{margin:2px 0 0;color:#333}
-/* price */
-.price{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
-.plan{border:2px solid var(--line);border-radius:14px;padding:14px 16px}
-.plan.hot{border-color:var(--ink);background:var(--y);position:relative}
-.plan .tagx{position:absolute;top:-12px;left:14px;background:var(--ink);color:var(--y);font-family:Rubik;font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px}
-.plan h3{font-size:17px;font-weight:900}
-.plan .amt{font-family:Rubik;font-weight:900;font-size:30px;margin-top:6px;line-height:1.1}
-.plan .amt small{font-size:14px;font-weight:500}
-.plan .was{text-decoration:line-through;color:var(--muted);font-size:14px}
-.guar{border:2px dashed var(--ink);border-radius:14px;padding:12px 16px;margin-top:14px}
-.guar h3{font-size:17px;font-weight:900}
-.next{display:flex;gap:10px;margin-top:10px}
-.next div{flex:1;background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13.5px}
-.next b{font-family:Rubik;font-weight:900;font-size:18px;display:block}
-.sign{margin-top:14px;font-size:14px}
-
-.stack td{padding:7px 10px}.stack td:last-child{font-family:Rubik;font-weight:700;text-align:left;white-space:nowrap;color:var(--muted)}
-.stack tr.tot td{border-top:2px solid var(--ink);font-size:15.5px;color:var(--ink)}
-.offerbox{background:var(--y);border:2px solid var(--ink);border-radius:16px;padding:12px 18px;margin-top:10px;box-shadow:6px 6px 0 var(--ink)}
-.offerbox h3{font-size:20px;font-weight:900}
-.offerbox .line{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(0,0,0,.15);padding:8px 0;gap:12px}
-.offerbox .line:last-child{border-bottom:0}
-.offerbox .line b{font-family:Rubik;font-weight:900;font-size:22px;white-space:nowrap}
-.offerbox .line span{font-size:14.5px}
-.offerbox small{display:block;font-size:12.5px;color:#4a4300}
-.why{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
-.why div{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13.5px}
-.why b{font-family:Rubik;font-weight:700;display:block;font-size:15px}
+.out{background:#d9fdd3;align-self:flex-end}
+.photo{width:120px;height:80px;border-radius:5px;background:linear-gradient(135deg,#cfc6b8,#a99d8b);margin-bottom:2px}
+.side{flex:1}
+.side h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.msg{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.55;background:#fafafa}
+.msg div{display:flex;gap:8px}
+.msg span:first-child{color:var(--muted);min-width:48px}
+.side p{font-size:13.5px;margin-top:10px}
+table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:14.5px}
+td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:left;white-space:nowrap;font-weight:600}
+tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
+.faq p{margin-bottom:8px}
+.faq b{display:block}
+.box{border:1px solid var(--ink);padding:12px 16px;margin:12px 0}
+.box table{margin:0}
+.sig{margin-top:22px;line-height:1.5}
+.sig b{font-size:16px}
 </style></head><body>
 
-<!-- 1 cover -->
-<section class="page cover">
-  <div class="brand"><span>עונה ראשון</span> מזכירה בוואטסאפ לבעלי מקצוע</div>
-  <div class="meta">__DATE__<br>הצעה אישית</div>
-  <h1>אף לקוח שכותב לך<br><em>לא הולך יותר לאינסטלטור אחר.</em></h1>
-  <p class="for">הצעה ל<b>__BIZ__</b>: מזכירה בוואטסאפ שעונה לכל לקוח תוך שניות, בשמך, ושולחת לך את כל הפרטים מוכנים.</p>
-  <div class="toc">
-    <div>1. מה קורה היום</div><div>2. איך זה עובד</div>
-    <div>3. ככה זה נראה בפועל</div><div>4. מה אתה מקבל</div>
-    <div>5. החשבון</div><div>6. שאלות נפוצות</div>
-    <div>7. הצעת המחיר</div><div>8. איך מתחילים</div>
-  </div>
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">__DATE__</div></header>
+  <div class="to">לכבוד<br>__OWNER__, __BIZ__</div>
+  <h1>הנדון: הצעה למענה אוטומטי ללקוחות בוואטסאפ</h1>
+
+  <p>שלום __OWNER__,</p>
+  <p>תודה על השיחה. כמו שסיכמנו, אני שולח לך הסבר מסודר: מה זה, איך זה עובד אצלך ביום-יום, דוגמה לשיחה, ובסוף המחיר.</p>
+
+  <h2>מה הבעיה שזה פותר</h2>
+  <p>רוב העבודות שלך מתחילות בהודעה בוואטסאפ. הבעיה היא שהן מגיעות בדיוק כשאתה מתחת לכיור, בנסיעה, או אצל לקוח אחר. לקוח שלא מקבל תשובה תוך כמה דקות שולח הודעה לעוד אינסטלטור או שניים, והראשון שעונה מקבל את העבודה.</p>
+  <p>גם כשאתה כן מספיק לענות, כל פנייה זה כמה הודעות הלוך וחזור: מה קרה, איפה אתה גר, תשלח תמונה. וזה בדרך כלל באמצע עבודה אחרת.</p>
+
+  <h2>מה אנחנו עושים</h2>
+  <p>אנחנו מחברים למספר הוואטסאפ שלך מענה אוטומטי שעונה ללקוחות שלך תוך שניות, בשם העסק ובסגנון שלך. הוא שואל מה קרה, מבקש תמונה וכתובת, ושולח לך את כל הפרטים בהודעה אחת מסודרת. אתה רק מתקשר וסוגר את העבודה.</p>
+
+  <h2>איך זה עובד ביום-יום</h2>
+  <ol>
+    <li>לקוח כותב למספר הרגיל שלך. לא צריך מספר חדש או אפליקציה חדשה.</li>
+    <li>הוא מקבל תשובה תוך שניות, גם בערב ובשבת. מחוץ לשעות העבודה שלך הוא מקבל הודעה מתי תחזור אליו.</li>
+    <li>אתה מקבל הודעה אחת עם שם, טלפון, הבעיה, כתובת עם קישור לוויז, והתמונות. מקרה דחוף כמו הצפה מגיע אליך מיד.</li>
+    <li>ברגע שאתה עונה ללקוח בעצמך, המענה האוטומטי יוצא מהשיחה. למשפחה, לחברים ולספקים שלך הוא לא עונה בכלל.</li>
+  </ol>
+  <p>מחירים הוא לא נותן אף פעם. כל שאלה על מחיר מגיעה אליך.</p>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>1</span></div>
 </section>
 
-<!-- 2 problem + how -->
 <section class="page">
-  <h2><span class="n">1</span>מה קורה היום</h2>
-  <p class="lead">אתה מתחת לכיור, בנסיעה או אצל לקוח אחר. בדיוק אז מישהו כותב לך "יש לי נזילה, אפשר היום?".</p>
-  <div class="cards">
-    <div class="card"><h3>הלקוח לא מחכה</h3><p>מי שלא מקבל תשובה תוך כמה דקות שולח הודעה לעוד שניים-שלושה אינסטלטורים. הראשון שעונה מקבל את העבודה.</p></div>
-    <div class="card"><h3>הזמן שלך הולך על שאלות</h3><p>"מה קרה? איפה אתה גר? תשלח תמונה". כל פנייה זה כמה הודעות הלוך וחזור, בדרך כלל באמצע עבודה אחרת.</p></div>
-    <div class="card"><h3>לקוחות נשכחים</h3><p>הודעה שנקראה בנסיעה ונשכחה עד הערב. עד שחזרת, הוא כבר סגר עם מישהו אחר.</p></div>
-    <div class="card"><h3>מעט ביקורות בגוגל</h3><p>לקוחות מרוצים לא כותבים ביקורת אם לא מבקשים מהם. ומי שמחפש אינסטלטור בגוגל בוחר את מי שיש לו יותר.</p></div>
-  </div>
-
-  <h2 style="margin-top:22px"><span class="n">2</span>איך זה עובד</h2>
-  <p class="lead">מחברים את זה למספר הוואטסאפ שלך. אתה ממשיך להשתמש בו בדיוק כמו היום.</p>
-  <div class="steps">
-    <div class="step"><div class="k">1</div><div><h3>לקוח כותב לך בוואטסאפ</h3><p>לאותו מספר שכבר יש לו. לא צריך מספר חדש ולא אפליקציה חדשה.</p></div></div>
-    <div class="step"><div class="k">2</div><div><h3>הוא מקבל תשובה תוך שניות, בשמך ובסגנון שלך</h3><p>המזכירה שואלת מה קרה, מבקשת תמונה וכתובת, ועונה על שאלות כמו אזור ושעות. מחירים היא לא נותנת אף פעם. שאלה על מחיר מגיעה אליך.</p></div></div>
-    <div class="step"><div class="k">3</div><div><h3>אתה מקבל הודעה אחת מסודרת</h3><p>שם, טלפון, מה הבעיה, כתובת עם כפתור לוויז, והתמונות. מצב חירום כמו הצפה מגיע אליך מיד, גם בלילה.</p></div></div>
-    <div class="step"><div class="k">4</div><div><h3>אתה מתקשר וסוגר את העבודה</h3><p>ברגע שאתה עונה ללקוח בעצמך, המזכירה יוצאת מהשיחה. למשפחה, לחברים ולספקים שלך היא לא עונה בכלל.</p></div></div>
-  </div>
-  <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>2</span></div>
-</section>
-
-<!-- 3 demo -->
-<section class="page">
-  <h2><span class="n">3</span>ככה זה נראה בפועל</h2>
-  <p class="lead">שיחה לדוגמה, ככה בדיוק הלקוח שלך רואה אותה. מימין מה שאתה מקבל כשהיא נגמרת.</p>
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
+  <h2 style="margin-top:0">דוגמה לשיחה</h2>
+  <p>ככה הלקוח שלך רואה את זה בטלפון שלו, ומשמאל ההודעה שאתה מקבל בסוף.</p>
   <div class="demo">
     <div class="phone">
-      <div class="bar">__BIZ__<small>מחובר/ת</small></div>
+      <div class="bar"><div class="av">__INITIAL__</div><div><b>__BIZ__</b><small>חשבון עסקי</small></div></div>
       <div class="chat">
+        <div class="day">היום</div>
         <div class="m in">היי, יש לי נזילה מהתקרה בשירותים, אפשר מישהו היום?<i>21:47</i></div>
         <div class="m out">אהלן, מה נשמע? מצטער לשמוע. זה מטפטף או ממש זורם? ויש מים ליד שקעים או חשמל?<i>21:47</i></div>
         <div class="m in">מטפטף, לא ליד חשמל<i>21:48</i></div>
-        <div class="m out">טוב שכך. אפשר לשלוח תמונה של התקרה? ככה __OWNER__ יבין מה להביא איתו<i>21:48</i></div>
-        <div class="m in">[תמונה]<i>21:49</i></div>
-        <div class="m out">מעולה, רואים. מה הכתובת? רחוב, מספר, עיר וקומה<i>21:49</i></div>
+        <div class="m out">טוב שכך. אפשר לשלוח תמונה של התקרה? ככה __OWNER__ יידע מה להביא<i>21:48</i></div>
+        <div class="m in"><div class="photo"></div><i>21:49</i></div>
+        <div class="m out">רואים, תודה. מה הכתובת? רחוב, מספר, עיר וקומה<i>21:49</i></div>
         <div class="m in">הרצל 12 נתניה, קומה 3. כמה זה עולה בערך?<i>21:50</i></div>
-        <div class="m out">את המחיר __OWNER__ נותן בעצמו אחרי שהוא רואה את התמונה. כבר העברתי לו את כל הפרטים, והוא חוזר אליך מחר בבוקר. ערב טוב!<i>21:50</i></div>
-        <div class="note">הלקוח קיבל מענה מלא תוך 3 דקות, בלי שנגעת בטלפון</div>
+        <div class="m out">את המחיר __OWNER__ נותן בעצמו אחרי שהוא רואה את התמונה. העברתי לו את כל הפרטים והוא יחזור אליך מחר בבוקר. ערב טוב<i>21:50</i></div>
       </div>
     </div>
-    <div class="mail">
-      <div class="h"><b>🔔 פנייה חדשה</b>מה שאתה מקבל, בהודעה אחת</div>
-      <div class="b">
-        <div class="row"><span>שם</span><span>דני כהן</span></div>
-        <div class="row"><span>טלפון</span><span>050-1234567</span></div>
-        <div class="row"><span>בעיה</span><span>נזילה מטפטפת מהתקרה בשירותים, לא ליד חשמל</span></div>
-        <div class="row"><span>כתובת</span><span>הרצל 12, נתניה, קומה 3</span></div>
-        <div class="row"><span>תמונה</span><span>מצורפת</span></div>
-        <div class="row"><span>❓ שאלה</span><span>הלקוח שואל כמה זה עולה בערך</span></div>
-        <span class="btn g">וואטסאפ ללקוח</span><span class="btn b">📍 ניווט בוויז</span><br>
-        <span class="btn b">בדרך</span><span class="btn b">קבע תור</span><span class="btn b">סיימתי</span>
+    <div class="side">
+      <h3>ההודעה שאתה מקבל</h3>
+      <div class="msg">
+        <div><span>שם</span><span>דני כהן</span></div>
+        <div><span>טלפון</span><span>050-1234567</span></div>
+        <div><span>בעיה</span><span>נזילה מטפטפת מהתקרה בשירותים, לא ליד חשמל</span></div>
+        <div><span>כתובת</span><span>הרצל 12, נתניה, קומה 3 (קישור לוויז)</span></div>
+        <div><span>תמונה</span><span>מצורפת</span></div>
+        <div><span>שאלה</span><span>שואל כמה זה עולה בערך</span></div>
       </div>
+      <p>בהודעה יש גם כפתורים: "וואטסאפ ללקוח", "בדרך" (הלקוח מקבל שאתה בדרך), "קבע תור" (הלקוח מקבל אישור ותזכורת יום לפני) ו"סיימתי" (הלקוח מקבל בקשה לכתוב עליך ביקורת בגוגל).</p>
+      <p>הלקוח קיבל מענה מלא תוך 3 דקות, בעשר בלילה, ואתה לא נגעת בטלפון.</p>
     </div>
   </div>
-  <p class="cap">הכפתורים עובדים בלחיצה אחת. "בדרך" שולח ללקוח שאתה בדרך. "קבע תור" שולח לו אישור ותזכורת יום לפני. "סיימתי" שולח לו דקה אחרי בקשה לכתוב עליך ביקורת בגוגל.</p>
 
-  <div class="cards" style="margin-top:14px">
-    <div class="card"><h3>מבין גם הקלטות ותמונות</h3><p>לקוח ששולח הודעה קולית מקבל תשובה רגילה. גם בערבית, רוסית ואנגלית.</p></div>
-    <div class="card"><h3>מבחין בחירום</h3><p>הצפה או מים ליד חשמל מגיעים אליך מיד, והלקוח מקבל הנחיה מה לעשות עד שתגיע.</p></div>
-  </div>
-  <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>3</span></div>
+  <h2>מה עוד כלול</h2>
+  <ul>
+    <li>תזכורת אליך אם לא חזרת ללקוח, אחרי שעה ושוב אחרי שעתיים.</li>
+    <li>לקוח שהפסיק לענות באמצע מקבל תזכורת, ואתה מקבל את מה שנאסף.</li>
+    <li>הבנה של הודעות קוליות ותמונות, ומענה גם בערבית, רוסית ואנגלית.</li>
+    <li>טבלה של כל הפניות עם הורדה לאקסל, ודוח שבועי.</li>
+    <li>חשבוניות מתוכנת החשבוניות שלך יכולות להישלח ללקוח לבד (תלוי בתוכנה).</li>
+    <li>תחזוקה מלאה. אתה לא נוגע בשום הגדרה.</li>
+  </ul>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>2</span></div>
 </section>
 
-<!-- 4 what you get + proof + math -->
 <section class="page">
-  <h2><span class="n">4</span>מה אתה מקבל</h2>
-  <ul class="check">
-    <li><b>מענה תוך שניות</b>, 24 שעות, גם בשבת (מחוץ לשעות שלך היא אומרת ללקוח מתי תחזור)</li>
-    <li><b>הודעה אחת מסודרת</b> על כל פנייה, עם תמונות וכפתור לוויז</li>
-    <li><b>תזכורת</b> אם שכחת לחזור ללקוח, אחרי שעה ושוב אחרי שעתיים</li>
-    <li><b>לקוח שהפסיק לענות</b> מקבל תזכורת, ואתה מקבל את מה שנאסף</li>
-    <li><b>אישור ותזכורות לתור</b> ללקוח, כדי שלא יבריז</li>
-    <li><b>בקשת ביקורת בגוגל</b> אחרי כל עבודה, לבד</li>
-    <li><b>טבלה של כל הפניות</b> עם הורדה לאקסל</li>
-    <li><b>דוח שבועי</b>: כמה פניות, כמה נסגרו</li>
-    <li><b>חשבוניות</b> מתוכנת החשבוניות שלך נשלחות ללקוח לבד (לפי התוכנה)</li>
-    <li><b>אנחנו מתחזקים הכל.</b> אתה לא נוגע בשום הגדרה</li>
-  </ul>
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
+  <h2 style="margin-top:0">זה כבר עובד</h2>
+  <p>המערכת עובדת אצל מנעולן בנתניה. ב-4 הימים הראשונים היא ענתה ל-19 פניות חדשות, שלחה 11 חשבוניות ללקוחות ושלחה 6 בקשות לביקורת בגוגל, בלי שהוא היה צריך לעשות משהו.</p>
 
-  <div class="proof">
-    <b style="font-family:Rubik">כבר עובד אצל מנעולן בנתניה.</b> מה קרה ב-4 הימים הראשונים:
-    <div class="grid">
-      <div><div class="big">19</div><div>פניות חדשות נענו תוך שניות</div></div>
-      <div><div class="big">11</div><div>חשבוניות נשלחו ללקוחות לבד</div></div>
-      <div><div class="big">6</div><div>בקשות ביקורת יצאו בגוגל</div></div>
-    </div>
-  </div>
-
-  <h2 style="margin-top:20px"><span class="n">5</span>החשבון</h2>
-  <p class="lead">דוגמה עם מספרים זהירים. כדאי לשים במקום את המספרים שלך.</p>
-  <table class="calc">
+  <h2>החשבון</h2>
+  <p>דוגמה עם מספרים זהירים. כדאי לשים במקום את המספרים שלך:</p>
+  <table>
     <tr><td>פניות בשבוע שנכנסות כשאתה באמצע עבודה</td><td>5</td></tr>
-    <tr><td>מתוכן הולכות היום לאינסטלטור אחר</td><td>1 בשבוע</td></tr>
+    <tr><td>מתוכן הולכות לאינסטלטור אחר</td><td>1 בשבוע</td></tr>
     <tr><td>שווי עבודה ממוצעת</td><td>500 ₪</td></tr>
     <tr><td>כסף שהולך לאחר בחודש</td><td>2,000 ₪</td></tr>
-    <tr><td>זמן שנחסך על שאלות בטלפון (חצי שעה ביום)</td><td>12 שעות בחודש</td></tr>
-    <tr class="tot"><td>מספיק שהיא מחזירה לך <b>עבודה אחת בחודש</b> כדי לכסות את העלות</td><td>✓</td></tr>
+    <tr><td>זמן שנחסך על שאלות בטלפון</td><td>כ-12 שעות בחודש</td></tr>
+    <tr class="t"><td>מספיק שזה מחזיר לך עבודה אחת בחודש כדי שזה ישתלם</td><td></td></tr>
   </table>
-  <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>4</span></div>
-</section>
 
-<!-- 5 faq -->
-<section class="page">
-  <h2><span class="n">6</span>שאלות נפוצות</h2>
+  <h2>שאלות שבדרך כלל שואלים</h2>
   <div class="faq">
-    <h3>הלקוחות ירגישו שזה רובוט?</h3><p>היא כותבת בסגנון שלך, קצר ואנושי, בשם העסק. מי ששואל ישירות "אתה בוט?" מקבל תשובה כנה. אצל המנעולן שלנו הלקוחות פשוט שמחים שענו להם מיד.</p>
-    <h3>יחסמו לי את הוואטסאפ?</h3><p>לא. מתחברים רק בדרך הרשמית של Meta (החברה של וואטסאפ). המספר והאפליקציה נשארים שלך, ואתה ממשיך לעבוד מהם כרגיל.</p>
-    <h3>אני צריך להבין בטכנולוגיה?</h3><p>לא. אנחנו מחברים הכל בשיחה קצרה, גם מרחוק. אתה ממשיך לענות ללקוחות כמו היום, רק שאף אחד לא מחכה.</p>
-    <h3>מה אם אני רוצה לענות בעצמי?</h3><p>עונים כרגיל מהטלפון. ברגע שענית ללקוח, היא יוצאת מהשיחה איתו.</p>
-    <h3>היא תיתן ללקוח מחיר לא נכון?</h3><p>היא לא נותנת מחירים בכלל. כל שאלה על מחיר מגיעה אליך, כתובה בראש ההודעה.</p>
-    <h3>ואם זה לא מתאים לי?</h3><p>שולחים הודעה אחת ומפרקים. אין חוזה ואין התחייבות. וב-30 הימים הראשונים זה גם לא עולה לך כלום (ראה בעמוד הבא).</p>
+    <p><b>הלקוחות ירגישו שזה אוטומטי?</b>ההודעות קצרות ואנושיות, בשם העסק ובסגנון שלך. מי ששואל ישירות מקבל תשובה כנה.</p>
+    <p><b>יחסמו לי את הוואטסאפ?</b>לא. החיבור נעשה בדרך הרשמית של Meta (החברה של וואטסאפ). המספר והאפליקציה נשארים שלך.</p>
+    <p><b>אני צריך להבין בטכנולוגיה?</b>לא. אנחנו מחברים הכל בשיחה קצרה, גם מרחוק. אתה ממשיך לענות ללקוחות כמו היום.</p>
+    <p><b>ואם אני רוצה לענות בעצמי?</b>עונים כרגיל מהטלפון. ברגע שענית, המענה האוטומטי יוצא מהשיחה.</p>
+    <p><b>ואם זה לא מתאים לי?</b>שולחים הודעה ומפרקים. אין חוזה ואין התחייבות.</p>
   </div>
-
-  <h2 style="margin-top:20px">למה דווקא עכשיו</h2>
-  <div class="why">
-    <div><b>החורף מתחיל</b>סתימות, דודים ונזילות. העונה שבה הכי הרבה לקוחות כותבים, והכי הרבה הולכים לאיבוד.</div>
-    <div><b>מקום אחד לאזור</b>אנחנו לוקחים אינסטלטור אחד בכל אזור, כדי שלא נעבוד בשביל המתחרה שלך.</div>
-    <div><b>כל יום בלי זה עולה כסף</b>כל לקוח שלא קיבל תשובה היום כבר הזמין מישהו אחר.</div>
-  </div>
-  <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>5</span></div>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>3</span></div>
 </section>
 
-<!-- 6 price -->
 <section class="page">
-  <h2><span class="n">7</span>הצעת המחיר</h2>
-  <p class="lead">קודם מה זה שווה, אחר כך כמה זה עולה לך.</p>
-  <table class="stack">
-    <tr><td>מזכירה שעונה לכל לקוח 24 שעות, 7 ימים בשבוע (מזכירה אמיתית עולה 6,000 ₪ בחודש ויותר, ולא עובדת בלילה)</td><td>6,000 ₪ לחודש</td></tr>
-    <tr><td>כל לקוח שנשאר אצלך במקום ללכת לאחר (לפי עבודה אחת בשבוע)</td><td>2,000 ₪ לחודש</td></tr>
-    <tr><td>12 שעות בחודש שחוזרות אליך במקום שאלות בטלפון</td><td>12 שעות</td></tr>
-    <tr><td>ביקורות בגוגל שמגיעות לבד אחרי כל עבודה, ושיחות חדשות בלי לשלם על פרסום</td><td>לא נמדד בכסף</td></tr>
-    <tr class="tot"><td>מה זה עולה לך</td><td>490 ₪ לחודש</td></tr>
-  </table>
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
+  <h2 style="margin-top:0">הצעת מחיר</h2>
+  <p>לפני המחיר, כדאי לזכור למה להשוות: מזכירה אמיתית עולה 6,000 ₪ בחודש ויותר, ולא עונה בלילה ובשבת. לקוח אחד בשבוע שנשאר אצלך שווה כ-2,000 ₪ בחודש.</p>
 
-  <div class="offerbox">
-    <h3>ההצעה ל__OWNER__</h3>
-    <div class="line"><span><b style="font-size:16px">30 יום ראשונים: 0 ₪</b><small>מחברים, אתה רואה בעצמך כמה לקוחות נענו, ורק אז מחליט.</small></span><b>0 ₪</b></div>
-    <div class="line"><span>הקמה והתאמה לעסק שלך<small>משלמים רק אחרי 30 יום, ורק אם החלטת להמשיך. אפשר ב-3 תשלומים של 834 ₪.</small></span><b>2,500 ₪</b></div>
-    <div class="line"><span>מנוי חודשי, נעול לשנה<small>כולל שרת, AI, תחזוקה ושינויים קטנים. בלי מע"מ (עוסק פטור).</small></span><b>490 ₪</b></div>
-    <div class="line"><span>בונוס: מלמדים אותה את התשובות שלך<small>אחריות, אזורים, תשלום, שעות. היא עונה עליהן לבד בדיוק כמו שאתה היית עונה.</small></span><b>מתנה</b></div>
+  <div class="box">
+    <table>
+      <tr><td>30 הימים הראשונים</td><td>ללא תשלום</td></tr>
+      <tr><td>הקמה והתאמה לעסק שלך (חד-פעמי)<br><span style="color:var(--muted);font-size:13px">משולם רק אחרי 30 יום, ורק אם החלטת להמשיך. אפשר ב-3 תשלומים של 834 ₪.</span></td><td>2,500 ₪</td></tr>
+      <tr><td>מנוי חודשי, מחיר נעול לשנה<br><span style="color:var(--muted);font-size:13px">כולל שרת, תחזוקה ושינויים קטנים.</span></td><td>490 ₪</td></tr>
+      <tr><td>לימוד התשובות שלך (אחריות, אזורים, תשלום, שעות), כדי שהלקוחות יקבלו בדיוק את מה שאתה היית עונה</td><td>ללא תוספת</td></tr>
+    </table>
   </div>
+  <p style="font-size:13.5px;color:var(--muted)">המחירים ללא מע"מ (עוסק פטור). אין התחייבות, אפשר להפסיק בכל חודש.</p>
 
-  <div class="guar"><h3>ההבטחה שלנו: אין לך מה להפסיד</h3><p>אם אחרי 30 יום לא ראית בעצמך לפחות עבודה אחת שהייתה הולכת לאיבוד, מפרקים הכל ואתה לא משלם שקל. לא על ההקמה ולא על החודש. את כל הסיכון לוקחים אנחנו.</p></div>
+  <h2>ההתחייבות שלנו</h2>
+  <p>אם אחרי 30 יום לא ראית לפחות עבודה אחת שהייתה הולכת לאיבוד, מפרקים הכל ואתה לא משלם כלום. לא על ההקמה ולא על החודש.</p>
 
-  <h2 style="margin-top:12px"><span class="n">8</span>איך מתחילים</h2>
-  <div class="next">
-    <div><b>1.</b>עונים "כן" להודעה הזו</div>
-    <div><b>2.</b>ממלאים טופס קצר על העסק (5 דקות)</div>
-    <div><b>3.</b>שיחת חיבור קצרה, ומאותו רגע אף לקוח לא מחכה</div>
+  <h2>למה עכשיו</h2>
+  <p>החורף הוא העונה של סתימות, דודים ונזילות, וזה הזמן שהכי הרבה לקוחות כותבים והכי הרבה הולכים לאיבוד. בנוסף, אנחנו עובדים עם אינסטלטור אחד בכל אזור, כדי לא לעבוד בשביל המתחרה שלך. ההצעה בתוקף 7 ימים.</p>
+
+  <h2>איך מתחילים</h2>
+  <ol>
+    <li>עונים לי "כן" בוואטסאפ.</li>
+    <li>ממלאים טופס קצר על העסק, בערך 5 דקות.</li>
+    <li>קובעים שיחת חיבור קצרה, ומאותו רגע כל לקוח מקבל תשובה.</li>
+  </ol>
+
+  <div class="sig">
+    בברכה,<br>
+    <b>__SENDER__</b><br>
+    עונה ראשון<br>
+    052-4666175
   </div>
-  <p class="sign">ההצעה בתוקף 7 ימים, כי יש לנו מקום לאינסטלטור אחד בכל אזור.<br><b>__SENDER__</b> · עונה ראשון · לשאלות פשוט ענה להודעה הזו</p>
-  <div class="foot"><span>עונה ראשון · הצעה ל__BIZ__</span><span>6</span></div>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>4</span></div>
 </section>
 </body></html>

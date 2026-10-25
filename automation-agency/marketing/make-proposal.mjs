@@ -1,7 +1,7 @@
 import { chromium } from '/opt/node-tools/node_modules/playwright/index.mjs';
 import fs from 'fs';
 const [,, src, out, biz, owner, sender, phone, date] = process.argv;
-let h = fs.readFileSync(src,'utf8').replaceAll('__BIZ__',biz).replaceAll('__OWNER__',owner).replaceAll('__SENDER__',sender).replaceAll('__PHONE__',phone).replaceAll('__DATE__',date);
+let h = fs.readFileSync(src,'utf8').replaceAll('__BIZ__',biz).replaceAll('__OWNER__',owner).replaceAll('__SENDER__',sender).replaceAll('__PHONE__',phone).replaceAll('__DATE__',date).replaceAll('__INITIAL__',(owner||'?')[0]);
 fs.writeFileSync('prop_render.html', h);
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }).catch(() => chromium.launch());
 const p = await b.newPage();
