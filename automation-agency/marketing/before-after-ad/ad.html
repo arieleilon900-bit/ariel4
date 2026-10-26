@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>מודעת לפני ואחרי - עונה ראשון</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=block" rel="stylesheet">
+<style>
+  /* default 1080x1080 (feed), ?story = 1080x1920 */
+  :root{--bg:#0b1a13;--green:#25d366;--red:#ff4d4d;--yellow:#ffd23f;--cream:#f4efe6;--chat:#efe7dc;--out:#d9fdd3;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Heebo',sans-serif;color:#fff;width:1080px;height:1080px;overflow:hidden;position:relative;
+    background:radial-gradient(ellipse at 70% 0%,#1b4632 0%,var(--bg) 60%);}
+  body.story{height:1920px;}
+  .wrap{position:relative;padding:50px 56px 0;}
+  .story .wrap{padding-top:200px;}
+  h1{font-size:72px;font-weight:900;line-height:1.04;letter-spacing:-1px;}
+  h1 em{font-style:normal;color:var(--red);}
+  .sub{font-size:28px;color:rgba(255,255,255,.8);margin:14px 0 28px;line-height:1.3;}
+  .sub b{color:#fff;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .col{border-radius:28px;overflow:hidden;background:var(--chat);color:#111;display:flex;flex-direction:column;}
+  .lbl{padding:14px 20px;font-size:26px;font-weight:900;display:flex;align-items:center;gap:10px;color:#fff;}
+  .bad .lbl{background:#5a1f1f;}
+  .good .lbl{background:#0b5c4a;}
+  .lbl i{font-style:normal;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;}
+  .bad .lbl i{background:var(--red);}
+  .good .lbl i{background:var(--green);color:var(--bg);}
+  .msgs{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1;}
+  .m{max-width:90%;padding:10px 14px 6px;border-radius:16px;font-size:23px;line-height:1.3;box-shadow:0 1px 1px rgba(0,0,0,.12);}
+  .m small{display:block;text-align:left;font-size:15px;color:#7a8a86;margin-top:2px;}
+  .in{align-self:flex-start;background:#fff;border-top-right-radius:4px;}
+  .out{align-self:flex-end;background:var(--out);border-top-left-radius:4px;}
+  .gap{align-self:center;font-size:17px;color:#8a6d6d;background:#f6dede;border-radius:8px;padding:4px 12px;font-weight:700;}
+  .lost{align-self:center;margin-top:auto;background:var(--red);color:#fff;font-weight:900;font-size:22px;padding:8px 16px;border-radius:12px;transform:rotate(-3deg);}
+  .won{align-self:center;margin-top:auto;background:var(--green);color:var(--bg);font-weight:900;font-size:22px;padding:8px 16px;border-radius:12px;transform:rotate(2deg);}
+  .checks{display:flex;justify-content:space-between;gap:12px;margin-top:22px;}
+  .checks div{flex:1;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);border-radius:18px;padding:14px 12px;font-size:23px;font-weight:700;text-align:center;line-height:1.25;}
+  .checks b{color:var(--green);margin-left:6px;}
+  .bar{position:absolute;left:0;right:0;bottom:0;height:150px;background:var(--cream);color:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 56px;}
+  .bar h2{font-size:46px;font-weight:900;line-height:1;}
+  .bar h2 span{background:linear-gradient(transparent 60%,var(--yellow) 60%);}
+  .bar p{font-size:21px;margin-top:8px;font-weight:500;}
+  .cta{background:var(--green);border-radius:999px;padding:12px 30px;text-align:center;box-shadow:0 10px 30px rgba(37,211,102,.35);}
+  .cta span{display:block;font-size:20px;font-weight:700;}
+  .cta b{display:block;font-size:40px;font-weight:900;direction:ltr;}
+  /* story */
+  .story h1{font-size:76px;}
+  .story .sub{font-size:33px;margin:18px 0 30px;}
+  .story .cols{grid-template-columns:1fr;gap:28px;}
+  .story .lbl{font-size:32px;padding:18px 24px;}
+  .story .m{font-size:26px;}
+  .story .cols{gap:20px;}
+  .story .checks div{font-size:25px;}
+  .story .msgs{padding:20px 24px;}
+  .story .lost,.story .won{margin-top:6px;font-size:26px;}
+  .story .bar{bottom:260px;left:40px;right:40px;border-radius:30px;height:180px;padding:0 40px;}
+  .story .bar h2{font-size:52px;}
+  .story .short{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>אתה מפסיד עבודות<br><em>כי אתה לא עונה מספיק מהר.</em></h1>
+  <div class="sub">מזכירה בוואטסאפ עונה ללקוחות שלך <b>תוך שניות, בשם שלך</b>.<br><b>אתה לא עושה כלום:</b> אנחנו מחברים הכל למספר הרגיל שלך.</div>
+  <div class="cols">
+    <div class="col bad">
+      <div class="lbl"><i>✕</i>היום, בלי מזכירה</div>
+      <div class="msgs">
+        <div class="m in">ערב טוב, יש לי נזילה מתחת לכיור. אפשר מישהו מחר?<small>21:10</small></div>
+        <div class="gap">⏳ שעה וחצי בלי תשובה</div>
+        <div class="m in">טוב, מצאתי מישהו אחר. תודה<small>22:42</small></div>
+        <div class="lost">העבודה הלכה למתחרה</div>
+      </div>
+    </div>
+    <div class="col good">
+      <div class="lbl"><i>✓</i>עם המזכירה של עונה ראשון</div>
+      <div class="msgs">
+        <div class="m in">ערב טוב, יש לי נזילה מתחת לכיור. אפשר מישהו מחר?<small>21:10</small></div>
+        <div class="m out">היי, כאן מוטי אינסטלציה 🙂 קיבלתי. תשלח תמונה וכתובת?<small>21:10 ✓✓</small></div>
+        <div class="m in">📷 הרצל 12 נתניה<small>21:11</small></div>
+        <div class="won">אתה מקבל הכל מסודר, ומתקשר לסגור</div>
+      </div>
+    </div>
+  </div>
+  <div class="checks">
+    <div><b>✓</b>על המספר הרגיל שלך</div>
+    <div><b>✓</b>לא עונה למשפחה ולחברים</div>
+    <div><b>✓</b>מחירים? רק אתה נותן</div>
+  </div>
+</div>
+<div class="bar">
+  <div><h2><span>חודש ראשון עלינו.</span></h2><p>לא החזיר לך לקוח? לא משלם שקל. <span class="short">בעל מקצוע אחד לכל אזור.</span></p></div>
+  <div class="cta"><span>שלחו "מעוניין"</span><b>052-4666175</b></div>
+</div>
+<script>if (location.search.includes('story')) document.body.classList.add('story');</script>
+</body>
+</html>
