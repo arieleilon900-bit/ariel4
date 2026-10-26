@@ -98,12 +98,13 @@ export async function documentTypesSummary(env, now = new Date()) {
   const types = {};
   for (const d of data.ReturnValue || []) {
     const t = Number(d.DocumentType);
-    const x = (types[t] ||= { count: 0, names: new Set() });
+    const x = (types[t] ||= { count: 0, phone: 0, quoteText: 0, last: '', names: new Set() });
     x.count++;
-    for (const [k, v] of Object.entries(d)) {
-      if (typeof v === 'string' && /type.*name|typename|doctype/i.test(k) && v.length < 40) x.names.add(v);
-      if (typeof v === 'string' && /הצעת מחיר/.test(v)) x.names.add('הצעת מחיר');
-    }
+    if (findPhone(d)) x.phone++;
+    if (Object.values(d).some((v) => typeof v === 'string' && /הצעת מחיר/.test(v))) x.quoteText++;
+    const date = String(d.Date || '').slice(0, 10);
+    if (date > x.last) x.last = date;
+    for (const [k, v] of Object.entries(d)) if (typeof v === 'string' && /type.*name|typename/i.test(k) && v.length < 40) x.names.add(v);
   }
-  return Object.entries(types).map(([t, x]) => `${t}×${x.count}${x.names.size ? ` (${[...x.names].join(' / ')})` : ''}`).join(', ');
+  return Object.entries(types).map(([t, x]) => `סוג ${t}: ${x.count} מסמכים, ${x.phone} עם טלפון, אחרון ${x.last}${x.quoteText ? `, ${x.quoteText} עם "הצעת מחיר" בטקסט` : ''}${x.names.size ? ` (${[...x.names].join(' / ')})` : ''}`).join(' | ');
 }
