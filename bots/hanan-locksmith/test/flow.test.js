@@ -857,7 +857,8 @@ test('/admin/setup: wires the webhook, creates missing templates, checks keys; n
     assert.equal(params.get('access_token'), 'APP1|appsec');
     assert.ok(params.get('fields').includes('smb_message_echoes'));
     const created = reqs.filter((r) => r.url.endsWith('/WABA1/message_templates') && r.method === 'POST').map((r) => JSON.parse(r.body));
-    assert.equal(created.length, 8, 'all but the existing one');
+    assert.equal(created.length, 9, 'all but the existing one');
+    assert.equal(created.find((t) => t.name === 'quote_v1').components[0].format, 'DOCUMENT');
     assert.ok(!created.some((t) => t.name === 'followup_v1'));
     const inv = created.find((t) => t.name === 'invoice_v1');
     assert.deepEqual(inv.components[0], { type: 'HEADER', format: 'DOCUMENT', example: { header_handle: ['4::handle'] } });
@@ -1713,6 +1714,56 @@ test('Yesh Invoice: Hanan gets "sent successfully"; a duplicate copy of the same
   const bodies = mails.map((m) => m.text).join('\n');
   assert.match(bodies, /נשלחה בהצלחה/);
   assert.doesNotMatch(bodies, /לא נשלח/);
+});
+
+test('Yesh Invoice: a quote goes to the customer once, Hanan gets "sent", no job or review; the bot then leaves that customer to Hanan', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
+  const mails = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk', YESH_QUOTE_TYPES: '3', OWNER_PHONE: 'email', OWNER_EMAIL: 'h@example.com', GMAIL_USER: 'b@example.com', GMAIL_APP_PASSWORD: 'x', __mail: async (m) => { mails.push(m); } };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'כמה עולה להחליף צילינדר?' } }, 'q0'), t0);
+  await runEvery15(env, t0);
+
+  // לקוח שכתב היום: הצעת המחיר כמסמך רגיל
+  const NEW = '972547777777';
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [
+    { DocumentType: 3, DocumentNumber: 55, CustomerName: 'דני', CustomerPhone: '0541234567', pdfUrl: 'https://yesh.example/q55.pdf' },
+    { DocumentType: 3, DocumentNumber: 56, CustomerName: 'רוני', CustomerPhone: '0547777777', pdfUrl: 'https://yesh.example/q56.pdf' },
+  ] }];
+  await runEvery15(env, new Date(t0.getTime() + 15 * 60000));
+  assert.deepEqual(yeshRequests.at(-1).body.docTypes, [6, 8, 9, 3]);
+  const doc = sent.find((m) => m.to === CUSTOMER && m.type === 'document');
+  assert.equal(doc.document.link, 'https://yesh.example/q55.pdf');
+  assert.equal(doc.document.filename, 'הצעת מחיר.pdf');
+  assert.match(doc.document.caption, /הצעת המחיר/);
+  // לקוח חדש שלא כתב לבוט: דרך התבנית של הצעת מחיר, והוא נחשב "מוכר" (חנן מטפל בו)
+  const tpl = sent.find((m) => m.to === NEW && m.template);
+  assert.equal(tpl.template.name, 'quote_v1');
+  assert.equal(env.DB.raw.prepare('SELECT known FROM customers WHERE phone = ?').get(NEW).known, 1);
+  // לא נפתחה עבודה ולא תהיה בקשת ביקורת
+  assert.equal(env.DB.raw.prepare('SELECT COUNT(*) n FROM jobs').get().n, 0);
+  const conv = env.DB.raw.prepare('SELECT state, owner_replied_at FROM conversations WHERE phone = ?').get(CUSTOMER);
+  assert.equal(conv.state, 'handoff');
+  assert.ok(conv.owner_replied_at);
+  assert.match(mails.map((m) => m.text).join('\n'), /הצעת המחיר נשלחה בהצלחה/);
+
+  // אותן הצעות שוב (חפיפה בזמנים): לא נשלחות פעמיים
+  const before = sent.length;
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [
+    { DocumentType: 3, DocumentNumber: 55, CustomerName: 'דני', CustomerPhone: '0541234567', pdfUrl: 'https://yesh.example/q55.pdf' },
+  ] }];
+  await runEvery15(env, new Date(t0.getTime() + 30 * 60000));
+  assert.equal(sent.slice(before).filter((m) => m.to === CUSTOMER).length, 0);
+});
+
+test('Yesh Invoice: without YESH_QUOTE_TYPES quotes are not fetched or sent', async () => {
+  sent.length = 0; yeshRequests = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk' };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  await runEvery15(env, t0);
+  await runEvery15(env, new Date(t0.getTime() + 15 * 60000));
+  assert.deepEqual(yeshRequests.at(-1).body.docTypes, [6, 8, 9]);
 });
 
 test('Yesh Invoice: a document without a phone that Yesh keeps returning is reported to Hanan only once', async () => {

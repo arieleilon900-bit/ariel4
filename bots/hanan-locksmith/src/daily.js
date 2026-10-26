@@ -57,7 +57,7 @@ export async function dailyReport(env, now = new Date()) {
     `לקוחות שכתבו: ${customers}, הודעות מלקוחות: ${inbound}, תשובות של הבוט: ${replies}`,
     `מיילים שיצאו לחנן: ${emailsOk}`,
     `פניות חדשות: ${await ev('lead')}, תזכורות לחנן: ${await ev('owner_nudge')}, תזכורות ללקוחות: ${await ev('customer_nudge')}`,
-    `מסמכים מיש חשבונית שנשלחו: ${await ev('invoice')}, בקשות ביקורת: ${await ev('review')}, ספאם שסונן: ${await ev('spam')}`,
+    `מסמכים מיש חשבונית שנשלחו: ${await ev('invoice')}, הצעות מחיר: ${await ev('quote')}, בקשות ביקורת: ${await ev('review')}, ספאם שסונן: ${await ev('spam')}`,
     weekly,
   ].join('\n');
 }

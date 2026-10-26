@@ -2,7 +2,7 @@
 // משמש גם את החיבור האוטומטי ליש חשבונית וגם את השליחה הידנית של חנן (מעביר PDF לבוט).
 import { MESSAGES, TEMPLATES } from './config.js';
 import { inServiceWindow, nowIso } from './util.js';
-import { logEvent } from './handler.js';
+import { logEvent, markOwnerReplied } from './handler.js';
 import { upsertLead } from './sheets.js';
 import * as wa from './whatsapp.js';
 
@@ -42,5 +42,24 @@ export async function deliverReceipt(env, phone, doc, { docId = null, label = ''
   await env.DB.prepare("UPDATE conversations SET state = 'closed', followup_sent = 1 WHERE phone = ? AND state IN ('bot','handoff')").bind(phone).run();
   if (r.ok) await logEvent(env, 'invoice', phone, now);
   await upsertLead(env, phone, { status: r.ok ? 'קבלה נשלחה, עבודה הסתיימה' : 'קבלה לא נשלחה (תקלה)', issue: job.issue, address: job.address, note: docId ? `מסמך ${docId}` : '' }, now);
+  return r;
+}
+
+// הצעת מחיר מיש חשבונית: נשלחת ללקוח, בלי לסגור עבודה ובלי ביקורת.
+// זה כמו שחנן כתב ללקוח בעצמו: אם יש איתו פנייה פתוחה, חנן לוקח אותה; אם אין, הלקוח נחשב "מוכר" והבוט לא פונה אליו
+export async function deliverQuote(env, phone, doc, { now = new Date() } = {}) {
+  const c = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(phone).first();
+  const r = inServiceWindow(c?.last_inbound_at, now)
+    ? await wa.sendDocument(env, phone, doc, 'הצעת מחיר.pdf', MESSAGES.quote)
+    : await wa.sendTemplate(env, phone, TEMPLATES.quote, [], doc, 'הצעת מחיר.pdf');
+  if (!r.ok) return r;
+  const conv = await env.DB.prepare("SELECT id, state FROM conversations WHERE phone = ? AND state IN ('bot','handoff') ORDER BY id DESC LIMIT 1").bind(phone).first();
+  if (conv) {
+    if (conv.state === 'bot') await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
+    await markOwnerReplied(env, phone, now);
+  } else if (env.KNOWN_ON_OWNER_MESSAGE !== '0') {
+    await env.DB.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1) ON CONFLICT(phone) DO UPDATE SET known = 1').bind(phone, nowIso(now)).run();
+  }
+  await logEvent(env, 'quote', phone, now);
   return r;
 }

@@ -167,6 +167,7 @@ export const MESSAGES = {
   reminderDayBefore: (when, address) => `תזכורת: חנן מגיע אליך ${when}${address ? ` לכתובת ${address}` : ''}. אם משהו השתנה, אפשר לכתוב כאן.`,
   reminderTwoHours: (time) => `חנן מגיע אליך היום ב-${time}. נתראה 🙂`,
   invoice: 'מצורפת הקבלה על העבודה. תודה!',
+  quote: 'מצורפת הצעת המחיר. לכל שאלה אפשר לכתוב כאן.',
   optedOut: 'הוסרת. לא נשלח לך יותר תזכורות או עדכונים. אם תצטרך מנעולן, פשוט כתוב כאן.',
   customerNudge: 'היי, עדיין צריך עזרה? אפשר להמשיך מאיפה שעצרנו, ואני מעביר הכל לחנן.',
   photoNudge: 'אם יש לך תמונה או סרטון קצר של הדלת או המנעול, תשלח לי בבקשה. זה יעזור לחנן להגיע עם הכלים הנכונים 🙏',
@@ -243,6 +244,7 @@ export const TEMPLATES = {
   yearly: 'yearly_checkup_v1',      // אין משתנים
   referral: 'referral_v1',          // אין משתנים
   invoice: 'invoice_v1',            // כותרת: מסמך PDF
+  quote: 'quote_v1',                // כותרת: מסמך PDF (הצעת מחיר)
   ownerAlert: 'owner_alert_v1',     // {{1}} = טקסט הסיכום (להודעות לחנן מחוץ לחלון)
 };
 
@@ -255,6 +257,7 @@ export const TEMPLATE_DEFS = [
   { name: 'appt_today_v1', category: 'UTILITY', body: 'חנן המנעולן מגיע אליך היום ב-{{1}}. נתראה!', examples: ['14:30'] },
   { name: 'on_the_way_v1', category: 'UTILITY', body: 'חנן המנעולן בדרך אליך. זמן הגעה משוער: כ-{{1}} דקות.', examples: ['20'] },
   { name: 'invoice_v1', category: 'UTILITY', body: 'מצורפת הקבלה על העבודה. תודה שבחרת בחנן המנעולן!', documentHeader: true },
+  { name: 'quote_v1', category: 'UTILITY', body: 'מצורפת הצעת המחיר מחנן המנעולן. לכל שאלה אפשר לכתוב כאן.', documentHeader: true },
   { name: 'review_request_v1', category: 'MARKETING', body: 'תודה שבחרת בחנן המנעולן! אם יצאת מרוצה, ביקורת קצרה בגוגל תעזור לנו מאוד: {{1}} תודה רבה!', examples: ['https://g.page/r/example/review'] },
   { name: 'referral_v1', category: 'MARKETING', body: 'שמחנו לעזור! אם מישהו מהחברים או מהמשפחה צריך מנעולן, אפשר להעביר להם את המספר הזה.' },
   { name: 'yearly_checkup_v1', category: 'MARKETING', body: 'היי, עברה שנה מאז שחנן המנעולן עבד אצלך. רוצה שנבדוק שהמנעול והדלת במצב טוב?' },

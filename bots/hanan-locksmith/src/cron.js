@@ -3,7 +3,7 @@ import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, TIMING, msg as tmsg } from './
 import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
 import { customerLang, flushDueSummaries, logEvent, sendToCustomer, sendToOwner } from './handler.js';
 import { fetchNewDocuments } from './yesh.js';
-import { deliverReceipt } from './receipts.js';
+import { deliverQuote, deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
 import { runNudges } from './nudges.js';
 import { upsertLead } from './sheets.js';
@@ -250,7 +250,23 @@ async function invoices(env, now) {
   try { notified = JSON.parse((await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(notifiedKey).first())?.value || '{}'); } catch { notified = {}; }
   const monthAgo = now.getTime() - 30 * 86400000;
   for (const k of Object.keys(notified)) if (notified[k] < monthAgo) delete notified[k];
-  for (const d of fresh.filter((x) => x.phone && x.pdfUrl)) {
+  // הצעות מחיר: נשלחות ללקוח פעם אחת (בלי לסגור עבודה ובלי ביקורת)
+  const quotesKey = 'yesh_quotes_sent';
+  let quotesSent = {};
+  try { quotesSent = JSON.parse((await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(quotesKey).first())?.value || '{}'); } catch { quotesSent = {}; }
+  for (const k of Object.keys(quotesSent)) if (quotesSent[k] < monthAgo) delete quotesSent[k];
+  for (const d of fresh.filter((x) => x.quote && x.phone && x.pdfUrl && !quotesSent[x.id])) {
+    const r = await deliverQuote(env, d.phone, d.pdfUrl, { now });
+    if (r?.ok) {
+      quotesSent[d.id] = now.getTime();
+      await sendToOwner(env, `✓ הצעת המחיר נשלחה בהצלחה ל${d.customerName ? `${d.customerName} ` : ''}(${displayPhone(d.phone)}) בוואטסאפ.`, now);
+    } else if (!notified[d.id]) {
+      notified[d.id] = now.getTime();
+      await sendToOwner(env, `לא הצלחתי לשלוח את הצעת המחיר ל-${displayPhone(d.phone)} בוואטסאפ. כדאי לשלוח לו בעצמך.`, now);
+    }
+  }
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(quotesKey, JSON.stringify(quotesSent)).run();
+  for (const d of fresh.filter((x) => !x.quote && x.phone && x.pdfUrl)) {
     // חנן כבר שלח את הקבלה הזו ידנית (העביר PDF לבוט) בשעות האחרונות: רק מסמנים, לא שולחים שוב
     const manual = await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_doc_id IS NULL AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
       .bind(d.phone, new Date(now.getTime() - 12 * 3600000).toISOString()).first();
