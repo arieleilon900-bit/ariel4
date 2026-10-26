@@ -2,7 +2,7 @@
 import { BUSINESS, FEATURES, MESSAGES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
 import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
 import { customerLang, flushDueSummaries, logEvent, sendToCustomer, sendToOwner } from './handler.js';
-import { fetchNewDocuments } from './yesh.js';
+import { dealTypes, fetchNewDocuments } from './yesh.js';
 import { deliverQuote, deliverReceipt } from './receipts.js';
 import { customerHours, restNow } from './hours.js';
 import { runNudges } from './nudges.js';
@@ -214,6 +214,7 @@ async function yearly(env, now) {
 
 // סוגי המסמכים ביש חשבונית שנשלחים ללקוח
 const DOC_LABELS = { 6: 'קבלה', 8: 'חשבונית מס', 9: 'חשבונית מס קבלה' };
+const docLabel = (env, type) => DOC_LABELS[type] || (dealTypes(env).includes(type) ? 'חשבונית עסקה' : undefined);
 
 // מסמכים מיש חשבונית (קבלה, חשבונית מס, חשבונית מס קבלה): כל מסמך חדש נשלח ללקוח.
 // המסמך הראשון של עבודה סוגר אותה (ומפעיל בקשת ביקורת). קבלה שמגיעה אחר כך על אותה עבודה
@@ -271,8 +272,8 @@ async function invoices(env, now) {
     const manual = await env.DB.prepare('SELECT id FROM jobs WHERE phone = ? AND invoice_doc_id IS NULL AND invoice_sent_at >= ? ORDER BY id DESC LIMIT 1')
       .bind(d.phone, new Date(now.getTime() - 12 * 3600000).toISOString()).first();
     if (manual) { await env.DB.prepare('UPDATE jobs SET invoice_doc_id = ? WHERE id = ?').bind(d.id, manual.id).run(); continue; }
-    const label = DOC_LABELS[d.type] || 'מסמך';
-    const r = await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, label: DOC_LABELS[d.type], filename: `${label}.pdf`, now });
+    const label = docLabel(env, d.type) || 'מסמך';
+    const r = await deliverReceipt(env, d.phone, d.pdfUrl, { docId: d.id, label: docLabel(env, d.type), filename: `${label}.pdf`, now });
     if (r?.ok) {
       if (nameKey(d.customerName)) sentNames[nameKey(d.customerName)] = now.getTime();
       await sendToOwner(env, `✓ ה${label} נשלחה בהצלחה ל${d.customerName ? `${d.customerName} ` : ''}(${displayPhone(d.phone)}) בוואטסאפ.`, now);

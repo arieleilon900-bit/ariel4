@@ -5,7 +5,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { FEATURES, TEMPLATE_DEFS } from './config.js';
 import { MODEL } from './ai.js';
 import { ensureHeader, getAccessToken } from './sheets.js';
-import { documentTypesSummary, quoteTypes, yeshCall, yeshConfigured } from './yesh.js';
+import { dealTypes, documentTypesSummary, quoteTypes, yeshCall, yeshConfigured } from './yesh.js';
 import { DUAL, is360, isDual, isUltra } from './whatsapp.js';
 
 const D360 = 'https://waba-v2.360dialog.io';
@@ -202,7 +202,7 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
   else await step('יש חשבונית', async () => {
     await yeshCall(env, 'getInvoices', { CustomerID: -1, PageSize: 1, PageNumber: 1, docTypes: [], Search: '', from: '2020-01-01 00:00', to: '2100-01-01 00:00' });
     ok(`יש חשבונית: המפתחות עובדים, קבלות חדשות${quoteTypes(env).length ? ' והצעות מחיר' : ''} יישלחו ללקוחות לבד`);
-    try { const t = await documentTypesSummary(env); ok(`יש חשבונית: סוגי מסמכים ב-30 יום: ${t || 'לא חזרו מסמכים'}. הצעות מחיר נשלחות לסוג: ${quoteTypes(env).join(',') || 'לא הוגדר'}`); } catch (e) { warn(`יש חשבונית: לא הצלחתי לסכם סוגי מסמכים (${e.message})`); }
+    try { const t = await documentTypesSummary(env); ok(`יש חשבונית: סוגי מסמכים ב-30 יום: ${t || 'לא חזרו מסמכים'}. הצעות מחיר נשלחות לסוג: ${quoteTypes(env).join(',') || 'לא הוגדר'}, חשבונית עסקה לסוג: ${dealTypes(env).join(',') || 'לא הוגדר'}`); } catch (e) { warn(`יש חשבונית: לא הצלחתי לסכם סוגי מסמכים (${e.message})`); }
     const f = (await env.DB.prepare("SELECT value FROM settings WHERE key = 'yesh_doc_fields'").first())?.value;
     if (f) { const x = JSON.parse(f); warn(`יש חשבונית: במסמך האחרון שלא נשלח (${x.at}) חסר ${!x.phone ? 'טלפון' : ''}${!x.phone && !x.pdf ? ' וגם ' : ''}${!x.pdf ? 'קישור ל-PDF' : ''}. שדות במסמך: ${x.fields.join(', ')}`); }
   });

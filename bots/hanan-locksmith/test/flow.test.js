@@ -1757,6 +1757,22 @@ test('Yesh Invoice: a quote goes to the customer once, Hanan gets "sent", no job
   assert.equal(sent.slice(before).filter((m) => m.to === CUSTOMER).length, 0);
 });
 
+test('Yesh Invoice: a deal invoice (חשבונית עסקה) goes to the customer like an invoice, with its own name', async () => {
+  sent.length = 0; aiRequests = []; outSeq = 0; yeshRequests = [];
+  const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk', YESH_DEAL_TYPES: '2', YESH_QUOTE_TYPES: '1' };
+  const t0 = new Date('2026-10-14T07:00:00Z');
+  aiQueue = [ai({ reply: 'מה הכתובת?' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'ננעלתי' } }, 'd0'), t0);
+  await runEvery15(env, t0);
+  yeshQueue = [{ Success: true, totalpage: 1, ReturnValue: [{ DocumentType: 2, DocumentNumber: 12, CustomerName: 'דני', CustomerPhone: '0541234567', pdfUrl: 'https://yesh.example/d12.pdf' }] }];
+  await runEvery15(env, new Date(t0.getTime() + 15 * 60000));
+  assert.deepEqual(yeshRequests.at(-1).body.docTypes, [6, 8, 9, 2, 1]);
+  const doc = sent.find((m) => m.to === CUSTOMER && m.type === 'document');
+  assert.equal(doc.document.filename, 'חשבונית עסקה.pdf');
+  assert.match(doc.document.caption, /חשבונית עסקה/);
+  assert.equal(env.DB.raw.prepare('SELECT invoice_doc_id FROM jobs').get().invoice_doc_id, '2-12');
+});
+
 test('Yesh Invoice: without YESH_QUOTE_TYPES quotes are not fetched or sent', async () => {
   sent.length = 0; yeshRequests = [];
   const env = { ...makeEnv(), YESH_USERKEY: 'uk', YESH_SECRET: 'sk' };
