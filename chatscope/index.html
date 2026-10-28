@@ -496,7 +496,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .story{position:fixed;inset:0;z-index:90;background:#0d0a1a;display:flex;align-items:center;justify-content:center;}
 .st-frame{position:relative;width:min(100vw,calc(100dvh * 9 / 16));height:min(100dvh,calc(100vw * 16 / 9));max-height:100dvh;overflow:hidden;color:#fff;border-radius:0;}
 @media (min-width:640px){.st-frame{height:min(92dvh,860px);width:calc(min(92dvh,860px) * 9 / 16);border-radius:26px;}}
-.st-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:70px 28px 90px;text-align:center;}
+.st-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:70px 62px 90px;text-align:center;}
 .st-slide .eyebrow{font-weight:800;font-size:14px;letter-spacing:.08em;opacity:.85;text-transform:uppercase;margin-bottom:10px;}
 .st-slide h2{font-family:'Rubik';font-weight:900;font-size:clamp(28px,7.5vw,40px);line-height:1.08;margin-bottom:12px;}
 .st-slide .huge{font-family:'Rubik';font-weight:900;font-size:clamp(64px,19vw,104px);line-height:1;letter-spacing:-.03em;margin:8px 0;}
@@ -518,8 +518,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .st-top{position:absolute;top:24px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:6;font-weight:800;font-size:14px;}
 .st-top .brand{display:flex;align-items:center;gap:8px;}
 .st-x{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.25);display:grid;place-items:center;color:#fff;font-size:20px;}
-.st-tap{position:absolute;top:70px;bottom:80px;width:50%;z-index:4;}
-.st-tap.prev{right:0;}.st-tap.next{left:0;}
+.st-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.5);transition:transform .15s,opacity .2s;}
+.st-arrow:hover{transform:translateY(-50%) scale(1.08);}
+.st-arrow:active{transform:translateY(-50%) scale(.94);}
+.st-arrow svg{width:22px;height:22px;}
+.st-arrow.next{right:10px;}.st-arrow.prev{left:10px;}
+.st-arrow[disabled]{opacity:0;pointer-events:none;}
+.st-arrow.next.pulse{animation:nudge 1.4s ease-in-out infinite;}
+@keyframes nudge{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-50%) translateX(6px)}}
+.st-slide.from-next{animation:slideFromRight .38s cubic-bezier(.2,.8,.2,1);}
+.st-slide.from-prev{animation:slideFromLeft .38s cubic-bezier(.2,.8,.2,1);}
+@keyframes slideFromRight{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slideFromLeft{from{transform:translateX(-60px);opacity:0}to{transform:none;opacity:1}}
 .st-bottom{position:absolute;bottom:18px;left:16px;right:16px;display:flex;gap:8px;z-index:6;}
 .st-bottom .btn{flex:1;padding:12px 14px;font-size:14px;}
 .st-btn-w{background:#fff;color:var(--ink);}
@@ -839,8 +849,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
     <div class="st-prog" id="stProg"></div>
     <div class="st-top"><span class="brand">🔍 צ'אטסקופ</span><button class="st-x" id="stClose" aria-label="סגירה">✕</button></div>
     <div id="stSlide"></div>
-    <button class="st-tap prev" id="stPrev" aria-label="הקודם"></button>
-    <button class="st-tap next" id="stNext" aria-label="הבא"></button>
+    <button class="st-arrow prev" id="stPrev" aria-label="השקופית הקודמת"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button class="st-arrow next" id="stNext" aria-label="השקופית הבאה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="st-bottom"><button class="btn st-btn-g" id="stSave">📸 שמירת השקופית</button><button class="btn st-btn-w" id="stSkip">לדוח המלא</button></div>
   </div>
 </div>
@@ -1758,7 +1768,7 @@ function storySlides(r) {
   const S = [], nm = p => esc(dispName(p));
   const push = (html, bg) => S.push({ html, bg: bg || GRADS[S.length % GRADS.length] });
   const title = esc(anon ? 'הצ\'אט שלכם' : r.title);
-  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d2">הסיפור של</div><h2 class="anim d2">${title}</h2><p class="anim d3">סקופי קרא כל הודעה. מוכנים לשמוע מה הוא חושב?</p><p class="anim d4" style="font-size:14px;opacity:.7;margin-top:18px">הקישו בצד שמאל כדי להמשיך ←</p>`, GRADS[1]);
+  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d2">הסיפור של</div><h2 class="anim d2">${title}</h2><p class="anim d3">סקופי קרא כל הודעה. מוכנים לשמוע מה הוא חושב?</p><p class="anim d4" style="font-size:14px;opacity:.7;margin-top:18px">לחצו על החץ ימינה כדי להמשיך →</p>`, GRADS[1]);
   const pages = Math.max(1, Math.round(r.totalWords / 250));
   push(`<div class="eyebrow anim d1">ביחד כתבתם</div><div class="huge anim d2" data-count="${r.total}">0</div><h2 class="anim d2">הודעות</h2>
     <div class="sbox anim d3">✍️ ${fmt(r.totalWords)} מילים. זה בערך <b>${fmt(pages)} עמודים</b> של ספר${pages > 300 ? ', כלומר רומן שלם' : ''}.</div>
@@ -1841,6 +1851,7 @@ function storySlides(r) {
 
 let ST = { i: 0, slides: [], timer: null, start: 0, dur: 6500, paused: false, elapsed: 0 };
 function openStory(i = 0) {
+  ST.i = 0;
   ST.slides = storySlides(R);
   $('#stProg').innerHTML = ST.slides.map(() => '<i><b></b></i>').join('');
   $('#story').classList.remove('hidden');
@@ -1853,11 +1864,15 @@ function closeStory() {
 function goSlide(i) {
   if (i < 0) i = 0;
   if (i >= ST.slides.length) { closeStory(); return; }
-  ST.i = i; ST.elapsed = 0; ST.start = performance.now(); ST.paused = false;
+  const dir = i >= ST.i ? 'from-next' : 'from-prev';
+  ST.i = i;
   const s = ST.slides[i];
   $('#stFrame').style.background = s.bg;
-  $('#stSlide').innerHTML = `<div class="st-slide">${s.html}</div>`;
-  $$('#stProg b').forEach((b, k) => b.style.width = k < i ? '100%' : '0');
+  $('#stSlide').innerHTML = `<div class="st-slide ${i ? dir : ''}">${s.html}</div>`;
+  $$('#stProg b').forEach((b, k) => b.style.width = k <= i ? '100%' : '0');
+  $('#stPrev').disabled = i === 0;
+  $('#stNext').classList.toggle('pulse', i === 0);
+  $('#stNext').setAttribute('aria-label', i === ST.slides.length - 1 ? 'סיום' : 'השקופית הבאה');
   // count-up numbers and bars
   $$('[data-count]', $('#stSlide')).forEach(el => {
     const target = +el.dataset.count, t0 = performance.now();
@@ -1865,32 +1880,20 @@ function goSlide(i) {
     requestAnimationFrame(step);
   });
   requestAnimationFrame(() => $$('[data-w]', $('#stSlide')).forEach(b => b.style.width = b.dataset.w + '%'));
-  cancelAnimationFrame(ST.timer);
-  const tick = now => {
-    if (!ST.paused) {
-      const f = (ST.elapsed + now - ST.start) / ST.dur;
-      const bar = $$('#stProg b')[ST.i]; if (bar) bar.style.width = Math.min(100, f * 100) + '%';
-      if (f >= 1) { goSlide(ST.i + 1); return; }
-    }
-    ST.timer = requestAnimationFrame(tick);
-  };
-  ST.timer = requestAnimationFrame(tick);
 }
 function pauseStory(on) {
   if (on && !ST.paused) { ST.elapsed += performance.now() - ST.start; ST.paused = true; }
   else if (!on && ST.paused) { ST.start = performance.now(); ST.paused = false; }
 }
-$('#stNext').onclick = () => { if (!ST._wasHold) goSlide(ST.i + 1); };
-$('#stPrev').onclick = () => { if (!ST._wasHold) goSlide(ST.i - 1); };
+$('#stNext').onclick = () => goSlide(ST.i + 1);
+$('#stPrev').onclick = () => goSlide(ST.i - 1);
 $('#stClose').onclick = closeStory;
 $('#stSkip').onclick = closeStory;
-['pointerdown'].forEach(ev => $('#stFrame').addEventListener(ev, e => { if (e.target.closest('.st-tap')) { ST._hold = setTimeout(() => pauseStory(true), 250); } }));
-['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => $('#stFrame').addEventListener(ev, () => { clearTimeout(ST._hold); if (ST.paused) { pauseStory(false); ST._wasHold = true; setTimeout(() => ST._wasHold = false, 50); } }));
 document.addEventListener('keydown', e => {
   if ($('#story').classList.contains('hidden')) return;
   if (e.key === 'Escape') closeStory();
-  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); goSlide(ST.i + 1); }
-  if (e.key === 'ArrowRight') goSlide(ST.i - 1);
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goSlide(ST.i + 1); }
+  if (e.key === 'ArrowLeft') goSlide(ST.i - 1);
 });
 $('#stSave').onclick = async () => {
   pauseStory(true);
@@ -1898,7 +1901,7 @@ $('#stSave').onclick = async () => {
     if (!window.html2canvas) throw new Error('x');
     const frame = $('#stFrame');
     $$('.anim', frame).forEach(a => { a.style.animation = 'none'; a.style.opacity = 1; a.style.transform = 'none'; });
-    const canvas = await html2canvas(frame, { backgroundColor: null, scale: 2, useCORS: true, ignoreElements: el => el.classList && (el.classList.contains('st-bottom') || el.classList.contains('st-tap') || el.classList.contains('st-x') || el.classList.contains('st-prog')) });
+    const canvas = await html2canvas(frame, { backgroundColor: null, scale: 2, useCORS: true, ignoreElements: el => el.classList && (el.classList.contains('st-bottom') || el.classList.contains('st-arrow') || el.classList.contains('st-x') || el.classList.contains('st-prog')) });
     cardBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
     cardName = `chatscope-${ST.i + 1}.png`;
     $('#modalImg').src = canvas.toDataURL('image/png');
