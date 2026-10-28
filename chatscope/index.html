@@ -365,7 +365,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .fr-oneliner{margin:26px 0 0;padding:16px 20px;border-radius:18px;background:var(--yellow-soft);font-weight:800;font-size:17px;text-align:center;}
 .fr-castrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-top:22px;}
 .fr-cc{display:flex;gap:10px;align-items:flex-start;background:#faf8ff;border-radius:16px;padding:12px;min-width:0;}
-.fr-cc b{display:block;font-size:15px;}
+.fr-cc > div > b{display:block;font-size:15px;}
 .fr-cc span{display:block;font-size:13.5px;font-weight:700;color:var(--ink-2);}
 .fr-cc small{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45;}
 .fr-toc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);}
@@ -399,7 +399,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 @media (max-width:560px){.fr-term{grid-template-columns:1fr;gap:4px;}}
 .fr-item{display:flex;gap:12px;align-items:flex-start;background:#faf8ff;border-radius:16px;padding:14px 16px;margin:0 0 12px;}
 .fr-item-em{font-size:26px;line-height:1.1;flex:none;}
-.fr-item b{display:block;font-size:16.5px;margin-bottom:2px;}
+.fr-item > div > b{display:block;font-size:16.5px;margin-bottom:2px;}
+.fr-item p b{font-weight:800;color:var(--ink);}
 .fr-item p{font-size:15.5px;line-height:1.7;color:var(--ink-2);}
 .fr-date{display:inline-block;background:var(--ink);color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:6px;}
 .fr-notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:12px;}
@@ -624,6 +625,15 @@ i.yb0{background:#262b52;} i.yb1{background:#6b5a2e;} i.yb2{background:#a38532;}
 .th-bar{width:220px;height:8px;border-radius:99px;background:#ece6f6;overflow:hidden;margin-top:14px;direction:rtl;}
 .th-bar b{display:block;height:100%;width:0;background:linear-gradient(270deg,var(--violet),var(--pink),var(--yellow));border-radius:99px;}
 .th p{color:var(--muted);font-size:14px;margin-top:12px;}
+.fr-vs{background:#faf8ff;border-radius:18px;padding:12px 14px;margin:0 0 10px;}
+.fr-vs-t{font-weight:900;font-size:15px;text-align:center;margin-bottom:8px;}
+.fr-vs-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch;}
+.fr-vs-side{position:relative;background:#fff;border-radius:14px;padding:10px;text-align:center;border:2px solid transparent;min-width:0;}
+.fr-vs-side span{display:block;font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fr-vs-side b{display:block;font-family:'Rubik';font-weight:900;font-size:19px;line-height:1.25;word-break:break-word;}
+.fr-vs-side.win{border-color:var(--pc);background:color-mix(in srgb,var(--pc) 12%,#fff);}
+.fr-vs-side i{position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-style:normal;font-size:18px;}
+.fr-vs-mid{align-self:center;font-family:'Rubik';font-weight:900;font-size:13px;color:var(--pink);}
 /* story button in hero */
 .story-cta{display:flex;align-items:center;gap:14px;margin-top:18px;background:linear-gradient(90deg,var(--pink),var(--violet));color:#fff;border-radius:20px;padding:14px 18px;font-weight:800;font-size:16px;width:100%;text-align:right;box-shadow:0 14px 30px -14px rgba(255,107,139,.9);transition:transform .15s;}
 .story-cta:hover{transform:translateY(-2px);}
@@ -1761,9 +1771,14 @@ function renderReport() {
   const rest = r.people.slice(12);
   let h = '';
 
+  // the written report comes first: headline, story, proofs, characters, awards
+  const rep = R.ai || R.local;
+  h += `<section class="r-sec reveal in" id="frSec" style="margin-top:0">${rep ? fullReportHTML(rep) : ''}</section>`;
+  if (!R.ai) h += `<section class="r-sec reveal in"><h2>🤖 רוצים גרסה עמוקה עוד יותר?</h2><p class="sub">סקופי כתב את הדוח הזה מהמספרים ומההודעות. עם AI הוא קורא כל הודעה לעומק, מבין בדיחות פנימיות והקשרים, וכותב דוח אישי לגמרי.</p>${aiCtaHTML()}</section>`;
+  h += `<div class="r-divider"><span>📊 הנתונים מאחורי הסיפור</span></div>`;
   // hero
-  h += `<section class="r-hero reveal in">
-    <span class="kicker">הדוח של סקופי</span>
+  h += `<section class="r-hero reveal in" style="margin-top:30px">
+    <span class="kicker">הנתונים</span>
     <h1>${esc(anon ? 'הצ\'אט שלכם' : r.title)}</h1>
     <div class="r-meta">
       <span>💬 ${fmt(r.total)} הודעות</span>
@@ -1775,12 +1790,7 @@ function renderReport() {
       <svg class="face" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="#fff"/><circle cx="60" cy="60" r="38" fill="#ffe1e8"/><circle cx="47" cy="55" r="6" fill="#1a1530"/><circle cx="73" cy="55" r="6" fill="#1a1530"/><path d="M48 74 q12 9 24 0" stroke="#1a1530" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
       <p>${verdictText(r)}</p>
     </div>
-    <button class="story-cta" id="openStory"><span class="ring"><span>▶</span></span><span>לצפות בסיפור של הצ'אט<small>${storySlides(r).length} שקופיות, כמו סיכום שנתי. מושלם לצילום מסך לקבוצה.</small></span></button>
   </section>`;
-
-  // the written report (or the button to create it)
-  h += `<section class="r-sec reveal in" id="frSec">${R.ai ? fullReportHTML(R.ai) : `<h2>✍️ הדוח המלא</h2><p class="sub">המספרים למטה מספרים מה קרה. הדוח המלא מספר את הסיפור.</p>${aiCtaHTML()}`}</section>`;
-  if (R.ai) h += `<div class="r-divider"><span>📊 הנתונים מאחורי הסיפור</span></div>`;
 
   // interest meter
   if (r.isPair) {
@@ -2026,7 +2036,7 @@ function storySlides(r) {
     const [e, c] = r.topEmoji[0];
     push(`<div class="eyebrow anim d1">האימוג'י של הצ'אט</div><div class="emoji-xl anim d2" style="font-size:clamp(120px,36vw,170px)">${esc(e)}</div><p class="anim d3">נשלח ${fmt(c)} פעמים</p><div class="chips anim d4">${r.topEmoji.slice(1, 7).map(([e2, c2]) => `<span>${esc(e2)} ${fmt(c2)}</span>`).join('')}</div>`);
   }
-  const ai = r.ai;
+  const ai = r.ai || r.local;
   if (ai) {
     push(`<div class="eyebrow anim d1">סקופי סיכם את זה ככה</div><h2 class="anim d2" style="font-family:'Frank Ruhl Libre',serif">${T(ai.headline)}</h2><div class="sbox anim d3" style="text-align:center">${TB(ai.one_liner)}</div>`, GRADS[1]);
     for (const c of (ai.cast || []).slice(0, 8)) {
@@ -2255,7 +2265,7 @@ const S_ARR = items => ({ type: 'array', items });
 const S_OBJ = props => ({ type: 'object', additionalProperties: false, required: Object.keys(props), properties: props });
 // A report is prose sections made of blocks: paragraphs, real chat excerpts, glossary terms, list items, notes.
 const S_BLOCK = S_OBJ({
-  kind: { type: 'string', enum: ['paragraph', 'chat', 'term', 'item', 'note'] },
+  kind: { type: 'string', enum: ['paragraph', 'chat', 'term', 'item', 'note', 'vs'] },
   emoji: S_STR, title: S_STR, text: S_STR, date: S_STR,
   messages: S_ARR(S_OBJ({ from: S_STR, text: S_STR, time: S_STR })),
 });
@@ -2265,7 +2275,7 @@ const REPORT_SCHEMA = S_OBJ({
   hook: S_ARR(S_STR),
   cast: S_ARR(S_OBJ({ name: S_STR, emoji: S_STR, title: S_STR, line: S_STR })),
   sections: S_ARR(S_OBJ({
-    key: { type: 'string', enum: ['profile', 'dictionary', 'tension', 'turning_points', 'moments', 'awards', 'unsaid', 'predictions', 'notes'] },
+    key: { type: 'string', enum: ['profile', 'verdicts', 'dictionary', 'tension', 'turning_points', 'moments', 'unsaid', 'predictions', 'versus', 'notes', 'awards'] },
     emoji: S_STR, title: S_STR, intro: S_STR, blocks: S_ARR(S_BLOCK),
   })),
   verdict: S_STR,
@@ -2309,14 +2319,16 @@ ${r.busiest ? `היום הכי עמוס: ${fmtDate(r.busiest.date)} עם ${r.bus
 - cast: לכל משתתף מרכזי (עד 8) כינוי־תפקיד קולע (title), אימוג'י, ושורה אחת (line) שמסכמת אותו.
 - sections, בסדר הזה, כל אחד עם emoji, כותרת מקורית בסגנון "נושא: הטוויסט" (title), ופסקת פתיחה (intro):
   1. profile: הפרופיל. החלק הארוך ביותר. לכל משתתף מרכזי פסקה או שתיים: איך הוא רואה את עצמו, ומה האמת לפי הצ'אט, עם פרטים ספציפיים. לפחות שני בלוקי chat עם חילופי דברים אמיתיים שמראים את ההבדל ביניהם, ואחרי כל אחד פסקה קצרה שמפרשת אותו.
+  1b. verdicts: המסקנות של סקופי. בלוקי item עם תשובה חדה וראיות לשאלות: מי הדומיננטי/ת ולמה, האם יש פה אהבה (או ניצוץ, או חברות, ומי מראה את זה יותר), מי צריך את מי יותר, ומתי הקשר היה הכי חם. אחרי כל מסקנה, בלוק chat שמוכיח אותה.
   2. dictionary: המילון הסודי. פסקת intro על השפה שלהם, ואז 5–12 בלוקי term: title הוא המונח, emoji, text הוא ההגדרה המשועשעת, date הוא מתי ואיך זה נולד.
   3. tension: איפה זה מתחכך. 1–2 פסקאות, בלוק chat אחד לפחות, ו־2–4 בלוקי item עם הטריגרים שחוזרים.
   4. turning_points: רגעי המפנה בסדר כרונולוגי, 3–7. לכל אחד בלוק item (title, date, text עם הסיפור) ומיד אחריו בלוק chat מהרגע עצמו.
   5. moments: 3–5 רגעים בלתי נשכחים מסוגים שונים (הכי מצחיק, הכי מתוק, הכי מביך, הכי כאוטי), כל אחד item ואחריו chat.
-  6. awards: 5–8 פרסים מקוריים כבלוקי item: emoji, title הוא שם הפרס, text הוא "הזוכה: שם. ..." עם נימוק וראיה.
-  7. unsaid: מה שאף אחד לא אומר בקול אבל כל ההודעות צועקות אותו. 1–2 פסקאות כנות, לא מרושעות.
-  8. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item.
+  6. unsaid: מה שאף אחד לא אומר בקול אבל כל ההודעות צועקות אותו. 1–2 פסקאות כנות, לא מרושעות.
+  7. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item.
+  8. versus: הדמות מול הדמות. פסקה שמעמידה את שתי הדמויות המרכזיות זו מול זו (הכינוי של כל אחד), ואז 5–8 בלוקי vs: title הוא הקטגוריה (למשל "מי כותב ראשון"), emoji, text הוא שם המנצח, ו־messages הם שני פריטים {from: שם, text: הערך או משפט קצר עם ראיה, time: ""}. סיים בפסקה שמסבירה למה שתי הדמויות האלה צריכות אחת את השנייה.
   9. notes: פתק אישי מסקופי לכל משתתף מרכזי, בלוק note עם title=שם המשתתף ו־text של 2–3 משפטים.
+  10. awards: הסיום. 5–8 פרסים מקוריים כבלוקי item: emoji, title הוא שם הפרס, text הוא "הזוכה: שם. ..." עם נימוק וראיה.
 - verdict: פסק דין של 2–4 משפטים.
 
 בבלוקים: שדות שלא רלוונטיים לסוג הבלוק נשארים מחרוזת ריקה או מערך ריק. בבלוק chat, messages הן הודעות רצופות ומדויקות מהצ'אט (2–8), עם from כפי שמופיע בצ'אט ו־time (שעה או תאריך ושעה).
@@ -2450,22 +2462,32 @@ function blockHTML(b) {
     case 'chat': return (b.messages || []).length ? chatBlockHTML(b.messages) : '';
     case 'term': return `<div class="fr-term"><dt>${b.emoji ? `<span>${esc(b.emoji)}</span>` : ''}${T(b.title)}</dt><dd>${TB(b.text)}${b.date ? `<small>${T(b.date)}</small>` : ''}</dd></div>`;
     case 'item': return `<div class="fr-item">${b.emoji ? `<span class="fr-item-em">${esc(b.emoji)}</span>` : ''}<div>${b.date ? `<span class="fr-date">${T(b.date)}</span>` : ''}${b.title ? `<b>${T(b.title)}</b>` : ''}<p>${TB(b.text)}</p></div></div>`;
+    case 'vs': {
+      const [x, y] = b.messages || [];
+      if (!x || !y) return '';
+      const px = personByName(x.from), py = personByName(y.from), w = personByName(b.text);
+      const side = (m, pp) => { const won = w && pp && w === pp; return `<div class="fr-vs-side ${won ? 'win' : ''}" style="--pc:${pp ? pp.color : 'var(--pink)'}"><span>${T(m.from)}</span><b>${TB(m.text)}</b>${won ? '<i>👑</i>' : ''}</div>`; };
+      return `<div class="fr-vs"><div class="fr-vs-t">${esc(b.emoji)} ${T(b.title)}</div><div class="fr-vs-row">${side(x, px)}<div class="fr-vs-mid">VS</div>${side(y, py)}</div></div>`;
+    }
     case 'note': { const p = personByName(b.title); return `<div class="fr-note" style="--pc:${p ? p.color : 'var(--muted)'}"><span>אל: ${T(b.title)}</span><p>${TB(b.text)}</p><i>סקופי</i></div>`; }
     default: return b.text ? `<p class="fr-p">${TB(b.text)}</p>` : '';
   }
 }
 
-const SEC_ICON = { profile: '🧠', dictionary: '🗣️', tension: '⚡', turning_points: '🧭', moments: '✨', awards: '🏅', unsaid: '🤫', predictions: '🔮', notes: '💌' };
-const SEC_SHORT = { profile: 'הפרופיל', dictionary: 'המילון הסודי', tension: 'המתח', turning_points: 'רגעי המפנה', moments: 'רגעים', awards: 'פרסים', unsaid: 'מה שלא נאמר', predictions: 'תחזיות', notes: 'פתקים' };
+const SEC_ICON = { verdicts: '🔍', versus: '🥊', profile: '🧠', dictionary: '🗣️', tension: '⚡', turning_points: '🧭', moments: '✨', awards: '🏅', unsaid: '🤫', predictions: '🔮', notes: '💌' };
+const SEC_SHORT = { verdicts: 'המסקנות', versus: 'הדמות מול הדמות', profile: 'הפרופיל', dictionary: 'המילון הסודי', tension: 'המתח', turning_points: 'רגעי המפנה', moments: 'רגעים', awards: 'פרסים', unsaid: 'מה שלא נאמר', predictions: 'תחזיות', notes: 'פתקים' };
 
+const SEC_ORDER = ['profile', 'verdicts', 'dictionary', 'tension', 'turning_points', 'moments', 'unsaid', 'predictions', 'versus', 'notes', 'awards'];
 function fullReportHTML(rep) {
-  const secs = rep.sections || [];
+  // awards always close the report
+  const secs = [...(rep.sections || [])].sort((a, b) => (SEC_ORDER.indexOf(a.key) + 1 || 50) - (SEC_ORDER.indexOf(b.key) + 1 || 50));
   let h = `<article class="fr" id="fullReport">
     <header class="fr-head">
-      <span class="kicker">הדוח המלא${rep.demo ? ' · דוגמה' : ''}</span>
+      <span class="kicker">${rep.local ? 'הדוח של סקופי' : 'הדוח המלא'}${rep.demo ? ' · דוגמה' : ''}</span>
       <h1>${T(rep.headline)}</h1>
       <div class="fr-by"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#1a1530"/><circle cx="60" cy="60" r="38" fill="#ffe1e8"/><circle cx="47" cy="55" r="6" fill="#1a1530"/><circle cx="73" cy="55" r="6" fill="#1a1530"/><path d="M48 74 q12 9 24 0" stroke="#1a1530" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
         <div><b>סקופי</b><small>קרא ${fmt(R.total)} הודעות${rep.sampled ? ' (במבחר קטעים)' : ''}, כולל את אלה שמחקתם</small></div></div>
+      <button class="story-cta" id="openStory"><span class="ring"><span>▶</span></span><span>לצפות בסיפור של הצ'אט<small>${storySlides(R).length} שקופיות במסך מלא. מושלם לצילום מסך לקבוצה.</small></span></button>
     </header>
     <div class="fr-hook">${(rep.hook || []).map(p => `<p>${TB(p)}</p>`).join('')}</div>
     <div class="fr-oneliner">${TB(rep.one_liner)}</div>`;
@@ -2542,7 +2564,7 @@ function freePrompt(r) {
 
 ${aiUserPrompt(r, sample)}
 
-פורמט התשובה: החזר JSON תקין בלבד, בלי שום טקסט לפני או אחרי, בדיוק במבנה הזה (key של כל section הוא אחד מ: profile, dictionary, tension, turning_points, moments, awards, unsaid, predictions, notes):
+פורמט התשובה: החזר JSON תקין בלבד, בלי שום טקסט לפני או אחרי, בדיוק במבנה הזה (key של כל section הוא אחד מ: profile, verdicts, dictionary, tension, turning_points, moments, unsaid, predictions, versus, notes, awards):
 ${JSON_SHAPE}`;
 }
 function parseLooseJSON(text) {
@@ -3140,6 +3162,334 @@ function thinkingShow(ms = 2600) {
 }
 
 /* =========================================================
+   Scopy's own written report: built from the real messages, no AI needed
+   ========================================================= */
+// Hebrew gender from how people talk about themselves ("אני מגיעה" / "אני מגיע")
+const G_PAIRS = [['מגיע', 'מגיעה'], ['יודע', 'יודעת'], ['צריך', 'צריכה'], ['חושב', 'חושבת'], ['עייף', 'עייפה'], ['בא', 'באה'], ['הולך', 'הולכת'], ['אוהב', 'אוהבת'], ['מצטער', 'מצטערת'], ['בטוח', 'בטוחה'], ['עסוק', 'עסוקה'], ['מתגעגע', 'מתגעגעת'], ['שמח', 'שמחה'], ['מבין', 'מבינה'], ['יכול', 'יכולה'], ['נוסע', 'נוסעת'], ['עובד', 'עובדת'], ['יושב', 'יושבת'], ['מוכן', 'מוכנה'], ['ער', 'ערה'], ['ישן', 'ישנה'], ['מת', 'מתה'], ['סגור', 'סגורה'], ['חולה', 'חולה'], ['מסכים', 'מסכימה'], ['רעב', 'רעבה'], ['לחוץ', 'לחוצה'], ['זוכר', 'זוכרת'], ['שונא', 'שונאת'], ['מקווה', 'מקווה'], ['נשבע', 'נשבעת'], ['יוצא', 'יוצאת'], ['חוזר', 'חוזרת'], ['כותב', 'כותבת'], ['רואה', 'רואה'], ['מרגיש', 'מרגישה'], ['גמור', 'גמורה'], ['מאחר', 'מאחרת']];
+const G_M = new Map(), G_F = new Map();
+G_PAIRS.forEach(([m, f]) => { if (m !== f) { G_M.set(m, 1); G_F.set(f, 1); } });
+function inferGenders(r) {
+  const score = new Map(r.people.map(p => [p.name, 0]));
+  const re = /(?:^|[\s,.!?])אני\s+(?:לא\s+|כבר\s+|ממש\s+|עדיין\s+|גם\s+)?([א-ת]+)/g;
+  for (const m of r.msgs) {
+    if (!m.text || !score.has(m.from)) continue;
+    let x; re.lastIndex = 0;
+    while ((x = re.exec(m.text))) { const w = x[1]; if (G_M.has(w)) score.set(m.from, score.get(m.from) - 1); else if (G_F.has(w)) score.set(m.from, score.get(m.from) + 1); }
+  }
+  for (const p of r.people) { const s = score.get(p.name); p.g = s >= 2 ? 'f' : s <= -2 ? 'm' : null; }
+}
+const gx = (p, m, f) => m === f ? m : p.g === 'f' ? f : p.g === 'm' ? m : `${m}/${f.startsWith(m) ? f.slice(m.length) : f}`;
+
+function buildLocalReport(r) {
+  inferGenders(r);
+  const msgs = r.msgs, P = r.people.filter(p => p.msgs >= 3), main = P.slice(0, 8);
+  const meP = r.me ? r.people.find(p => p.name === r.me) : null;
+  const isText = m => m.text && !m.media && !MEDIA_RE.test(m.text.trim()) && !DELETED_RE.test(m.text.trim());
+  const hm = m => m.t ? `${String(m.t.getHours()).padStart(2, '0')}:${String(m.t.getMinutes()).padStart(2, '0')}` : '';
+  const bub = m => ({ from: m.from, text: m.media || MEDIA_RE.test((m.text || '').trim()) ? '📷 מדיה' : DELETED_RE.test((m.text || '').trim()) ? '🚫 ההודעה נמחקה' : truncate(m.text, 260), time: hm(m) });
+  const around = (i, before = 2, after = 3) => {
+    const t0 = msgs[i].t, out = [];
+    for (let k = Math.max(0, i - before); k <= Math.min(msgs.length - 1, i + after); k++) { if (!t0 || !msgs[k].t || Math.abs(msgs[k].t - t0) < 8 * HOUR) out.push(bub(msgs[k])); }
+    return out;
+  };
+  const chat = arr => ({ kind: 'chat', emoji: '', title: '', text: '', date: '', messages: arr });
+  const para = text => ({ kind: 'paragraph', emoji: '', title: '', text, date: '', messages: [] });
+  const item = (emoji, title, text, date = '') => ({ kind: 'item', emoji, title, text, date, messages: [] });
+  const N = p => `**${p.name}**`;
+  // pronouns: talk to the reader directly, about everyone else
+  const V = p => p === meP ? { He: p.g === 'f' ? 'את' : 'אתה', he: p.g === 'f' ? 'את' : 'אתה', his: 'שלך', him: 'אותך', from: 'ממך', to: 'לך' }
+    : { He: gx(p, 'הוא', 'היא'), he: gx(p, 'הוא', 'היא'), his: gx(p, 'שלו', 'שלה'), him: gx(p, 'אותו', 'אותה'), from: gx(p, 'ממנו', 'ממנה'), to: gx(p, 'לו', 'לה') };
+  const idxOf = pred => { for (let i = 0; i < msgs.length; i++) if (pred(msgs[i], i)) return i; return -1; };
+  const bestIdx = (pred, score) => { let b = -1, bs = -Infinity; for (let i = 0; i < msgs.length; i++) { if (!pred(msgs[i], i)) continue; const s = score(msgs[i], i); if (s > bs) { bs = s; b = i; } } return b; };
+  const gap = i => i > 0 && msgs[i].t && msgs[i - 1].t ? msgs[i].t - msgs[i - 1].t : Infinity;
+
+  // --- proof finders (all return an index into msgs, or -1) ---
+  const F = {
+    night: p => bestIdx((m, i) => m.from === p.name && isText(m) && m.t && m.t.getHours() < 5 && m.text.split(/\s+/).length >= 3, (m) => m.text.length + (m.t.getHours() >= 1 ? 30 : 0)),
+    morning: p => bestIdx((m) => m.from === p.name && isText(m) && m.t && m.t.getHours() >= 5 && m.t.getHours() < 8, m => -m.t.getHours() * 60 - m.t.getMinutes()),
+    opener: p => bestIdx((m, i) => m.from === p.name && isText(m) && gap(i) > 6 * HOUR && gap(i) < Infinity, (m, i) => Math.min(gap(i), 5 * DAY) / HOUR + (/\?/.test(m.text) ? 20 : 0)),
+    fast: p => bestIdx((m, i) => m.from === p.name && i > 0 && msgs[i - 1].from !== p.name && isText(m) && isText(msgs[i - 1]) && gap(i) < 60e3, (m, i) => msgs[i - 1].text.length),
+    slow: p => bestIdx((m, i) => m.from === p.name && i > 0 && msgs[i - 1].from !== p.name && isText(m) && isText(msgs[i - 1]) && gap(i) > 2 * HOUR && gap(i) < 2 * DAY, (m, i) => gap(i) + (/\?/.test(msgs[i - 1].text) ? 3 * HOUR : 0)),
+    question: p => bestIdx((m, i) => m.from === p.name && isText(m) && /\?/.test(m.text) && m.text.length > 12 && m.text.length < 160, m => m.text.length),
+    laugh: p => bestIdx((m, i) => m.from === p.name && LAUGH_RE.test(m.text || '') && i > 0 && msgs[i - 1].from !== p.name && isText(msgs[i - 1]) && msgs[i - 1].text.length > 15, (m, i) => msgs[i - 1].text.length),
+    love: p => bestIdx((m) => m.from === p.name && isText(m) && LOVE_RE.test(m.text) && m.text.length > 6, m => m.text.length),
+    emoji: p => bestIdx((m) => m.from === p.name && isText(m), m => emojisOf(m.text).length * 10 + Math.min(m.text.length, 60) / 10),
+    media: p => bestIdx((m, i) => m.from === p.name && (m.media || MEDIA_RE.test((m.text || '').trim())) && i + 2 < msgs.length && msgs[i + 1].from === p.name, () => 1),
+    brief: p => bestIdx((m, i) => m.from === p.name && isText(m) && m.text.split(/\s+/).length <= 2 && i > 0 && msgs[i - 1].from !== p.name && isText(msgs[i - 1]) && msgs[i - 1].text.split(/\s+/).length >= 12, (m, i) => msgs[i - 1].text.length),
+    sorry: p => bestIdx((m) => m.from === p.name && isText(m) && SORRY_RE.test(m.text), m => m.text.length),
+    thanks: p => bestIdx((m) => m.from === p.name && isText(m) && THANKS_RE.test(m.text), m => m.text.length),
+    double: p => bestIdx((m, i) => m.from === p.name && isText(m) && i > 0 && msgs[i - 1].from === p.name && gap(i) > 30 * 60e3 && gap(i) < DAY, (m, i) => gap(i)),
+    signature: p => { const w = p.signature && p.signature[0] && p.signature[0][0]; return w ? bestIdx((m) => m.from === p.name && isText(m) && m.text.toLowerCase().includes(w) && m.text.length < 160, m => -Math.abs(m.text.length - 50)) : -1; },
+    any: p => bestIdx((m) => m.from === p.name && isText(m) && m.text.length > 15 && m.text.length < 140, m => -Math.abs(m.text.length - 60)),
+  };
+  const proof = (p, kinds) => { for (const k of kinds) { const i = F[k](p); if (i >= 0) return { k, i }; } return null; };
+
+  // --- per-archetype voice: how they see themselves vs what the chat shows ---
+  const A = {
+    engine: { self: p => `${V(p).He} ${gx(p, 'בטוח', 'בטוחה')} ש${V(p).he} סתם עוד ${gx(p, 'משתתף', 'משתתפת')} בצ'אט.`, real: p => `בפועל, ${Math.round(p.share * 100)}% מכל ההודעות פה הן ${V(p).his}. כשהצ'אט שותק, ${V(p).he} ${gx(p, 'זה', 'זו')} שמחזיר אותו לחיים, ואם צריך, גם פעמיים ברצף.`, proofs: ['double', 'opener', 'any'], after: p => `ככה נראה ${gx(p, 'מישהו', 'מישהי')} שלא ${gx(p, 'מוכן', 'מוכנה')} לתת לשיחה הזאת למות.` },
+    novelist: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} ${gx(p, 'כותב', 'כותבת')} "רק כמה מילים".`, real: p => `${p.avgWords.toFixed(1)} מילים בממוצע להודעה, ופעם אחת ${fmt(p.longest.split(/\s+/).length)} מילים ברצף. זה כבר לא צ'אט, זה טור דעה.`, proofs: ['longest'], after: p => `ואף אחד לא עצר ${V(p).him} באמצע. סימן שקוראים עד הסוף.` },
+    emoji: { self: p => `${V(p).He} ${gx(p, 'בטוח', 'בטוחה')} ש${V(p).he} ${gx(p, 'מתבטא', 'מתבטאת')} במילים.`, real: p => `${fmt(p.emojis)} אימוג'ים, ובעיקר ${p.topEmoji.join(' ')}. חצי מהרגשות בצ'אט הזה עוברים דרך פרצופים קטנים.`, proofs: ['emoji'], after: () => `תרגום חופשי: יותר רגש ממה שמישהו פה מוכן להגיד במילים.` },
+    owl: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} ${gx(p, 'הולך', 'הולכת')} לישון בשעה נורמלית.`, real: p => `${Math.round(p.nightRate * 100)}% מההודעות ${V(p).his} נשלחו בין חצות לחמש בבוקר. השעה האהובה: ${String(p.peakHour).padStart(2, '0')}:00.`, proofs: ['night'], after: () => `ההודעות הכי כנות בצ'אט הזה נכתבות כשכולם אמורים לישון.` },
+    bird: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} שכולם ערים בשבע בבוקר.`, real: p => `${Math.round(p.morningRate * 100)}% מההודעות ${V(p).his} נשלחו לפני 9. כולם עוד ישנים, ו${V(p).he} כבר ${gx(p, 'מעדכן', 'מעדכנת')}.`, proofs: ['morning'], after: () => `ה"בוקר טוב" הזה מגיע לפני שהקפה של כולם מוכן.` },
+    starter: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} שהשיחות פה פשוט "קורות".`, real: p => `${fmt(p.starts)} פעמים ${V(p).he} ${gx(p, 'זה ששובר', 'זו ששוברת')} שקט של שש שעות ומעלה. ${Math.round(p.startShare * 100)}% מהשיחות מתחילות ${V(p).from}.`, proofs: ['opener'], after: () => `מישהו צריך להיות הראשון לכתוב. פה זה כמעט תמיד אותו בן אדם.` },
+    flash: { self: p => `${V(p).He} ${gx(p, 'בטוח', 'בטוחה')} ש${V(p).he} ${gx(p, 'רגוע', 'רגועה')} לגמרי עם הטלפון.`, real: p => `חציון של ${fmtDur(p.rt)} לתשובה. הטלפון כנראה מודבק ${V(p).to} ליד.`, proofs: ['fast'], after: () => `זה כבר לא זמן תגובה, זה רפלקס.` },
+    ghost: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} ${gx(p, 'עונה', 'עונה')} "די מהר".`, real: p => `חציון של ${fmtDur(p.rt)} לתשובה. ${V(p).He} ${gx(p, 'קורא', 'קוראת')} הכל, ${gx(p, 'עונה', 'עונה')} כשבא ${V(p).to}.`, proofs: ['slow'], after: () => `תסתכלו על השעות. בצד השני מישהו חיכה.` },
+    curious: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} סתם ${gx(p, 'סקרן', 'סקרנית')}.`, real: p => `${fmt(p.questions)} שאלות. ${Math.round(p.qRate * 100)}% מההודעות ${V(p).his} נגמרות בסימן שאלה.`, proofs: ['question'], after: () => `וכל "שאלה קטנה" פה היא אף פעם לא באמת קטנה.` },
+    comic: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} שכולם פה מצחיקים.`, real: p => `${fmt(p.laughs)} הודעות עם צחוק. "חחחח" זה כבר סימן פיסוק ${V(p).his}.`, proofs: ['laugh'], after: () => `קהל חם כזה כל קומיקאי היה רוצה.` },
+    romantic: { self: p => `${V(p).He} ${gx(p, 'בטוח', 'בטוחה')} ש${V(p).he} ${gx(p, 'מסתיר', 'מסתירה')} רגשות היטב.`, real: p => `${fmt(p.love)} הודעות עם לבבות, "אוהב/ת" או "מתגעגע/ת". הלב פה על המקלדת.`, proofs: ['love'], after: () => `ואף אחד לא צחק. כולם רק שמחו בשקט.` },
+    photo: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} ${gx(p, 'שולח', 'שולחת')} "כמה תמונות".`, real: p => `${Math.round(p.mediaRate * 100)}% מההודעות ${V(p).his} הן תמונות, סרטונים, סטיקרים והקלטות. ${fmt(p.media)} קבצים.`, proofs: ['media', 'any'], after: () => `בלי הגלריה הזאת, לצ'אט לא היה זיכרון.` },
+    brief: { self: p => `${V(p).He} ${gx(p, 'בטוח', 'בטוחה')} ש${V(p).he} ${gx(p, 'עונה', 'עונה')} "מספיק".`, real: p => `${p.avgWords.toFixed(1)} מילים בממוצע. "כן", "סבבה" ו"👍" זה משפט שלם ${V(p).his}.`, proofs: ['brief', 'any'], after: () => `פסקה שלמה מצד אחד, מילה אחת מהצד השני. זה כל הסיפור.` },
+    polite: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} שזה נורמלי להגיד תודה על הכל.`, real: p => `${fmt(p.thanks)} פעמים "תודה". הנימוס ${V(p).his} מחזיק את האווירה.`, proofs: ['thanks', 'any'], after: () => `אמא שלך גאה.` },
+    sorry: { self: p => `${V(p).He} ${gx(p, 'בטוח', 'בטוחה')} ש${V(p).he} לא ${gx(p, 'מתנצל', 'מתנצלת')} הרבה.`, real: p => `${fmt(p.sorry)} פעמים "סליחה" או "סורי". זה כבר לא התנצלות, זה מותג.`, proofs: ['sorry', 'any'], after: () => `ואף אחד לא באמת כעס.` },
+    quiet: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} ${gx(p, 'חלק פעיל', 'חלק פעיל')} מהצ'אט.`, real: p => `${(p.share * 100).toFixed(1)}% מההודעות. ${V(p).He} ${gx(p, 'קורא', 'קוראת')} הכל ו${gx(p, 'כותב', 'כותבת')} רק כשבאמת צריך.`, proofs: ['any'], after: () => `וכשזה קורה, כולם עוצרים לקרוא.` },
+    steady: { self: p => `${V(p).He} ${gx(p, 'חושב', 'חושבת')} ש${V(p).he} ${gx(p, 'האדם', 'האדם')} הכי רגיל בצ'אט.`, real: p => `${fmt(p.msgs)} הודעות, חציון תגובה של ${fmtDur(p.rt)}, בדיוק באמצע בכל מדד. ${V(p).He} העוגן.`, proofs: ['signature', 'any'], after: () => `כל צ'אט צריך מישהו אחד יציב. פה זה ברור מי.` },
+  };
+  const archKey = p => A[p.arch.id] ? p.arch.id : 'steady';
+  const proofBlocks = (p, kinds) => {
+    if (kinds[0] === 'longest') { const i = idxOf(m => m.from === p.name && m.text === p.longest); return i >= 0 ? [chat([bub(msgs[i])])] : []; }
+    const pr = proof(p, kinds); if (!pr) return [];
+    const before = ['fast', 'slow', 'laugh', 'brief'].includes(pr.k) ? 1 : 1, after = pr.k === 'media' || pr.k === 'double' ? 2 : 2;
+    return [chat(around(pr.i, before, after))];
+  };
+
+  // --- headline, hook ---
+  const top = P[0], second = P[1], quiet = P[P.length - 1];
+  const topE = r.topEmoji[0] ? r.topEmoji[0][0] : '💬';
+  const hh = r.timed ? String(r.peakHour).padStart(2, '0') + ':00' : '';
+  let headline, one;
+  if (r.isPair && r.interest) {
+    const lead = r.interest.a >= r.interest.b ? P[0] : P[1], lag = lead === P[0] ? P[1] : P[0];
+    const g = Math.abs(r.interest.a - r.interest.b);
+    headline = g < 8 ? `⚖️ ${lead.name} ו${lag.name}: שני אנשים, אותה כמות אכפתיות, ו־${fmt(r.total)} הודעות שמוכיחות את זה`
+      : g < 22 ? `${topE} ${lead.name} קצת יותר בעניין, ו${lag.name} יודע/ת את זה מצוין` : `🎯 ${lead.name} רודף/ת, ${lag.name} עונה. ${fmt(r.total)} הודעות של מרדף`;
+    one = g < 8 ? 'צ\'אט מאוזן להפליא. שניכם מושכים את החבל באותו כוח.' : `${lead.name} משקיע/ה ${Math.max(r.interest.a, r.interest.b)}% מהאנרגיה. ${lag.name}, הכדור אצלך.`;
+  } else {
+    headline = `${topE} ${top.name} מחזיק/ה את הקבוצה, ${quiet.name} רק קורא/ת, ובאמצע ${fmt(r.total)} הודעות של כאוס`;
+    one = `קבוצה שבנויה על ${top.name}, נשענת על ${second ? second.name : 'כולם'}, וצוחקת על הכל.`;
+  }
+  const kindTail = { couple: 'שני אנשים שלא מסוגלים להפסיק לדבר אחד עם השנייה', crush: 'שני אנשים שמשחקים אותה אדישים ולא מצליחים', friend: 'שני חברים שיודעים אחד על השני יותר מדי', group: 'קבוצה של חברים שמנהלת מדינה קטנה', family: 'משפחה שמתאמת ארוחת שישי כמו מבצע צבאי', ex: 'שני אנשים שהיה ביניהם הרבה, ועכשיו פחות', work: 'צוות שעובד קשה, או לפחות כותב על זה הרבה' };
+  const hook = [
+    `אם מישהו זר היה גולל בצ'אט הזה, הוא היה רואה ${fmt(r.total)} הודעות${r.timed ? ` ב־${fmt(r.spanDays)} ימים, שיא פעילות ב־${hh}${r.peakHour < 5 ? ' בלילה' : ''}` : ''}, והמון ${topE}. הוא היה חושב שמדובר ב${kindTail[r.kind] || (r.isPair ? 'שני אנשים שיש להם הרבה מה להגיד' : 'קבוצה שיש לה הרבה מה להגיד')}.`,
+    `אבל סקופי קרא כל הודעה, ומאחורי המספרים יש משהו פשוט יותר. ${r.timed && r.bestStreak > 2 ? `${fmt(r.bestStreak)} ימים ברצף שבהם מישהו פה לא ויתר. ` : ''}${P.reduce((s, p) => s + p.love, 0) > 2 ? `${fmt(P.reduce((s, p) => s + p.love, 0))} הודעות עם לבבות, שאף אחד לא יודה שהוא שלח. ` : ''}${P.reduce((s, p) => s + p.laughs, 0) > 5 ? `ו־${fmt(P.reduce((s, p) => s + p.laughs, 0))} פעמים שמישהו פה צחק באמת.` : ''}`,
+  ];
+
+  // --- profile ---
+  const profile = [];
+  main.forEach((p, k) => {
+    const a = A[archKey(p)];
+    const intro = p === meP ? `ואז יש ${V(p).him}, ${N(p)}. ` : (k === 0 ? '' : '');
+    profile.push(para(`${intro}${p === meP ? '' : N(p) + ' '}${p === meP ? a.self(p) : a.self(p).replace(/^(הוא|היא|הוא\/היא) /, '')}`.replace(/\s+/g, ' ').trim()));
+    profile.push(para(`אבל הצ'אט מספר סיפור אחר. ${a.real(p)}`));
+    profile.push(...proofBlocks(p, a.proofs));
+    profile.push(para(a.after(p)));
+    const story = traitStory(p);
+    if (story) profile.push(para(story));
+  });
+
+  // --- secondary traits woven into one story per person ---
+  function traitStory(p) {
+    const mean = f => P.reduce((a, x) => a + f(x), 0) / Math.max(1, P.length);
+    const T = [
+      ['owl', x => x.nightRate, x => `${gx(x, 'חי', 'חיה')} בלילה (${Math.round(x.nightRate * 100)}% מההודעות אחרי חצות)`],
+      ['flash', x => x.rt != null ? 1 / Math.max(x.rt, 1e4) : 0, x => `${gx(x, 'עונה', 'עונה')} תוך ${fmtDur(x.rt)} בחציון`],
+      ['starter', x => x.startShare, x => `${gx(x, 'פותח', 'פותחת')} ${Math.round(x.startShare * 100)}% מהשיחות`],
+      ['curious', x => x.qRate, x => `${gx(x, 'שואל', 'שואלת')} הרבה (${fmt(x.questions)} שאלות)`],
+      ['comic', x => x.laughRate, x => `${gx(x, 'צוחק', 'צוחקת')} בקלות (${fmt(x.laughs)} פעמים)`],
+      ['romantic', x => x.loveRate, x => `לא ${gx(x, 'מתבייש', 'מתביישת')} להראות רגש (${fmt(x.love)} הודעות עם אהבה)`],
+      ['emoji', x => x.emojiRate, x => `${gx(x, 'מדבר', 'מדברת')} באימוג'ים, בעיקר ${x.topEmoji[0] || ''}`],
+      ['novelist', x => x.avgWords, x => `${gx(x, 'כותב', 'כותבת')} ארוך (${x.avgWords.toFixed(1)} מילים להודעה)`],
+      ['double', x => x.doubles / Math.max(1, x.msgs), x => `${gx(x, 'כותב', 'כותבת')} שוב כשלא עונים (${fmt(x.doubles)} פעמים)`],
+      ['lastword', x => x.lastWord / Math.max(1, x.msgs), x => `${gx(x, 'נשאר', 'נשארת')} עם המילה האחרונה (${fmt(x.lastWord)} פעמים)`],
+    ];
+    const got = T.filter(([id]) => id !== p.arch.id).map(([id, f, txt]) => ({ id, txt, r: (f(p) + 1e-9) / (mean(f) + 1e-9) })).filter(x => x.r > 1.2).sort((a, b) => b.r - a.r).slice(0, 3);
+    const low = T.filter(([id]) => id !== p.arch.id).map(([id, f]) => ({ id, r: (f(p) + 1e-9) / (mean(f) + 1e-9) })).sort((a, b) => a.r - b.r)[0];
+    const lowTxt = { owl: 'ישן/ה בלילות', flash: 'לא ממהר/ת לענות', starter: 'כמעט לא כותב/ת ראשון/ה', curious: 'כמעט לא שואל/ת שאלות', comic: 'קשה להצחיק', romantic: 'שומר/ת את הרגשות לעצמו/ה', emoji: 'כמעט לא משתמש/ת באימוג\'ים', novelist: 'כותב/ת קצר', double: 'לא רודף/ת אחרי אף אחד', lastword: 'נותן/ת לאחרים לסגור' }[low && low.r < .7 ? low.id : ''];
+    if (!got.length && !lowTxt) return '';
+    const who = p === meP ? 'ומה עוד? ' + V(p).He : 'ומה עוד על ' + p.name + '? ' + V(p).He;
+    return `${who} ${got.map(x => x.txt(p)).join(', ')}${lowTxt ? `${got.length ? ', אבל ' : ' '}${lowTxt}` : ''}. ${got.length >= 2 ? 'השילוב הזה הוא בדיוק מה שהופך את הדמות הזאת למה שהיא.' : ''}`.replace(/\s+/g, ' ');
+  }
+
+  // --- conclusions: who dominates, is there love, who needs whom ---
+  const conc = [];
+  const tot = k => P.reduce((a, x) => a + x[k], 0) || 1;
+  const dom = P.map(x => ({ p: x, s: .3 * x.msgs / tot('msgs') + (r.timed ? .3 * x.starts / tot('starts') + .2 * x.lastWord / tot('lastWord') : 0) + .2 * x.words / tot('words') })).sort((a, b) => b.s - a.s);
+  if (dom.length >= 2) {
+    const d = dom[0].p, o = dom[1].p, gapD = (dom[0].s - dom[1].s) / dom[0].s;
+    conc.push(item('👑', 'מי הדומיננטי/ת פה?', gapD < .12
+      ? `אין פה מלך. ${N(d)} ו${N(o)} מחלקים את השליטה כמעט שווה בשווה: כמה כותבים, מי פותח, מי סוגר. זה צ'אט של שותפים, לא של מנהל ועובד.`
+      : `${N(d)}, בלי ויכוח. ${V(d).He} ${gx(d, 'כותב', 'כותבת')} ${Math.round(d.msgs / tot('msgs') * 100)}% מההודעות${r.timed ? `, ${gx(d, 'פותח', 'פותחת')} ${Math.round(d.starts / tot('starts') * 100)}% מהשיחות ו${gx(d, 'סוגר', 'סוגרת')} ${Math.round(d.lastWord / tot('lastWord') * 100)}% מהן` : ''}. ${N(o)} ${gx(o, 'מגיב', 'מגיבה')} לקצב ש${V(d).he} ${gx(d, 'קובע', 'קובעת')}. ${gapD > .35 ? 'זה לא צ\'אט, זו הופעת יחיד עם קהל.' : 'זו לא דיקטטורה, אבל ברור מי מחזיק את ההגה.'}`));
+    const oi = F.opener(d); if (oi >= 0) conc.push(chat(around(oi, 0, 3)));
+  }
+  // love: hearts, love words, good-night rituals, late talks
+  const lovePer100 = P.reduce((a, x) => a + x.love, 0) / r.total * 100;
+  const rituals = P.reduce((a, x) => a + x.gn + x.gm, 0);
+  const nightPct = r.timed ? P.reduce((a, x) => a + x.night, 0) / r.total * 100 : 0;
+  const ls = lovePer100 * 2 + Math.min(20, rituals / Math.max(1, r.spanDays || 30) * 30) + nightPct * .5;
+  const loveTier = ls > 22 ? ['💘', 'כן. ובגדול.', 'זה לא נראה ככה בכל הודעה, אבל המספרים לא משקרים'] : ls > 10 ? ['❤️‍🔥', 'יש פה ניצוץ.', 'לא כל יום, לא בכל הודעה, אבל הוא שם'] : ls > 4 ? ['🤗', 'יש פה חום, בעיקר חברי.', 'אכפתיות אמיתית, בלי דרמה רומנטית'] : ['🧊', 'כרגע, עניינים.', 'הצ\'אט הזה עובד, מתאם וצוחק, אבל הלב נשאר בבית'];
+  const lover = [...P].sort((a, b) => b.love - a.love)[0];
+  conc.push(item(loveTier[0], `יש פה אהבה? ${loveTier[1]}`, `${loveTier[2]}: ${fmt(P.reduce((a, x) => a + x.love, 0))} הודעות עם לב, "אוהב/ת" או "מתגעגע/ת"${rituals ? `, ${fmt(rituals)} פעמים "בוקר טוב" או "לילה טוב"` : ''}${nightPct > 3 ? `, ו־${Math.round(nightPct)}% מהשיחות קורות אחרי חצות` : ''}. ${lover && lover.love > 0 ? `מי שהכי לא מפחד/ת להגיד את זה: ${N(lover)}.` : ''}`));
+  const li = lover && lover.love > 0 ? F.love(lover) : -1;
+  if (li >= 0) conc.push(chat(around(li, 1, 2)));
+  // who needs whom
+  if (r.isPair && r.interest) {
+    const [a, b] = P, lead = r.interest.a >= r.interest.b ? a : b, lag = lead === a ? b : a, g = Math.abs(r.interest.a - r.interest.b);
+    conc.push(item('🧲', 'מי צריך את מי יותר?', g < 8 ? `תיקו: ${r.interest.a}% מול ${r.interest.b}%. שניכם מושכים את החבל באותו כוח, וזה הסימן הכי טוב שיש.` : `${N(lead)}, ב־${Math.max(r.interest.a, r.interest.b)}%. ${V(lead).He} ${gx(lead, 'יוזם', 'יוזמת')}, ${gx(lead, 'שואל', 'שואלת')} ו${gx(lead, 'עונה', 'עונה')} מהר יותר. ${N(lag)} לא ${gx(lag, 'אדיש', 'אדישה')}, ${V(lag).he} פשוט ${gx(lag, 'יודע', 'יודעת')} ש${V(lead).he} תמיד ${gx(lead, 'יחזור', 'תחזור')}.`));
+  } else {
+    const glue = groupGlue(r);
+    if (glue) conc.push(item('🧲', 'מי הדבק של הקבוצה?', `${N(glue.p)}. על כל הודעה ${V(glue.p).his} מגיעות ${glue.v.toFixed(2)} תגובות בממוצע, יותר מכל אחד אחר. כש${V(glue.p).he} ${gx(glue.p, 'כותב', 'כותבת')}, כולם עונים.`));
+  }
+  if (r.chapters && r.chapters.length > 1) {
+    const pk = r.peakChapter, lastC = r.chapters[r.chapters.length - 1];
+    conc.push(item('🌡️', 'מתי היה הכי חם?', `${rangeLabel(pk.start, pk.end)}: ${pk.perDay.toFixed(1)} הודעות ביום. ${pk === lastC ? 'וזה עכשיו. הצ\'אט הזה בשיא שלו.' : `היום הקצב הוא ${lastC.perDay.toFixed(1)} ביום. ${lastC.perDay < pk.perDay * .6 ? 'משהו נרגע מאז. אולי זה טוב, אולי שווה לבדוק.' : 'כמעט אותו חום, רק יותר בוגר.'}`}`));
+  }
+  if (P.length >= 2) conc.push(para(`השורה התחתונה: ${N(P[0])} ${gx(P[0], 'הוא', 'היא')} ${P[0].arch.title}, ${N(P[1])} ${gx(P[1], 'הוא', 'היא')} ${P[1].arch.title}. ${P[0].arch.id === P[1].arch.id ? 'שני אנשים מאותו חומר.' : 'שני הפכים, וזה בדיוק מה שמחזיק את זה.'}`));
+
+  // --- dictionary ---
+  const dict = [];
+  const used = new Set();
+  for (const p of main) for (const [w, c] of (p.signature || []).slice(0, 2)) {
+    if (used.has(w) || dict.length >= 9) continue; used.add(w);
+    const fi = idxOf(m => m.from === p.name && isText(m) && m.text.toLowerCase().includes(w));
+    const ex = fi >= 0 ? msgs[fi] : null;
+    dict.push({ kind: 'term', emoji: p.topEmoji[0] || '🔤', title: `"${w}"`, text: `המילה של ${N(p)}: ${fmt(c)} פעמים. כשמישהו אחר פה כותב "${w}", זה כנראה ציטוט.`, date: ex ? `הופיעה לראשונה${ex.t ? ` ב־${fmtDate(ex.t)}` : ''}: "${truncate(ex.text, 90)}"` : '', messages: [] });
+  }
+  for (const [e, c] of r.topEmoji.slice(0, 2)) {
+    if (dict.length >= 10) break;
+    const owner = [...P].sort((a, b) => (b.emojiMap.get(e) || 0) - (a.emojiMap.get(e) || 0))[0];
+    dict.push({ kind: 'term', emoji: e, title: e, text: `נשלח ${fmt(c)} פעמים, בעיקר על ידי ${N(owner)}. בצ'אט הזה זה לא אימוג'י, זה מצב רוח.`, date: '', messages: [] });
+  }
+
+  // --- tension ---
+  const tension = [];
+  const unans = P.filter(p => p.unanswered >= 2).sort((a, b) => b.unanswered - a.unanswered);
+  if (r.timed) {
+    const qi = bestIdx((m, i) => isText(m) && /\?/.test(m.text) && m.text.length > 10 && (i === msgs.length - 1 || (msgs[i + 1].t - m.t) > 10 * HOUR), (m) => m.text.length);
+    if (qi >= 0) {
+      tension.push(para(`נתחיל בשאלות שנשארו באוויר. ${unans.length ? unans.slice(0, 3).map(p => `${N(p)} (${fmt(p.unanswered)})`).join(', ') + ' ' + (unans.length > 1 ? 'שאלו שאלות שחיכו יותר מחצי יום לתשובה.' : `${gx(unans[0], 'שאל', 'שאלה')} שאלות שחיכו יותר מחצי יום לתשובה.`) : 'יש פה שאלה אחת לפחות שחיכתה הרבה זמן.'}`));
+      const nx = msgs[qi + 1];
+      tension.push(chat([bub(msgs[qi]), ...(nx ? [{ ...bub(nx), time: nx.t ? `${fmtDate(nx.t)} ${hm(nx)}` : '' }] : [])]));
+      if (nx && nx.t) tension.push(para(`${fmtDur(nx.t - msgs[qi].t)} של שקט בין השאלה לתשובה. מישהו בדק את הטלפון כמה פעמים באמצע.`));
+    }
+    const dbl = [...P].sort((a, b) => b.doubles - a.doubles)[0];
+    if (dbl && dbl.doubles >= 2) {
+      tension.push(item('📨', `"עוד הודעה אחת": ${dbl.name}`, `${fmt(dbl.doubles)} פעמים ${N(dbl)} ${gx(dbl, 'כתב', 'כתבה')} שוב אחרי חצי שעה בלי תשובה.`));
+      const di = F.double(dbl); if (di >= 0) tension.push(chat(around(di, 1, 1)));
+    }
+    const withRT = P.filter(p => p.rt != null && p.rts.length > 5).sort((a, b) => a.rt - b.rt);
+    if (withRT.length >= 2 && withRT[withRT.length - 1].rt > withRT[0].rt * 2.5) {
+      const f = withRT[0], s = withRT[withRT.length - 1];
+      tension.push(item('⏱️', 'פער זמני התגובה', `${N(f)} עונה תוך ${fmtDur(f.rt)}. ${N(s)} תוך ${fmtDur(s.rt)}. פי ${Math.round(s.rt / f.rt)}. מישהו פה מחכה ליד הטלפון, ומישהו אחר לא.`));
+    }
+  }
+  const del = P.filter(p => p.deleted > 0).sort((a, b) => b.deleted - a.deleted)[0];
+  if (del) tension.push(item('🫣', 'ההודעות שנמחקו', `${N(del)} ${gx(del, 'מחק', 'מחקה')} ${fmt(del.deleted)} הודעות. סקופי לא יודע מה היה כתוב שם. אבל הוא יודע שמישהו התחרט.`));
+  if (!tension.length) tension.push(para('אין פה מלחמות. יש פה משהו נדיר יותר: צ\'אט שבו כולם פשוט נחמדים אחד לשני. סקופי חיפש, ולא מצא על מה לריב.'));
+
+  // --- turning points ---
+  const turns = [];
+  if (r.timed) {
+    const f0 = msgs[0];
+    turns.push({ t: f0.t, blocks: [item('🚪', 'איך זה התחיל', `ההודעה הראשונה. אף אחד עוד לא ידע לאן זה הולך.`, `${DAYS_HE[f0.t.getDay()]}, ${fmtDate(f0.t)}`), chat(msgs.slice(0, 4).map(bub))] });
+    if (r.busiest) {
+      const dayMsgs = []; msgs.forEach((m, i) => { if (dayKey(m.t) === r.busiest.k) dayMsgs.push(i); });
+      const hours = new Array(24).fill(0); dayMsgs.forEach(i => hours[msgs[i].t.getHours()]++);
+      const ph = hours.indexOf(Math.max(...hours));
+      const start = dayMsgs.find(i => msgs[i].t.getHours() === ph);
+      const words = (r.busiest.words || []).map(w => `"${w[0]}"`).join(', ');
+      turns.push({ t: r.busiest.date, blocks: [item('🔥', 'היום שבו כולם דיברו', `${fmt(r.busiest.v)} הודעות ביום אחד, רובן סביב ${String(ph).padStart(2, '0')}:00.${words ? ` המילים של היום: ${words}.` : ''}`, `${DAYS_HE[r.busiest.date.getDay()]}, ${fmtDate(r.busiest.date)}`), chat(msgs.slice(start, start + 5).map(bub))] });
+    }
+    if (r.longestGap && r.longestGap.gap > 2 * DAY) {
+      const ti = msgs.indexOf(r.longestGap.to);
+      const br = r.people.find(p => p.name === r.longestGap.to.from);
+      turns.push({ t: r.longestGap.to.t, blocks: [item('🤐', 'השקט הגדול', `${fmtDur(r.longestGap.gap)} בלי מילה. ואז ${N(br)} ${gx(br, 'שבר', 'שברה')} את השתיקה.`, fmtDate(r.longestGap.to.t)), chat(around(ti, 1, 2))] });
+    }
+    const L = msgs[msgs.length - 1];
+    turns.push({ t: L.t, blocks: [item('📍', 'איפה זה עומד עכשיו', r.trend ? (r.trend.dir === 'up' ? `החודש האחרון: ${Math.round(r.trend.change * 100)}% יותר הודעות מהחודש שלפניו. זה מתחמם.` : r.trend.dir === 'down' ? `החודש האחרון: ${Math.round(-r.trend.change * 100)}% פחות הודעות מהחודש שלפניו. משהו מתקרר.` : 'החודש האחרון נראה בדיוק כמו החודש שלפניו. יציב.') : 'ההודעות האחרונות, נכון לעכשיו.', fmtDate(L.t)), chat(msgs.slice(-4).map(bub))] });
+    turns.sort((a, b) => a.t - b.t);
+  }
+
+  // --- moments ---
+  const moments = [];
+  // funniest: the message that got the most laughs right after it
+  let fun = -1, funS = 0;
+  for (let i = 0; i < msgs.length - 1; i++) {
+    if (!isText(msgs[i]) || msgs[i].text.length < 8) continue;
+    let s = 0; for (let k = i + 1; k <= Math.min(msgs.length - 1, i + 4); k++) if (msgs[k].from !== msgs[i].from && LAUGH_RE.test(msgs[k].text || '')) s++;
+    if (s > funS) { funS = s; fun = i; }
+  }
+  if (fun >= 0) moments.push(item('😂', 'הכי מצחיק', `ההודעה שהכי הרבה אנשים צחקו עליה מיד אחריה. ${N(r.people.find(p => p.name === msgs[fun].from))}, זה שלך.`, msgs[fun].t ? fmtDate(msgs[fun].t) : ''), chat(around(fun, 0, 3)));
+  const lv = bestIdx((m, i) => isText(m) && LOVE_RE.test(m.text) && m.text.length > 12, m => m.text.length);
+  if (lv >= 0) moments.push(item('🥹', 'הכי מתוק', 'הרגע שבו מישהו פה אמר את מה שכולם מרגישים.', msgs[lv].t ? fmtDate(msgs[lv].t) : ''), chat(around(lv, 1, 2)));
+  if (r.timed) {
+    const ni = bestIdx((m, i) => isText(m) && m.t.getHours() >= 1 && m.t.getHours() < 5 && i + 1 < msgs.length && msgs[i + 1].from !== m.from && msgs[i + 1].t - m.t < 30 * 60e3, m => m.t.getHours() * 60 + m.t.getMinutes());
+    if (ni >= 0) moments.push(item('🌙', 'הכי מאוחר', `${hm(msgs[ni])} בלילה, ושני אנשים עדיין ערים. סקופי לא שופט.`, fmtDate(msgs[ni].t)), chat(around(ni, 1, 2)));
+  }
+
+  // --- awards ---
+  const awards = computeAwards(r).slice(0, 8).map(({ a, w, ru }) => item(a.em, a.t, `הזוכה: ${N(w.p)}. ${a.s(w.v, w.p)}.${ru ? ` במקום השני: ${ru.p.name}.` : ''}`));
+
+  // --- versus: character against character ---
+  const vs = [];
+  if (P.length >= 2) {
+    const [a, b] = P;
+    const row = (emoji, title, va, vb, fa, fb, low) => { const aw = low ? va < vb : va > vb; const tie = va === vb; return { kind: 'vs', emoji, title, text: tie ? '' : (aw ? a.name : b.name), date: '', messages: [{ from: a.name, text: fa, time: '' }, { from: b.name, text: fb, time: '' }] }; };
+    vs.push(para(`ועכשיו, ראש בראש. ${N(a)}, ${a.arch.em} ${a.arch.title}, מול ${N(b)}, ${b.arch.em} ${b.arch.title}.`));
+    vs.push(row('💬', 'מי כותב יותר', a.msgs, b.msgs, fmt(a.msgs), fmt(b.msgs)));
+    if (r.timed) vs.push(row('🎬', 'מי פותח שיחות', a.starts, b.starts, fmt(a.starts), fmt(b.starts)));
+    if (a.rt != null && b.rt != null) vs.push(row('⚡', 'מי עונה מהר', a.rt, b.rt, fmtDur(a.rt), fmtDur(b.rt), true));
+    vs.push(row('📜', 'מי כותב ארוך', a.avgWords, b.avgWords, `${a.avgWords.toFixed(1)} מילים`, `${b.avgWords.toFixed(1)} מילים`));
+    vs.push(row('❓', 'מי שואל', a.questions, b.questions, fmt(a.questions), fmt(b.questions)));
+    vs.push(row('😂', 'מי צוחק', a.laughs, b.laughs, fmt(a.laughs), fmt(b.laughs)));
+    vs.push(row('❤️', 'מי אומר את זה', a.love, b.love, fmt(a.love), fmt(b.love)));
+    if (r.timed) vs.push(row('🦉', 'מי ער בלילה', a.night, b.night, fmt(a.night), fmt(b.night)));
+    const winsA = vs.filter(x => x.kind === 'vs' && x.text === a.name).length, winsB = vs.filter(x => x.kind === 'vs' && x.text === b.name).length;
+    vs.push(para(`${winsA === winsB ? 'תיקו מושלם. שתי דמויות הפוכות שמשלימות אחת את השנייה.' : `${N(winsA > winsB ? a : b)} ${gx(winsA > winsB ? a : b, 'לוקח', 'לוקחת')} ${Math.max(winsA, winsB)} מתוך ${winsA + winsB} קטגוריות.`} ${a.arch.title} צריך/ה ${b.arch.title}, וזה בדיוק מה שמחזיק את הצ'אט הזה.`));
+  }
+
+  // --- notes ---
+  const NOTE = {
+    engine: p => `בלעדיך הצ'אט הזה היה שותק. אבל פעם אחת, תני/תן למישהו אחר לכתוב ראשון. אולי תופתע/י.`,
+    novelist: () => `כל מילה שלך נקראת. תמשיך/י לכתוב, רק תשאיר/י גם מקום לתשובה.`,
+    emoji: () => `האימוג'ים שלך הם חצי מהאווירה פה. מדי פעם, תגיד/י את זה גם במילים.`,
+    owl: () => `ההודעות של שתיים בלילה הן הכי כנות. אבל גם שינה זה דבר.`,
+    bird: () => `הבוקר טוב שלך מחמם לכולם את היום. גם אם אף אחד לא עונה לפני עשר.`,
+    starter: () => `את/ה זה שתמיד כותב/ת ראשון/ה. זה לא חולשה. זה הדבר הכי חשוב בצ'אט.`,
+    flash: () => `עונה מהר זה מתוק. אבל מותר גם לחכות דקה לפני "חחח".`,
+    ghost: () => `בצד השני מחכים לך. תשובה של מילה אחת עדיפה על שקט של שלוש שעות.`,
+    curious: () => `השאלות שלך מראות שאכפת לך. ולפעמים, גם לספר משהו על עצמך זה בסדר.`,
+    comic: () => `הצחוק שלך הוא הדבק של הצ'אט הזה. אל תפסיק/י.`,
+    romantic: () => `את/ה זה שאומר/ת את הדברים שכולם מרגישים. אל תתבייש/י בזה.`,
+    photo: () => `הגלריה שלך היא הזיכרון של כולם. מדי פעם, תוסיף/י גם משפט.`,
+    brief: () => `"סבבה" זה לא תשובה, זה מגן. פעם אחת, תכתוב/תכתבי משפט שלם.`,
+    polite: () => `התודה שלך לא מובנת מאליה. כולם שמים לב, גם אם לא אומרים.`,
+    sorry: () => `לא צריך להתנצל כל כך הרבה. אף אחד פה לא כועס.`,
+    quiet: () => `כשאת/ה כותב/ת, כולם קוראים. תכתוב/י יותר.`,
+    steady: () => `את/ה העוגן של הצ'אט. זה לא מרגש, אבל בלעדיך הכל היה מתפרק.`,
+  };
+  const notes = main.slice(0, 8).map(p => ({ kind: 'note', emoji: '', title: p.name, text: (NOTE[archKey(p)] || NOTE.steady)(p), date: '', messages: [] }));
+
+  const sections = [
+    { key: 'profile', emoji: '🧠', title: r.isPair ? `${P[0].name} מול ${P[1] ? P[1].name : ''}: מי באמת מי` : 'הפרופיל: מי באמת מחזיק את הצ\'אט הזה', intro: 'כל אחד פה בטוח שהוא יודע מה התפקיד שלו. ההודעות עצמן מספרות משהו קצת אחר.', blocks: profile },
+    { key: 'verdicts', emoji: '🔍', title: 'המסקנות של סקופי', intro: 'אחרי שקראתי הכל, הנה מה שאני באמת חושב.', blocks: conc },
+    { key: 'dictionary', emoji: '🗣️', title: 'המילון הסודי: איך מדברים פה', intro: 'מילים שלמישהו מבחוץ לא אומרות כלום, ולכם אומרות הכל.', blocks: dict },
+    { key: 'tension', emoji: '⚡', title: 'המתח: איפה זה מתחכך', intro: '', blocks: tension },
+    ...(turns.length ? [{ key: 'turning_points', emoji: '🧭', title: 'רגעי המפנה', intro: 'הרגעים שבהם הצ\'אט הזה השתנה.', blocks: turns.flatMap(x => x.blocks) }] : []),
+    ...(moments.length ? [{ key: 'moments', emoji: '✨', title: 'רגעים שלא נשכחים', intro: '', blocks: moments }] : []),
+    ...(vs.length ? [{ key: 'versus', emoji: '🥊', title: `הדמות מול הדמות: ${P[0].name} נגד ${P[1].name}`, intro: '', blocks: vs }] : []),
+    { key: 'notes', emoji: '💌', title: 'פתק לכל אחד', intro: '', blocks: notes },
+    { key: 'awards', emoji: '🏆', title: 'טקס הפרסים', intro: 'ולסיום, הרגע שכולם חיכו לו. בלי נאומי תודה, בבקשה.', blocks: awards },
+  ].filter(s => s.blocks.length);
+
+  return {
+    local: true,
+    headline, one_liner: one, hook: hook.filter(Boolean),
+    cast: main.map(p => ({ name: p.name, emoji: p.arch.em, title: p.arch.title, line: p.arch.desc(p) })),
+    sections,
+    verdict: verdictText(r).replace(/<b>(.*?)<\/b>/g, '**$1**').replace(/<[^>]+>/g, ''),
+  };
+}
+
+/* =========================================================
    Flow
    ========================================================= */
 const LOAD_STEPS = ['פותח את הקובץ', 'מפרק הודעות', 'מודד זמני תגובה', 'סופר אימוג\'ים', 'מחלק תארים', 'כותב את פסק הדין'];
@@ -3158,6 +3508,7 @@ async function run(getMessages, opts = {}) {
     if (opts.kind) R.kind = opts.kind;
     if (opts.lang) R.lang = opts.lang;
     if (opts.me !== undefined && !ai) R.me = opts.me;
+    try { R.local = buildLocalReport(R); } catch (e) { console.warn('local report failed', e); R.local = null; }
     anon = false; $('#anonToggle').checked = false;
     clearInterval(tick); bar.style.width = '100%';
     await readingShow(R.msgs, R.me);
@@ -3165,7 +3516,6 @@ async function run(getMessages, opts = {}) {
     await thinkingShow();
     show('reportView');
     renderReport();
-    openStory(0);
   } catch (e) {
     clearInterval(tick);
     if (opts.kind) { show('wizard'); wzRender(); toast(e.message || 'משהו השתבש'); return; }
