@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#1a1530">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%231a1530'/%3E%3Ccircle cx='44' cy='44' r='22' fill='none' stroke='%23ff6b8b' stroke-width='9'/%3E%3Cpath d='M60 60l18 18' stroke='%23ffd166' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@600;700;800;900&family=Frank+Ruhl+Libre:wght@500;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <style>
@@ -349,6 +349,82 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .modal-box img{width:100%;border-radius:16px;display:block;}
 .modal-box .row{display:flex;gap:8px;margin-top:12px;}
 .modal-box .row .btn{flex:1;}
+
+
+/* ---------- the written report (reading layout) ---------- */
+.fr{background:#fff;border-radius:30px;box-shadow:var(--shadow);padding:clamp(22px,5vw,56px) clamp(18px,5vw,64px);max-width:860px;margin:0 auto;}
+.fr-head{text-align:center;}
+.fr-head h1{font-family:'Frank Ruhl Libre','Rubik',serif;font-weight:900;font-size:clamp(28px,5vw,44px);line-height:1.15;margin:10px 0 18px;text-wrap:balance;}
+.fr-by{display:inline-flex;align-items:center;gap:10px;text-align:right;background:#faf8ff;border-radius:999px;padding:6px 16px 6px 8px;}
+.fr-by svg{width:40px;height:40px;flex:none;}
+.fr-by b{display:block;font-size:15px;}
+.fr-by small{font-size:12.5px;color:var(--muted);}
+.fr-hook{margin-top:28px;font-size:clamp(17px,2.2vw,19.5px);line-height:1.85;color:var(--ink);}
+.fr-hook p+p{margin-top:14px;}
+.fr-hook p:first-child::first-letter{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:3.1em;float:right;line-height:.9;margin:6px 0 0 10px;color:var(--pink);}
+.fr-oneliner{margin:26px 0 0;padding:16px 20px;border-radius:18px;background:var(--yellow-soft);font-weight:800;font-size:17px;text-align:center;}
+.fr-castrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-top:22px;}
+.fr-cc{display:flex;gap:10px;align-items:flex-start;background:#faf8ff;border-radius:16px;padding:12px;min-width:0;}
+.fr-cc b{display:block;font-size:15px;}
+.fr-cc span{display:block;font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.fr-cc small{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45;}
+.fr-toc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);}
+.fr-toc b{font-size:13px;color:var(--muted);margin-inline-end:4px;}
+.fr-toc a{text-decoration:none;background:#f6f2fc;border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.fr-toc a:hover{background:var(--ink);color:#fff;}
+.fr-sec{margin-top:56px;scroll-margin-top:140px;}
+.fr-ico{width:66px;height:66px;margin:0 auto 14px;border-radius:50%;background:#fff;box-shadow:0 6px 20px -6px rgba(26,21,48,.25);display:grid;place-items:center;font-size:30px;}
+.fr-h{font-family:'Frank Ruhl Libre','Rubik',serif;font-weight:900;font-size:clamp(24px,3.6vw,34px);line-height:1.2;text-align:center;text-wrap:balance;}
+.fr-orn{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 22px;}
+.fr-orn i{width:44px;height:1.5px;background:var(--ink);opacity:.7;}
+.fr-orn b{width:8px;height:8px;background:var(--ink);transform:rotate(45deg);}
+.fr-p{font-size:clamp(16.5px,2vw,18.5px);line-height:1.85;color:var(--ink);margin:0 0 16px;}
+.fr-p b{font-weight:800;}
+.fr-intro{color:var(--ink-2);}
+.fr-blocks{display:flex;flex-direction:column;}
+/* WhatsApp-style real excerpts */
+.wa{background:#efe7dd;background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:14px 14px;border-radius:18px;padding:14px 12px;margin:4px 0 18px;display:flex;flex-direction:column;gap:5px;}
+.wa-b{max-width:84%;align-self:flex-end;background:#fff;border-radius:12px;border-top-left-radius:3px;padding:6px 10px 4px;box-shadow:0 1px 1px rgba(0,0,0,.08);font-size:15.5px;line-height:1.45;word-break:break-word;}
+.wa-b.mine{align-self:flex-start;background:#d9fdd3;border-top-left-radius:12px;border-top-right-radius:3px;}
+.wa-b b{display:block;font-size:13px;margin-bottom:1px;}
+.wa-b span{white-space:pre-wrap;}
+.wa-b i{display:flex;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;font-size:11px;color:#667781;margin-top:2px;direction:ltr;}
+.wa-b i svg{width:16px;height:11px;}
+/* glossary, items, notes */
+.fr-term{display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line);}
+.fr-term:last-child{border-bottom:0;}
+.fr-term dt{font-family:'Frank Ruhl Libre','Rubik',serif;font-weight:900;font-size:19px;display:flex;gap:8px;align-items:flex-start;}
+.fr-term dd{font-size:16px;line-height:1.7;}
+.fr-term dd small{display:block;font-size:13px;color:var(--muted);margin-top:4px;}
+@media (max-width:560px){.fr-term{grid-template-columns:1fr;gap:4px;}}
+.fr-item{display:flex;gap:12px;align-items:flex-start;background:#faf8ff;border-radius:16px;padding:14px 16px;margin:0 0 12px;}
+.fr-item-em{font-size:26px;line-height:1.1;flex:none;}
+.fr-item b{display:block;font-size:16.5px;margin-bottom:2px;}
+.fr-item p{font-size:15.5px;line-height:1.7;color:var(--ink-2);}
+.fr-date{display:inline-block;background:var(--ink);color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:6px;}
+.fr-notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:12px;}
+.fr-note{background:#fffdf6;border:1px solid #f1e6c6;border-radius:6px 18px 18px 18px;padding:16px 18px;box-shadow:0 8px 20px -14px rgba(26,21,48,.4);border-top:4px solid var(--pc);}
+.fr-note span{font-weight:800;font-size:13px;color:var(--muted);}
+.fr-note p{font-size:16px;line-height:1.7;margin:6px 0;}
+.fr-note i{font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--pink);}
+.fr-verdict{margin-top:56px;background:var(--ink);color:#fff;border-radius:24px;padding:24px;text-align:center;}
+.fr-verdict span{font-weight:800;font-size:13px;letter-spacing:.06em;color:var(--yellow);}
+.fr-verdict p{font-family:'Frank Ruhl Libre',serif;font-size:clamp(18px,2.6vw,22px);line-height:1.6;margin-top:8px;}
+.r-divider{display:flex;align-items:center;gap:14px;margin:46px 0 0;color:var(--muted);font-weight:800;}
+.r-divider::before,.r-divider::after{content:'';flex:1;height:1px;background:var(--line);}
+/* AI call to action */
+.ai-cta-top{display:flex;gap:14px;align-items:flex-start;}
+.ai-cta-em{font-size:34px;line-height:1;}
+.ai-cta-top h3{font-size:20px;font-weight:900;margin-bottom:4px;}
+.ai-cta-top p{font-size:15px;color:var(--ink-2);}
+.me-pick{margin-top:16px;}
+.me-pick > b{font-size:15px;}
+.me-pick > span{font-size:13.5px;color:var(--muted);margin-inline-start:6px;}
+.me-opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.ai-live{display:flex;flex-direction:column;gap:2px;background:#faf8ff;border-radius:14px;padding:12px 14px;}
+.ai-live small{color:var(--muted);}
+.dotpulse{width:10px;height:10px;border-radius:50%;background:var(--pink);display:inline-block;margin-inline-end:8px;animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
 
 /* story button in hero */
 .story-cta{display:flex;align-items:center;gap:14px;margin-top:18px;background:linear-gradient(90deg,var(--pink),var(--violet));color:#fff;border-radius:20px;padding:14px 18px;font-weight:800;font-size:16px;width:100%;text-align:right;box-shadow:0 14px 30px -14px rgba(255,107,139,.9);transition:transform .15s;}
@@ -1417,6 +1493,10 @@ function renderReport() {
     <button class="story-cta" id="openStory"><span class="ring"><span>▶</span></span><span>לצפות בסיפור של הצ'אט<small>${storySlides(r).length} שקופיות, כמו סיכום שנתי. מושלם לצילום מסך לקבוצה.</small></span></button>
   </section>`;
 
+  // the written report (or the button to create it)
+  h += `<section class="r-sec reveal in" id="frSec">${R.ai ? fullReportHTML(R.ai) : `<h2>✍️ הדוח המלא</h2><p class="sub">המספרים למטה מספרים מה קרה. הדוח המלא מספר את הסיפור.</p>${aiCtaHTML()}`}</section>`;
+  if (R.ai) h += `<div class="r-divider"><span>📊 הנתונים מאחורי הסיפור</span></div>`;
+
   // interest meter
   if (r.isPair) {
     const [a, b] = r.people, I = r.interest;
@@ -1543,25 +1623,15 @@ function renderReport() {
     h += `<section class="r-sec reveal"><h2>✨ רגעים</h2><div class="moments">${ms.map(([i, t, d]) => `<div class="moment"><div class="mi">${i}</div><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div></section>`;
   }
 
-  // AI
-  h += `<section class="r-sec reveal" id="aiSec"><h2>🤖 ניתוח עומק עם AI</h2><p class="sub">המספרים מספרים מה קרה. Claude קורא את ההודעות עצמן ומספר למה.</p>
-    <div class="card ai-card">
-      <p style="font-size:15px">הדביקו מפתח API של Anthropic (מתחיל ב־<code>sk-ant-</code>). ההודעות נשלחות ישירות מהדפדפן שלכם ל־Anthropic, לא דרכנו. בצ'אט ארוך במיוחד נשלחים קטעים מייצגים מלאים.</p>
-      <div class="ai-row"><input id="aiKey" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false"><button class="btn btn-ink" id="aiGo">✨ לכתוב ניתוח</button></div>
-      <label class="toggle" style="margin-top:10px"><input type="checkbox" id="aiRemember"><span style="display:inline">לזכור את המפתח בדפדפן הזה</span></label>
-      <p class="ai-note">משיגים מפתח ב־console.anthropic.com. העלות נמוכה, בדרך כלל סנטים בודדים לצ'אט.${anon ? ' במצב אנונימי השמות מוחלפים גם במה שנשלח.' : ''}</p>
-      <div class="ai-out" id="aiOut"></div>
-    </div></section>`;
-
   $('#report').innerHTML = h;
   renderBoard(boards, 0);
   $$('[data-board]').forEach(b => b.onclick = () => { $$('[data-board]').forEach(x => x.setAttribute('aria-pressed', x === b)); renderBoard(boards, +b.dataset.board); });
   $$('[data-card]').forEach(b => b.onclick = () => openCard(R.people[+b.dataset.card]));
-  try { const k = localStorage.getItem('chatscope.key'); if (k) { $('#aiKey').value = k; $('#aiRemember').checked = true; } } catch {}
-  $('#aiGo').onclick = runAI;
+  try { const k = localStorage.getItem('chatscope.key'); if (k && $('#aiKey')) { $('#aiKey').value = k; $('#aiRemember').checked = true; } } catch {}
+  if ($('#aiGo')) $('#aiGo').onclick = runAI;
+  $$('[data-me]').forEach(b => b.onclick = () => { R.me = b.dataset.me || null; $$('[data-me]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
   $('#openStory').onclick = () => openStory(0);
   if ($('#game')) newRound();
-  if (R.aiHtml) $('#aiOut').innerHTML = R.aiHtml;
   observeReveal();
 }
 function rangeLabel(a, b) {
@@ -1670,8 +1740,28 @@ function storySlides(r) {
     const [e, c] = r.topEmoji[0];
     push(`<div class="eyebrow anim d1">האימוג'י של הצ'אט</div><div class="emoji-xl anim d2" style="font-size:clamp(120px,36vw,170px)">${esc(e)}</div><p class="anim d3">נשלח ${fmt(c)} פעמים</p><div class="chips anim d4">${r.topEmoji.slice(1, 7).map(([e2, c2]) => `<span>${esc(e2)} ${fmt(c2)}</span>`).join('')}</div>`);
   }
-  // per-person archetypes
-  for (const p of r.people.slice(0, 8).filter(p => p.msgs >= 5)) {
+  const ai = r.ai;
+  if (ai) {
+    push(`<div class="eyebrow anim d1">סקופי סיכם את זה ככה</div><h2 class="anim d2" style="font-family:'Frank Ruhl Libre',serif">${T(ai.headline)}</h2><div class="sbox anim d3" style="text-align:center">${TB(ai.one_liner)}</div>`, GRADS[1]);
+    for (const c of (ai.cast || []).slice(0, 8)) {
+      const p = personByName(c.name);
+      push(`<div class="eyebrow anim d1">סקופי חושב ש…</div><div class="mid anim d1">${T(c.name)}</div><div class="emoji-xl anim d2" style="margin-top:14px">${esc(c.emoji)}</div><h2 class="anim d2">${T(c.title)}</h2><div class="sbox anim d3">${TB(c.line)}</div>
+        ${p && p.signature && p.signature.length ? `<div class="chips anim d4">${p.signature.slice(0, 3).map(w => `<span>"${esc(w[0])}"</span>`).join('')}</div>` : ''}`);
+    }
+    const dict = (ai.sections || []).find(x => x.key === 'dictionary');
+    const terms = dict ? dict.blocks.filter(b => b.kind === 'term').slice(0, 4) : [];
+    if (terms.length) push(`<div class="eyebrow anim d1">המילון הסודי</div><h2 class="anim d1">מילים שרק אתם מבינים</h2><div class="sbars anim d2">${terms.map((t, i) => `<div class="sbox anim d${Math.min(5, i + 2)}" style="margin-top:0"><b>${esc(t.emoji)} ${T(t.title)}</b><br>${TB(t.text)}</div>`).join('')}</div>`, GRADS[5]);
+    const tp = (ai.sections || []).find(x => x.key === 'turning_points');
+    if (tp) {
+      const chat = tp.blocks.find(b => b.kind === 'chat' && b.messages.length), item = tp.blocks.find(b => b.kind === 'item');
+      if (item) push(`<div class="eyebrow anim d1">רגע מפנה</div><h2 class="anim d2">${esc(item.emoji)} ${T(item.title)}</h2><p class="anim d3">${TB(item.text)}</p>${chat ? `<div class="anim d4" style="text-align:right;margin-top:14px">${chatBlockHTML(chat.messages.slice(0, 4))}</div>` : ''}`, GRADS[3]);
+    }
+    const uns = (ai.sections || []).find(x => x.key === 'unsaid');
+    const up = uns && uns.blocks.find(b => b.kind === 'paragraph');
+    if (up) push(`<div class="eyebrow anim d1">מה שאף אחד לא אומר בקול</div><div class="emoji-xl anim d2">🤫</div><p class="anim d3" style="font-size:18px;line-height:1.6">${TB(up.text)}</p>`, GRADS[7]);
+  }
+  // per-person archetypes (when there is no written report)
+  if (!ai) for (const p of r.people.slice(0, 8).filter(p => p.msgs >= 5)) {
     push(`<div class="eyebrow anim d1">סקופי חושב ש…</div><div class="mid anim d1">${nm(p)}</div><div class="emoji-xl anim d2" style="margin-top:14px">${p.arch.em}</div><h2 class="anim d2">${p.arch.title}</h2>
       <p class="anim d3">${esc(p.arch.desc(p))}</p><div class="sbox anim d4">״${esc(p.arch.quote(p))}״</div>
       ${p.signature && p.signature.length ? `<div class="chips anim d5">${p.signature.slice(0, 3).map(w => `<span>"${esc(w[0])}"</span>`).join('')}</div>` : ''}`);
@@ -1686,7 +1776,7 @@ function storySlides(r) {
   }
   const aw = computeAwards(r).slice(0, 4);
   if (aw.length) push(`<div class="eyebrow anim d1">טקס הפרסים</div><h2 class="anim d1">והזוכים הם…</h2><div class="sbars anim d2" style="gap:10px">${aw.map(({ a, w }, i) => `<div class="sbox anim d${Math.min(5, i + 2)}" style="margin-top:0;display:flex;gap:12px;align-items:center"><span style="font-size:30px">${a.em}</span><span><b>${esc(a.t)}</b><br>${nm(w.p)} · ${esc(a.s(w.v, w.p))}</span></div>`).join('')}</div>`, GRADS[2]);
-  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d1">פסק הדין של סקופי</div><p class="anim d2" style="font-size:17.5px;line-height:1.6">${verdictText(r)}</p><p class="anim d4" style="margin-top:16px;font-weight:800">צלמו מסך ושלחו לקבוצה 👀</p>`, GRADS[1]);
+  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d1">פסק הדין של סקופי</div><p class="anim d2" style="font-size:17.5px;line-height:1.6">${ai ? TB(ai.verdict) : verdictText(r)}</p><p class="anim d4" style="margin-top:16px;font-weight:800">צלמו מסך ושלחו לקבוצה 👀</p>`, GRADS[1]);
   return S;
 }
 
@@ -1875,97 +1965,398 @@ $('#copyBtn').onclick = async () => {
 };
 $('#anonToggle').onchange = e => { anon = e.target.checked; renderReport(); };
 
-/* ---------- AI ---------- */
-function chatSample(r, budget = 160000) {
+/* ---------- AI: the full written report ---------- */
+// Set this to your deployed proxy (see worker.js) so visitors don't need their own key.
+const AI_PROXY = '';
+const AI_MODEL = 'claude-opus-5-5';
+const CHAR_BUDGET = 500000; // how much of the chat Claude reads (chars); longer chats are sampled in full windows
+
+const S_STR = { type: 'string' };
+const S_ARR = items => ({ type: 'array', items });
+const S_OBJ = props => ({ type: 'object', additionalProperties: false, required: Object.keys(props), properties: props });
+// A report is prose sections made of blocks: paragraphs, real chat excerpts, glossary terms, list items, notes.
+const S_BLOCK = S_OBJ({
+  kind: { type: 'string', enum: ['paragraph', 'chat', 'term', 'item', 'note'] },
+  emoji: S_STR, title: S_STR, text: S_STR, date: S_STR,
+  messages: S_ARR(S_OBJ({ from: S_STR, text: S_STR, time: S_STR })),
+});
+const REPORT_SCHEMA = S_OBJ({
+  headline: S_STR,
+  one_liner: S_STR,
+  hook: S_ARR(S_STR),
+  cast: S_ARR(S_OBJ({ name: S_STR, emoji: S_STR, title: S_STR, line: S_STR })),
+  sections: S_ARR(S_OBJ({
+    key: { type: 'string', enum: ['profile', 'dictionary', 'tension', 'turning_points', 'moments', 'awards', 'unsaid', 'predictions', 'notes'] },
+    emoji: S_STR, title: S_STR, intro: S_STR, blocks: S_ARR(S_BLOCK),
+  })),
+  verdict: S_STR,
+});
+
+const AI_SYSTEM = `אתה "סקופי". קראת צ'אט שלם, הודעה אחרי הודעה, ועכשיו אתה כותב עליו דוח ארוך, אישי ומצחיק, מהסוג שאנשים שולחים לקבוצה ומצטטים ממנו שבועות.
+
+הקול שלך:
+- חד, חם, חצוף ומצחיק. כותב כמו חבר שראה הכל, לא מפחד להגיד את זה, ואוהב את האנשים האלה.
+- אתה מספר סיפור, לא מסכם נתונים. פסקאות מלאות, עם פרטים ספציפיים: שמות של דברים שהם הזכירו, מקומות, מותגים, הרגלים, מספרים.
+- כל טענה נשענת על ראיה מהצ'אט. הדרך הכי חזקה להוכיח: לשלב קטע אמיתי מהשיחה (בלוק chat) ממש בתוך הטקסט, ואז משפט שמסביר מה רואים בו.
+- הלב של הדוח הוא הפער: איך כל אחד רואה ומציג את עצמו, מול מה שההתנהגות שלו בצ'אט מראה. תמיד עם ראיות.
+- אתה מזהה מה מיוחד רק לצ'אט הזה: כינויים, בדיחות פנימיות, ביטויים שנולדו ברגע מסוים, טקסים חוזרים.
+- הרבה הומור, ורגע או שניים של כנות אמיתית שמזכירים למה האנשים האלה ביחד.
+
+כללים:
+- ציטוטים ובלוקי chat רק מהטקסט עצמו, מילה במילה, כולל שגיאות כתיב ואימוג'ים (מותר לקצר עם "…"). לעולם אל תמציא הודעה, ציטוט או אירוע.
+- תאריכים כפי שהם מופיעים בצ'אט (למשל 14.3.2025). בלי תאריכים, תאר זמן במילים.
+- מגדר: הסק מצורות הפועל והתואר שכל אחד משתמש בהן על עצמו בהודעות שלו. אם לא ברור, נסח בניטרליות.
+- הרגיסטר משקף את הצ'אט. אם הם מקללים, מותר לך לקלל. לעולם לא ללעוג למראה, לגוף, למוצא או לזהות, ובלי אבחנות פסיכולוגיות.
+- עברית טבעית ומדוברת. אפשר להדגיש שמות ומושגים עם **כוכביות**. בלי מקפים ארוכים ובלי משפטים מליציים.
+- השתמש בשמות בדיוק כפי שהם מופיעים בצ'אט.`;
+
+function aiUserPrompt(r, sample) {
+  const nm = from => { const p = r.people.find(x => x.name === from); return p ? dispName(p) : from; };
+  const me = r.me ? r.people.find(p => p.name === r.me) : null;
+  return `זה ${sample.sampled ? 'מבחר של קטעים רצופים מתוך' : ''} צ'אט${r.isPair ? ' בין שני אנשים' : ` קבוצתי עם ${r.people.length} משתתפים`}${anon ? '' : ` בשם "${r.title}"`}: ${r.total} הודעות${r.timed ? `, מ־${fmtDate(r.first)} עד ${fmtDate(r.last)}` : ''}.
+${me ? `\nמי שקורא את הדוח הוא ${nm(me.name)}. פנה אליו/ה ישירות בגוף שני ("ואז יש אותך, ${nm(me.name)}..."), ועל כל השאר כתוב בגוף שלישי.` : '\nהדוח נקרא על ידי כל חברי הצ\'אט. כתוב על כולם בגוף שלישי, ומדי פעם פנה לכולם יחד ("אתם").'}
+
+מדדים שכבר חושבו מכל הצ'אט (שלב אותם כשהם מחזקים טענה):
+${statsForAI(r)}
+${r.isPair && r.interest ? `מדד "מי יותר בעניין": ${nm(r.people[0].name)} ${r.interest.a}%, ${nm(r.people[1].name)} ${r.interest.b}%` : ''}
+${r.busiest ? `היום הכי עמוס: ${fmtDate(r.busiest.date)} עם ${r.busiest.v} הודעות.` : ''}
+
+מבנה הדוח:
+- headline: כותרת ראשית עם אימוג'י שמסכמת את המהות של הצ'אט בצורה מפתיעה ומצחיקה.
+- one_liner: שורה תחתונה במשפט אחד.
+- hook: 2–3 פסקאות פתיחה. התחל מתצפית שתופסת (למשל מה היה חושב אדם זר שגולל בצ'אט הזה), ובסוף עבור לרגע כנות על מה שבאמת מחזיק את האנשים האלה יחד.
+- cast: לכל משתתף מרכזי (עד 8) כינוי־תפקיד קולע (title), אימוג'י, ושורה אחת (line) שמסכמת אותו.
+- sections, בסדר הזה, כל אחד עם emoji, כותרת מקורית בסגנון "נושא: הטוויסט" (title), ופסקת פתיחה (intro):
+  1. profile: הפרופיל. החלק הארוך ביותר. לכל משתתף מרכזי פסקה או שתיים: איך הוא רואה את עצמו, ומה האמת לפי הצ'אט, עם פרטים ספציפיים. לפחות שני בלוקי chat עם חילופי דברים אמיתיים שמראים את ההבדל ביניהם, ואחרי כל אחד פסקה קצרה שמפרשת אותו.
+  2. dictionary: המילון הסודי. פסקת intro על השפה שלהם, ואז 5–12 בלוקי term: title הוא המונח, emoji, text הוא ההגדרה המשועשעת, date הוא מתי ואיך זה נולד.
+  3. tension: איפה זה מתחכך. 1–2 פסקאות, בלוק chat אחד לפחות, ו־2–4 בלוקי item עם הטריגרים שחוזרים.
+  4. turning_points: רגעי המפנה בסדר כרונולוגי, 3–7. לכל אחד בלוק item (title, date, text עם הסיפור) ומיד אחריו בלוק chat מהרגע עצמו.
+  5. moments: 3–5 רגעים בלתי נשכחים מסוגים שונים (הכי מצחיק, הכי מתוק, הכי מביך, הכי כאוטי), כל אחד item ואחריו chat.
+  6. awards: 5–8 פרסים מקוריים כבלוקי item: emoji, title הוא שם הפרס, text הוא "הזוכה: שם. ..." עם נימוק וראיה.
+  7. unsaid: מה שאף אחד לא אומר בקול אבל כל ההודעות צועקות אותו. 1–2 פסקאות כנות, לא מרושעות.
+  8. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item.
+  9. notes: פתק אישי מסקופי לכל משתתף מרכזי, בלוק note עם title=שם המשתתף ו־text של 2–3 משפטים.
+- verdict: פסק דין של 2–4 משפטים.
+
+בבלוקים: שדות שלא רלוונטיים לסוג הבלוק נשארים מחרוזת ריקה או מערך ריק. בבלוק chat, messages הן הודעות רצופות ומדויקות מהצ'אט (2–8), עם from כפי שמופיע בצ'אט ו־time (שעה או תאריך ושעה).
+
+<chat>
+${sample.text}
+</chat>`;
+}
+
+function chatSample(r, budget = CHAR_BUDGET) {
   const name = from => { const p = r.people.find(x => x.name === from); return p ? dispName(p) : from; };
   const line = m => `${m.t ? `${fmtDate(m.t)} ${String(m.t.getHours()).padStart(2, '0')}:${String(m.t.getMinutes()).padStart(2, '0')} ` : ''}${name(m.from)}: ${(m.text || '[מדיה]').replace(/\n/g, ' ')}`;
   const all = r.msgs.map(line);
   const size = all.reduce((s, l) => s + l.length + 1, 0);
   if (size <= budget) return { text: all.join('\n'), sampled: false };
-  // evenly spaced contiguous windows
-  const win = 80, avg = size / all.length, nWin = Math.max(1, Math.floor(budget / (avg * win)));
+  // evenly spaced contiguous windows, so conversations stay readable
+  const win = 120, avg = size / all.length, nWin = Math.max(1, Math.floor(budget / (avg * win)));
   const step = Math.floor(all.length / nWin), out = [];
   for (let i = 0; i < nWin; i++) { const s = i * step; out.push(`--- קטע ${i + 1} ---`, ...all.slice(s, s + win)); }
   return { text: out.join('\n'), sampled: true };
 }
 function statsForAI(r) {
-  return r.people.slice(0, 15).map(p => `${dispName(p)}: ${p.msgs} הודעות (${(p.share * 100).toFixed(1)}%), ${p.avgWords.toFixed(1)} מילים להודעה, חציון תגובה ${fmtDur(p.rt)}, פתח/ה ${p.starts} שיחות, ${p.questions} שאלות, ${p.laughs} צחוקים, ${p.love} הודעות אהבה, ${p.night} הודעות לילה, ${p.deleted} נמחקו, ארכיטיפ: ${p.arch.title}`).join('\n');
+  return r.people.slice(0, 15).map(p => `${dispName(p)}: ${p.msgs} הודעות (${(p.share * 100).toFixed(1)}%), ${p.avgWords.toFixed(1)} מילים להודעה${r.timed ? `, חציון תגובה ${fmtDur(p.rt)}, פתח/ה ${p.starts} שיחות, ${p.night} הודעות בין חצות לחמש` : ''}, ${p.questions} שאלות, ${p.laughs} הודעות צחוק, ${p.love} הודעות אהבה, ${p.deleted} נמחקו, ${p.media} מדיה`).join('\n');
 }
-function md(s) {
-  const lines = esc(s).split('\n'); let out = '', inList = false;
-  const inline = t => t.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>');
-  for (const l of lines) {
-    const t = l.trim();
-    if (/^[-*•]\s+/.test(t)) { if (!inList) { out += '<ul>'; inList = true; } out += `<li>${inline(t.replace(/^[-*•]\s+/, ''))}</li>`; continue; }
-    if (inList) { out += '</ul>'; inList = false; }
-    if (/^#{1,2}\s/.test(t)) out += `<h3>${inline(t.replace(/^#+\s/, ''))}</h3>`;
-    else if (/^#{3,}\s/.test(t)) out += `<h4>${inline(t.replace(/^#+\s/, ''))}</h4>`;
-    else if (t) out += `<p>${inline(t)}</p>`;
-  }
-  return out + (inList ? '</ul>' : '');
-}
+
 async function runAI() {
-  const key = $('#aiKey').value.trim();
-  const out = $('#aiOut');
-  if (!/^sk-ant-/.test(key)) { out.innerHTML = '<div class="err">צריך מפתח API תקין של Anthropic שמתחיל ב־sk-ant-</div>'; return; }
-  try { if ($('#aiRemember').checked) localStorage.setItem('chatscope.key', key); else localStorage.removeItem('chatscope.key'); } catch {}
-  const btn = $('#aiGo'); btn.disabled = true; btn.textContent = 'סקופי קורא… (עד דקה)';
-  out.innerHTML = '';
+  const out = $('#aiStatus');
+  let key = '';
+  if (!AI_PROXY) {
+    key = ($('#aiKey')?.value || '').trim();
+    if (!/^sk-ant-/.test(key)) { out.innerHTML = '<div class="err">צריך מפתח API של Anthropic שמתחיל ב־sk-ant-. משיגים אחד ב־console.anthropic.com.</div>'; return; }
+    try { if ($('#aiRemember').checked) localStorage.setItem('chatscope.key', key); else localStorage.removeItem('chatscope.key'); } catch {}
+  }
+  const btn = $('#aiGo'); btn.disabled = true;
   const sample = chatSample(R);
-  const system = `אתה "סקופי", מנתח צ'אטים שנון, חם וחד. אתה כותב בעברית טבעית ויומיומית, עם הומור עדין ולא מעליב, ומבסס כל טענה על דוגמאות קונקרטיות מהשיחה (ציטוטים קצרים). אתה לא מאבחן פסיכולוגית ולא נותן עצות דרמטיות. כשאתה לא יודע מגדר של אדם, נסח בצורה ניטרלית.`;
-  const prompt = `לפניך ${sample.sampled ? 'קטעים מייצגים מתוך' : ''} צ'אט בשם "${anon ? 'צ\'אט' : R.title}" (${R.total} הודעות${R.timed ? `, ${R.spanDays} ימים` : ''}).
-
-נתונים שכבר חושבו:
-${statsForAI(R)}
-
-כתוב דוח בפורמט Markdown עם הכותרות הבאות:
-## בשורה אחת
-משפט אחד שמסכם את הצ'אט.
-## הדינמיקה
-2–3 פסקאות: מי מוביל, מי נמשך, איך האנרגיה השתנתה לאורך הזמן, מה מצית ויכוחים או צחוקים.
-## מה סקופי חושב על כל אחד
-תת־כותרת ### לכל משתתף מרכזי (עד 8), 2–4 משפטים עם ציטוט אופייני אחד ופרס הומוריסטי אחד.
-## בדיחות פנימיות ורגעים
-רשימה של 3–6 נקודות.
-## מה הייתי משנה
-2–3 טיפים קלילים ופרקטיים.
-
-<chat>
-${sample.text}
-</chat>`;
+  const body = {
+    model: AI_MODEL,
+    max_tokens: 32000,
+    stream: true,
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'high', format: { type: 'json_schema', schema: REPORT_SCHEMA } },
+    fallbacks: 'default',
+    system: AI_SYSTEM,
+    messages: [{ role: 'user', content: aiUserPrompt(R, sample) }],
+  };
+  const phases = ['סקופי קורא את כל ההודעות…', 'מחפש את הבדיחות הפנימיות…', 'בונה פרופיל לכל אחד…', 'מאתר את רגעי המפנה…', 'כותב את המילון הסודי…'];
+  let ph = 0, chars = 0;
+  const setStatus = () => { out.innerHTML = `<div class="ai-live"><span class="dotpulse"></span><b>${chars ? `סקופי כותב… ${fmt(chars / 5)} מילים` : phases[ph % phases.length]}</b><small>דוח מלא לוקח בדרך כלל 1–3 דקות. אפשר להמשיך לגלול בינתיים.</small></div>`; };
+  setStatus();
+  const phTimer = setInterval(() => { ph++; if (!chars) setStatus(); }, 4000);
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(AI_PROXY || 'https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
+      headers: AI_PROXY ? { 'content-type': 'application/json' } : {
         'content-type': 'application/json',
         'x-api-key': key,
-        'anthropic-version': '2023-06-01',
+        'anthropic-version': '2026-10-21',
         'anthropic-beta': 'server-side-fallback-2026-07-01',
         'anthropic-dangerous-direct-browser-access': 'true',
       },
-      body: JSON.stringify({
-        model: 'claude-opus-5-5',
-        max_tokens: 16000,
-        thinking: { type: 'adaptive' },
-        output_config: { effort: 'medium' },
-        fallbacks: 'default',
-        system,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+      body: JSON.stringify(body),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error?.message || `שגיאה ${res.status}`);
-    if (data.stop_reason === 'refusal') throw new Error('המודל סירב לנתח את התוכן הזה.');
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-    if (!text) throw new Error('לא התקבלה תשובה.');
-    R.aiHtml = md(text) + (sample.sampled ? '<p class="ai-note">* הצ\'אט ארוך במיוחד, ולכן נשלחו קטעים מייצגים ממנו.</p>' : '');
-    out.innerHTML = R.aiHtml;
+    if (!res.ok) { let msg = `שגיאה ${res.status}`; try { const j = await res.json(); msg = j?.error?.message || msg; } catch {} throw new Error(msg); }
+    // read the SSE stream
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = '', text = '', stop = null;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf('\n\n')) >= 0) {
+        const chunk = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        const dl = chunk.split('\n').find(l => l.startsWith('data:'));
+        if (!dl) continue;
+        let ev; try { ev = JSON.parse(dl.slice(5)); } catch { continue; }
+        if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') { text += ev.delta.text; const before = chars; chars = text.length; if ((chars / 5 | 0) - (before / 5 | 0) > 15) setStatus(); }
+        else if (ev.type === 'message_delta' && ev.delta?.stop_reason) stop = ev.delta.stop_reason;
+        else if (ev.type === 'error') throw new Error(ev.error?.message || 'שגיאה מהשרת');
+      }
+    }
+    if (stop === 'refusal') throw new Error('המודל סירב לכתוב דוח על התוכן הזה.');
+    if (stop === 'max_tokens') throw new Error('הדוח יצא ארוך מדי ונקטע. נסו שוב.');
+    const rep = JSON.parse(text);
+    rep.sampled = sample.sampled;
+    R.ai = rep;
+    renderReport();
+    $('#fullReport')?.scrollIntoView({ behavior: 'smooth' });
+    toast('הדוח המלא מוכן ✍️');
   } catch (e) {
-    out.innerHTML = `<div class="err">${esc(e.message === 'Failed to fetch' ? 'לא הצלחתי להתחבר ל־Anthropic. בדקו את החיבור לאינטרנט.' : e.message)}</div>`;
+    out.innerHTML = `<div class="err">${esc(e.message === 'Failed to fetch' ? 'לא הצלחתי להתחבר לשרת. בדקו את החיבור לאינטרנט ונסו שוב.' : e.message)}</div>`;
   } finally {
-    btn.disabled = false; btn.textContent = '✨ לכתוב ניתוח';
+    clearInterval(phTimer);
+    if (btn) btn.disabled = false;
   }
 }
+
+/* ---------- rendering the written report ---------- */
+// in anonymous mode, swap every real name inside the AI's prose too
+function aiText(s) {
+  s = String(s || '');
+  if (!anon) return s;
+  const ps = [...R.people].sort((a, b) => b.name.length - a.name.length);
+  for (const p of ps) s = s.split(p.name).join(dispName(p));
+  return s;
+}
+const T = s => esc(aiText(s));
+const TB = s => T(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+function personByName(n) {
+  n = String(n || '').trim();
+  return R.people.find(p => p.name === n) || R.people.find(p => n && (p.name.includes(n) || n.includes(p.name)));
+}
+function avatarFor(n, size = 40) {
+  const p = personByName(n);
+  if (p) return avatar(p, size);
+  return `<div class="av" style="background:var(--muted);width:${size}px;height:${size}px;font-size:${size * .38}px">${esc(initials(aiText(n)))}</div>`;
+}
+
+function chatBlockHTML(msgs) {
+  const meName = R.me || (R.isPair ? R.people[1].name : null);
+  let prev = null;
+  return `<div class="wa">${msgs.map(m => {
+    const p = personByName(m.from), mine = p && meName && p.name === meName;
+    const showName = !mine && (!R.isPair || !meName) && m.from !== prev;
+    prev = m.from;
+    return `<div class="wa-b ${mine ? 'mine' : ''}">${showName ? `<b style="color:${p ? p.color : 'var(--violet)'}">${T(m.from)}</b>` : ''}<span>${T(m.text)}</span><i>${T(m.time)}${mine ? ' <svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 6.5l3 3L10 3M7 9.5L13 3" fill="none" stroke="#53bdeb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</i></div>`;
+  }).join('')}</div>`;
+}
+function blockHTML(b) {
+  switch (b.kind) {
+    case 'chat': return (b.messages || []).length ? chatBlockHTML(b.messages) : '';
+    case 'term': return `<div class="fr-term"><dt>${b.emoji ? `<span>${esc(b.emoji)}</span>` : ''}${T(b.title)}</dt><dd>${TB(b.text)}${b.date ? `<small>${T(b.date)}</small>` : ''}</dd></div>`;
+    case 'item': return `<div class="fr-item">${b.emoji ? `<span class="fr-item-em">${esc(b.emoji)}</span>` : ''}<div>${b.date ? `<span class="fr-date">${T(b.date)}</span>` : ''}${b.title ? `<b>${T(b.title)}</b>` : ''}<p>${TB(b.text)}</p></div></div>`;
+    case 'note': { const p = personByName(b.title); return `<div class="fr-note" style="--pc:${p ? p.color : 'var(--muted)'}"><span>אל: ${T(b.title)}</span><p>${TB(b.text)}</p><i>סקופי</i></div>`; }
+    default: return b.text ? `<p class="fr-p">${TB(b.text)}</p>` : '';
+  }
+}
+
+const SEC_ICON = { profile: '🧠', dictionary: '🗣️', tension: '⚡', turning_points: '🧭', moments: '✨', awards: '🏅', unsaid: '🤫', predictions: '🔮', notes: '💌' };
+const SEC_SHORT = { profile: 'הפרופיל', dictionary: 'המילון הסודי', tension: 'המתח', turning_points: 'רגעי המפנה', moments: 'רגעים', awards: 'פרסים', unsaid: 'מה שלא נאמר', predictions: 'תחזיות', notes: 'פתקים' };
+
+function fullReportHTML(rep) {
+  const secs = rep.sections || [];
+  let h = `<article class="fr" id="fullReport">
+    <header class="fr-head">
+      <span class="kicker">הדוח המלא${rep.demo ? ' · דוגמה' : ''}</span>
+      <h1>${T(rep.headline)}</h1>
+      <div class="fr-by"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#1a1530"/><circle cx="60" cy="60" r="38" fill="#ffe1e8"/><circle cx="47" cy="55" r="6" fill="#1a1530"/><circle cx="73" cy="55" r="6" fill="#1a1530"/><path d="M48 74 q12 9 24 0" stroke="#1a1530" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+        <div><b>סקופי</b><small>קרא ${fmt(R.total)} הודעות${rep.sampled ? ' (במבחר קטעים)' : ''}, כולל את אלה שמחקתם</small></div></div>
+    </header>
+    <div class="fr-hook">${(rep.hook || []).map(p => `<p>${TB(p)}</p>`).join('')}</div>
+    <div class="fr-oneliner">${TB(rep.one_liner)}</div>`;
+  if ((rep.cast || []).length) h += `<div class="fr-castrow">${rep.cast.map(c => `<div class="fr-cc">${avatarFor(c.name, 44)}<div><b>${T(c.name)}</b><span>${esc(c.emoji)} ${T(c.title)}</span><small>${TB(c.line)}</small></div></div>`).join('')}</div>`;
+  h += `<nav class="fr-toc"><b>בדוח הזה</b>${secs.map((s, i) => `<a href="#fr-${i}">${esc(s.emoji || SEC_ICON[s.key] || '•')} ${T(SEC_SHORT[s.key] || s.title)}</a>`).join('')}</nav>`;
+  secs.forEach((s, i) => {
+    h += `<section class="fr-sec fr-${s.key}" id="fr-${i}">
+      <div class="fr-ico">${esc(s.emoji || SEC_ICON[s.key] || '✨')}</div>
+      <h2 class="fr-h">${T(s.title)}</h2><div class="fr-orn" aria-hidden="true"><i></i><b></b><i></i></div>
+      ${s.intro ? `<p class="fr-p fr-intro">${TB(s.intro)}</p>` : ''}
+      <div class="fr-blocks${s.key === 'dictionary' ? ' fr-dict' : ''}${s.key === 'notes' ? ' fr-notes' : ''}">${(s.blocks || []).map(blockHTML).join('')}</div>
+    </section>`;
+  });
+  h += `<footer class="fr-verdict"><span>פסק הדין</span><p>${TB(rep.verdict)}</p></footer>`;
+  if (rep.demo) h += `<p class="ai-note" style="text-align:center">זה דוח לדוגמה שנכתב מראש על צ'אט בדוי. על צ'אט אמיתי סקופי כותב דוח חדש מאפס, עם ההודעות שלכם.</p>`;
+  return h + '</article>';
+}
+
+function aiCtaHTML() {
+  return `<div class="card ai-card" id="aiCta">
+    <div class="ai-cta-top"><div class="ai-cta-em">✍️</div><div><h3>הדוח המלא: סקופי כותב את הסיפור</h3>
+    <p>פרופיל לכל אחד (איך הוא רואה את עצמו מול מה שהצ'אט מראה), המילון הסודי, המתח, רגעי המפנה, פרסים ופתק אישי. עם הודעות אמיתיות מהצ'אט בתוך הטקסט.</p></div></div>
+    <div class="me-pick"><b>מי אתם בצ'אט?</b><span>סקופי ידבר אליכם ישירות.</span>
+      <div class="me-opts">${R.people.slice(0, 12).map(p => `<button class="pill" data-me="${esc(p.name)}" aria-pressed="${R.me === p.name}">${esc(dispName(p))}</button>`).join('')}<button class="pill" data-me="" aria-pressed="${!R.me}">אף אחד, רק מציץ 👀</button></div></div>
+    ${AI_PROXY ? '' : `<div class="ai-row"><input id="aiKey" type="password" placeholder="מפתח API של Anthropic (sk-ant-...)" autocomplete="off" spellcheck="false"></div>
+      <label class="toggle" style="margin-top:10px"><input type="checkbox" id="aiRemember"><span style="display:inline">לזכור את המפתח בדפדפן הזה</span></label>
+      <p class="ai-note">ההודעות נשלחות ישירות מהדפדפן שלכם ל־Anthropic, ולא עוברות דרכנו. העלות נגבית מחשבון ה־API שלכם (בדרך כלל פחות מדולר לצ'אט ארוך).${anon ? ' במצב אנונימי נשלחים כינויים במקום שמות.' : ''}</p>`}
+    <button class="btn btn-pink" id="aiGo" style="margin-top:14px;width:100%">✨ לכתוב לי את הדוח המלא</button>
+    <div id="aiStatus" style="margin-top:12px"></div>
+  </div>`;
+}
+
+/* ---------- pre-written sample reports for the fictional demo chats ---------- */
+const P_ = text => ({ kind: 'paragraph', emoji: '', title: '', text, date: '', messages: [] });
+const C_ = (...msgs) => ({ kind: 'chat', emoji: '', title: '', text: '', date: '', messages: msgs.map(([from, text, time]) => ({ from, text, time })) });
+const TERM_ = (emoji, title, text, date) => ({ kind: 'term', emoji, title, text, date, messages: [] });
+const ITEM_ = (emoji, title, text, date = '') => ({ kind: 'item', emoji, title, text, date, messages: [] });
+const NOTE_ = (title, text) => ({ kind: 'note', emoji: '', title, text, date: '', messages: [] });
+const SEC_ = (key, emoji, title, intro, blocks) => ({ key, emoji, title, intro, blocks });
+
+const DEMO_REPORTS = {
+  crush: { demo: true, me: 'איתי',
+    headline: '🌙 שתי שאלות קטנות, שעה אחת בלילה, ובחור אחד שעונה "חח"',
+    one_liner: 'נועה כותבת מכתבי אהבה בתחפושת של שאלות, ואיתי עונה כמו מזכירה אוטומטית שמאוהבת בסתר.',
+    hook: [
+      'אם מישהו זר היה גולל בצ\'אט הזה, הוא היה בטוח שמדובר בשני אנשים שעובדים במשמרות הפוכות. אחת ערה תמיד, בעיקר בין חצות לשתיים, ושואלת שאלות שנשמעות כמו סקר שביעות רצון ("מה עשית בשבת?", "איזה מוזיקה אתה שומע עכשיו?"). השני עונה בשלוש מילים, אחרי תשע דקות, ובדרך כלל אחת מהן היא "חח".',
+      'אבל סקופי קרא את כל ההודעות, ויש פה משהו שהמספרים לבד מפספסים. **איתי, אתה עונה. כל פעם.** בשום שלב לא השארת אותה על "נקרא". ומי שבאמת לא מעוניין לא כותב "לילה טוב" בחזרה בשעה אחת וחצי בלילה.',
+    ],
+    cast: [
+      { name: 'נועה', emoji: '🦉', title: 'משמרת הלילה של הרגשות', line: 'שואלת "שאלה קטנה" שאף פעם לא באמת קטנה.' },
+      { name: 'איתי', emoji: '🗿', title: 'השגריר של המילה "סבבה"', line: 'עונה בדיוק מספיק כדי שהשיחה תמשיך, ולא מילה אחת יותר.' },
+    ],
+    sections: [
+      SEC_('profile', '🧠', 'הפרופיל: החוקרת הלילית מול הבטון המזוין', 'בצ\'אט הזה יש חלוקת תפקידים ברורה: אחת שואלת, אחד עונה. אבל מי שבאמת מחזיק את ההגה פה זה פחות ברור ממה שנדמה.', [
+        P_('**נועה** רואה את עצמה כמי ששומרת על דיסטנס קליל. היא "משועממת", היא "סתם" שואלת, הכל אגבי. אבל הצ\'אט מספר סיפור אחר לגמרי: יותר ממחצית ההודעות שלה נשלחו אחרי חצות, היא פותחת כמעט שלוש מתוך ארבע שיחות, וכל "סתם" שלה מגיע עם תיקון מיידי.'),
+        C_(['נועה', 'סתם 🙃', '01:21'], ['נועה', 'זאת אומרת לא סתם', '01:21']),
+        P_('זה כל הסיפור של נועה בשתי הודעות. היא מנסה להיות מגניבה, מחזיקה מעמד בדיוק שניה, ואז הכנות מנצחת. זה לא חולשה, זה הדבר הכי אמיץ בצ\'אט הזה.'),
+        P_('**ואז יש אותך, איתי.** אתה בטוח שאתה הבחור העסוק והמסתורי. "מחר עובד עד מאוחר", "היה יום ארוך", "לא יודע עוד". אבל תסתכל על זה מבחוץ: על כל שאלה שהיא שאלה ענית. לפעמים אחרי שבע דקות, לפעמים בשתי מילים, אבל ענית. אתה לא מסתורי, אתה פשוט חוסך מילים כאילו משלמים עליהן.'),
+        C_(['נועה', 'שאלה קטנה... מה עשית בשבת?', '01:13'], ['איתי', 'למה את שואלת 🤨', '01:20']),
+        P_('שבע דקות לחשוב, ובסוף ענית בשאלה. זה ההבדל ביניכם: היא רוצה לדעת, ואתה רוצה לדעת למה היא רוצה לדעת. שניכם בעצם שואלים את אותה שאלה.'),
+      ]),
+      SEC_('dictionary', '🗣️', 'המילון הסודי: איך מדברים בשתיים בלילה', 'לצ\'אט הזה יש שפה משלו. מבחוץ זה נראה כמו הודעות רגילות. מבפנים, כל מילה פה עושה עבודה כפולה.', [
+        TERM_('🔍', '"שאלה קטנה"', 'שאלה גדולה מאוד בתחפושת. מגיעה תמיד אחרי חצות ותמיד לפני שאלה על מה שעשית בסוף השבוע.', 'מופיע כבר מהשבוע הראשון, ומאז חוזר כמו טקס.'),
+        TERM_('🙃', '"סתם"', 'בשפת נועה: "לא סתם בכלל". בדרך כלל מגיע עם תיקון תוך פחות מדקה.', 'הרגע הקלאסי: "סתם 🙃" ומיד "זאת אומרת לא סתם".'),
+        TERM_('😅', '"חח"', 'בשפת איתי: "שמעתי, אהבתי, אין לי כוח להקליד יותר". יחידת הצחוק הבסיסית שלו.', 'הודעה מספר אחת שלו בכל הצ\'אט.'),
+        TERM_('📅', '"אולי בשבוע הבא"', 'כן, אבל בפחד. התשובה הקבועה של איתי לכל הזמנה.', 'נולד מתוך "בא לך לראות סרט מתישהו?"'),
+        TERM_('🌙', '"טוב לילה"', 'הסימן שנועה מוותרת להערב. איתי עונה "לילה טוב", כלומר את אותן מילים בסדר הפוך, וזה כנראה הכי רומנטי שהוא יכול.', ''),
+      ]),
+      SEC_('tension', '⚡', 'המתח: היא רוצה תאריך, הוא רוצה "אולי"', 'אין פה ריבים. יש פה משהו יותר מתיש: הזמנה שנשארת באוויר.', [
+        P_('הדפוס חוזר שוב ושוב. נועה זורקת הצעה קונקרטית, איתי עונה בתשובה שאי אפשר לריב איתה וגם אי אפשר לקבוע איתה כלום.'),
+        C_(['נועה', 'בא לך לראות סרט מתישהו?', '23:48'], ['איתי', 'אולי בשבוע הבא', '00:02']),
+        ITEM_('⏳', 'הטריגר: הזמנה עם תאריך', 'כל פעם שנועה מתקרבת לתוכנית אמיתית, זמן התגובה של איתי קופץ, והתשובה נהיית מעורפלת.'),
+        ITEM_('👻', 'הטריגר: "אתה תמיד נעלם לי"', 'נועה אומרת את זה בחיוך, אבל היא אומרת את זה הרבה. ואיתי, בדיוק אחרי זה, עונה מהר במיוחד. הוא שומע.'),
+      ]),
+      SEC_('turning_points', '🧭', 'רגעי המפנה', 'איך הגענו מ"ערה?" ל"זאת אומרת לא סתם".', [
+        ITEM_('🚪', 'הפתיחה', 'נועה פותחת את הצ\'אט בשעה שרוב האנשים כבר ישנים, ומגדירה את הטון לכל מה שיבוא אחר כך.', 'בהתחלה'),
+        C_(['נועה', 'ערה? 👀', '01:12'], ['איתי', 'ערב רגוע, את?', '01:15']),
+        ITEM_('🎬', 'ההזמנה הראשונה', 'בפעם הראשונה נועה עוברת משאלות להצעה. מכאן והלאה, כל שיחה נמדדת לפי השאלה אם זה יקרה.', 'באמצע'),
+        C_(['נועה', 'בא לך לראות סרט מתישהו?', '22:30'], ['איתי', 'אולי בשבוע הבא', '22:41']),
+        ITEM_('💗', 'הסדק בשריון', 'איתי צוחק באמת. לא "חח", אלא "חחחח באמת". אצלו זו כמעט הצהרת אהבה.', 'בחודש האחרון'),
+        C_(['נועה', 'אני חושבת שזה הכי מצחיק שראיתי השבוע', '00:40'], ['איתי', 'חחחח באמת', '00:42'], ['איתי', 'וואלה מצחיק', '00:42']),
+      ]),
+      SEC_('awards', '🏅', 'טקס הפרסים', 'בלי נאומי תודה, בבקשה.', [
+        ITEM_('🦉', 'פרס משמרת הלילה', 'הזוכה: נועה. רוב ההודעות שלה נשלחו כשכל המדינה ישנה.'),
+        ITEM_('🧊', 'פרס הקור המחושב', 'הזוכה: איתי. חציון של תשע דקות לתשובה, גם כשהשאלה היא "מה איתך היום?"'),
+        ITEM_('🔁', 'פרס התיקון העצמי', 'הזוכה: נועה, על "סתם 🙃" ואחריו "זאת אומרת לא סתם", הרגע הכי כן בצ\'אט.'),
+        ITEM_('📅', 'פרס "אולי בשבוע הבא"', 'הזוכה: איתי. השבוע הבא עדיין לא הגיע.'),
+      ]),
+      SEC_('unsaid', '🤫', 'מה שאף אחד לא אומר בקול', '', [
+        P_('נועה לא תגיד "אני מחכה לך", אז היא שואלת מה עשית בשבת. איתי לא יגיד "גם אני", אז הוא עונה כל פעם, גם באחת בלילה. שניכם מחכים שהשני יגיד את זה ראשון, ובינתיים אתם מדברים על מוזיקה.'),
+      ]),
+      SEC_('predictions', '🔮', 'התחזיות של סקופי', '', [
+        ITEM_('🎬', 'הסרט יקרה', 'אבל רק אחרי שנועה תפסיק לשאול ואיתי ייאלץ להציע בעצמו.'),
+        ITEM_('😂', '"חח" יתפתח ל"חחחח"', 'זה כבר קרה פעם אחת. סקופי מזהה מגמה.'),
+        ITEM_('🌙', 'עוד "ערה?" אחד לפחות', 'השבוע. בסביבות 01:10.'),
+      ]),
+      SEC_('notes', '💌', 'פתק לכל אחד', '', [
+        NOTE_('נועה', 'אל תפסיקי לשאול. אבל פעם אחת, תני לו לשאול ראשון ותראי מה קורה. השקט הזה יעבוד לטובתך.'),
+        NOTE_('איתי', 'היא לא באמת רוצה לדעת מה עשית בשבת. היא רוצה לדעת אם חשבת עליה. "אולי בשבוע הבא" זו לא תשובה, זה דחיינות עם אימוג\'י.'),
+      ]),
+    ],
+    verdict: 'זה לא צ\'אט של מישהי שרודפת אחרי מישהו שלא מעוניין. זה צ\'אט של שני אנשים שמעוניינים, ורק אחת מהם מוכנה להודות בזה. איתי, הכדור אצלך.',
+  },
+
+  friends: { demo: true, me: null,
+    headline: '🍻 מנכ"ל אחד, צלמת חתונות, ובחור שעדיין לא ראה את ההודעה',
+    one_liner: 'דניאל מנהל את הקבוצה כמו אירוע חברה, ושאר החבר\'ה מתייחסים לזה כמו להמלצה.',
+    hook: [
+      'מי שנכנס לקבוצה הזאת בפעם הראשונה יחשוב שזה ערוץ תפעול של מסעדה. "מי בא הערב?", "סגרתי ל־21:00", "מי מביא רמקול", ואז "נו??". מתחת לזה יש זרם קבוע של תמונות שאף אחד לא ביקש, ובחור אחד שמגיב לכל דבר עם 👍.',
+      'אבל בין כל ההודעות האלה מסתתר משהו שקשה לזייף: כבר יותר מארבעה חודשים, כמעט כל שבוע, מישהו מכם דואג שתיפגשו. וזה לא קורה מעצמו.',
+    ],
+    cast: [
+      { name: 'דניאל', emoji: '📋', title: 'המנכ"ל בהתנדבות', line: 'פותח את רוב השיחות, סוגר את רוב השולחנות, ומתעצבן כשאין תשובה תוך דקה.' },
+      { name: 'מאיה', emoji: '🎂', title: 'מחלקת מצב הרוח', line: 'צוחקת על הכל, מגיעה באיחור עם עוגה, ואומרת "אוהבת אתכם" בלי בושה.' },
+      { name: 'שירה', emoji: '📸', title: 'הארכיון הלאומי', line: 'כל ערב קורה פעמיים: פעם אחת במציאות ופעם אחת בגלריה שלה.' },
+      { name: 'עומר', emoji: '🌙', title: 'משמרת הלילה', line: 'מגיע לשיחה כשהיא כבר נגמרה ושואל "רגע מה קרה פה".' },
+      { name: 'גיל', emoji: '👍', title: 'האגודל', line: 'משתתף נאמן במאמץ מינימלי.' },
+    ],
+    sections: [
+      SEC_('profile', '🧠', 'הפרופיל: מי מחזיק את הקבוצה הזאת בחיים', 'כל קבוצת חברים צריכה מישהו שעושה את העבודה השחורה. בקבוצה הזאת ברור לגמרי מי זה, וברור לגמרי מי נהנה מזה.', [
+        P_('**דניאל** רואה את עצמו כאחד החבר\'ה שפשוט אוהב להיפגש. בפועל הוא מנהל את הקבוצה. שליש מכל ההודעות הן שלו, הוא פותח את רוב השיחות, והוא היחיד שיודע להזמין שולחן. כשאין תשובה, הוא לא מוותר. הוא מסלים.'),
+        C_(['דניאל', 'מי בא הערב?', '18:02'], ['דניאל', 'חבר׳ה יאללה תענו', '18:31'], ['דניאל', 'נו??', '18:47'], ['מאיה', 'אני בפנים 🙌', '18:49']),
+        P_('ארבעים וחמש דקות של תחנונים, ומי שמצילה את המצב היא, כמובן, מאיה. בלעדיה דניאל היה עדיין כותב "נו??" לחלל הריק.'),
+        P_('**מאיה** בטוחה שהיא "תמיד מאחרת". והיא באמת מאחרת. אבל היא גם התשובה הראשונה כמעט לכל הצעה, ומי שמחזירה את הקבוצה לחיים עם "חחחחחח מת". אם דניאל הוא המנוע, מאיה היא הדלק.'),
+        P_('**שירה** חושבת שהיא שולחת "כמה תמונות". שליש מההודעות שלה הן מדיה. היא לא מדברת הרבה, היא מתעדת. ובזכותה יש לקבוצה הזאת זיכרון.'),
+        P_('**עומר** הוא היחיד שהקבוצה הזאת מתעוררת אליו בלילה. הוא עונה הכי לאט, מתנצל הכי הרבה, ובכל זאת מצליח לא לפספס אף ערב. **וגיל**, גיל אומר "אחלה". זה הכל. וזה גם סוג של נאמנות.'),
+        C_(['עומר', 'רגע מה קרה פה', '01:14'], ['עומר', 'עדיין ערים?', '01:15']),
+      ]),
+      SEC_('dictionary', '🗣️', 'המילון הסודי של יום חמישי', 'חמש מילים שאם תכתבו אותן בכל קבוצה אחרת, אף אחד לא יבין למה כולם צוחקים.', [
+        TERM_('❓', '"נו??"', 'השלב השלישי בפרוטוקול של דניאל. אחריו יש רק שתיקה מאוכזבת.', 'מופיע אחרי כל "מי בא הערב?" שלא קיבל תשובה תוך חצי שעה.'),
+        TERM_('🙏', '"סורי לא ראיתי"', 'החתימה הרשמית של עומר. נשלח בדרך כלל אחרי שהתוכנית כבר נסגרה, ולפעמים אחרי שכולם כבר שם.', ''),
+        TERM_('🎂', '"אני מביאה עוגה"', 'ההתנצלות המובנית של מאיה על האיחור שעוד יגיע.', ''),
+        TERM_('📸', '<המדיה לא נכללה>', 'ההודעה הכי נפוצה של שירה. מבחינת הקבוצה, זה "תראו כמה יפים היינו".', ''),
+        TERM_('👍', '👍', 'כל המילון של גיל בתו אחד. יכול להיות "כן", "לא", "אולי" או "קראתי ואני לא מגיע".', ''),
+      ]),
+      SEC_('tension', '⚡', 'המתח: דניאל מול כל השאר', 'אין דרמה גדולה, אבל יש חיכוך קבוע אחד, והוא קורה כמעט כל שבוע.', [
+        P_('דניאל רוצה תשובה עכשיו. שאר הקבוצה רוצה תשובה מתישהו. התוצאה היא הסלמה הדרגתית שכולם כבר מכירים בעל פה.'),
+        ITEM_('⏰', 'הטריגר: "סגרתי ל־21:00"', 'דניאל סוגר, ורק אחר כך שואל מי מגיע. עומר מגיב עם "אני אגיע אם אסיים", כלומר אולי.'),
+        ITEM_('😶', 'הטריגר: השתיקה של גיל', 'כשגיל לא שולח אפילו 👍, דניאל מתחיל לספור מקומות בשולחן מחדש.'),
+      ]),
+      SEC_('moments', '✨', 'רגעים שלא נשכחים', '', [
+        ITEM_('😂', 'הכי מצחיק', 'הבוקר שאחרי, כשמאיה עדיין צוחקת וכולם מנסים להבין על מה.'),
+        C_(['מאיה', 'איזה ערב היה אתמול חחח', '10:12'], ['שירה', 'הנה התמונות מאתמול', '10:15'], ['מאיה', '😂😂😂', '10:16']),
+        ITEM_('❤️', 'הכי מתוק', 'מאיה כותבת את מה שכולם מרגישים ואף אחד אחר לא כותב.'),
+        C_(['מאיה', 'אוהבת אתכם ❤️', '23:58'], ['שירה', 'איזה יפים יצאנו 😍', '23:59']),
+      ]),
+      SEC_('awards', '🏅', 'טקס הפרסים', 'השולחן שמור ל־21:00, אז נעשה את זה מהר.', [
+        ITEM_('📋', 'פרס מפעל חיים', 'הזוכה: דניאל. בלי ההודעות שלו, הקבוצה הזאת הייתה ארכיון תמונות של שירה.'),
+        ITEM_('🎂', 'פרס "מגיעה קצת באיחור"', 'הזוכה: מאיה. אבל עם עוגה, אז זה בסדר.'),
+        ITEM_('📸', 'פרס הפפראצי', 'הזוכה: שירה. אף ערב לא נגמר בלי גלריה.'),
+        ITEM_('🦉', 'פרס "רגע מה קרה פה"', 'הזוכה: עומר, שמגיע לכל שיחה אחרי שהיא נגמרה.'),
+        ITEM_('👍', 'פרס החיסכון במילים', 'הזוכה: גיל. 5% מההודעות, 100% מהנוכחות בשולחן.'),
+      ]),
+      SEC_('unsaid', '🤫', 'מה שאף אחד לא אומר בקול', '', [
+        P_('דניאל עייף מלהיות זה שתמיד מארגן, ולא יודה בזה אף פעם. ה"נו??" שלו הוא לא כעס, זה פחד קטן שאם הוא יפסיק לכתוב, אף אחד לא יכתוב במקומו. אז מישהו מכם, שבוע אחד, תכתוב "מי בא הערב?" לפניו.'),
+      ]),
+      SEC_('predictions', '🔮', 'התחזיות של סקופי', '', [
+        ITEM_('📅', 'דניאל יקבע', 'ביום חמישי הבא, בסביבות שש בערב. שלושה "נו??" לפחות.'),
+        ITEM_('📸', 'שירה תשלח', 'גלריה של 40 תמונות שאף אחד לא יעבור עליהן, וכולם יחכו להן.'),
+        ITEM_('🙏', 'עומר יגיד', '"סורי לא ראיתי". השאלה היא רק על איזו הודעה.'),
+      ]),
+      SEC_('notes', '💌', 'פתק לכל אחד', '', [
+        NOTE_('דניאל', 'בלעדיך אין קבוצה. אבל פעם אחת, תשתוק ותראה מי מרים את הכפפה. אתה עלול להיות מופתע לטובה.'),
+        NOTE_('מאיה', 'ה"אוהבת אתכם" שלך עושה יותר ממה שאת חושבת. תמשיכי, גם אם את היחידה שאומרת את זה.'),
+        NOTE_('שירה', 'בעוד עשר שנים, התמונות שלך יהיו הדבר היחיד שיישאר מהתקופה הזאת. כתבי לפעמים גם משפט.'),
+        NOTE_('עומר', 'יש התראות בטלפון. הן עובדות.'),
+        NOTE_('גיל', 'אגודל זה לא רגש. פעם אחת, תכתוב משפט שלם. רק כדי לראות את הפנים של כולם.'),
+      ]),
+    ],
+    verdict: 'זאת קבוצה שבנויה על אדם אחד שמארגן, אחת ששמחה, אחת שמתעדת, אחד שמאחר ואחד שמהנהן. זה נשמע כאוטי, אבל זה עובד כבר חודשים, וזה יותר ממה שרוב הקבוצות מצליחות.',
+  },
+};
 
 /* =========================================================
    Flow
@@ -1979,9 +2370,10 @@ async function run(getMessages) {
   const tick = setInterval(() => { i = Math.min(i + 1, LOAD_STEPS.length - 1); msg.textContent = LOAD_STEPS[i]; bar.style.width = `${(i + 1) / LOAD_STEPS.length * 100}%`; }, 320);
   msg.textContent = LOAD_STEPS[0]; bar.style.width = '8%';
   try {
-    const [{ messages, title }] = await Promise.all([getMessages(), sleep(1500)]);
+    const [{ messages, title, ai }] = await Promise.all([getMessages(), sleep(1500)]);
     if (!messages || !messages.length) throw new Error('לא הצלחתי לזהות הודעות בקובץ. ודאו שזה ייצוא צ\'אט מוואטסאפ, טלגרם, אינסטגרם או מסנג\'ר.');
     R = analyze(messages, title);
+    if (ai) { R.ai = ai; R.me = ai.me || null; }
     anon = false; $('#anonToggle').checked = false;
     clearInterval(tick); bar.style.width = '100%';
     await sleep(250);
@@ -2016,7 +2408,7 @@ $('#demoList').innerHTML = DEMOS.map(d => `<button class="demo-item" data-demo="
   <div class="demo-msg">${esc(d.last)}</div></div>
   <span class="demo-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
 </button>`).join('');
-$$('[data-demo]').forEach(b => b.onclick = () => { const d = DEMOS.find(x => x.id === b.dataset.demo); run(async () => ({ messages: buildDemo(d), title: d.title + ' (דוגמה)' })); });
+$$('[data-demo]').forEach(b => b.onclick = () => { const d = DEMOS.find(x => x.id === b.dataset.demo); run(async () => ({ messages: buildDemo(d), title: d.title + ' (דוגמה)', ai: DEMO_REPORTS[d.id] || null })); });
 
 // nav
 $('#backBtn').onclick = () => { show('landing'); };
