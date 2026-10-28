@@ -11,7 +11,8 @@ import { renderTable, tableAction, tableKey } from './table.js';
 import { handleOwnerCommand } from './owner.js';
 import { runTurn } from './ai.js';
 import { setWindowAlwaysOpen } from './util.js';
-import { BUSINESS } from './config.js';
+import { BUSINESS, SALES } from './config.js';
+import { markLead, salesWeeklyReport } from './sales.js';
 import { actionPage, ownerByEmail, serveMedia } from './email.js';
 
 // בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
@@ -41,6 +42,9 @@ export default {
       setWindowAlwaysOpen(isUltra(env));
       return actionPage(env, request, url, handleOwnerCommand);
     }
+
+    // בוט המכירות: הכפתורים במייל (התקשרתי / נקבע חיבור / לא רלוונטי)
+    if (url.pathname === '/sales/mark' && request.method === 'GET') return markLead(env, url);
 
     if (url.pathname === '/' || url.pathname === '/health') {
       if (isUltra(env)) {
@@ -156,7 +160,7 @@ export default {
     // כל דקה: רק הסיכומים לבעל העסק שהגיע הזמן שלהם (הלקוח סיים לכתוב)
     if (event.cron === '* * * * *') { ctx.waitUntil(flushDueSummaries(env, now)); return; }
     if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
-    if (event.cron === '0 6 * * SUN') ctx.waitUntil(weeklyReport(env, now));
+    if (event.cron === '0 6 * * SUN') ctx.waitUntil(SALES.prompt ? salesWeeklyReport(env, now) : weeklyReport(env, now));
     else ctx.waitUntil(runEvery15(env, now));
   },
 };

@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -1503,4 +1503,166 @@ test('Dualhook: replies go through api.dualhook.com with our key; webhooks need 
   assert.equal((await offEnv.DB.prepare('SELECT known FROM customers WHERE phone = ?').bind('972501112233').first())?.known, 1);
   assert.equal(await offEnv.DB.prepare('SELECT * FROM customers WHERE phone = ?').bind('972504445566').first(), null, 'messages are ignored while off');
   assert.equal(sent.length, 0);
+});
+
+// ---------- בוט המכירות של עונה ראשון ----------
+const salesOut = (o) => ({ replies: ['אהלן'], stage: 'opening', price_given: false, event: 'none', handoff_reason: '', lead: { name: '', trade: '', city: '', business_name: '', weekly_unanswered: '', job_value: '' }, onboarding_notes: '', ...o, lead: { name: '', trade: '', city: '', business_name: '', weekly_unanswered: '', job_value: '', ...(o.lead || {}) } });
+async function withSalesClient(fn) {
+  const cfg = await import('../src/config.js');
+  const original = (await import('../src/client.js')).default;
+  cfg.applyClient((await import('../clients/oneh-rishon-sales/client.js')).default);
+  try { await fn(cfg); } finally { cfg.applyClient(original); }
+}
+const salesEnv = (mails) => ({ ...makeEnv(), OWNER_PHONE: '', SALES_GAP_MS: '0', SALES_SETUP_PRICE: '3,500', SALES_DEPOSIT: '500', PAYMENT_LINK: 'https://pay.example/deposit',
+  SALES_ALERT_EMAILS: 'eliya@example.com, ariel@example.com', GMAIL_USER: 'b@example.com', GMAIL_APP_PASSWORD: 'x', WORKER_URL: 'https://sales.example', WA_VERIFY_TOKEN: 'sec',
+  __mail: async (m) => { mails.push(m); } });
+const PRO = '972541112233';
+
+test('sales bot: voice note is transcribed and answered, ad referral saved, prices filled in, HOT_LEAD and PAID reach Eliya and Ariel', async () => {
+  await withSalesClient(async () => {
+    sent.length = 0; aiRequests = []; outSeq = 0;
+    const mails = [];
+    const env = salesEnv(mails);
+    const heard = [];
+    env.AI = { run: async (model, input) => { heard.push(model); return { text: 'יש לי סתימה בכיור, אני בהרצל בנתניה' }; } };
+    const t0 = new Date('2026-10-14T08:00:00Z');
+
+    // הודעה ראשונה: ממודעה (referral), טקסט
+    aiQueue = [salesOut({ replies: ['סבבה! בוא תבדוק אותי: תכתוב או תקליט לי כאילו אתה לקוח שלך עם תקלה.', 'אני אענה כמו שהמזכירה שלך תענה.'], stage: 'demo', lead: { trade: 'אינסטלטור' } })];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'היי, אני אינסטלטור ורוצה לראות איך זה עובד' }, referral: { source_id: 'ad123', source_type: 'ad', headline: 'מזכירה בוואטסאפ', source_url: 'https://fb.me/x', ctwa_clid: 'c1' } }, 's1'), t0);
+    assert.deepEqual(textsTo(PRO), ['סבבה! בוא תבדוק אותי: תכתוב או תקליט לי כאילו אתה לקוח שלך עם תקלה.', 'אני אענה כמו שהמזכירה שלך תענה.']);
+    const sys = aiRequests[0].system.map((b) => b.text).join('\n');
+    assert.ok(sys.includes('הקמה 3,500 ₪') && sys.includes('https://pay.example/deposit') && sys.includes('500 ₪'), 'values filled in');
+    assert.ok(!/\{SETUP_PRICE\}|\{DEPOSIT\}|\{PAYMENT_LINK\}|<!--|הערות להטמעה/.test(sys), 'no placeholders, comments or implementation notes');
+    assert.match(sys, /עכשיו בישראל: יום רביעי 14\/10 בשעה 11:00/);
+    const ref = JSON.parse(env.DB.raw.prepare('SELECT referral FROM sales_leads WHERE phone = ?').get(PRO).referral);
+    assert.equal(ref.source_id, 'ad123');
+    assert.equal(ref.headline, 'מזכירה בוואטסאפ');
+
+    // הודעה קולית: מתומללת, וה-AI מקבל את מה שנאמר
+    aiQueue = [salesOut({ replies: ['שמעתי, סתימה בכיור בהרצל בנתניה. מאיזה חדר, מטבח או אמבטיה?'], stage: 'demo' })];
+    await processWebhook(env, inbound(PRO, { type: 'audio', audio: { id: 'aud1' } }, 's2'), new Date(t0.getTime() + 60000));
+    assert.equal(heard.length, 1, 'transcribed');
+    const lastUser = aiRequests[1].messages.at(-1).content;
+    assert.match(String(lastUser), /\[הודעה קולית\] יש לי סתימה בכיור, אני בהרצל בנתניה/);
+    assert.equal(textsTo(PRO).at(-1), 'שמעתי, סתימה בכיור בהרצל בנתניה. מאיזה חדר, מטבח או אמבטיה?');
+
+    // שאל מחיר: HOT_LEAD פעם אחת, לשתי הכתובות
+    aiQueue = [salesOut({ replies: ['הקמה 3,500 ₪ פעם אחת, ואז 600 ₪ בחודש.'], stage: 'offer', price_given: true, event: 'hot_lead', lead: { name: 'יוסי', city: 'נתניה', weekly_unanswered: '5', job_value: '500' } })];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'כמה זה עולה?' } }, 's3'), new Date(t0.getTime() + 120000));
+    assert.equal(mails.length, 2);
+    assert.deepEqual(mails.map((m) => m.to).sort(), ['ariel@example.com', 'eliya@example.com']);
+    assert.match(mails[0].text, /HOT_LEAD: יוסי/);
+    assert.match(mails[0].text, /אינסטלטור/);
+    assert.match(mails[0].text, /מודעה: מזכירה בוואטסאפ/);
+    assert.match(mails[0].text, /https:\/\/sales\.example\/sales\/mark\?p=972541112233&s=called&k=/);
+    aiQueue = [salesOut({ replies: ['זה עונה לך?'], stage: 'offer', price_given: true, event: 'hot_lead' })];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'יקר' } }, 's4'), new Date(t0.getTime() + 180000));
+    assert.equal(mails.length, 2, 'hot lead only once');
+
+    // שילם: PAID עם השיחה
+    aiQueue = [salesOut({ replies: ['מעולה! איך קוראים לעסק, כמו שהלקוחות מכירים אותו?'], stage: 'onboarding', event: 'paid' })];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'שילמתי' } }, 's5'), new Date(t0.getTime() + 240000));
+    assert.equal(mails.length, 4);
+    assert.match(mails[2].text, /PAID: יוסי/);
+    assert.match(mails[2].text, /הוא: \[הודעה קולית\] יש לי סתימה בכיור/);
+    // סוף הקליטה: מייל עם כל התשובות
+    aiQueue = [salesOut({ replies: ['קיבלתי הכל, תודה יוסי!'], stage: 'done', onboarding_notes: 'שם העסק: יוסי אינסטלציה\nאזורים: השרון' })];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'זהו' } }, 's6'), new Date(t0.getTime() + 300000));
+    assert.equal(mails.length, 6);
+    assert.match(mails[4].text, /הקליטה הסתיימה/);
+    assert.match(mails[4].text, /אזורים: השרון/);
+
+    // הכפתור במייל: רק עם חתימה נכונה
+    const { markLead } = await import('../src/sales.js');
+    const link = mails[0].text.match(/https:\/\/sales\.example\/sales\/mark\?[^\s]+/)[0].replace('s=called', 's=scheduled');
+    assert.equal((await markLead(env, new URL(link))).status, 200);
+    assert.equal(env.DB.raw.prepare('SELECT status FROM sales_leads WHERE phone = ?').get(PRO).status, 'scheduled');
+    assert.equal((await markLead(env, new URL(link.replace(/k=[0-9a-f]+/, 'k=bad')))).status, 403);
+  });
+});
+
+test('sales bot: follow-ups only inside 24 hours and at most two; day-3 template only with consent; "not interested" stops everything', async () => {
+  await withSalesClient(async () => {
+    const { salesFollowups, FOLLOWUPS } = await import('../src/sales.js');
+    sent.length = 0; aiRequests = []; outSeq = 0;
+    const mails = [];
+    const env = salesEnv(mails);
+    const t0 = new Date('2026-10-14T08:00:00Z');
+    aiQueue = [salesOut({ replies: ['תכתוב לי כאילו אתה לקוח שלך.'], stage: 'demo' })];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'היי, אני חשמלאי' } }, 'f1'), t0);
+    await salesFollowups(env, new Date(t0.getTime() + 60 * 60000));
+    assert.equal(textsTo(PRO).length, 1, 'not before 2 hours');
+    await salesFollowups(env, new Date(t0.getTime() + 2 * 3600000));
+    assert.equal(textsTo(PRO).at(-1), FOLLOWUPS.demo);
+    await salesFollowups(env, new Date(t0.getTime() + 3 * 3600000));
+    assert.equal(textsTo(PRO).filter((t) => t === FOLLOWUPS.demo).length, 1, 'once');
+
+    // קיבל מחיר ושתק: אחרי 20 שעות, לא אחרי 24
+    aiQueue = [salesOut({ replies: ['הקמה 3,500 ₪.'], stage: 'offer', price_given: true, event: 'hot_lead' })];
+    const t1 = new Date(t0.getTime() + 4 * 3600000);
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'כמה זה עולה' } }, 'f2'), t1);
+    await salesFollowups(env, new Date(t1.getTime() + 19 * 3600000));
+    assert.notEqual(textsTo(PRO).at(-1), FOLLOWUPS.price);
+    await salesFollowups(env, new Date(t1.getTime() + 21 * 3600000));
+    assert.equal(textsTo(PRO).at(-1), FOLLOWUPS.price);
+    const before = sent.length;
+    await salesFollowups(env, new Date(t1.getTime() + 26 * 3600000));
+    assert.equal(sent.length, before, 'nothing free after 24 hours, and no more than two');
+
+    // "אחשוב" + הסכים שיכתבו: תבנית אחת אחרי יומיים, לא יותר
+    const B = '972547770000';
+    aiQueue = [salesOut({ replies: ['אפשר לכתוב לך עוד יומיים?'], stage: 'objection' })];
+    await processWebhook(env, inbound(B, { type: 'text', text: { body: 'אני צריך לחשוב' } }, 'f3'), t0);
+    aiQueue = [salesOut({ replies: ['סבבה, אכתוב לך.'], stage: 'objection', event: 'followup_ok' })];
+    await processWebhook(env, inbound(B, { type: 'text', text: { body: 'כן' } }, 'f4'), new Date(t0.getTime() + 60000));
+    await salesFollowups(env, new Date(t0.getTime() + 47 * 3600000));
+    assert.ok(!sent.some((m) => m.to === B && m.template), 'not before day 3');
+    await salesFollowups(env, new Date(t0.getTime() + 50 * 3600000));
+    await salesFollowups(env, new Date(t0.getTime() + 54 * 3600000));
+    assert.equal(sent.filter((m) => m.to === B && m.template?.name === 'sales_followup_v1').length, 1);
+
+    // לא מעוניין: אף הודעה יותר
+    const C = '972547771111';
+    aiQueue = [salesOut({ replies: ['תכתוב לי כאילו אתה לקוח.'], stage: 'demo' })];
+    await processWebhook(env, inbound(C, { type: 'text', text: { body: 'היי' } }, 'f5'), t0);
+    aiQueue = [salesOut({ replies: ['סבבה, לא אכתוב יותר. בהצלחה!'], stage: 'other', event: 'opt_out' })];
+    await processWebhook(env, inbound(C, { type: 'text', text: { body: 'לא מעוניין' } }, 'f6'), new Date(t0.getTime() + 60000));
+    const n = sent.filter((m) => m.to === C).length;
+    await salesFollowups(env, new Date(t0.getTime() + 3 * 3600000));
+    assert.equal(sent.filter((m) => m.to === C).length, n);
+    // ובלילה ובשבת לא שולחים בכלל
+    const D = '972547772222';
+    aiQueue = [salesOut({ replies: ['תכתוב לי כאילו אתה לקוח.'], stage: 'demo' })];
+    await processWebhook(env, inbound(D, { type: 'text', text: { body: 'היי' } }, 'f7'), new Date('2026-10-14T19:00:00Z'));
+    await salesFollowups(env, new Date('2026-10-14T21:30:00Z'));
+    assert.equal(sent.filter((m) => m.to === D).length, 1, 'no follow-up at 00:30');
+  });
+});
+
+test('sales bot: when the AI fails the prospect gets a human handoff, and Eliya and Ariel get HANDOFF; the bot never sends the service-bot nudges', async () => {
+  await withSalesClient(async (cfg) => {
+    sent.length = 0; aiRequests = []; outSeq = 0;
+    const mails = [];
+    const env = salesEnv(mails);
+    const t0 = new Date('2026-10-14T08:00:00Z');
+    aiQueue = [{ broken: true }];
+    await processWebhook(env, inbound(PRO, { type: 'text', text: { body: 'היי' } }, 'e1'), t0);
+    assert.match(textsTo(PRO)[0], /אליה ולאריאל/);
+    assert.equal(mails.length, 2);
+    assert.match(mails[0].text, /HANDOFF/);
+    assert.deepEqual(cfg.TEMPLATE_DEFS.map((t) => t.name), ['sales_followup_v1'], 'only the sales template');
+    const { runEvery15 } = await import('../src/cron.js');
+    const n = sent.length;
+    await runEvery15(env, new Date(t0.getTime() + 3 * 3600000));
+    assert.equal(sent.length, n, 'no service-bot nudges or follow-ups');
+  });
+});
+
+test('sales bot: the prompt the server uses is exactly Eliya\'s file (without implementation notes and unapproved lines)', async () => {
+  const { cleanPrompt } = await import('../scripts/build-sales-prompt.mjs');
+  const md = readFileSync(new URL('../clients/oneh-rishon-sales/sales-bot-prompt-v3.md', import.meta.url), 'utf8');
+  const built = (await import('../clients/oneh-rishon-sales/sales-prompt.js')).default;
+  assert.equal(built, cleanPrompt(md), 'run: node scripts/build-sales-prompt.mjs clients/oneh-rishon-sales');
+  assert.ok(!built.includes('יש חשבונית') && !built.includes('לקוח שלנו שעובד'), 'unapproved claims stay out');
 });

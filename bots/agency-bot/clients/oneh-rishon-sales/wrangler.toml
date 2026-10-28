@@ -1,0 +1,48 @@
+# בוט המכירות של עונה ראשון. ממלאים את מה שמסומן ב-REPLACE. עד שיש database_id אמיתי, ההעלאה מדלגת עליו.
+name = "oneh-rishon-sales-bot"
+main = "../../src/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["* * * * *", "*/15 * * * *", "0 6 * * SUN"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "oneh-rishon-sales-bot"
+database_id = "REPLACE_WITH_DATABASE_ID"
+migrations_dir = "../../migrations"
+
+[ai]
+binding = "AI"
+
+[vars]
+# meta / 360dialog / ultramsg (וואטסאפ רגיל דרך UltraMsg, לא רשמי: סיכון לחסימת המספר)
+WA_PROVIDER = "dualhook"
+# UltraMsg: מספר ה-Instance (לא סוד). הטוקן: סוד בשם <PREFIX>_ULTRAMSG_TOKEN
+ULTRAMSG_INSTANCE = ""
+# מצב בדיקה: הבוט עונה רק למספרים האלה (ולבעל העסק). ריק = עונה לכולם
+TEST_PHONES = ""
+# הכתובת של הבוט (לטבלת הלקוחות ולחיבור האוטומטי של UltraMsg). <subdomain> = השם של חשבון ה-Cloudflare
+WORKER_URL = "https://oneh-rishon-sales-bot.eliyabuis12.workers.dev"
+WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
+WABA_ID = ""
+META_APP_ID = ""
+# הטלפון של בעל העסק לסיכומים ופקודות (מספר אחר ממספר העסק), בפורמט 9725XXXXXXXX
+OWNER_PHONE = ""
+# ריק: אריאל ואליה יכולים לכתוב למספר כמו כל בעל מקצוע ולבדוק את הבוט
+ADMIN_PHONE = ""
+SHEET_ID = ""
+REVIEW_LINK = ""
+TEMPLATE_LANG = "he"
+CLAUDE_MODEL = "claude-sonnet-5-5"
+# בוט המכירות: הערכים שמוחלפים בהנחיה
+PAYMENT_LINK = "REPLACE_WITH_PAYMENT_LINK"
+SALES_SETUP_PRICE = "3,500"
+SALES_DEPOSIT = "500"
+# לאן נשלחות ההתראות HOT_LEAD / PAID / HANDOFF (כמה כתובות: מופרדות בפסיק)
+SALES_ALERT_EMAILS = "eliyabuis12@gmail.com"
+
+# סודות (GitHub Secrets, עם הקידומת של הלקוח, למשל __PREFIX___WA_TOKEN):
+# DUALHOOK_API_KEY, DUALHOOK_WEBHOOK_KEY, WA_VERIFY_TOKEN, GMAIL_USER, GMAIL_APP_PASSWORD, WA_TOKEN, WA_APP_SECRET, GOOGLE_SA_JSON, D360_API_KEY, YESH_USERKEY, YESH_SECRET
+# ANTHROPIC_API_KEY: אם אין ללקוח מפתח משלו, משתמשים במשותף (ANTHROPIC_API_KEY בלי קידומת)

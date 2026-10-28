@@ -9,6 +9,11 @@ on:
       - 'bots/agency-bot/**'
       - '.github/workflows/agency-bot.yml'
   workflow_dispatch:
+    inputs:
+      sales_sim:
+        description: 'Sales bot: run the 4 simulated conversations with the real AI (nothing is sent)'
+        type: boolean
+        default: false
 
 jobs:
   test:
@@ -34,6 +39,21 @@ jobs:
             list=$(echo "$list" | jq -c --arg s "$slug" --arg p "$prefix" '. + [{slug: $s, prefix: $p}]')
           done
           echo "clients=$list" >> "$GITHUB_OUTPUT"
+
+  sales-sim:
+    needs: test
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.sales_sim == 'true'
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: bots/agency-bot } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - name: Sales bot, 4 simulated conversations (real AI, nothing is sent)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/sales-sim.mjs
 
   deploy:
     needs: test

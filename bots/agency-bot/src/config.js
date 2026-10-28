@@ -8,6 +8,9 @@ export const FEATURES = {
   receipts: false,
 };
 const DEFAULT_FEATURES = { ...FEATURES };
+// בוט מכירות (רק ללקוח שמגדיר sales ב-client.js, כמו oneh-rishon-sales): במקום קבלת פנייה של לקוח,
+// שיחת מכירה לבעלי מקצוע לפי הנחיה קבועה. ריק = בוט רגיל
+export const SALES = {};
 
 // תזמונים
 export const TIMING = {
@@ -176,7 +179,11 @@ export function applyClient(client = {}) {
   for (const k of Object.keys(client.messages || {})) CUSTOM_MESSAGES.add(k);
   Object.assign(TIMING, DEFAULT_TIMING, client.timing || {});
   Object.assign(FEATURES, DEFAULT_FEATURES, client.features || {});
-  const defs = defaultTemplates(BUSINESS).map((d) => (client.templates?.[d.name] ? { ...d, body: client.templates[d.name] } : d));
+  for (const k of Object.keys(SALES)) delete SALES[k];
+  Object.assign(SALES, client.sales || {});
+  // בוט מכירות: רק התבניות שלו (בלי תזכורות תור, ביקורות וכו' של בעל מקצוע)
+  const defs = client.sales ? (client.sales.templates || [])
+    : defaultTemplates(BUSINESS).map((d) => (client.templates?.[d.name] ? { ...d, body: client.templates[d.name] } : d));
   TEMPLATE_DEFS.splice(0, TEMPLATE_DEFS.length, ...defs);
 }
 

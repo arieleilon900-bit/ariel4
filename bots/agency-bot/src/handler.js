@@ -1,6 +1,7 @@
 // טיפול בהודעה נכנסת מלקוח, ובהודעות שחנן שולח מהאפליקציה (Coexistence).
 import { runTurn } from './ai.js';
-import { BUSINESS, MESSAGES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
+import { BUSINESS, MESSAGES, SALES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
+import { salesRespond } from './sales.js';
 import { upsertLead } from './sheets.js';
 import { displayPhone, ilDateTimeLabel, inServiceWindow, nowIso, wazeLink, addHours } from './util.js';
 import * as wa from './whatsapp.js';
@@ -315,7 +316,8 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
 
   // הגנה מלולאה (למשל מענה אוטומטי של הלקוח שעונה לבוט שוב ושוב): יותר מ-12 תשובות של הבוט בשעה → עוצרים ומעבירים לחנן
   const botReplies = (await env.DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE conv_id = ? AND role = 'assistant' AND created_at >= ?").bind(conv.id, new Date(now.getTime() - 3600000).toISOString()).first())?.n || 0;
-  if (botReplies >= 12) {
+  // בבוט המכירות תשובה אחת היא עד 3 הודעות, והשיחה ארוכה יותר
+  if (botReplies >= (SALES.prompt ? 36 : 12)) {
     const moved = await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?), owner_replied_at = COALESCE(owner_replied_at, ?) WHERE id = ? AND state IN ('bot','handoff')").bind(nowIso(now), nowIso(now), conv.id).run();
     if (moved.meta?.changes) await sendToOwner(env, `⚠️ השיחה עם ${displayPhone(phone)} ארוכה מדי (אולי מענה אוטומטי). הבוט הפסיק לענות לו. אם זה לקוח אמיתי, כדאי לחזור אליו. וואטסאפ: https://wa.me/${phone}`, now, phone);
     return;
@@ -329,6 +331,7 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
     if (latest?.id !== myId) return;
   }
 
+  if (SALES.prompt) { await salesRespond(env, { conv, phone, content, msg, now }); return; }
   await aiRespond(env, { conv, phone, customer, contactName, myId, content, now });
 }
 
