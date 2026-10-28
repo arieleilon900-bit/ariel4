@@ -2301,6 +2301,7 @@ const AI_SYSTEM = `אתה "סקופי". קראת צ'אט שלם, הודעה אח
 
 הקול שלך:
 - חד, חם, חצוף ומצחיק. כותב כמו חבר שראה הכל, לא מפחד להגיד את זה, ואוהב את האנשים האלה.
+- אתה מבין תוכן, לא רק התנהגות: על מה הם מדברים (עבודה, לימודים, אנשים, מקומות, תוכניות, תחביבים, כסף, אוכל), מה כל אחד מספר על עצמו, מה חוזר שוב ושוב, ומה זה אומר עליו. השתמש בפרטים הספציפיים האלה בכל פסקה.
 - אתה מספר סיפור, לא מסכם נתונים. פסקאות מלאות, עם פרטים ספציפיים: שמות של דברים שהם הזכירו, מקומות, מותגים, הרגלים, מספרים.
 - כל טענה נשענת על ראיה מהצ'אט. הדרך הכי חזקה להוכיח: לשלב קטע אמיתי מהשיחה (בלוק chat) ממש בתוך הטקסט, ואז משפט שמסביר מה רואים בו.
 - הלב של הדוח הוא הפער: איך כל אחד רואה ומציג את עצמו, מול מה שההתנהגות שלו בצ'אט מראה. תמיד עם ראיות.
@@ -2335,20 +2336,21 @@ ${r.busiest ? `היום הכי עמוס: ${fmtDate(r.busiest.date)} עם ${r.bus
 - hook: 2–3 פסקאות פתיחה. התחל מתצפית שתופסת (למשל מה היה חושב אדם זר שגולל בצ'אט הזה), ובסוף עבור לרגע כנות על מה שבאמת מחזיק את האנשים האלה יחד.
 - cast: לכל משתתף מרכזי (עד 8) כינוי־תפקיד קולע (title), אימוג'י, ושורה אחת (line) שמסכמת אותו.
 - sections, בסדר הזה, כל אחד עם emoji, כותרת מקורית בסגנון "נושא: הטוויסט" (title), ופסקת פתיחה (intro):
-  1. person: פרק נפרד לכל דמות מרכזית (בזוג: שני פרקים, אחד אחרי השני; בקבוצה: עד 5). זה החלק הארוך והחשוב ביותר. title בפורמט "שם: הכינוי שלו", emoji של הדמות, intro במשפט אחד. בכל פרק, בסדר הזה:
+  1. person: פרק נפרד לכל דמות מרכזית (בזוג: שני פרקים, אחד אחרי השני; בקבוצה: עד 5). זה החלק הארוך והחשוב ביותר. title בפורמט "שם: משפט־מטאפורה אחד שתופס את הסתירה הכי גדולה של הדמות" (דימוי מפתיע מהעולם האמיתי, כזה שגורם לקרוא את הפרק), emoji של הדמות, intro במשפט אחד. בכל פרק, בסדר הזה:
      - פסקה: איך הוא רואה ומציג את עצמו. פסקה: "אבל הצ'אט מספר סיפור אחר", עם פרטים ומספרים. בלוק chat שמוכיח.
      - item 😨 "ממה X באמת מפחד/ת": הפחד שההתנהגות שלו חושפת (להיות זה שלא עונים לו, להיראות יותר מדי בעניין, שזה לא הדדי, להיחשף, להישאר בחוץ...). חד, מפתיע, כזה שגורם לו להגיד "איך הוא יודע". ומיד בלוק chat שמוכיח.
      - item 🪞 "איך Y רואה את X": מה ההתנהגות של האחרים כלפיו מגלה.
      - item 🔦 "הרגע שחשף אותו": ההודעה שבה המסכה ירדה, עם תאריך, ובלוק chat.
      - item 🔥 "הצלייה של סקופי": צלייה חדה ומצחיקה, בלי רחמים (בלי לעבור את הקו האדום).
      - item 💎 "הדבר הכי טוב ב־X": סיום כן וחם, משהו אמיתי שהוא צריך לשמוע.
+     חשוב: הפסקה הראשונה בכל פרק היא מסה ארוכה ורצופה, לפחות 180 מילים (כ־20 שורות בטלפון), שמאפיינת את הדמות מכל הכיוונים: התפקיד שלה, איך היא מדברת, מתי היא חיה, איך היא מתנהגת כשיש שקט, שאלה, בדיחה, רגע רגשי. לכל היותר 2 בלוקי chat בכל פרק, כל השאר ניתוח. אל תחזור על אותן כותרות או אותן זוויות בין דמויות: כל דמות מקבלת כותרות משנה אחרות וזוויות אחרות (פחד, סתירה, אז ועכשיו, הגרסה הלילית, טקס קבוע, הרגע שחשף, מי מחכה למי).
   1b. verdicts: המסקנות של סקופי. בלוקי item עם תשובה חדה וראיות לשאלות: מי הדומיננטי/ת ולמה, האם יש פה אהבה (או ניצוץ, או חברות, ומי מראה את זה יותר), מי צריך את מי יותר, ומתי הקשר היה הכי חם. אחרי כל מסקנה, בלוק chat שמוכיח אותה.
   2. dictionary: המילון הסודי. פסקת intro על השפה שלהם, ואז 5–12 בלוקי term: title הוא המונח, emoji, text הוא ההגדרה המשועשעת, date הוא מתי ואיך זה נולד.
   3. tension: איפה זה מתחכך. 1–2 פסקאות, בלוק chat אחד לפחות, ו־2–4 בלוקי item עם הטריגרים שחוזרים.
   4. turning_points: רגעי המפנה בסדר כרונולוגי, 3–7. לכל אחד בלוק item (title, date, text עם הסיפור) ומיד אחריו בלוק chat מהרגע עצמו.
   5. moments: 3–5 רגעים בלתי נשכחים מסוגים שונים (הכי מצחיק, הכי מתוק, הכי מביך, הכי כאוטי), כל אחד item ואחריו chat.
   6. unsaid: מה שאף אחד לא אומר בקול אבל כל ההודעות צועקות אותו. 1–2 פסקאות כנות, לא מרושעות.
-  7. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item.
+  7. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item. מותר לבחור פורמט יצירתי (למשל "תחזית מזג האוויר של הקשר לחודש הבא" או "דוח מבקר המדינה על הצ'אט"), כל עוד הכל מבוסס על ראיות.
   8. versus: הדמות מול הדמות. פסקה שמעמידה את שתי הדמויות המרכזיות זו מול זו (הכינוי של כל אחד), ואז 5–8 בלוקי vs: title הוא הקטגוריה (למשל "מי כותב ראשון"), emoji, text הוא שם המנצח, ו־messages הם שני פריטים {from: שם, text: הערך או משפט קצר עם ראיה, time: ""}. סיים בפסקה שמסבירה למה שתי הדמויות האלה צריכות אחת את השנייה.
   9. notes: פתק אישי מסקופי לכל משתתף מרכזי, בלוק note עם title=שם המשתתף ו־text של 2–3 משפטים.
   9b. reactions: "מה כל אחד יעשה אחרי שיקרא את זה": בלוק item לכל משתתף מרכזי עם תחזית קצרה ומצחיקה לתגובה שלו לדוח, לפי האופי שלו. זו תחזית, אז לא בלוק chat.
@@ -3460,82 +3462,237 @@ function buildLocalReport(r) {
   }
   const recvPer = q => { let n = 0; for (const [, mm] of rtTo) if (mm.has(q.name)) { /* replies q gave */ } for (const x of P) if (x !== q && x.repliesTo.has(q.name)) n += x.repliesTo.get(q.name); return n / Math.max(1, q.msgs); };
   const cmpWord = (v, f, more, less, same) => { const rr = rel({ ...v }, f); return rr > 1.25 ? more : rr < .8 ? less : same; };
-  function portrait(p) {
-    const out = [], rank = P.indexOf(p) + 1, Y = V(p), you = isYou(p);
-    const who = you ? Y.he : p.name;
-    // role in the group
-    const roles = [];
-    if (r.timed && rel(p, q => q.startShare) > 1.3) roles.push(`${gx(p, 'זה', 'זו')} ש${gx(p, 'מתחיל', 'מתחילה')} את רוב השיחות`);
-    if (P.length > 2 && rel(p, recvPer) > 1.25) roles.push(`הדבק: על ההודעות ${Y.his} עונים יותר מכל אחד אחר`);
-    if (r.timed && rel(p, q => q.lastWord / Math.max(1, q.msgs)) > 1.3) roles.push(`${gx(p, 'זה', 'זו')} ש${gx(p, 'סוגר', 'סוגרת')} את השיחות`);
-    if (p.rt != null && rel(p, q => 1 / Math.max(q.rt || 1e9, 1e4)) > 1.3) roles.push(`${gx(p, 'זה', 'זו')} ש${gx(p, 'עונה', 'עונה')} הכי מהר`);
-    if (p.share < .5 / P.length) roles.push(`${gx(p, 'הצופה', 'הצופה')} ${gx(p, 'השקט', 'השקטה')}`);
-    out.push(para(`**${you ? 'התפקיד שלך' : 'התפקיד של ' + p.name}${r.isPair ? ' בצ\'אט' : ' בקבוצה'}.** ${rank === 1 ? 'הכי הרבה הודעות' : `מקום ${rank} מתוך ${P.length} בכמות ההודעות`}: ${fmt(p.msgs)}, שהם ${Math.round(p.share * 100)}% מהכל. ${roles.length ? `${you ? Y.He : p.name} ${roles.slice(0, 2).join(', ו')}.` : `${you ? Y.He : p.name} לא ${gx(p, 'מוביל', 'מובילה')} ולא ${gx(p, 'נגרר', 'נגררת')}, ${gx(p, 'נמצא', 'נמצאת')} בדיוק באמצע. זה תפקיד בפני עצמו.`}`));
-    // how they talk
-    const sig = (p.signature || []).slice(0, 3).map(w => `"${w[0]}"`);
-    out.push(para(`**איך ${who} ${gx(p, 'מדבר', 'מדברת')}.** ${p.avgWords.toFixed(1)} מילים בממוצע להודעה, ${cmpWord(p, q => q.avgWords, 'יותר מכולם', 'פחות מכולם', 'בערך כמו כולם')}. ${p.emojis > 5 ? `${fmt(p.emojis)} אימוג'ים, והאהוב: ${p.topEmoji[0]}. ` : `כמעט בלי אימוג'ים. ${you ? Y.He : p.name} ${gx(p, 'סומך', 'סומכת')} על מילים. `}${sig.length ? `המילים שמזהות ${you ? 'אותך' : gx(p, 'אותו', 'אותה')}: ${sig.join(', ')}. ` : ''}${p.questions > 5 ? `${fmt(p.questions)} שאלות` : 'כמעט בלי שאלות'}, ${p.laughs > 5 ? `${fmt(p.laughs)} צחוקים` : 'וכמעט בלי צחוקים'}${p.media > 5 ? `, ו־${fmt(p.media)} תמונות וקבצים` : ''}.`));
-    // when they are alive
-    if (r.timed) {
-      const days = wd.get(p.name) || [], bd = days.indexOf(Math.max(...days));
-      out.push(para(`**מתי ${who} ${gx(p, 'חי', 'חיה')}.** השעה ${Y.his}: ${String(p.peakHour).padStart(2, '0')}:00. היום ${Y.his}: יום ${DAYS_HE[bd]}. ${p.nightRate > .12 ? `${Math.round(p.nightRate * 100)}% מההודעות אחרי חצות, כשכולם כבר ישנים.` : p.morningRate > .15 ? `${Math.round(p.morningRate * 100)}% מההודעות לפני 9 בבוקר. ${gx(p, 'ער', 'ערה')} לפני כולם.` : 'שעות נורמליות של בן אדם נורמלי. כמעט חשוד.'}`));
-    }
-    // who they talk with (groups)
-    if (!r.isPair && p.repliesTo.size) {
-      const to = [...p.repliesTo.entries()].sort((x, y) => y[1] - x[1])[0];
-      const from = P.filter(x => x !== p && x.repliesTo.has(p.name)).sort((x, y) => y.repliesTo.get(p.name) - x.repliesTo.get(p.name))[0];
-      out.push(Object.assign(para(`**עם מי ${who} באמת ${gx(p, 'מדבר', 'מדברת')}.** הכי הרבה ${you ? Y.he : gx(p, 'הוא', 'היא')} ${gx(p, 'עונה', 'עונה')} ל${N(pOf(to[0]))} (${fmt(to[1])} פעמים).${from ? ` ומי שהכי עונה ${you ? 'לך' : gx(p, 'לו', 'לה')}: ${N(from)}. ${from.name === to[0] ? 'ציר אמיתי בתוך הקבוצה.' : 'משולש מעניין.'}` : ''}`), { mixed: true }));
-    }
-    // in every situation
-    const q = qrt.get(p.name) || [], qm = median(q);
-    const S = [];
-    if (r.timed) S.push(['🤫', 'כשהצ\'אט שותק', rel(p, x => x.startShare) > 1.2 ? `${you ? Y.He : p.name} ${gx(p, 'זה', 'זו')} ש${gx(p, 'שובר', 'שוברת')} את השקט. ${fmt(p.starts)} פעמים.` : `${you ? Y.He : p.name} ${gx(p, 'מחכה', 'מחכה')} שמישהו אחר יכתוב ראשון. ${fmt(p.starts)} פתיחות בלבד.`]);
-    if (qm != null && q.length >= 3) S.push(['❓', `כששואלים ${you ? 'אותך' : gx(p, 'אותו', 'אותה')} שאלה`, `${gx(p, 'עונה', 'עונה')} תוך ${fmtDur(qm)}. ${qm < 3 * 60e3 ? 'בלי לחשוב פעמיים.' : qm > 30 * 60e3 ? 'אחרי שחשב/ה על זה טוב טוב, או שכח/ה.' : 'בקצב סביר.'}`]);
-    S.push(['😂', 'כשמשהו מצחיק', rel(p, x => x.laughRate) > 1.2 ? `${gx(p, 'הראשון', 'הראשונה')} לצחוק. ${fmt(p.laughs)} פעמים "חחח".` : rel(p, x => x.laughRate) < .7 ? `קשה להצחיק ${you ? 'אותך' : gx(p, 'אותו', 'אותה')}. ${fmt(p.laughs)} צחוקים בכל הצ'אט.` : `${gx(p, 'צוחק', 'צוחקת')} כשבאמת מצחיק. לא יותר.`]);
-    if (r.timed) S.push(['📨', `כשלא עונים ${you ? 'לך' : gx(p, 'לו', 'לה')}`, p.doubles >= 3 ? `${gx(p, 'כותב', 'כותבת')} שוב. ${fmt(p.doubles)} פעמים, אחרי חצי שעה של שקט.` : `${gx(p, 'מחכה', 'מחכה')} בשקט. לא ${gx(p, 'רודף', 'רודפת')} אחרי אף אחד.`]);
-    S.push(['❤️', 'כשמגיע רגע רגשי', rel(p, x => x.loveRate) > 1.2 ? `לא ${gx(p, 'מתבייש', 'מתביישת')}. ${fmt(p.love)} הודעות עם לב.` : rel(p, x => x.laughRate) > 1.2 ? `${gx(p, 'בורח', 'בורחת')} להומור. זה יותר בטוח.` : `${gx(p, 'שותק', 'שותקת')}, ומשאיר/ה את זה לאחרים.`]);
-    out.push(para(`**${you ? Y.He : p.name} בכל מצב:**`));
-    S.forEach(([e, t, x]) => out.push(item(e, t, x)));
-    return out;
-  }
 
   const chapters = [];
   const chars = (r.isPair ? P.slice(0, 2) : P.slice(0, 5));
-  chars.forEach(p => {
-    const a = A[archKey(p)], blocks = [];
-    const other = r.isPair ? P.find(q => q !== p) : null;
-    const open = p === meP ? `ואז יש ${V(p).him}, ${N(p)}. ` : addressAll ? `${N(p)}, ${['צריך לדבר.', 'שב/י רגע.', 'אין דרך עדינה להגיד את זה.', 'הגיע תורך.', 'סקופי ראה הכל.'][chars.indexOf(p) % 5]} ` : '';
-    blocks.push(para(`${open}${isYou(p) ? '' : N(p) + ' '}${isYou(p) ? a.self(p) : a.self(p).replace(/^(הוא|היא|הוא\/היא) /, '')}`.replace(/\s+/g, ' ').trim()));
-    blocks.push(para(`אבל הצ'אט מספר סיפור אחר. ${a.real(p)}`));
-    blocks.push(...proofBlocks(p, a.proofs));
-    blocks.push(para(a.after(p)));
-    blocks.push(...portrait(p));
+  const usedAngles = new Map();               // angle id -> times used, so each character gets different angles
+  const pick = (arr, k) => arr[((k % arr.length) + arr.length) % arr.length];
+  // a title made from the person's two strongest traits, e.g. "הינשופה ששואלת הכל"
+  const TRAIT_TAGS = [
+    ['owl', q => q.nightRate, q => `שלא ${gx(q, 'ישן', 'ישנה')}`],
+    ['starter', q => q.startShare, q => `שתמיד ${gx(q, 'כותב', 'כותבת')} ${gx(q, 'ראשון', 'ראשונה')}`],
+    ['flash', q => q.rt != null ? 1 / Math.max(q.rt, 1e4) : 0, q => 'שעונה לפני שסיימת להקליד'],
+    ['ghost', q => q.rt || 0, q => `שעונה כשבא ${gx(q, 'לו', 'לה')}`],
+    ['curious', q => q.qRate, q => `ש${gx(q, 'שואל', 'שואלת')} הכל`],
+    ['comic', q => q.laughRate, q => `ש${gx(q, 'צוחק', 'צוחקת')} על הכל`],
+    ['romantic', q => q.loveRate, q => 'עם הלב על המקלדת'],
+    ['emoji', q => q.emojiRate, q => `שמדבר/ת ב${q.topEmoji[0] || 'אימוג\'ים'}`],
+    ['novelist', q => q.avgWords, q => `ש${gx(q, 'כותב', 'כותבת')} מגילות`],
+    ['brief', q => 1 / Math.max(q.avgWords, .5), q => 'של שתי מילים'],
+    ['double', q => q.doubles / Math.max(1, q.msgs), q => `שלא ${gx(q, 'מוותר', 'מוותרת')} על תשובה`],
+    ['media', q => q.mediaRate, q => 'עם הגלריה'],
+    ['sorry', q => q.sorry / Math.max(1, q.msgs), q => `ש${gx(q, 'מתנצל', 'מתנצלת')} על הכל`],
+  ];
+  // a one-sentence title that names the character's contradiction
+  const TITLES = {
+    engine: [q => `${gx(q, 'המנוע', 'המנוע')} של הצ'אט, ${gx(q, 'שבטוח', 'שבטוחה')} שזה סתם תחביב`, q => `${gx(q, 'מי', 'מי')} שמחזיק/ה את כולם ולא ${gx(q, 'מבקש', 'מבקשת')} כלום בחזרה`],
+    novelist: [q => `${gx(q, 'הסופר', 'הסופרת')} שלא ${gx(q, 'יודע', 'יודעת')} לכתוב "סבבה" ולהמשיך הלאה`, q => `${gx(q, 'מי', 'מי')} שכל הודעה שלו/ה היא מכתב, גם כשהשאלה הייתה "מה נשמע"`],
+    emoji: [q => `${gx(q, 'מי', 'מי')} שמדבר/ת בפרצופים קטנים כי מילים זה מחייב`, q => `${q.topEmoji[0] || '😂'} אחד שאומר יותר מכל הפסקאות של כולם`],
+    owl: [q => `${gx(q, 'שומר', 'שומרת')} הלילה, שאומר/ת את האמת רק אחרי חצות`, q => `${gx(q, 'מי', 'מי')} שחי/ה כשכולם ישנים, ויודע/ת בדיוק למה`],
+    bird: [q => `${gx(q, 'מי', 'מי')} שמעיר/ה את כולם לפני שהשמש החליטה לקום`],
+    starter: [q => `${gx(q, 'מי', 'מי')} שתמיד כותב/ת ראשון/ה, ובודק/ת בשקט אם מישהו היה כותב במקומו/ה`, q => `${gx(q, 'מצית', 'מצית')} השיחות, שלא סובל/ת שקט של יותר מחצי יום`],
+    flash: [q => `${gx(q, 'מי', 'מי')} שעונה לפני שסיימת להקליד, ובטוח/ה שזה נראה רגוע`],
+    ghost: [q => `${gx(q, 'מי', 'מי')} שקורא/ת הכל, עונה מתי שבא לו/ה, ויודע/ת שמחכים`, q => `${gx(q, 'השחקן', 'השחקנית')} הכי טוב/ה במשחק של "אני לא באמת בעניין"`],
+    curious: [q => `${gx(q, 'החוקר', 'החוקרת')} שכל "שאלה קטנה" שלו/ה היא בעצם חקירה`, q => `${gx(q, 'מי', 'מי')} ששואל/ת הכל, כדי לא להגיד כלום על עצמו/ה`],
+    comic: [q => `${gx(q, 'מי', 'מי')} שצוחק/ת על הכל, כי ככה לא צריך לדבר ברצינות`, q => `הצחוק הכי מהיר בצ'אט, והבריחה הכי מהירה מרגשות`],
+    romantic: [q => `${gx(q, 'מי', 'מי')} שכותב/ת "אוהב/ת" ומחכה בשקט לשמוע את זה בחזרה`, q => `הלב הפתוח של הצ'אט, שלא יודע/ת לשמור רגש בבטן`],
+    photo: [q => `${gx(q, 'מי', 'מי')} שמתעד/ת הכל, כדי שאף רגע לא ילך לאיבוד`],
+    brief: [q => `${gx(q, 'מי', 'מי')} שעונה בשתי מילים ומתכוון/ת לפסקה שלמה`, q => `${gx(q, 'המינימליסט', 'המינימליסטית')} שחושב/ת שאדישות זה סגנון`],
+    polite: [q => `${gx(q, 'מי', 'מי')} שאומר/ת תודה גם כשלא מגיע, ושומר/ת על האווירה בלי שאף אחד ישים לב`],
+    sorry: [q => `${gx(q, 'מי', 'מי')} שמתנצל/ת לפני שמישהו בכלל הספיק להיפגע`],
+    quiet: [q => `${gx(q, 'הצופה', 'הצופה')} ${gx(q, 'השקט', 'השקטה')}, שיודע/ת על כולם הכל`],
+    steady: [q => `${gx(q, 'העוגן', 'העוגן')} ${gx(q, 'השקט', 'השקטה')}, שכולם סומכים עליו/ה בלי לשים לב`],
+  };
+  const tagOf = p => TRAIT_TAGS.filter(([id]) => id !== p.arch.id).map(([id, f, t]) => ({ id, t, s: rel(p, f) })).sort((x, y) => y.s - x.s)[0];
+
+  // the long character essay: many facts, each with several phrasings, ordered by what's most distinctive
+  function essay(p, k) {
+    const Y = V(p), you = isYou(p), sub = you ? Y.he : p.name, from = Y.from;
+    const n = P.length, rank = P.indexOf(p) + 1, pc = Math.round(p.share * 100);
+    const F2 = [];   // [score, [variant functions]]
+    const SKIP = { starter: 'starts', comic: 'laughs', romantic: 'love', curious: 'questions', novelist: 'length', brief: 'length', emoji: 'emoji', owl: 'time', bird: 'time', flash: 'speed', ghost: 'speed', photo: 'media', engine: 'none', sorry: 'none', polite: 'none', quiet: 'none', steady: 'none' }[p.arch.id];
+    let key = '';
+    const add = (score, variants) => { if (score > 0 && variants.length && key !== SKIP) F2.push([score, variants]); };
+    key = 'role';
+    add(9, [
+      () => `${sub} ${gx(p, 'אחראי', 'אחראית')} ל־${pc}% מכל מה שנכתב פה${rank === 1 ? ', יותר מכל אחד אחר' : ''}.`,
+      () => `מתוך ${fmt(r.total)} הודעות, ${fmt(p.msgs)} יצאו ${from}${rank === 1 ? '. אף אחד לא מתקרב' : `, מקום ${rank} מתוך ${n}`}.`,
+      () => `${fmt(p.msgs)} הודעות, ${pc}% מהשיחה כולה. ${rank === 1 ? 'זה לא חלק מהצ\'אט, זה עמוד התווך שלו.' : rank === n && n > 2 ? 'הכי מעט בצ\'אט, וזה לא מקרי.' : 'נוכחות יציבה, בלי לנסות להשתלט.'}`,
+    ]);
+    key = 'starts';
+    const ss = rel(p, q => q.startShare);
+    if (r.timed) add(Math.abs(ss - 1) * 6, ss >= 1 ? [
+      () => `כשהצ'אט נרדם, ${sub} ${gx(p, 'זה', 'זו')} ש${gx(p, 'מעיר', 'מעירה')} אותו: ${fmt(p.starts)} פעמים אחרי שש שעות של שקט.`,
+      () => `${Math.round(p.startShare * 100)}% מהשיחות נפתחות ${from}. בלי ההודעה הראשונה ${Y.his}, הרבה ימים פה פשוט לא היו קורים.`,
+      () => `${sub} לא ${gx(p, 'מחכה', 'מחכה')} להזמנה. ${fmt(p.starts)} שיחות התחילו מאפס בזכות הודעה ${Y.his}.`,
+    ] : [
+      () => `${sub} כמעט אף פעם לא ${gx(p, 'כותב ראשון', 'כותבת ראשונה')}. ${fmt(p.starts)} פתיחות בלבד, ${sub} ${gx(p, 'מעדיף', 'מעדיפה')} להצטרף לשיחה שכבר רצה.`,
+      () => `ההודעה הראשונה של הבוקר כמעט אף פעם לא ${Y.his}. ${sub} ${gx(p, 'מחכה', 'מחכה')} שמישהו אחר ישבור את הקרח.`,
+    ]);
+    key = 'speed';
+    if (p.rt != null && p.rts.length > 5) {
+      const sp = rel(p, q => q.rt || 0);
+      add(Math.abs(Math.log(sp)) * 6, sp < 1 ? [
+        () => `התשובות ${Y.his} מגיעות תוך ${fmtDur(p.rt)} בחציון. הטלפון כנראה לא יוצא מהיד.`,
+        () => `${fmtDur(p.rt)}. זה הזמן שלוקח ${you ? 'לך' : gx(p, 'לו', 'לה')} לענות. יש אנשים שלוקח להם יותר זמן לפתוח את ההתראה.`,
+        () => `${sub} ${gx(p, 'עונה', 'עונה')} מהר, ${fmtDur(p.rt)} בחציון. מי שכותב ${you ? 'לך' : gx(p, 'לו', 'לה')} יודע שהוא לא ידבר לקיר.`,
+      ] : [
+        () => `התשובות ${Y.his} לוקחות ${fmtDur(p.rt)} בחציון. בינתיים, בצד השני, מישהו בוהה במסך.`,
+        () => `${sub} לא ${gx(p, 'ממהר', 'ממהרת')}. ${fmtDur(p.rt)} לתשובה, גם כשהשאלה פשוטה.`,
+        () => `${fmtDur(p.rt)} בחציון. ${sub} ${gx(p, 'קורא', 'קוראת')} הכל, ${gx(p, 'עונה', 'עונה')} כשנוח.`,
+      ]);
+    }
+    key = 'length';
+    const lw = rel(p, q => q.avgWords);
+    add(Math.abs(Math.log(lw)) * 5 + .5, lw > 1.2 ? [
+      () => `${p.avgWords.toFixed(1)} מילים בממוצע להודעה. ${sub} לא ${gx(p, 'שולח', 'שולחת')} הודעות, ${sub} ${gx(p, 'מסביר', 'מסבירה')}.`,
+      () => `ההודעות ${Y.his} ארוכות מכל השאר, ${p.avgWords.toFixed(1)} מילים בממוצע${p.longest.split(/\s+/).length >= 20 ? `, ופעם אחת ${fmt(p.longest.split(/\s+/).length)} מילים ברצף` : ''}.`,
+    ] : lw < .8 ? [
+      () => `${p.avgWords.toFixed(1)} מילים להודעה. ${sub} ${gx(p, 'כותב', 'כותבת')} כמו מברק: קצר, ענייני, בלי קישוטים.`,
+      () => `${sub} ${gx(p, 'חוסך', 'חוסכת')} במילים. ${p.avgWords.toFixed(1)} בממוצע, וכל מילה נבחרה בקפידה, או שבכלל לא.`,
+    ] : [
+      () => `${p.avgWords.toFixed(1)} מילים בממוצע להודעה, בדיוק באמצע. לא מגילות, לא סמסים.`,
+    ]);
+    key = 'emoji';
+    if (p.emojis > 5) add(rel(p, q => q.emojiRate) * 2, [
+      () => `${fmt(p.emojis)} אימוג'ים, והמנצח: ${p.topEmoji[0]}. כשאין מילים, יש ${p.topEmoji[0]}.`,
+      () => `האימוג'י ${Y.his}: ${p.topEmoji.join(' ')}. ${fmt(p.emojis)} פעמים ציור במקום משפט.`,
+    ]);
+    key = 'words';
+    const sig = (p.signature || []).slice(0, 3).map(w => `"${w[0]}"`);
+    if (sig.length) add(3.5, [
+      () => `יש מילים שהן רק ${Y.his}: ${sig.join(', ')}. מישהו אחר כותב אותן, וכולם יודעים את מי הוא מצטט.`,
+      () => `המילון ${Y.his}: ${sig.join(', ')}. מילים שבצ'אט הזה כבר יש להן בעלים.`,
+    ]);
+    key = 'time';
+    if (r.timed) {
+      const days = new Array(7).fill(0); msgs.forEach(m => { if (m.from === p.name && m.t) days[m.t.getDay()]++; });
+      const bd = days.indexOf(Math.max(...days)), hh = String(p.peakHour).padStart(2, '0');
+      add(p.nightRate > .12 ? 6 : 2.5, p.nightRate > .12 ? [
+        () => `${Math.round(p.nightRate * 100)}% מההודעות ${Y.his} נכתבו אחרי חצות. השעה ${Y.his} היא ${hh}:00, כשכל השאר כבר ישנים.`,
+        () => `${sub} ${gx(p, 'חי', 'חיה')} בלילה. ${hh}:00 היא שעת השיא ${Y.his}, ויום ${DAYS_HE[bd]} הוא היום ${Y.his}.`,
+      ] : [
+        () => `השעה ${Y.his} היא ${hh}:00 והיום ${Y.his} הוא ${DAYS_HE[bd]}. שם תמצאו ${you ? 'אותך' : gx(p, 'אותו', 'אותה')} כמעט תמיד.`,
+        () => `יום ${DAYS_HE[bd]}, ${hh}:00. אם ${sub} ${gx(p, 'כותב', 'כותבת')}, זה כנראה עכשיו.`,
+      ]);
+    }
+    key = 'questions';
+    if (p.questions > 3) add(rel(p, q => q.qRate) * 2, [
+      () => `${fmt(p.questions)} שאלות. ${sub} ${gx(p, 'רוצה', 'רוצה')} לדעת, ולא תמיד ${gx(p, 'מחכה', 'מחכה')} שיספרו לבד.`,
+      () => `${Math.round(p.qRate * 100)}% מההודעות ${Y.his} נגמרות בסימן שאלה. סקרנות, או צורך לדעת איפה כולם עומדים.`,
+    ]);
+    key = 'laughs';
+    if (p.laughs > 3) add(rel(p, q => q.laughRate) * 2, [
+      () => `${fmt(p.laughs)} הודעות עם צחוק. ${sub} ${gx(p, 'הקהל', 'הקהל')} הכי טוב שיש בצ'אט הזה.`,
+      () => `ה"חחחח" ${Y.his} מגיע ${fmt(p.laughs)} פעמים. לפעמים כי מצחיק, לפעמים כי ככה יותר קל.`,
+    ]);
+    key = 'love';
+    if (p.love > 2) add(rel(p, q => q.loveRate) * 2.2, [
+      () => `${fmt(p.love)} הודעות עם לב או "מתגעגע/ת". ${sub} לא ${gx(p, 'מסתיר', 'מסתירה')} רגשות, גם כשאחרים כן.`,
+      () => `ה"אוהב/ת" ${Y.his} לא נשמר לאירועים מיוחדים: ${fmt(p.love)} פעמים, באמצע יום רגיל.`,
+    ]);
+    key = 'doubles';
+    if (p.doubles >= 3) add(rel(p, q => q.doubles / Math.max(1, q.msgs)) * 2, [
+      () => `${fmt(p.doubles)} פעמים הגיעה ממך הודעה שנייה אחרי חצי שעה בלי תשובה. השקט הזה לא עובר ${you ? 'לך' : gx(p, 'לו', 'לה')} בשקט.`.replace('ממך', from),
+      () => `כשלא עונים, ${sub} לא ${gx(p, 'מוותר', 'מוותרת')}: הודעה שנייה, לפעמים שלישית. ${fmt(p.doubles)} פעמים.`,
+    ]);
+    key = 'media';
+    if (p.media > 5) add(rel(p, q => q.mediaRate) * 1.8, [
+      () => `${fmt(p.media)} תמונות, סרטונים וקבצים. חצי מהזיכרון של הצ'אט הזה יושב בגלריה ${Y.his}.`,
+    ]);
+    key = 'deleted';
+    if (p.deleted >= 2) add(4, [
+      () => `${fmt(p.deleted)} הודעות נמחקו. מה שהיה כתוב שם נשאר רק ${you ? 'אצלך' : gx(p, 'אצלו', 'אצלה')}.`,
+    ]);
+    key = 'shift';
+    if (r.timed && Math.abs(p.shift || 0) > .05) add(Math.abs(p.shift) * 40, [
+      () => `ויש גם תנועה: ${p.shift > 0 ? `בחצי השני של הצ'אט החלק ${Y.his} בשיחה גדל. משהו נפתח.` : `בחצי השני של הצ'אט החלק ${Y.his} בשיחה קטן. משהו השתנה.`}`,
+    ]);
+    key = 'ritual';
+    if (p.gn + p.gm >= 3) add(3, [
+      () => `${p.gm >= p.gn ? `"בוקר טוב" ${fmt(p.gm)} פעמים` : `"לילה טוב" ${fmt(p.gn)} פעמים`}. אצל ${you ? 'מישהו כמוך' : p.name} זה לא נימוס, זה טקס.`,
+    ]);
+    // order: role first, then the most distinctive facts; phrasing rotates per character
+    const ordered = [F2[0], ...F2.slice(1).sort((x, y) => y[0] - x[0])].slice(0, 12);
+    const sentences = ordered.map(([, vs], j) => pick(vs, k + j)());
+    return sentences.join(' ');
+  }
+
+  // angles: each character gets the three that fit them best, avoiding what earlier characters got
+  function angles(p, k) {
+    const Y = V(p), you = isYou(p), sub = you ? Y.he : p.name, other = r.isPair ? P.find(q => q !== p) : null;
+    const list = [];
     // fear
     const fear = FEARS.map(f => ({ f, s: f.score(p) })).filter(x => x.s > 1.15).sort((x, y) => y.s - x.s)[0];
-    if (fear) {
-      blocks.push(item('😨', `ממה ${isYou(p) ? V(p).he : p.name} באמת ${gx(p, 'מפחד', 'מפחדת')}`, fear.f.text(p)));
+    if (fear) list.push({ id: 'fear', s: fear.s * 1.5, build: () => {
+      const t = pick([`ממה ${sub} באמת ${gx(p, 'מפחד', 'מפחדת')}`, 'הפחד שמאחורי ההודעות', `הנקודה הרגישה של ${you ? 'ך' : p.name}`.replace('של ך', 'שלך'), 'מה מסתתר מתחת'], k);
+      const out = [item('😨', t, fear.f.text(p))];
       const fi = fear.f.find(p);
-      if (fi >= 0) blocks.push(chat(fear.f.id === 'misunderstood' ? [bub(msgs[fi])] : around(fi, 1, 1)));
+      if (fi >= 0) out.push(chat(fear.f.id === 'misunderstood' ? [bub(msgs[fi])] : around(fi, 1, 1)));
+      return out;
+    } });
+    // contradiction
+    const C = [];
+    if (rel(p, q => q.loveRate) > 1.3 && p.avgWords < 4) C.push(`${sub} ${gx(p, 'אומר', 'אומרת')} "אוהב/ת" הרבה, אבל בשתיים־שלוש מילים. הרגש גדול, המילים קטנות.`);
+    if (p.sorry >= 4 && p.rt != null && rel(p, q => q.rt || 0) > 1.3) C.push(`${sub} ${gx(p, 'מתנצל', 'מתנצלת')} ${fmt(p.sorry)} פעמים, ועדיין ${gx(p, 'עונה', 'עונה')} לאט. ההתנצלות מגיעה מהר יותר מהתשובה.`);
+    if (rel(p, q => q.qRate) > 1.3 && r.timed && rel(p, q => q.startShare) < .8) C.push(`${sub} ${gx(p, 'שואל', 'שואלת')} הכל, אבל כמעט לא ${gx(p, 'פותח', 'פותחת')} שיחה. סקרנות, רק כשמישהו אחר כבר התחיל.`);
+    if (rel(p, q => q.laughRate) > 1.3 && rel(p, q => q.loveRate) < .7) C.push(`${sub} ${gx(p, 'צוחק', 'צוחקת')} על הכל, חוץ מרגשות. שם פתאום נהיה שקט.`);
+    if (p.share > 1.2 / n0() && rel(p, q => q.qRate) < .7) C.push(`${sub} ${gx(p, 'מדבר', 'מדברת')} הרבה ו${gx(p, 'שואל', 'שואלת')} מעט. הצ'אט שומע ${you ? 'אותך' : gx(p, 'אותו', 'אותה')} מצוין, אבל ${sub} ${gx(p, 'שומע', 'שומעת')} אותו?`);
+    if (p.rt != null && rel(p, q => 1 / Math.max(q.rt || 1e9, 1e4)) > 1.3 && p.avgWords < 4) C.push(`${sub} ${gx(p, 'עונה', 'עונה')} מהר, אבל קצר. נוכחות מלאה, תוכן מינימלי.`);
+    if (C.length) list.push({ id: 'contra', s: 2.4, build: () => [item('🌓', pick(['הסתירה', 'מה לא מסתדר פה', `שני הצדדים של ${you ? 'ך' : p.name}`.replace('של ך', 'שלך')], k + 1), C[0])] });
+    // then vs now
+    if (r.timed && Math.abs(p.shift || 0) > .06) list.push({ id: 'shift', s: Math.abs(p.shift) * 30, build: () => [item(p.shift > 0 ? '📈' : '📉', pick([`${you ? 'אתה' : p.name} אז ועכשיו`.replace('אתה', you ? Y.He : 'אתה'), 'מה השתנה', 'הגרף לא משקר'], k + 2), p.shift > 0 ? `בהתחלה החלק ${Y.his} בשיחה היה קטן. היום ${sub} בלב העניינים: גידול של ${Math.round(p.shift * 100)} נקודות אחוז. משהו גורם ${you ? 'לך' : gx(p, 'לו', 'לה')} להתקרב.` : `בהתחלה החלק ${Y.his} בשיחה היה גדול. היום פחות: ירידה של ${Math.round(-p.shift * 100)} נקודות אחוז. ${gx(p, 'עסוק', 'עסוקה')}, או ${gx(p, 'מתרחק', 'מתרחקת')}?`)] });
+    // night self vs day self
+    const night = msgs.filter(m => m.from === p.name && isText(m) && m.t && m.t.getHours() < 5);
+    const day = msgs.filter(m => m.from === p.name && isText(m) && m.t && m.t.getHours() >= 8 && m.t.getHours() < 20);
+    if (night.length >= 8 && day.length >= 8) {
+      const aw = arr => arr.reduce((x, m) => x + m.text.split(/\s+/).length, 0) / arr.length;
+      const nw = aw(night), dw = aw(day);
+      if (nw > dw * 1.25 || nw < dw * .75) list.push({ id: 'night', s: 2 + Math.abs(Math.log(nw / dw)) * 3, build: () => [item('🌙', pick([`${you ? 'הגרסה הלילית שלך' : p.name + ' של הלילה'}`, 'מה שקורה אחרי חצות', 'שתי משמרות'], k + 3), nw > dw ? `ביום ${sub} ${gx(p, 'כותב', 'כותבת')} ${dw.toFixed(1)} מילים להודעה. אחרי חצות, ${nw.toFixed(1)}. בלילה ${sub} ${gx(p, 'נפתח', 'נפתחת')}, ומה שלא נאמר באור יום פתאום נכתב.` : `ביום ${sub} ${gx(p, 'כותב', 'כותבת')} ${dw.toFixed(1)} מילים להודעה, ובלילה רק ${nw.toFixed(1)}. הלילה ${Y.his} שקט וקצר, ולפעמים זה אומר יותר.`)] });
     }
-    // how the other(s) see them
+    // ritual
+    if (p.gm + p.gn >= 4) list.push({ id: 'ritual', s: 1.6 + (p.gm + p.gn) / 20, build: () => [item(p.gm >= p.gn ? '☀️' : '🌙', pick(['הטקס הקבוע', 'משהו שאפשר לסמוך עליו', 'השעון הביולוגי של הצ\'אט'], k + 4), `${p.gm ? `${fmt(p.gm)} פעמים "בוקר טוב"` : ''}${p.gm && p.gn ? ' ו־' : ''}${p.gn ? `${fmt(p.gn)} פעמים "לילה טוב"` : ''}. ${sub} ${gx(p, 'פותח', 'פותחת')} או ${gx(p, 'סוגר', 'סוגרת')} את היום של כולם, גם כשאף אחד לא ביקש.`)] });
+    // exposing message, quoted inline
+    const ri = bestIdx((m) => m.from === p.name && isText(m) && m.text.length > 25 && m.text.length < 400, m => m.text.length * .4 + (m.t && m.t.getHours() < 5 ? 60 : 0) + (LOVE_RE.test(m.text) ? 50 : 0) + (/\?/.test(m.text) ? 15 : 0) + (SORRY_RE.test(m.text) ? 30 : 0));
+    if (ri >= 0) list.push({ id: 'expose', s: 1.8, build: () => [item('🔦', pick(['הרגע שחשף', 'ההודעה שהסגירה', 'שנייה של כנות', 'בלי מסכה'], k + 5), `${msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]}, ${fmtDate(msgs[ri].t)}, ${hm(msgs[ri])}: ` : ''}"${truncate(msgs[ri].text, 150)}". ${pick(['מכל ההודעות, זאת ההודעה שבה המסכה ירדה.', 'לרגע אחד, בלי בדיחות ובלי הגנות.', 'זה לא נכתב בשביל הקבוצה. זה נכתב כי היה חייב.'], k)}`)] });
+    // how others treat them
     const toP = rtTo.get(p.name), fromP = new Map();
     for (const [x, mm] of rtTo) if (mm.has(p.name)) fromP.set(x, median(mm.get(p.name)));
     if (other && toP && toP.get(other.name) && fromP.get(other.name) != null) {
-      const theyAnswer = median(toP.get(other.name)), heAnswers = fromP.get(other.name);
-      const ratio = theyAnswer / Math.max(heAnswers, 1e3);
-      blocks.push(Object.assign(item('🪞', `איך ${other.name} ${gx(other, 'רואה', 'רואה')} ${isYou(p) ? 'אותך' : 'את ' + p.name}`,
-        `כש${isYou(p) ? V(p).he : p.name} ${gx(p, 'כותב', 'כותבת')}, ${N(other)} ${gx(other, 'עונה', 'עונה')} תוך ${fmtDur(theyAnswer)}. כש${N(other)} ${gx(other, 'כותב', 'כותבת')}, ${isYou(p) ? V(p).he : p.name} ${gx(p, 'עונה', 'עונה')} תוך ${fmtDur(heAnswers)}. ${ratio < .6 ? `${N(other)} ${gx(other, 'ממהר', 'ממהרת')} ${isYou(p) ? 'אליך' : p.g === 'f' ? 'אליה' : p.g === 'm' ? 'אליו' : 'אליו/ה'}. זה אומר הרבה, גם אם אף אחד לא אמר את זה.` : ratio > 1.7 ? `${N(other)} לא ${gx(other, 'ממהר', 'ממהרת')}. ${isYou(p) ? V(p).he : p.name} ${gx(p, 'מחכה', 'מחכה')}, ו${N(other)} ${gx(other, 'יודע', 'יודעת')} את זה.` : 'שניכם באותו קצב. זה פחות דרמטי, וזה בדיוק הסימן הטוב.'}`), { mixed: true }));
+      const theyAnswer = median(toP.get(other.name)), heAnswers = fromP.get(other.name), ratio = theyAnswer / Math.max(heAnswers, 1e3);
+      list.push({ id: 'mirror', s: 1.5 + Math.abs(Math.log(ratio)), build: () => [Object.assign(item('🪞', pick([`איך ${other.name} ${gx(other, 'רואה', 'רואה')} ${you ? 'אותך' : 'את ' + p.name}`, 'המראה', 'מי מחכה למי'], k + 6),
+        `כש${sub} ${gx(p, 'כותב', 'כותבת')}, ${N(other)} ${gx(other, 'עונה', 'עונה')} תוך ${fmtDur(theyAnswer)}. כש${N(other)} ${gx(other, 'כותב', 'כותבת')}, ${sub} ${gx(p, 'עונה', 'עונה')} תוך ${fmtDur(heAnswers)}. ${ratio < .6 ? `${N(other)} ${gx(other, 'ממהר', 'ממהרת')} ${you ? 'אליך' : p.g === 'f' ? 'אליה' : p.g === 'm' ? 'אליו' : 'אליו/ה'}. זה אומר הרבה.` : ratio > 1.7 ? `${N(other)} לא ${gx(other, 'ממהר', 'ממהרת')}, ו${sub} ${gx(p, 'מחכה', 'מחכה')}.` : 'אותו קצב בדיוק. זה פחות דרמטי, וזה הסימן הטוב.'}`), { mixed: true })] });
     } else if (!other) {
       const fans = [...fromP.entries()].filter(([x]) => x !== p.name).sort((x, y) => x[1] - y[1]);
-      if (fans.length) { const to = isYou(p) ? 'לך' : gx(p, 'לו', 'לה'); blocks.push(Object.assign(item('🪞', `מי הכי מחכה ${to}`, `כש${isYou(p) ? V(p).he : p.name} ${gx(p, 'כותב', 'כותבת')}, הכי מהר עונה ${to} ${N(r.people.find(q => q.name === fans[0][0]) || { name: fans[0][0] })}, תוך ${fmtDur(fans[0][1])}.${fans.length > 1 ? ` הכי לאט: ${fans[fans.length - 1][0]}, תוך ${fmtDur(fans[fans.length - 1][1])}.` : ''}`), { mixed: true })); }
+      if (fans.length > 1) list.push({ id: 'mirror', s: 1.4, build: () => { const to = you ? 'לך' : gx(p, 'לו', 'לה'); return [Object.assign(item('🪞', pick([`מי הכי מחכה ${to}`, 'מי רץ לענות', 'המעריצים'], k + 6), `כש${sub} ${gx(p, 'כותב', 'כותבת')}, הכי מהר עונה ${to} ${N(pOf(fans[0][0]))}, תוך ${fmtDur(fans[0][1])}. הכי לאט: ${fans[fans.length - 1][0]}, תוך ${fmtDur(fans[fans.length - 1][1])}.`), { mixed: true })]; } });
     }
-    // the moment that exposed them: quoted in one line, no extra bubbles
-    const ri = bestIdx((m) => m.from === p.name && isText(m) && m.text.length > 25 && m.text.length < 400, m => m.text.length * .4 + (m.t && m.t.getHours() < 5 ? 60 : 0) + (LOVE_RE.test(m.text) ? 50 : 0) + (/\?/.test(m.text) ? 15 : 0) + (SORRY_RE.test(m.text) ? 30 : 0));
-    if (ri >= 0) blocks.push(item('🔦', `הרגע שחשף ${isYou(p) ? V(p).him : gx(p, 'אותו', 'אותה')}`, `${msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]}, ${fmtDate(msgs[ri].t)}, ${hm(msgs[ri])}: ` : ''}"${truncate(msgs[ri].text, 150)}". מכל ההודעות ${V(p).his}, זאת ההודעה שבה המסכה ירדה.`));
-    if (ROAST[archKey(p)]) blocks.push(item('🔥', 'הצלייה של סקופי', ROAST[archKey(p)](p)));
+    const chosen = list.map(x => ({ ...x, s: x.s * (usedAngles.get(x.id) ? .45 / usedAngles.get(x.id) : 1) })).sort((x, y) => y.s - x.s).slice(0, 3);
+    chosen.forEach(x => usedAngles.set(x.id, (usedAngles.get(x.id) || 0) + 1));
+    // a fear proof is the second excerpt; keep at most one excerpt from angles
+    let chats = 0;
+    return chosen.flatMap(x => x.build()).filter(b => b.kind !== 'chat' || ++chats <= 1);
+  }
+  const n0 = () => P.length;
+
+  chars.forEach((p, k) => {
+    const a = A[archKey(p)], blocks = [];
+    const you = isYou(p), Y = V(p);
+    const tg = tagOf(p);
+    const tpl = TITLES[archKey(p)];
+    const title = genderize(tpl ? pick(tpl, k)(p) : `${p.arch.title}${tg && tg.s > 1.15 ? ' ' + tg.t(p) : ''}`, p.g);
+    const open = p === meP ? pick([`ואז יש ${Y.him}, ${N(p)}.`, `ועכשיו, ${N(p)}. ${Y.He}.`, `${N(p)}. הגענו ${you ? 'אליך' : ''}.`], k)
+      : addressAll ? pick([`${N(p)}, צריך לדבר.`, `${N(p)}, שב/י רגע.`, `${N(p)}, אין דרך עדינה להגיד את זה.`, `${N(p)}, הגיע תורך.`, `${N(p)}, סקופי ראה הכל.`], k) : '';
+    const selfLine = you ? a.self(p) : `${N(p)} ${a.self(p).replace(/^(הוא|היא|הוא\/היא) /, '')}`;
+    // one long paragraph: who they think they are, what the chat shows, and everything else
+    blocks.push(para(`${open ? open + ' ' : ''}${selfLine} ${pick(['אבל הצ\'אט מספר סיפור אחר.', 'ההודעות לא מסכימות.', 'המספרים חושבים אחרת.', 'סקופי בדק, וזה לא בדיוק ככה.'], k)} ${a.real(p)} ${essay(p, k)}`.replace(/\s+/g, ' ').trim()));
+    blocks.push(...proofBlocks(p, a.proofs));
+    blocks.push(para(a.after(p)));
+    blocks.push(...angles(p, k));
+    if (ROAST[archKey(p)]) blocks.push(item('🔥', pick(['הצלייה של סקופי', 'בלי רחמים', 'סקופי לא מתאפק', 'השורה שתכאב', 'מה כולם חושבים ולא אומרים'], k), ROAST[archKey(p)](p)));
     const good = GOOD.map(([f, t]) => ({ s: f(p), t })).sort((x, y) => y.s - x.s)[0];
-    blocks.push(item('💎', `הדבר הכי טוב ב${isYou(p) ? 'ך' : p.name}`, good.t(p)));
+    blocks.push(item('💎', pick([`הדבר הכי טוב ב${you ? 'ך' : p.name}`, `למה בלי ${you ? 'אותך' : p.name} זה לא אותו דבר`, 'מה שאף אחד לא אומר בקול', `הצד ${you ? 'שלך' : gx(p, 'שלו', 'שלה')} שכולם אוהבים`, 'ובכל זאת'], k), good.t(p)));
     blocks.forEach(b => { if (b.kind !== 'chat' && !b.mixed && p.g) { b.text = genderize(b.text, p.g); b.title = genderize(b.title, p.g); } });
-    chapters.push({ key: 'person', emoji: p.arch.em, title: `${p.name}: ${genderize(p.arch.title, p.g)}`, intro: genderize(p.arch.desc(p), p.g), blocks, toc: p.name });
+    chapters.push({ key: 'person', emoji: p.arch.em, title: `${p.name}: ${title}`, intro: genderize(p.arch.desc(p), p.g), blocks, toc: p.name });
   });
 
   // --- secondary traits woven into one story per person ---
