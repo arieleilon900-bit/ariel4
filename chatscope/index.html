@@ -2291,7 +2291,7 @@ const REPORT_SCHEMA = S_OBJ({
   hook: S_ARR(S_STR),
   cast: S_ARR(S_OBJ({ name: S_STR, emoji: S_STR, title: S_STR, line: S_STR })),
   sections: S_ARR(S_OBJ({
-    key: { type: 'string', enum: ['person', 'profile', 'verdicts', 'dictionary', 'tension', 'turning_points', 'moments', 'unsaid', 'predictions', 'versus', 'notes', 'awards'] },
+    key: { type: 'string', enum: ['person', 'profile', 'verdicts', 'dictionary', 'tension', 'turning_points', 'moments', 'unsaid', 'predictions', 'versus', 'notes', 'reactions', 'awards'] },
     emoji: S_STR, title: S_STR, intro: S_STR, blocks: S_ARR(S_BLOCK),
   })),
   verdict: S_STR,
@@ -2351,10 +2351,13 @@ ${r.busiest ? `היום הכי עמוס: ${fmtDate(r.busiest.date)} עם ${r.bus
   7. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item.
   8. versus: הדמות מול הדמות. פסקה שמעמידה את שתי הדמויות המרכזיות זו מול זו (הכינוי של כל אחד), ואז 5–8 בלוקי vs: title הוא הקטגוריה (למשל "מי כותב ראשון"), emoji, text הוא שם המנצח, ו־messages הם שני פריטים {from: שם, text: הערך או משפט קצר עם ראיה, time: ""}. סיים בפסקה שמסבירה למה שתי הדמויות האלה צריכות אחת את השנייה.
   9. notes: פתק אישי מסקופי לכל משתתף מרכזי, בלוק note עם title=שם המשתתף ו־text של 2–3 משפטים.
-  10. awards: הסיום. 5–8 פרסים מקוריים כבלוקי item: emoji, title הוא שם הפרס, text הוא "הזוכה: שם. ..." עם נימוק וראיה.
+  9b. reactions: "מה כל אחד יעשה אחרי שיקרא את זה": בלוק item לכל משתתף מרכזי עם תחזית קצרה ומצחיקה לתגובה שלו לדוח, לפי האופי שלו. זו תחזית, אז לא בלוק chat.
+  10. awards: הסיום. כותרת עם שם הקבוצה ("פרסי X הרשמיים"). 5–8 פרסים מקוריים כבלוקי item ממוספרים: emoji, title "1. שם הפרס", text "מוענק ל־שם, על ..." עם נימוק וראיה.
 - verdict: פסק דין של 2–4 משפטים.
 
 בבלוקים: שדות שלא רלוונטיים לסוג הבלוק נשארים מחרוזת ריקה או מערך ריק. בבלוק chat, messages הן הודעות רצופות ומדויקות מהצ'אט (2–8), עם from כפי שמופיע בצ'אט ו־time (שעה או תאריך ושעה).
+אפשר לשלב בתוך messages שורת קריין: פריט עם from ריק ("") ו־text של משפט קצר שמספר את הסצנה, למשל "כשכולם רוצים לצאת, אתה שולח:" או "ואז X, אחרי שעה:". השתמש בזה כדי לספר את הרגעים כמו סיפור.
+${r.isPair ? '' : 'בקבוצה: בפרק של כל משתתף, פנה אליו ישירות בגוף שני ובשם ("X, אני חייב לשאול..."). לאירועים בתולדות הקבוצה תן שמות כמו של אירוע היסטורי ("פרשת ה... של מרץ 2026"), וספר אותם עם שורות קריין ובועות.'}
 
 <chat>
 ${sample.text}
@@ -2597,7 +2600,7 @@ function freePrompt(r) {
 
 ${aiUserPrompt(r, sample)}
 
-פורמט התשובה: החזר JSON תקין בלבד, בלי שום טקסט לפני או אחרי, בדיוק במבנה הזה (key של כל section הוא אחד מ: person, verdicts, dictionary, tension, turning_points, moments, unsaid, predictions, versus, notes, awards):
+פורמט התשובה: החזר JSON תקין בלבד, בלי שום טקסט לפני או אחרי, בדיוק במבנה הזה (key של כל section הוא אחד מ: person, verdicts, dictionary, tension, turning_points, moments, unsaid, predictions, versus, notes, reactions, awards):
 ${JSON_SHAPE}`;
 }
 function parseLooseJSON(text) {
