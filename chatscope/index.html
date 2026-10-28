@@ -426,6 +426,25 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .dotpulse{width:10px;height:10px;border-radius:50%;background:var(--pink);display:inline-block;margin-inline-end:8px;animation:pulse 1s ease-in-out infinite;}
 @keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
 
+.ai-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;}
+.free-steps{margin-top:14px;padding-inline-start:20px;display:grid;gap:14px;font-size:15px;}
+.free-steps li::marker{font-weight:900;color:var(--pink);}
+.free-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.free-answer,#freePrompt{width:100%;min-height:110px;margin-top:8px;border-radius:14px;border:1.5px solid var(--line);padding:10px 12px;font:13px/1.5 ui-monospace,Menlo,monospace;direction:ltr;text-align:left;background:#fff;resize:vertical;}
+.types{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px;}
+.type{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.type span{font-size:30px;line-height:1.1;}
+.type b{font-size:17px;font-weight:900;}
+.type p{font-size:14px;color:var(--muted);}
+@media (max-width:900px){.types{grid-template-columns:1fr 1fr;}}
+.seen{background:var(--ink);color:#fff;border-radius:36px;padding:clamp(28px,6vw,60px);text-align:center;position:relative;overflow:hidden;}
+.seen::before{content:'';position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,139,.35),transparent 65%);top:-200px;right:-120px;}
+.seen > *{position:relative;}
+.seen-face svg{width:72px;height:72px;margin:0 auto 10px;display:block;}
+.seen-lines{display:grid;gap:10px;margin:14px auto 0;max-width:640px;}
+.seen-lines p{font-family:'Frank Ruhl Libre','Rubik',serif;font-size:clamp(20px,3.2vw,28px);line-height:1.35;font-weight:700;color:#e9e4fb;}
+.seen-lines em{font-style:normal;color:var(--pink);}
+.seen-end{margin:22px auto 0;max-width:520px;color:#c9c3e3;font-size:17px;}
 /* story button in hero */
 .story-cta{display:flex;align-items:center;gap:14px;margin-top:18px;background:linear-gradient(90deg,var(--pink),var(--violet));color:#fff;border-radius:20px;padding:14px 18px;font-weight:800;font-size:16px;width:100%;text-align:right;box-shadow:0 14px 30px -14px rgba(255,107,139,.9);transition:transform .15s;}
 .story-cta:hover{transform:translateY(-2px);}
@@ -538,7 +557,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
       <div>
         <span class="chip"><span class="dot">🔒</span>חינם · בלי הרשמה · שום דבר לא עולה לשרת</span>
         <h1>תעלו צ'אט.<br><span class="hl">סקופי</span> יגיד לכם<br>מה <span class="pink">באמת</span> קורה שם.</h1>
-        <p class="lead">מי יוזם, מי נעלם, מי עונה תוך שנייה ומי משאיר על "נקרא". סקופי עובר על כל הודעה וכותב דוח על כל אחד מהמשתתפים, עם דגלים ירוקים, דגלים אדומים וכרטיס לשתף בקבוצה.</p>
+        <p class="lead">חבר, חברה, קראש, אקס, הקבוצה, המשפחה. סקופי קורא כל הודעה וכותב לכם את הסיפור: מי בעניין, מי נעלם, איפה היו המלחמות, איפה הייתה האהבה, והמילים הסודיות שרק אתם מבינים.</p>
 
         <div class="drop" id="drop">
           <div class="drop-inner">
@@ -593,6 +612,45 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
         <div class="float-card fc1"><div class="t">מי יותר בעניין</div><div class="v">נועה 64% · איתי 36%</div><div class="meter"><b style="width:64%"></b><b style="width:36%"></b></div></div>
         <div class="float-card fc2"><div class="t">הארכיטיפ של נועה</div><div class="v">🦉 הינשוף</div><div class="s">41% מההודעות שלה נשלחו אחרי חצות</div></div>
         <div class="float-card fc3"><div class="t">דגל אדום</div><div class="v" style="font-size:16px">🚩 ‏7 דק' לענות</div><div class="s">על "מה עשית בשבת"</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="types" style="padding-top:30px">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">כל צ'אט. באמת כל צ'אט.</span>
+        <h2 class="h2">על מי אתם רוצים לדעת את האמת?</h2>
+        <p class="sub">זוגיות, קראש, האקס, החברה הכי טובה, קבוצת החבר'ה, המשפחה, העבודה. וואטסאפ, אינסטגרם, טלגרם או מסנג'ר. אם יש שם הודעות, סקופי יקרא אותן.</p>
+      </div>
+      <div class="types">
+        <div class="type reveal"><span>💘</span><b>הקראש</b><p>מי יותר בעניין? מי כותב ראשון? ומה באמת אומר ה"חח" הזה?</p></div>
+        <div class="type reveal"><span>❤️</span><b>בזוגיות</b><p>מי אומר "אוהב/ת" יותר, מי מתנצל ראשון, ואיך נראית אצלכם מריבה.</p></div>
+        <div class="type reveal"><span>💔</span><b>האקס</b><p>מתי בדיוק זה התחיל להתקרר? סקופי יראה לכם את הרגע.</p></div>
+        <div class="type reveal"><span>👯</span><b>החבר/ה הכי טוב/ה</b><p>מי תמיד שם בשתיים בלילה, ומה המילים הסודיות שרק שניכם מבינים.</p></div>
+        <div class="type reveal"><span>🍻</span><b>קבוצת החבר'ה</b><p>מי מחזיק את הקבוצה, מי רק שולח 👍, ומי הדבק שבלעדיו הכל מתפרק.</p></div>
+        <div class="type reveal"><span>🏡</span><b>המשפחה</b><p>מי עונה לאמא תוך שנייה, ומי "לא ראה את ההודעה" כבר שלושה ימים.</p></div>
+        <div class="type reveal"><span>💼</span><b>העבודה</b><p>מי באמת עובד ומי רק כותב "מעולה, תודה". (אל תשלחו לבוס.)</p></div>
+        <div class="type reveal"><span>📸</span><b>אינסטגרם</b><p>אותו דוח בדיוק על ה־DM. כולל כל ריל ששלחתם אחד לשני.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block seen-wrap" style="padding-top:20px">
+    <div class="wrap">
+      <div class="seen reveal">
+        <div class="seen-face"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#fff"/><circle cx="60" cy="60" r="38" fill="#ffe1e8"/><circle cx="47" cy="55" r="6" fill="#1a1530"/><circle cx="73" cy="55" r="6" fill="#1a1530"/><path d="M48 74 q12 9 24 0" stroke="#1a1530" stroke-width="5" fill="none" stroke-linecap="round"/></svg></div>
+        <span class="kicker" style="color:var(--yellow)">סקופי מדבר</span>
+        <div class="seen-lines">
+          <p>ראיתי פה <em>מלחמות</em> על מי שכח לענות.</p>
+          <p>ראיתי <em>אהבה</em> שמתחבאת מאחורי "חח" אחד.</p>
+          <p>ראיתי <em>ניצוץ בעיניים</em> בשתיים בלילה, ב"ערה?" שאף אחד לא שולח סתם.</p>
+          <p>ראיתי חברויות של עשר שנים מחזיקות על בדיחה אחת.</p>
+          <p>ראיתי קבוצות שמחזיקות בזכות בן אדם אחד, שאף אחד לא אמר לו תודה.</p>
+          <p>ראיתי "סבבה" שאומר "אני פגוע/ה", ו"לילה טוב" שאומר "תישאר/י עוד קצת".</p>
+        </div>
+        <p class="seen-end">אני לא סופר הודעות. אני קורא אותן. ואז אני כותב לכם מה ראיתי, בלי פילטר.</p>
+        <a href="#start" class="btn btn-pink" style="margin-top:22px">תראה לי את הצ'אט שלי</a>
       </div>
     </div>
   </section>
@@ -1629,6 +1687,7 @@ function renderReport() {
   $$('[data-card]').forEach(b => b.onclick = () => openCard(R.people[+b.dataset.card]));
   try { const k = localStorage.getItem('chatscope.key'); if (k && $('#aiKey')) { $('#aiKey').value = k; $('#aiRemember').checked = true; } } catch {}
   if ($('#aiGo')) $('#aiGo').onclick = runAI;
+  if ($('#aiCta')) bindAiCta();
   $$('[data-me]').forEach(b => b.onclick = () => { R.me = b.dataset.me || null; $$('[data-me]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
   $('#openStory').onclick = () => openStory(0);
   if ($('#game')) newRound();
@@ -2204,17 +2263,117 @@ function fullReportHTML(rep) {
 }
 
 function aiCtaHTML() {
+  const auto = !!AI_PROXY;
   return `<div class="card ai-card" id="aiCta">
     <div class="ai-cta-top"><div class="ai-cta-em">✍️</div><div><h3>הדוח המלא: סקופי כותב את הסיפור</h3>
     <p>פרופיל לכל אחד (איך הוא רואה את עצמו מול מה שהצ'אט מראה), המילון הסודי, המתח, רגעי המפנה, פרסים ופתק אישי. עם הודעות אמיתיות מהצ'אט בתוך הטקסט.</p></div></div>
     <div class="me-pick"><b>מי אתם בצ'אט?</b><span>סקופי ידבר אליכם ישירות.</span>
       <div class="me-opts">${R.people.slice(0, 12).map(p => `<button class="pill" data-me="${esc(p.name)}" aria-pressed="${R.me === p.name}">${esc(dispName(p))}</button>`).join('')}<button class="pill" data-me="" aria-pressed="${!R.me}">אף אחד, רק מציץ 👀</button></div></div>
-    ${AI_PROXY ? '' : `<div class="ai-row"><input id="aiKey" type="password" placeholder="מפתח API של Anthropic (sk-ant-...)" autocomplete="off" spellcheck="false"></div>
+    ${auto ? `<button class="btn btn-pink" id="aiGo" style="margin-top:14px;width:100%">✨ לכתוב לי את הדוח המלא</button><div id="aiStatus" style="margin-top:12px"></div>` : `
+    <div class="ai-tabs" role="tablist">
+      <button class="pill" data-aitab="free" aria-pressed="true">🆓 בחינם, דרך Claude או ChatGPT</button>
+      <button class="pill" data-aitab="key" aria-pressed="false">⚡ אוטומטי, עם מפתח API</button>
+    </div>
+    <div data-aipanel="free">
+      <ol class="free-steps">
+        <li><b>מעתיקים את ההוראות.</b> הן כוללות את הצ'אט ואת כל מה שסקופי צריך לדעת.
+          <button class="btn btn-ink" id="freeCopy" style="margin-top:8px;width:100%">📋 העתקת ההוראות</button>
+          <textarea id="freePrompt" class="hidden" readonly></textarea></li>
+        <li><b>מדביקים בצ'אט חדש</b> באחד מהם (חשבון חינמי מספיק), ושולחים:
+          <div class="free-links"><a class="btn btn-ghost btn-sm" href="https://claude.ai/new" target="_blank" rel="noopener">פתיחת Claude (מומלץ)</a><a class="btn btn-ghost btn-sm" href="https://chatgpt.com/" target="_blank" rel="noopener">פתיחת ChatGPT</a></div></li>
+        <li><b>מעתיקים את כל התשובה</b> (כפתור ההעתקה שמתחת לתשובה) ומדביקים כאן:
+          <textarea id="freeAnswer" class="free-answer" placeholder="הדביקו כאן את התשובה המלאה, כולל הסוגריים המסולסלים { }" spellcheck="false"></textarea>
+          <button class="btn btn-pink" id="freeGo" style="margin-top:8px;width:100%">✨ להציג את הדוח</button></li>
+      </ol>
+      <p class="ai-note">אם התשובה נקטעה באמצע, כתבו שם "תמשיך" והדביקו כאן את שני החלקים אחד אחרי השני. בצ'אט ארוך במיוחד נשלחים קטעים מייצגים, כדי שזה ייכנס במגבלות של חשבון חינמי.</p>
+      <div id="freeStatus"></div>
+    </div>
+    <div data-aipanel="key" class="hidden">
+      <div class="ai-row"><input id="aiKey" type="password" placeholder="מפתח API של Anthropic (sk-ant-...)" autocomplete="off" spellcheck="false"></div>
       <label class="toggle" style="margin-top:10px"><input type="checkbox" id="aiRemember"><span style="display:inline">לזכור את המפתח בדפדפן הזה</span></label>
-      <p class="ai-note">ההודעות נשלחות ישירות מהדפדפן שלכם ל־Anthropic, ולא עוברות דרכנו. העלות נגבית מחשבון ה־API שלכם (בדרך כלל פחות מדולר לצ'אט ארוך).${anon ? ' במצב אנונימי נשלחים כינויים במקום שמות.' : ''}</p>`}
-    <button class="btn btn-pink" id="aiGo" style="margin-top:14px;width:100%">✨ לכתוב לי את הדוח המלא</button>
-    <div id="aiStatus" style="margin-top:12px"></div>
+      <p class="ai-note">ההודעות נשלחות ישירות מהדפדפן שלכם ל־Anthropic, ולא עוברות דרכנו. העלות נגבית מחשבון ה־API שלכם (בדרך כלל פחות מדולר לצ'אט ארוך).${anon ? ' במצב אנונימי נשלחים כינויים במקום שמות.' : ''}</p>
+      <button class="btn btn-pink" id="aiGo" style="margin-top:14px;width:100%">✨ לכתוב לי את הדוח המלא</button>
+      <div id="aiStatus" style="margin-top:12px"></div>
+    </div>`}
   </div>`;
+}
+
+/* ---------- free mode: copy the prompt to Claude / ChatGPT, paste the answer back ---------- */
+const FREE_BUDGET = 80000; // chars of chat, so it fits a free account's limits
+const JSON_SHAPE = `{
+  "headline": "...", "one_liner": "...", "hook": ["פסקה", "פסקה"],
+  "cast": [{"name": "...", "emoji": "...", "title": "...", "line": "..."}],
+  "sections": [
+    {"key": "profile", "emoji": "🧠", "title": "...", "intro": "...", "blocks": [
+      {"kind": "paragraph", "text": "..."},
+      {"kind": "chat", "messages": [{"from": "שם", "text": "הודעה מדויקת", "time": "21:14"}]},
+      {"kind": "term", "emoji": "...", "title": "המונח", "text": "ההגדרה", "date": "מתי נולד"},
+      {"kind": "item", "emoji": "...", "title": "...", "text": "...", "date": "..."},
+      {"kind": "note", "title": "שם המשתתף", "text": "..."}
+    ]}
+  ],
+  "verdict": "..."
+}`;
+function freePrompt(r) {
+  const sample = chatSample(r, FREE_BUDGET);
+  return `${AI_SYSTEM}
+
+${aiUserPrompt(r, sample)}
+
+פורמט התשובה: החזר JSON תקין בלבד, בלי שום טקסט לפני או אחרי, בדיוק במבנה הזה (key של כל section הוא אחד מ: profile, dictionary, tension, turning_points, moments, awards, unsaid, predictions, notes):
+${JSON_SHAPE}`;
+}
+function parseLooseJSON(text) {
+  const raw = String(text || '');
+  const tryParse = t => { const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a < 0 || b <= a) return null; try { return JSON.parse(t.slice(a, b + 1)); } catch { return null; } };
+  if (raw.indexOf('{') < 0) throw new Error('לא מצאתי דוח בתשובה. ודאו שהעתקתם את כל התשובה, כולל הסוגריים { }.');
+  // one answer, with or without ``` fences
+  const plain = tryParse(raw.replace(/```(?:json)?/gi, ''));
+  if (plain) return plain;
+  // an answer that was cut and continued: glue the parts back together exactly where they split
+  const parts = raw.split(/```(?:json)?/i).map(x => x.replace(/^\s*\n|\n\s*$/g, '')).filter(x => x.trim());
+  const glued = tryParse(parts.join(''));
+  if (glued) return glued;
+  throw new Error('התשובה לא שלמה, כנראה נקטעה באמצע. כתבו שם "תמשיך", והדביקו כאן את שני החלקים ברצף.');
+}
+function normalizeReport(o) {
+  const str = v => typeof v === 'string' ? v : v == null ? '' : String(v);
+  const arr = v => Array.isArray(v) ? v : [];
+  return {
+    headline: str(o.headline), one_liner: str(o.one_liner),
+    hook: arr(o.hook).map(str),
+    cast: arr(o.cast).map(c => ({ name: str(c.name), emoji: str(c.emoji), title: str(c.title), line: str(c.line) })),
+    sections: arr(o.sections).map(s => ({
+      key: str(s.key), emoji: str(s.emoji), title: str(s.title), intro: str(s.intro),
+      blocks: arr(s.blocks).map(b => ({ kind: str(b.kind) || 'paragraph', emoji: str(b.emoji), title: str(b.title), text: str(b.text), date: str(b.date),
+        messages: arr(b.messages).map(m => ({ from: str(m.from), text: str(m.text), time: str(m.time) })) })),
+    })),
+    verdict: str(o.verdict),
+  };
+}
+function bindAiCta() {
+  $$('[data-aitab]').forEach(b => b.onclick = () => {
+    $$('[data-aitab]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    $$('[data-aipanel]').forEach(p => p.classList.toggle('hidden', p.dataset.aipanel !== b.dataset.aitab));
+  });
+  const copy = $('#freeCopy');
+  if (copy) copy.onclick = async () => {
+    const text = freePrompt(R);
+    try { await navigator.clipboard.writeText(text); toast('ההוראות הועתקו. עכשיו מדביקים ב־Claude או ב־ChatGPT'); copy.textContent = '✅ הועתק! אפשר להעתיק שוב'; }
+    catch { const ta = $('#freePrompt'); ta.value = text; ta.classList.remove('hidden'); ta.focus(); ta.select(); toast('סמנו את הטקסט והעתיקו ידנית'); }
+  };
+  const go = $('#freeGo');
+  if (go) go.onclick = () => {
+    const st = $('#freeStatus');
+    try {
+      const rep = normalizeReport(parseLooseJSON($('#freeAnswer').value));
+      if (!rep.headline || !rep.sections.length) throw new Error('הדוח שהודבק חסר. ודאו שהעתקתם את כל התשובה.');
+      R.ai = rep;
+      renderReport();
+      $('#fullReport')?.scrollIntoView({ behavior: 'smooth' });
+      toast('הדוח המלא מוכן ✍️');
+    } catch (e) { st.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+  };
 }
 
 /* ---------- pre-written sample reports for the fictional demo chats ---------- */
