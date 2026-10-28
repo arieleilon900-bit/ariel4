@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>צ'אטסקופ — מה הצ'אט שלכם אומר על כל אחד</title>
+<meta name="description" content="מעלים צ'אט מוואטסאפ, טלגרם, אינסטגרם או מסנג'ר — וסקופי כותב דוח על כל משתתף: מי יוזם, מי עונה מהר, מי בעניין, דגלים ירוקים ואדומים. הכל קורה בדפדפן, בלי שרת ובלי הרשמה.">
+<meta name="theme-color" content="#1a1530">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%231a1530'/%3E%3Ccircle cx='44' cy='44' r='22' fill='none' stroke='%23ff6b8b' stroke-width='9'/%3E%3Cpath d='M60 60l18 18' stroke='%23ffd166' stroke-width='10' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@600;700;800;900&family=Frank+Ruhl+Libre:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
+<style>
+:root{
+  --ink:#1a1530;
+  --ink-2:#3b3557;
+  --muted:#6f6a86;
+  --bg:#fff8f1;
+  --card:#ffffff;
+  --line:rgba(26,21,48,.09);
+  --pink:#ff6b8b;
+  --pink-soft:#ffe1e8;
+  --yellow:#ffd166;
+  --yellow-soft:#fff2cc;
+  --mint:#3ccf91;
+  --mint-soft:#dcf7ea;
+  --sky:#5aa9ff;
+  --sky-soft:#e1efff;
+  --violet:#8b6cff;
+  --violet-soft:#ece6ff;
+  --red:#ef4a5f;
+  --wa:#25d366;
+  --radius:22px;
+  --shadow:0 1px 2px rgba(26,21,48,.06),0 10px 30px -12px rgba(26,21,48,.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{font-family:'Heebo',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;overflow-x:hidden;}
+h1,h2,h3,.display{font-family:'Rubik','Heebo',sans-serif;letter-spacing:-.01em;}
+a{color:inherit;}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px;}
+.hidden{display:none !important;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+
+/* ---------- header ---------- */
+.top{position:sticky;top:0;z-index:30;background:rgba(255,248,241,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;gap:12px;}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Rubik';font-weight:900;font-size:21px;text-decoration:none;}
+.logo-mark{width:34px;height:34px;border-radius:11px;background:var(--ink);display:grid;place-items:center;}
+.logo-mark svg{width:22px;height:22px;}
+.nav{display:flex;align-items:center;gap:22px;font-weight:600;font-size:15px;}
+.nav a{text-decoration:none;color:var(--ink-2);}
+.nav a:hover{color:var(--ink);}
+.nav a.btn{color:#fff;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 24px;font-weight:800;font-size:15px;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease,background .15s;white-space:nowrap;}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(0);}
+.btn-ink{background:var(--ink);color:#fff;box-shadow:0 8px 20px -8px rgba(26,21,48,.6);}
+.btn-pink{background:var(--pink);color:#fff;box-shadow:0 10px 24px -10px rgba(255,107,139,.9);}
+.btn-ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink);}
+.btn-sm{padding:9px 16px;font-size:14px;}
+.btn svg{width:18px;height:18px;flex:none;}
+@media (max-width:760px){.nav a{display:none;}}
+
+/* ---------- hero ---------- */
+.hero{padding:56px 0 40px;position:relative;}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center;}
+.chip{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px 6px 8px;font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.chip .dot{width:22px;height:22px;border-radius:50%;background:var(--mint-soft);display:grid;place-items:center;font-size:12px;}
+.hero h1{font-size:clamp(36px,5.6vw,62px);line-height:1.04;font-weight:900;margin:18px 0 16px;}
+.hero h1 .hl{background:linear-gradient(transparent 62%,var(--yellow) 62%,var(--yellow) 92%,transparent 92%);padding:0 4px;}
+.hero h1 .pink{color:var(--pink);}
+.hero .lead{font-size:18.5px;color:var(--ink-2);max-width:540px;margin-bottom:26px;}
+.platforms{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+.pf{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 11px;font-size:13px;font-weight:700;color:var(--ink-2);}
+.pf i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+.drop{background:var(--card);border-radius:28px;box-shadow:var(--shadow);padding:22px;border:2px dashed rgba(26,21,48,.14);transition:border-color .2s,background .2s,transform .2s;position:relative;}
+.drop.over{border-color:var(--pink);background:#fff5f7;transform:scale(1.01);}
+.drop-inner{display:flex;align-items:center;gap:16px;}
+.drop-ico{width:58px;height:58px;border-radius:18px;background:var(--pink-soft);display:grid;place-items:center;flex:none;}
+.drop-ico svg{width:28px;height:28px;color:var(--pink);}
+.drop h3{font-size:18px;font-weight:800;}
+.drop p{font-size:14px;color:var(--muted);}
+.drop-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.drop-actions .btn{flex:1 1 160px;}
+.privacy-line{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;color:var(--muted);font-weight:600;}
+.privacy-line svg{width:16px;height:16px;color:var(--mint);flex:none;}
+.paste-box{margin-top:14px;}
+.paste-box textarea{width:100%;min-height:130px;border-radius:14px;border:1.5px solid var(--line);padding:12px;font:14px/1.5 ui-monospace,Menlo,monospace;direction:ltr;text-align:left;resize:vertical;background:#fcfbff;}
+.paste-box .row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px;}
+.err{margin-top:12px;background:#fff0f2;color:#b42339;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;}
+
+/* hero visual */
+.stage{position:relative;height:520px;}
+.phone{position:absolute;inset:0 auto 0 50%;transform:translateX(-50%) rotate(-3deg);width:290px;height:520px;background:var(--ink);border-radius:44px;padding:12px;box-shadow:0 40px 80px -30px rgba(26,21,48,.55);}
+.phone-screen{background:#efe7dd;border-radius:34px;height:100%;overflow:hidden;display:flex;flex-direction:column;}
+.ph-head{background:#fff;padding:16px 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);}
+.ph-av{width:34px;height:34px;border-radius:50%;background:var(--violet-soft);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--violet);}
+.ph-name{font-weight:800;font-size:14px;}
+.ph-sub{font-size:11px;color:var(--muted);}
+.ph-body{padding:14px 10px;display:flex;flex-direction:column;gap:7px;flex:1;}
+.bub{max-width:78%;padding:7px 11px;border-radius:14px;font-size:13px;line-height:1.35;box-shadow:0 1px 1px rgba(0,0,0,.06);opacity:0;transform:translateY(8px);animation:bub .5s ease forwards;}
+.bub.me{align-self:flex-start;background:#d9fdd3;border-top-right-radius:4px;}
+.bub.them{align-self:flex-end;background:#fff;border-top-left-radius:4px;}
+.bub small{display:block;font-size:10px;color:var(--muted);text-align:left;}
+@keyframes bub{to{opacity:1;transform:none;}}
+.float-card{position:absolute;background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:14px 16px;width:220px;animation:float 6s ease-in-out infinite;}
+.float-card .t{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+.float-card .v{font-family:'Rubik';font-weight:900;font-size:19px;margin-top:2px;}
+.float-card .s{font-size:12.5px;color:var(--ink-2);}
+.fc1{top:30px;right:-10px;}
+.fc2{bottom:80px;left:-14px;animation-delay:-3s;}
+.fc3{bottom:-6px;right:20px;width:190px;animation-delay:-1.5s;}
+.meter{height:8px;border-radius:99px;background:var(--pink-soft);overflow:hidden;margin-top:8px;display:flex;}
+.meter b{display:block;background:var(--pink);}
+.meter b+b{background:var(--violet);}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media (max-width:960px){
+  .hero-grid{grid-template-columns:1fr;}
+  .stage{height:470px;margin-top:10px;}
+  .phone{height:460px;width:260px;}
+  .fc1{right:0;}.fc2{left:0;}
+}
+@media (max-width:480px){
+  .float-card{width:180px;padding:11px 13px;}
+  .float-card .v{font-size:16px;}
+  .fc3{display:none;}
+}
+
+/* ---------- sections ---------- */
+section.block{padding:72px 0;}
+.kicker{display:inline-block;font-weight:800;font-size:13px;color:var(--pink);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.h2{font-size:clamp(28px,4vw,42px);font-weight:900;line-height:1.1;margin-bottom:12px;}
+.sub{color:var(--muted);font-size:17px;max-width:620px;}
+.center{text-align:center;}
+.center .sub{margin:0 auto;}
+
+/* demo list */
+.demo-list{margin-top:34px;background:#fff;border-radius:28px;box-shadow:var(--shadow);overflow:hidden;max-width:720px;margin-inline:auto;}
+.demo-item{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--line);width:100%;text-align:right;transition:background .15s;}
+.demo-item:last-child{border-bottom:0;}
+.demo-item:hover{background:#fdf7ff;}
+.demo-av{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:24px;flex:none;}
+.demo-main{flex:1;min-width:0;}
+.demo-top{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.demo-name{font-weight:800;font-size:16px;}
+.demo-time{font-size:12px;color:var(--muted);}
+.demo-msg{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 9px;margin-inline-start:6px;vertical-align:middle;}
+.tag-pink{background:var(--pink-soft);color:#c93556;}
+.tag-sky{background:var(--sky-soft);color:#2a6cc0;}
+.tag-yellow{background:var(--yellow-soft);color:#946a00;}
+.tag-violet{background:var(--violet-soft);color:#5b3fd1;}
+.tag-mint{background:var(--mint-soft);color:#1b8a5c;}
+.demo-go{color:var(--muted);flex:none;}
+.demo-go svg{width:20px;height:20px;transform:scaleX(-1);}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px;}
+.step{background:#fff;border-radius:var(--radius);padding:26px;box-shadow:var(--shadow);position:relative;}
+.step-n{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-family:'Rubik';font-weight:900;font-size:18px;margin-bottom:14px;}
+.step h3{font-size:19px;font-weight:800;margin-bottom:6px;}
+.step p{color:var(--muted);font-size:15px;}
+@media (max-width:820px){.steps{grid-template-columns:1fr;}}
+
+/* guide tabs */
+.guide{margin-top:30px;background:#fff;border-radius:28px;box-shadow:var(--shadow);padding:10px;}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:6px;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:10px 16px;border-radius:999px;font-weight:800;font-size:14px;color:var(--ink-2);white-space:nowrap;background:#f6f3fb;}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff;}
+.tab-panel{padding:18px 20px 22px;}
+.tab-panel ol{padding-inline-start:22px;display:grid;gap:9px;}
+.tab-panel li{font-size:15.5px;}
+.tab-panel li b{font-weight:800;}
+.tab-panel .note{margin-top:14px;font-size:13.5px;color:var(--muted);background:#faf8ff;border-radius:12px;padding:10px 14px;}
+
+/* features */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px;}
+.feat{background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);}
+.feat .ico{font-size:28px;margin-bottom:10px;}
+.feat h3{font-size:17px;font-weight:800;margin-bottom:4px;}
+.feat p{font-size:14.5px;color:var(--muted);}
+@media (max-width:900px){.feat-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.feat-grid{grid-template-columns:1fr;}}
+
+/* privacy */
+.priv{background:var(--ink);color:#fff;border-radius:36px;padding:48px;display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center;}
+.priv .h2{color:#fff;}
+.priv .sub{color:#c9c3e3;}
+.priv-list{display:grid;gap:12px;}
+.priv-item{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.06);border-radius:16px;padding:14px 16px;}
+.priv-item span{font-size:22px;}
+.priv-item b{display:block;font-size:15.5px;}
+.priv-item p{font-size:13.5px;color:#c9c3e3;}
+@media (max-width:860px){.priv{grid-template-columns:1fr;padding:30px 22px;border-radius:28px;}}
+
+/* faq */
+.faq{max-width:780px;margin:30px auto 0;display:grid;gap:10px;}
+.faq details{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:4px 20px;}
+.faq summary{list-style:none;cursor:pointer;padding:16px 0;font-weight:800;font-size:16px;display:flex;justify-content:space-between;gap:12px;}
+.faq summary::-webkit-details-marker{display:none;}
+.faq summary::after{content:'+';font-size:22px;line-height:1;color:var(--pink);transition:transform .2s;}
+.faq details[open] summary::after{transform:rotate(45deg);}
+.faq details p{padding:0 0 18px;color:var(--ink-2);font-size:15px;}
+
+.final{text-align:center;padding:80px 0 90px;}
+.final .h2{font-size:clamp(32px,5vw,52px);}
+
+footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);font-size:14px;}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;}
+
+/* ---------- loading ---------- */
+.loading{min-height:calc(100vh - 62px);display:grid;place-items:center;text-align:center;padding:40px 20px;}
+.scopey{width:120px;height:120px;margin:0 auto 22px;animation:bob 1.6s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-12px) rotate(4deg)}}
+.loading h2{font-size:28px;font-weight:900;}
+.loading p{color:var(--muted);margin-top:8px;min-height:24px;}
+.bar{width:260px;height:8px;border-radius:99px;background:#efe9f7;margin:20px auto 0;overflow:hidden;}
+.bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--violet));border-radius:99px;transition:width .35s ease;}
+
+/* ---------- report ---------- */
+.r-bar{position:sticky;top:62px;z-index:20;background:rgba(255,248,241,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.r-bar .wrap{display:flex;align-items:center;gap:10px;height:58px;}
+.r-bar .title{flex:1;min-width:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:var(--ink-2);cursor:pointer;user-select:none;}
+.toggle input{appearance:none;width:38px;height:22px;border-radius:99px;background:#ddd6ea;position:relative;cursor:pointer;transition:background .2s;flex:none;}
+.toggle input::after{content:'';position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle input:checked{background:var(--mint);}
+.toggle input:checked::after{transform:translateX(-16px);}
+@media (max-width:600px){.r-bar .toggle span{display:none;}}
+
+.report{padding:28px 0 80px;}
+.r-hero{background:var(--ink);color:#fff;border-radius:34px;padding:34px;position:relative;overflow:hidden;}
+.r-hero::before{content:'';position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,139,.45),transparent 65%);top:-160px;left:-120px;}
+.r-hero::after{content:'';position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(139,108,255,.4),transparent 65%);bottom:-170px;right:10%;}
+.r-hero > *{position:relative;z-index:1;}
+.r-hero .kicker{color:var(--yellow);}
+.r-hero h1{font-size:clamp(28px,4.4vw,44px);font-weight:900;line-height:1.1;}
+.r-meta{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 22px;}
+.r-meta span{background:rgba(255,255,255,.1);border-radius:999px;padding:6px 13px;font-size:13.5px;font-weight:700;}
+.verdict{display:flex;gap:16px;align-items:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:18px;}
+.verdict .face{width:54px;height:54px;flex:none;}
+.verdict p{font-size:16.5px;line-height:1.65;color:#ece8fa;}
+.verdict p b{color:#fff;}
+
+.r-sec{margin-top:34px;}
+.r-sec > h2{font-size:24px;font-weight:900;margin-bottom:4px;display:flex;align-items:center;gap:10px;}
+.r-sec > .sub{font-size:15px;margin-bottom:16px;}
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;}
+
+.interest{display:grid;gap:16px;}
+.int-row{display:flex;justify-content:space-between;font-weight:800;font-size:15px;margin-bottom:6px;gap:10px;}
+.int-bar{height:22px;border-radius:99px;overflow:hidden;display:flex;background:#f1edf8;}
+.int-bar b{display:block;height:100%;transition:width 1s cubic-bezier(.2,.8,.2,1);}
+.int-note{font-size:15px;color:var(--ink-2);}
+.facets{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:4px;}
+.facet{background:#faf8ff;border-radius:14px;padding:11px 13px;font-size:13.5px;}
+.facet b{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:2px;}
+
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:16px;}
+.person{background:#fff;border-radius:26px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;}
+.p-top{padding:20px 20px 16px;position:relative;}
+.p-head{display:flex;align-items:center;gap:12px;}
+.av{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff;flex:none;font-family:'Rubik';}
+.p-name{font-weight:900;font-size:18px;line-height:1.2;word-break:break-word;}
+.p-share{font-size:13px;color:var(--muted);font-weight:600;}
+.arch{margin-top:14px;border-radius:18px;padding:14px;display:flex;gap:12px;align-items:center;}
+.arch .em{font-size:38px;line-height:1;}
+.arch .at{font-family:'Rubik';font-weight:900;font-size:19px;}
+.arch .ad{font-size:13.5px;color:var(--ink-2);}
+.p-quote{margin:14px 0 0;font-size:15px;line-height:1.6;color:var(--ink-2);}
+.p-quote::before{content:'״';font-family:'Rubik';font-weight:900;color:var(--pink);font-size:22px;margin-inline-end:2px;}
+.p-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.p-stats div{padding:12px 6px;text-align:center;border-inline-start:1px solid var(--line);}
+.p-stats div:first-child{border-inline-start:0;}
+.p-stats b{display:block;font-family:'Rubik';font-weight:800;font-size:17px;}
+.p-stats span{font-size:11.5px;color:var(--muted);font-weight:600;}
+.flags{padding:14px 20px;display:grid;gap:7px;flex:1;}
+.flag{display:flex;gap:9px;font-size:14px;align-items:flex-start;}
+.flag i{font-style:normal;flex:none;}
+.p-foot{padding:0 20px 18px;display:flex;gap:8px;}
+.p-foot .btn{flex:1;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid2 > *,.people > *{min-width:0;}
+@media (max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+.lb{display:grid;gap:10px;}
+.lb-row{display:grid;grid-template-columns:minmax(80px,140px) 1fr auto;gap:10px;align-items:center;font-size:14px;}
+.lb-row .nm{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-row .tr{height:14px;border-radius:99px;background:#f3eff9;overflow:hidden;}
+.lb-row .tr b{display:block;height:100%;border-radius:99px;}
+.lb-row .vl{font-weight:800;font-family:'Rubik';font-size:13.5px;min-width:44px;text-align:left;}
+.lb-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.pill{padding:7px 13px;border-radius:999px;font-weight:700;font-size:13px;background:#f4f0fa;color:var(--ink-2);}
+.pill[aria-pressed="true"]{background:var(--ink);color:#fff;}
+
+.chart-wrap{overflow-x:auto;}
+.chart-wrap svg{display:block;}
+.heat{display:grid;grid-template-columns:34px repeat(24,1fr);gap:3px;direction:ltr;min-width:520px;}
+.heat .hl{font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:flex-end;padding-right:4px;font-weight:700;}
+.heat .hc{aspect-ratio:1;border-radius:4px;background:#f3eff9;}
+.heat .hh{font-size:10px;color:var(--muted);text-align:center;}
+.legend{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:10px;justify-content:flex-end;}
+.legend i{width:14px;height:14px;border-radius:3px;display:inline-block;}
+
+.words{display:flex;flex-wrap:wrap;gap:8px;}
+.word{background:#f6f2fc;border-radius:999px;padding:6px 12px;font-weight:700;color:var(--ink-2);}
+.word small{color:var(--muted);font-weight:600;margin-inline-start:4px;}
+.emojis{display:flex;flex-wrap:wrap;gap:10px;}
+.emo{background:#fffaf0;border-radius:16px;padding:8px 12px;text-align:center;min-width:62px;}
+.emo span{font-size:28px;display:block;line-height:1.2;}
+.emo small{font-weight:800;color:var(--muted);font-size:12px;}
+
+.moments{display:grid;gap:10px;}
+.moment{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:16px 18px;}
+.moment .mi{font-size:26px;flex:none;width:36px;text-align:center;}
+.moment b{display:block;font-size:15.5px;}
+.moment p{font-size:14px;color:var(--muted);}
+
+.pairs{display:grid;gap:8px;}
+.pair{display:flex;align-items:center;gap:10px;font-size:14.5px;background:#faf8ff;border-radius:14px;padding:10px 14px;}
+.pair .arrow{color:var(--pink);font-weight:900;}
+.pair .cnt{margin-inline-start:auto;font-weight:800;font-family:'Rubik';color:var(--muted);font-size:13px;}
+
+.ai-card{background:linear-gradient(135deg,#fff 0%,#fbf6ff 100%);border:1.5px solid var(--violet-soft);}
+.ai-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.ai-row input{flex:1 1 260px;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font:14px ui-monospace,Menlo,monospace;direction:ltr;background:#fff;min-width:0;}
+.ai-note{font-size:13px;color:var(--muted);margin-top:10px;}
+.ai-out{margin-top:18px;line-height:1.75;font-size:16px;}
+.ai-out h3{font-size:19px;font-weight:900;margin:20px 0 6px;}
+.ai-out h4{font-size:16.5px;font-weight:800;margin:14px 0 4px;}
+.ai-out ul{padding-inline-start:22px;margin:6px 0;}
+.ai-out p{margin:8px 0;}
+
+.others{width:100%;border-collapse:collapse;font-size:14px;}
+.others th,.others td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);}
+.others th{font-size:12px;color:var(--muted);font-weight:800;}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:700;font-size:14px;z-index:99;transition:transform .3s ease;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:calc(100% - 32px);text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+.modal{position:fixed;inset:0;background:rgba(26,21,48,.6);z-index:95;display:grid;place-items:center;padding:20px;}
+.modal-box{background:#fff;border-radius:26px;padding:18px;max-width:420px;width:100%;max-height:92vh;overflow:auto;}
+.modal-box img{width:100%;border-radius:16px;display:block;}
+.modal-box .row{display:flex;gap:8px;margin-top:12px;}
+.modal-box .row .btn{flex:1;}
+
+
+/* ---------- the written report (reading layout) ---------- */
+.fr{background:#fff;border-radius:30px;box-shadow:var(--shadow);padding:clamp(22px,5vw,56px) clamp(18px,5vw,64px);max-width:860px;margin:0 auto;}
+.fr-head{text-align:center;}
+.fr-head h1{font-family:'Frank Ruhl Libre','Rubik',serif;font-weight:900;font-size:clamp(28px,5vw,44px);line-height:1.15;margin:10px 0 18px;text-wrap:balance;}
+.fr-by{display:inline-flex;align-items:center;gap:10px;text-align:right;background:#faf8ff;border-radius:999px;padding:6px 16px 6px 8px;}
+.fr-by svg{width:40px;height:40px;flex:none;}
+.fr-by b{display:block;font-size:15px;}
+.fr-by small{font-size:12.5px;color:var(--muted);}
+.fr-hook{margin-top:28px;font-size:clamp(17px,2.2vw,19.5px);line-height:1.85;color:var(--ink);}
+.fr-hook p+p{margin-top:14px;}
+.fr-hook p:first-child::first-letter{font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:3.1em;float:right;line-height:.9;margin:6px 0 0 10px;color:var(--pink);}
+.fr-oneliner{margin:26px 0 0;padding:16px 20px;border-radius:18px;background:var(--yellow-soft);font-weight:800;font-size:17px;text-align:center;}
+.fr-castrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-top:22px;}
+.fr-cc{display:flex;gap:10px;align-items:flex-start;background:#faf8ff;border-radius:16px;padding:12px;min-width:0;}
+.fr-cc b{display:block;font-size:15px;}
+.fr-cc span{display:block;font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.fr-cc small{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.45;}
+.fr-toc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--line);}
+.fr-toc b{font-size:13px;color:var(--muted);margin-inline-end:4px;}
+.fr-toc a{text-decoration:none;background:#f6f2fc;border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.fr-toc a:hover{background:var(--ink);color:#fff;}
+.fr-sec{margin-top:56px;scroll-margin-top:140px;}
+.fr-ico{width:66px;height:66px;margin:0 auto 14px;border-radius:50%;background:#fff;box-shadow:0 6px 20px -6px rgba(26,21,48,.25);display:grid;place-items:center;font-size:30px;}
+.fr-h{font-family:'Frank Ruhl Libre','Rubik',serif;font-weight:900;font-size:clamp(24px,3.6vw,34px);line-height:1.2;text-align:center;text-wrap:balance;}
+.fr-orn{display:flex;align-items:center;justify-content:center;gap:10px;margin:12px 0 22px;}
+.fr-orn i{width:44px;height:1.5px;background:var(--ink);opacity:.7;}
+.fr-orn b{width:8px;height:8px;background:var(--ink);transform:rotate(45deg);}
+.fr-p{font-size:clamp(16.5px,2vw,18.5px);line-height:1.85;color:var(--ink);margin:0 0 16px;}
+.fr-p b{font-weight:800;}
+.fr-intro{color:var(--ink-2);}
+.fr-blocks{display:flex;flex-direction:column;}
+/* WhatsApp-style real excerpts */
+.wa{background:#efe7dd;background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:14px 14px;border-radius:18px;padding:14px 12px;margin:4px 0 18px;display:flex;flex-direction:column;gap:5px;}
+.wa-b{max-width:84%;align-self:flex-end;background:#fff;border-radius:12px;border-top-left-radius:3px;padding:6px 10px 4px;box-shadow:0 1px 1px rgba(0,0,0,.08);font-size:15.5px;line-height:1.45;word-break:break-word;}
+.wa-b.mine{align-self:flex-start;background:#d9fdd3;border-top-left-radius:12px;border-top-right-radius:3px;}
+.wa-b b{display:block;font-size:13px;margin-bottom:1px;}
+.wa-b span{white-space:pre-wrap;}
+.wa-b i{display:flex;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;font-size:11px;color:#667781;margin-top:2px;direction:ltr;}
+.wa-b i svg{width:16px;height:11px;}
+/* glossary, items, notes */
+.fr-term{display:grid;grid-template-columns:minmax(110px,180px) 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed var(--line);}
+.fr-term:last-child{border-bottom:0;}
+.fr-term dt{font-family:'Frank Ruhl Libre','Rubik',serif;font-weight:900;font-size:19px;display:flex;gap:8px;align-items:flex-start;}
+.fr-term dd{font-size:16px;line-height:1.7;}
+.fr-term dd small{display:block;font-size:13px;color:var(--muted);margin-top:4px;}
+@media (max-width:560px){.fr-term{grid-template-columns:1fr;gap:4px;}}
+.fr-item{display:flex;gap:12px;align-items:flex-start;background:#faf8ff;border-radius:16px;padding:14px 16px;margin:0 0 12px;}
+.fr-item-em{font-size:26px;line-height:1.1;flex:none;}
+.fr-item b{display:block;font-size:16.5px;margin-bottom:2px;}
+.fr-item p{font-size:15.5px;line-height:1.7;color:var(--ink-2);}
+.fr-date{display:inline-block;background:var(--ink);color:#fff;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;margin-bottom:6px;}
+.fr-notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:12px;}
+.fr-note{background:#fffdf6;border:1px solid #f1e6c6;border-radius:6px 18px 18px 18px;padding:16px 18px;box-shadow:0 8px 20px -14px rgba(26,21,48,.4);border-top:4px solid var(--pc);}
+.fr-note span{font-weight:800;font-size:13px;color:var(--muted);}
+.fr-note p{font-size:16px;line-height:1.7;margin:6px 0;}
+.fr-note i{font-family:'Frank Ruhl Libre',serif;font-weight:700;color:var(--pink);}
+.fr-verdict{margin-top:56px;background:var(--ink);color:#fff;border-radius:24px;padding:24px;text-align:center;}
+.fr-verdict span{font-weight:800;font-size:13px;letter-spacing:.06em;color:var(--yellow);}
+.fr-verdict p{font-family:'Frank Ruhl Libre',serif;font-size:clamp(18px,2.6vw,22px);line-height:1.6;margin-top:8px;}
+.r-divider{display:flex;align-items:center;gap:14px;margin:46px 0 0;color:var(--muted);font-weight:800;}
+.r-divider::before,.r-divider::after{content:'';flex:1;height:1px;background:var(--line);}
+/* AI call to action */
+.ai-cta-top{display:flex;gap:14px;align-items:flex-start;}
+.ai-cta-em{font-size:34px;line-height:1;}
+.ai-cta-top h3{font-size:20px;font-weight:900;margin-bottom:4px;}
+.ai-cta-top p{font-size:15px;color:var(--ink-2);}
+.me-pick{margin-top:16px;}
+.me-pick > b{font-size:15px;}
+.me-pick > span{font-size:13.5px;color:var(--muted);margin-inline-start:6px;}
+.me-opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.ai-live{display:flex;flex-direction:column;gap:2px;background:#faf8ff;border-radius:14px;padding:12px 14px;}
+.ai-live small{color:var(--muted);}
+.dotpulse{width:10px;height:10px;border-radius:50%;background:var(--pink);display:inline-block;margin-inline-end:8px;animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
+
+/* story button in hero */
+.story-cta{display:flex;align-items:center;gap:14px;margin-top:18px;background:linear-gradient(90deg,var(--pink),var(--violet));color:#fff;border-radius:20px;padding:14px 18px;font-weight:800;font-size:16px;width:100%;text-align:right;box-shadow:0 14px 30px -14px rgba(255,107,139,.9);transition:transform .15s;}
+.story-cta:hover{transform:translateY(-2px);}
+.story-cta .ring{width:46px;height:46px;border-radius:50%;padding:3px;background:conic-gradient(var(--yellow),#fff,var(--yellow));flex:none;}
+.story-cta .ring span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:var(--ink);font-size:20px;}
+.story-cta small{display:block;font-weight:600;opacity:.85;font-size:13px;}
+
+/* awards */
+.awards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:12px;}
+.award{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;}
+.award::after{content:'';position:absolute;inset:auto -30px -40px auto;width:110px;height:110px;border-radius:50%;background:var(--yellow-soft);z-index:0;}
+.award > *{position:relative;z-index:1;}
+.aw-top{display:flex;align-items:center;gap:10px;}
+.aw-em{font-size:30px;line-height:1;}
+.aw-title{font-family:'Rubik';font-weight:900;font-size:16px;line-height:1.2;}
+.aw-win{display:flex;align-items:center;gap:10px;}
+.aw-win b{font-size:16.5px;}
+.aw-stat{font-size:13.5px;color:var(--ink-2);}
+.aw-runner{font-size:12.5px;color:var(--muted);}
+
+/* chapters */
+.chapters{display:grid;gap:0;position:relative;}
+.chapter{display:grid;grid-template-columns:44px 1fr;gap:14px;padding-bottom:18px;}
+.ch-dot{width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:'Rubik';font-weight:900;position:relative;}
+.chapter:not(:last-child) .ch-dot::after{content:'';position:absolute;top:48px;bottom:-22px;width:3px;left:50%;transform:translateX(-50%);background:linear-gradient(var(--pink),var(--violet));border-radius:3px;height:calc(100% + 0px);}
+.chapter .card{padding:16px 18px;}
+.ch-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;}
+.ch-head b{font-family:'Rubik';font-size:17px;}
+.ch-head span{font-size:13px;color:var(--muted);font-weight:700;}
+.ch-text{font-size:15px;color:var(--ink-2);margin-top:6px;}
+.ch-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.trend{display:flex;gap:14px;align-items:center;}
+.trend .big{font-family:'Rubik';font-weight:900;font-size:40px;line-height:1;}
+
+/* game */
+.game{text-align:center;}
+.g-quote{font-size:clamp(19px,3vw,24px);font-weight:800;line-height:1.45;background:#faf8ff;border-radius:20px;padding:22px 18px;margin:12px 0 16px;position:relative;word-break:break-word;}
+.g-quote small{display:block;font-size:12.5px;color:var(--muted);font-weight:700;margin-top:8px;}
+.g-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr));gap:8px;}
+.g-opt{border:2px solid var(--line);border-radius:16px;padding:12px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;justify-content:center;background:#fff;transition:transform .12s,border-color .12s,background .12s;}
+.g-opt:hover{transform:translateY(-2px);border-color:var(--ink);}
+.g-opt.right{background:var(--mint-soft);border-color:var(--mint);}
+.g-opt.wrong{background:#ffe8ec;border-color:var(--red);}
+.g-score{display:flex;justify-content:center;gap:18px;font-weight:800;font-size:14px;color:var(--muted);}
+.g-score b{color:var(--ink);font-family:'Rubik';font-size:17px;}
+.g-res{min-height:26px;margin-top:12px;font-weight:800;}
+
+/* ---------- story mode ---------- */
+.story{position:fixed;inset:0;z-index:90;background:#0d0a1a;display:flex;align-items:center;justify-content:center;}
+.st-frame{position:relative;width:min(100vw,calc(100dvh * 9 / 16));height:min(100dvh,calc(100vw * 16 / 9));max-height:100dvh;overflow:hidden;color:#fff;border-radius:0;}
+@media (min-width:640px){.st-frame{height:min(92dvh,860px);width:calc(min(92dvh,860px) * 9 / 16);border-radius:26px;}}
+.st-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:70px 28px 90px;text-align:center;}
+.st-slide .eyebrow{font-weight:800;font-size:14px;letter-spacing:.08em;opacity:.85;text-transform:uppercase;margin-bottom:10px;}
+.st-slide h2{font-family:'Rubik';font-weight:900;font-size:clamp(28px,7.5vw,40px);line-height:1.08;margin-bottom:12px;}
+.st-slide .huge{font-family:'Rubik';font-weight:900;font-size:clamp(64px,19vw,104px);line-height:1;letter-spacing:-.03em;margin:8px 0;}
+.st-slide .mid{font-family:'Rubik';font-weight:900;font-size:clamp(36px,10vw,54px);line-height:1.05;}
+.st-slide p{font-size:17px;line-height:1.5;opacity:.92;}
+.st-slide .emoji-xl{font-size:clamp(90px,26vw,130px);line-height:1.1;margin-bottom:6px;}
+.st-slide .sbox{background:rgba(255,255,255,.14);border-radius:20px;padding:14px 16px;margin-top:16px;font-size:16px;line-height:1.5;text-align:right;}
+.st-slide .sbars{display:grid;gap:10px;margin-top:18px;text-align:right;}
+.st-slide .sbar{display:grid;grid-template-columns:minmax(60px,110px) 1fr 48px;gap:8px;align-items:center;font-weight:800;font-size:15px;}
+.st-slide .sbar .tr{height:16px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;}
+.st-slide .sbar .tr b{display:block;height:100%;background:#fff;border-radius:99px;width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1) .25s;}
+.st-slide .sbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st-slide .anim{opacity:0;transform:translateY(18px);animation:stIn .6s cubic-bezier(.2,.8,.2,1) forwards;}
+.st-slide .d1{animation-delay:.15s}.st-slide .d2{animation-delay:.45s}.st-slide .d3{animation-delay:.8s}.st-slide .d4{animation-delay:1.15s}.st-slide .d5{animation-delay:1.5s}
+@keyframes stIn{to{opacity:1;transform:none;}}
+.st-prog{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:4px;z-index:5;direction:ltr;}
+.st-prog i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden;}
+.st-prog i b{display:block;height:100%;width:0;background:#fff;}
+.st-top{position:absolute;top:24px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:6;font-weight:800;font-size:14px;}
+.st-top .brand{display:flex;align-items:center;gap:8px;}
+.st-x{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.25);display:grid;place-items:center;color:#fff;font-size:20px;}
+.st-tap{position:absolute;top:70px;bottom:80px;width:50%;z-index:4;}
+.st-tap.prev{right:0;}.st-tap.next{left:0;}
+.st-bottom{position:absolute;bottom:18px;left:16px;right:16px;display:flex;gap:8px;z-index:6;}
+.st-bottom .btn{flex:1;padding:12px 14px;font-size:14px;}
+.st-btn-w{background:#fff;color:var(--ink);}
+.st-btn-g{background:rgba(255,255,255,.18);color:#fff;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px;}
+.chips span{background:rgba(255,255,255,.18);border-radius:999px;padding:7px 14px;font-weight:800;font-size:15px;}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}.reveal{opacity:1;transform:none;}.bub{opacity:1;transform:none;}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a href="#" class="logo" data-home>
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6" stroke="#ff6b8b" stroke-width="2.6"/><path d="M15 15l5 5" stroke="#ffd166" stroke-width="2.8" stroke-linecap="round"/></svg></span>
+      צ'אטסקופ
+    </a>
+    <nav class="nav">
+      <a href="#demo" data-home-link>דוגמאות</a>
+      <a href="#how" data-home-link>איך זה עובד</a>
+      <a href="#privacy" data-home-link>פרטיות</a>
+      <a href="#faq" data-home-link>שאלות</a>
+      <a class="btn btn-ink btn-sm" href="#start" data-home-link>לנתח צ'אט</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= LANDING ================= -->
+<main id="landing">
+  <section class="hero" id="start">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="chip"><span class="dot">🔒</span>חינם · בלי הרשמה · שום דבר לא עולה לשרת</span>
+        <h1>תעלו צ'אט.<br><span class="hl">סקופי</span> יגיד לכם<br>מה <span class="pink">באמת</span> קורה שם.</h1>
+        <p class="lead">מי יוזם, מי נעלם, מי עונה תוך שנייה ומי משאיר על "נקרא". סקופי עובר על כל הודעה וכותב דוח על כל אחד מהמשתתפים, עם דגלים ירוקים, דגלים אדומים וכרטיס לשתף בקבוצה.</p>
+
+        <div class="drop" id="drop">
+          <div class="drop-inner">
+            <div class="drop-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg></div>
+            <div>
+              <h3>גררו לכאן את קובץ הצ'אט</h3>
+              <p>‎.txt או ‎.zip מוואטסאפ · ‎.json מטלגרם, אינסטגרם או מסנג'ר</p>
+            </div>
+          </div>
+          <div class="drop-actions">
+            <button class="btn btn-pink" id="pickBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              בחירת קובץ
+            </button>
+            <button class="btn btn-ghost" id="pasteToggle">הדבקת טקסט</button>
+          </div>
+          <input type="file" id="fileInput" class="sr" accept=".txt,.zip,.json,text/plain,application/zip,application/json" multiple>
+          <div class="paste-box hidden" id="pasteBox">
+            <textarea id="pasteArea" placeholder="[12/03/2025, 21:14:05] Noa: מה קורה?&#10;12/03/2025, 21:15 - Itay: הכל טוב 😄"></textarea>
+            <div class="row">
+              <span style="font-size:13px;color:var(--muted)">מדביקים את תוכן הצ'אט כמו שהוא</span>
+              <button class="btn btn-ink btn-sm" id="pasteGo">לנתח</button>
+            </div>
+          </div>
+          <div class="err hidden" id="err"></div>
+          <div class="privacy-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>הקובץ נקרא רק בתוך הדפדפן שלכם. אנחנו לא רואים אותו, ושום דבר לא נשמר.</div>
+        </div>
+
+        <div class="platforms">
+          <span class="pf"><i style="background:#25d366"></i>WhatsApp</span>
+          <span class="pf"><i style="background:#2aabee"></i>Telegram</span>
+          <span class="pf"><i style="background:linear-gradient(45deg,#f9a825,#e91e63,#7b1fa2)"></i>Instagram</span>
+          <span class="pf"><i style="background:#0084ff"></i>Messenger</span>
+          <span class="pf"><i style="background:#8e8e93"></i>טקסט חופשי</span>
+        </div>
+      </div>
+
+      <div class="stage" aria-hidden="true">
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ph-head"><div class="ph-av">נ</div><div><div class="ph-name">נועה 🌙</div><div class="ph-sub">מקלידה…</div></div></div>
+            <div class="ph-body">
+              <div class="bub them" style="animation-delay:.2s">ערה? 👀<small>01:12</small></div>
+              <div class="bub me" style="animation-delay:.7s">תמיד בשבילך 😅<small>01:12</small></div>
+              <div class="bub them" style="animation-delay:1.2s">שאלה קטנה... מה עשית בשבת?<small>01:13</small></div>
+              <div class="bub me" style="animation-delay:1.7s">למה את שואלת 🤨<small>01:20</small></div>
+              <div class="bub them" style="animation-delay:2.2s">סתם 🙃<small>01:21</small></div>
+              <div class="bub them" style="animation-delay:2.6s">זאת אומרת לא סתם<small>01:21</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="float-card fc1"><div class="t">מי יותר בעניין</div><div class="v">נועה 64% · איתי 36%</div><div class="meter"><b style="width:64%"></b><b style="width:36%"></b></div></div>
+        <div class="float-card fc2"><div class="t">הארכיטיפ של נועה</div><div class="v">🦉 הינשוף</div><div class="s">41% מההודעות שלה נשלחו אחרי חצות</div></div>
+        <div class="float-card fc3"><div class="t">דגל אדום</div><div class="v" style="font-size:16px">🚩 ‏7 דק' לענות</div><div class="s">על "מה עשית בשבת"</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="demo">
+    <div class="wrap center">
+      <span class="kicker">רוצים לראות קודם?</span>
+      <h2 class="h2">תלחצו על צ'אט לדוגמה</h2>
+      <p class="sub">צ'אטים בדויים לגמרי, שנבנו כדי להראות איך נראה דוח אמיתי. בלי להעלות כלום.</p>
+      <div class="demo-list" id="demoList"></div>
+    </div>
+  </section>
+
+  <section class="block" id="how" style="padding-top:20px">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">שלוש דקות, כולל הייצוא</span>
+        <h2 class="h2">איך זה עובד</h2>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><div class="step-n" style="background:var(--pink-soft);color:var(--pink)">1</div><h3>מייצאים את הצ'אט</h3><p>מהאפליקציה עצמה, בלי מדיה. ההוראות לכל פלטפורמה מופיעות כאן למטה.</p></div>
+        <div class="step reveal"><div class="step-n" style="background:var(--yellow-soft);color:#b98500">2</div><h3>מעלים לכאן</h3><p>הקובץ נקרא ומנותח בתוך הדפדפן, כך שאפילו אלפי הודעות לוקחות שניות.</p></div>
+        <div class="step reveal"><div class="step-n" style="background:var(--violet-soft);color:var(--violet)">3</div><h3>מקבלים את הדוח</h3><p>ארכיטיפ לכל אחד, מדד עניין, דגלים, גרפים ורגעי שיא. אפשר לשמור כרטיס לכל משתתף ולשלוח לקבוצה.</p></div>
+      </div>
+
+      <div class="guide reveal" id="guide">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-tab="wa-ios">WhatsApp · אייפון</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="wa-and">WhatsApp · אנדרואיד</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="tg">Telegram</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="ig">Instagram</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="fb">Messenger</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="other">iMessage ואחרים</button>
+        </div>
+        <div class="tab-panel" data-panel="wa-ios">
+          <ol>
+            <li>פותחים את הצ'אט ולוחצים על <b>השם</b> למעלה.</li>
+            <li>גוללים למטה ובוחרים <b>ייצוא צ'אט</b>.</li>
+            <li>בוחרים <b>ללא מדיה</b>.</li>
+            <li>שומרים לקבצים (<b>שמירה ב"קבצים"</b>) ומעלים כאן את קובץ ה־zip כמו שהוא.</li>
+          </ol>
+          <p class="note">לא צריך לפתוח את ה־zip. סקופי מוצא לבד את ‎_chat.txt שבתוכו.</p>
+        </div>
+        <div class="tab-panel hidden" data-panel="wa-and">
+          <ol>
+            <li>פותחים את הצ'אט ולוחצים על <b>⋮</b> בפינה.</li>
+            <li><b>עוד</b> ← <b>ייצוא צ'אט</b>.</li>
+            <li>בוחרים <b>ללא מדיה</b>.</li>
+            <li>שולחים לעצמכם (מייל או Drive), מורידים את קובץ ה־txt ומעלים לכאן.</li>
+          </ol>
+        </div>
+        <div class="tab-panel hidden" data-panel="tg">
+          <ol>
+            <li>פותחים את <b>Telegram Desktop</b> במחשב.</li>
+            <li>נכנסים לצ'אט, לוחצים על <b>⋮</b> ← <b>Export chat history</b>.</li>
+            <li>מבטלים את סימון התמונות והסרטונים ובוחרים פורמט <b>JSON</b> (Machine-readable).</li>
+            <li>מעלים כאן את הקובץ <b>result.json</b>.</li>
+          </ol>
+        </div>
+        <div class="tab-panel hidden" data-panel="ig">
+          <ol>
+            <li>באינסטגרם: <b>הגדרות</b> ← <b>מרכז החשבונות</b> ← <b>המידע שלך והרשאות</b> ← <b>הורדת המידע שלך</b>.</li>
+            <li>בוחרים <b>חלק מהמידע</b> ← <b>הודעות</b>, ופורמט <b>JSON</b>.</li>
+            <li>כשהקובץ מוכן מורידים, פותחים את התיקייה <b>messages/inbox/שם-הצ'אט</b>.</li>
+            <li>מעלים את כל קבצי <b>message_1.json</b>, <b>message_2.json</b> וכו' יחד.</li>
+          </ol>
+          <p class="note">מטא מכינה את הקובץ, וזה יכול לקחת כמה דקות עד כמה שעות. סקופי מתקן לבד את הקידוד המשובש של עברית שיש בקבצים האלה.</p>
+        </div>
+        <div class="tab-panel hidden" data-panel="fb">
+          <ol>
+            <li>בפייסבוק: <b>הגדרות</b> ← <b>מרכז החשבונות</b> ← <b>הורדת המידע שלך</b>.</li>
+            <li>בוחרים <b>הודעות</b> בפורמט <b>JSON</b>.</li>
+            <li>מהתיקייה <b>messages/inbox/…</b> מעלים את קבצי ה־message_*.json של הצ'אט.</li>
+          </ol>
+        </div>
+        <div class="tab-panel hidden" data-panel="other">
+          <ol>
+            <li>ל־iMessage אין ייצוא מובנה. אפשר להשתמש בכלי כמו <b>iMazing</b> במחשב ולייצא כ־TXT.</li>
+            <li>או פשוט להעתיק את השיחה ולהדביק אותה דרך <b>הדבקת טקסט</b>, בפורמט <b>שם: הודעה</b> בכל שורה.</li>
+          </ol>
+          <p class="note">בלי חותמות זמן סקופי עדיין יודע לזהות ארכיטיפים, מילים ואימוג'ים, אבל לא זמני תגובה ושעות פעילות.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" style="padding-top:20px">
+    <div class="wrap">
+      <div class="center">
+        <span class="kicker">מה יש בדוח</span>
+        <h2 class="h2">יותר מסטטיסטיקה. פסק דין.</h2>
+        <p class="sub">כל מספר בדוח מחושב מההודעות עצמן. בלי ניחושים, בלי "בערך".</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat reveal"><div class="ico">🎭</div><h3>ארכיטיפ לכל משתתף</h3><p>הינשוף, המנוע, הרוח, החוקר, מלך האימוג'י… כל אחד מקבל את התפקיד שהכי מגדיר אותו, בהשוואה לשאר.</p></div>
+        <div class="feat reveal"><div class="ico">💘</div><h3>מי יותר בעניין</h3><p>בשיחה בין שניים: מדד שמשקלל מי יוזם, מי עונה מהר, מי שואל ומי כותב יותר.</p></div>
+        <div class="feat reveal"><div class="ico">🚩</div><h3>דגלים ירוקים ואדומים</h3><p>הודעות כפולות בלי תשובה, הודעות שנמחקו, המילה האחרונה, התנצלויות, שאלות בלי מענה.</p></div>
+        <div class="feat reveal"><div class="ico">⏱️</div><h3>זמני תגובה אמיתיים</h3><p>חציון זמן התגובה של כל אחד, כדי שתשובה אחת אחרי שלושה ימים לא תעוות את התמונה.</p></div>
+        <div class="feat reveal"><div class="ico">📈</div><h3>ציר זמן ומפת חום</h3><p>איך השיחה התפתחה לאורך החודשים, ובאילו ימים ושעות היא הכי חיה.</p></div>
+        <div class="feat reveal"><div class="ico">🤖</div><h3>ניתוח AI עמוק (אופציונלי)</h3><p>עם מפתח API משלכם, Claude קורא את השיחה וכותב ניתוח מילולי על הדינמיקה, הבדיחות הפנימיות והרגעים שהשתנו.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="privacy" style="padding-top:20px">
+    <div class="wrap">
+      <div class="priv reveal">
+        <div>
+          <span class="kicker" style="color:var(--yellow)">פרטיות</span>
+          <h2 class="h2">הצ'אט שלכם לא עוזב את המכשיר.</h2>
+          <p class="sub">רוב האתרים מהסוג הזה מעלים את השיחה לשרת. אצלנו אין שרת בכלל: האתר הוא דף אחד שרץ אצלכם בדפדפן.</p>
+        </div>
+        <div class="priv-list">
+          <div class="priv-item"><span>💻</span><div><b>ניתוח מקומי</b><p>הקובץ נקרא בזיכרון של הדפדפן ונעלם כשסוגרים את הלשונית.</p></div></div>
+          <div class="priv-item"><span>🙈</span><div><b>מצב אנונימי</b><p>כפתור אחד מחליף את כל השמות ל"משתתף 1, 2, 3", לפני שמשתפים צילום מסך.</p></div></div>
+          <div class="priv-item"><span>🔑</span><div><b>AI רק אם תבחרו</b><p>ניתוח ה־AI נשלח ישירות מהדפדפן ל־Anthropic עם המפתח שלכם, ורק אחרי שלחצתם.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="faq" style="padding-top:20px">
+    <div class="wrap">
+      <div class="center"><span class="kicker">שאלות</span><h2 class="h2">מה שכולם שואלים</h2></div>
+      <div class="faq">
+        <details><summary>זה באמת בחינם?</summary><p>כן. הניתוח רץ בדפדפן שלכם, אז אין לנו עלויות שרת להעביר אליכם. הדבר היחיד שעולה כסף הוא ניתוח ה־AI האופציונלי, והוא מחויב ישירות בחשבון ה־API שלכם ב־Anthropic.</p></details>
+        <details><summary>אפשר לנתח קבוצות?</summary><p>בטח. בקבוצות סקופי מוסיף טבלת מובילים, מי עונה למי, "הדבק של הקבוצה" ו"הצופה השקט". כרטיסים מלאים מוצגים ל־12 המשתתפים הפעילים ביותר, והשאר מופיעים בטבלה.</p></details>
+        <details><summary>הצ'אט שלי באנגלית / בשפה אחרת, זה עובד?</summary><p>כן. הפירוק של הקובץ תומך בפורמטים של וואטסאפ בעברית, באנגלית ובשפות נוספות (כולל AM/PM ותאריכים אמריקאים), והמדדים לא תלויים בשפה. ניתוח המילים מסנן מילות קישור בעברית ובאנגלית.</p></details>
+        <details><summary>למה זמן התגובה שלי נראה מוזר?</summary><p>סקופי מודד רק תגובות שהגיעו תוך 12 שעות ומשתמש בחציון ולא בממוצע, כדי שערב אחד שבו נרדמתם לא יהרוס לכם את המספר. מעבר ל־6 שעות שקט נחשב "שיחה חדשה", ומי שכתב ראשון נחשב היוזם.</p></details>
+        <details><summary>מה עם הודעות קוליות ותמונות?</summary><p>כשמייצאים בלי מדיה, וואטסאפ משאיר שורה כמו "המדיה לא נכללה". סקופי סופר אותן כמדיה (ומי ששולח הרבה כאלה עלול לקבל את התואר "הצלם"), אבל לא יכול לדעת מה היה בהן.</p></details>
+        <details><summary>כמה הודעות זה מחזיק?</summary><p>נבדק על מאות אלפי הודעות. צ'אט של שנים עם 300 אלף הודעות לוקח בערך שנייה או שתיים במחשב רגיל.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <h2 class="h2">הצ'אט הבא בתור הוא שלכם.</h2>
+      <p class="sub" style="margin:0 auto 26px">תייצאו, תעלו, ותשלחו לקבוצה את מה שסקופי חושב.</p>
+      <a href="#start" class="btn btn-pink" style="font-size:17px;padding:16px 30px">לנתח צ'אט עכשיו</a>
+    </div>
+  </section>
+</main>
+
+<!-- ================= LOADING ================= -->
+<main id="loading" class="hidden">
+  <div class="loading">
+    <div>
+      <svg class="scopey" viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="52" cy="52" r="36" fill="#fff" stroke="#1a1530" stroke-width="7"/>
+        <circle cx="52" cy="52" r="26" fill="#ffe1e8"/>
+        <circle cx="42" cy="48" r="5" fill="#1a1530"/><circle cx="62" cy="48" r="5" fill="#1a1530"/>
+        <circle cx="44" cy="46" r="1.6" fill="#fff"/><circle cx="64" cy="46" r="1.6" fill="#fff"/>
+        <path d="M44 62 q8 6 16 0" stroke="#1a1530" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M80 80 l22 22" stroke="#ffd166" stroke-width="12" stroke-linecap="round"/>
+        <path d="M80 80 l22 22" stroke="#1a1530" stroke-width="3" stroke-linecap="round" opacity=".15"/>
+      </svg>
+      <h2>סקופי קורא…</h2>
+      <p id="loadMsg">פותח את הקובץ</p>
+      <div class="bar"><b id="loadBar"></b></div>
+    </div>
+  </div>
+</main>
+
+<!-- ================= REPORT ================= -->
+<main id="reportView" class="hidden">
+  <div class="r-bar">
+    <div class="wrap">
+      <button class="btn btn-ghost btn-sm" id="backBtn" aria-label="חזרה">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        חדש
+      </button>
+      <div class="title" id="rTitle"></div>
+      <label class="toggle"><input type="checkbox" id="anonToggle"><span>אנונימי</span></label>
+      <button class="btn btn-ink btn-sm" id="copyBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
+        שיתוף
+      </button>
+    </div>
+  </div>
+  <div class="wrap report" id="report"></div>
+</main>
+
+<div class="story hidden" id="story" role="dialog" aria-label="הסיפור של הצ'אט">
+  <div class="st-frame" id="stFrame">
+    <div class="st-prog" id="stProg"></div>
+    <div class="st-top"><span class="brand">🔍 צ'אטסקופ</span><button class="st-x" id="stClose" aria-label="סגירה">✕</button></div>
+    <div id="stSlide"></div>
+    <button class="st-tap prev" id="stPrev" aria-label="הקודם"></button>
+    <button class="st-tap next" id="stNext" aria-label="הבא"></button>
+    <div class="st-bottom"><button class="btn st-btn-g" id="stSave">📸 שמירת השקופית</button><button class="btn st-btn-w" id="stSkip">לדוח המלא</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal hidden" id="modal"><div class="modal-box"><img id="modalImg" alt="כרטיס לשיתוף"><div class="row"><button class="btn btn-pink" id="modalShare">שיתוף / שמירה</button><button class="btn btn-ghost" id="modalClose">סגירה</button></div></div></div>
+
+<footer>
+  <div class="wrap">
+    <span>צ'אטסקופ · דוחות צ'אט שרצים בדפדפן. נבנה בידי אריאל אילון.</span>
+    <span>לבידור בלבד. אל תיפרדו בגלל גרף 🙂</span>
+  </div>
+</footer>
+
+<script>
+'use strict';
+/* =========================================================
+   Utilities
+   ========================================================= */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Math.round(n).toLocaleString('he-IL');
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const median = arr => { if (!arr.length) return null; const a = [...arr].sort((x, y) => x - y); const m = a.length >> 1; return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2; };
+const HOUR = 3600e3, DAY = 86400e3;
+const DAYS_HE = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const DAYS_SHORT = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+const MONTHS_HE = ['ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
+const PALETTE = ['#ff6b8b','#8b6cff','#3ccf91','#5aa9ff','#ffb020','#ff8a4c','#16b8c4','#d65bd6','#7a8b99','#c0a000','#e0507a','#4c6fff'];
+
+function fmtDur(ms) {
+  if (ms == null) return '—';
+  const s = ms / 1000;
+  if (s < 60) return 'פחות מדקה';
+  const m = s / 60;
+  if (m < 60) return `${Math.round(m)} דק׳`;
+  const h = m / 60;
+  if (h < 24) return `${h < 10 ? h.toFixed(1).replace('.0', '') : Math.round(h)} שע׳`;
+  return `${Math.round(h / 24)} ימים`;
+}
+function fmtDate(d) { return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`; }
+function dayKey(d) { return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+function initials(name) {
+  const parts = name.replace(/[^\p{L}\p{N}\s]/gu, '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* =========================================================
+   Parsing
+   ========================================================= */
+const INVISIBLE = /[‎‏‪-‮⁦-⁩﻿]/g;
+const MEDIA_RE = /^<?\s*(המדיה לא נכללה|מדיה הושמטה|media omitted|<media omitted>|image omitted|video omitted|audio omitted|sticker omitted|gif omitted|document omitted|תמונה הושמטה|סרטון הושמט|קובץ שמע הושמט|מדבקה הושמטה|GIF הושמט|‏?מסמך הושמט|omitted)\s*>?$/i;
+const DELETED_RE = /^(this message was deleted|you deleted this message|ההודעה נמחקה|מחקת את ההודעה הזו|הודעה זו נמחקה)\.?$/i;
+const SYSTEM_HINT = /(end-to-end encrypted|מוצפנות מקצה לקצה|created group|יצר\/ה את הקבוצה|added|הוסיף|left|עזב|changed the subject|שינה את|security code|קוד האבטחה)/i;
+
+// [12/03/2025, 21:14:05] Name: text   (iOS)
+const RE_IOS = /^\[(\d{1,4})[./-](\d{1,2})[./-](\d{1,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AaPp]\.?\s?[Mm]\.?)?\]\s*([^:]{1,80}?):\s?([\s\S]*)$/;
+// 12/03/2025, 21:14 - Name: text   (Android)
+const RE_AND = /^(\d{1,4})[./-](\d{1,2})[./-](\d{1,4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AaPp]\.?\s?[Mm]\.?)?\s*[-–—]\s*([^:]{1,80}?):\s?([\s\S]*)$/;
+// system lines that look like a timestamp but have no "name:"
+const RE_TS_ONLY = /^\[?(\d{1,4})[./-](\d{1,2})[./-](\d{1,4}),?\s+(\d{1,2}):(\d{2})/;
+
+function parseWhatsApp(text) {
+  const lines = text.replace(/\r\n?/g, '\n').split('\n');
+  const raw = [];
+  let cur = null;
+  for (let line of lines) {
+    const clean = line.replace(INVISIBLE, '').replace(/ | /g, ' ');
+    const m = clean.match(RE_IOS) || clean.match(RE_AND);
+    if (m) {
+      cur = { a: +m[1], b: +m[2], c: +m[3], h: +m[4], mi: +m[5], s: +(m[6] || 0), ap: m[7], name: m[8].trim(), text: m[9] };
+      raw.push(cur);
+    } else if (RE_TS_ONLY.test(clean)) {
+      cur = null; // system message
+    } else if (cur) {
+      cur.text += '\n' + clean;
+    }
+  }
+  if (!raw.length) return null;
+  // Work out date order: Y-M-D, D/M/Y or M/D/Y
+  let ymd = raw.some(r => r.a > 31), dmy = false, mdy = false;
+  if (!ymd) {
+    for (const r of raw) { if (r.a > 12) { dmy = true; break; } if (r.b > 12) { mdy = true; break; } }
+    if (!dmy && !mdy) dmy = true; // default for Israel
+  }
+  return raw.map(r => {
+    let y, mo, d;
+    if (ymd) { y = r.a; mo = r.b; d = r.c; }
+    else if (mdy) { mo = r.a; d = r.b; y = r.c; }
+    else { d = r.a; mo = r.b; y = r.c; }
+    if (y < 100) y += 2000;
+    let h = r.h;
+    if (r.ap) { const pm = /p/i.test(r.ap); if (pm && h < 12) h += 12; if (!pm && h === 12) h = 0; }
+    return { t: new Date(y, mo - 1, d, h, r.mi, r.s), from: r.name, text: r.text.trim() };
+  }).filter(m => !isNaN(m.t));
+}
+
+// Fix Meta's latin-1 mojibake ("×©×××" -> "שלום")
+function fixMeta(s) {
+  if (typeof s !== 'string') return s;
+  try { return decodeURIComponent(escape(s)); } catch { return s; }
+}
+
+function parseJSON(obj) {
+  // Telegram
+  if (Array.isArray(obj.messages) && obj.messages.some(m => 'date' in m && ('from' in m || 'actor' in m))) {
+    const msgs = obj.messages.filter(m => m.type === 'message' && m.from).map(m => {
+      let text = m.text;
+      if (Array.isArray(text)) text = text.map(p => typeof p === 'string' ? p : (p.text || '')).join('');
+      let media = !!(m.photo || m.file || m.media_type || m.sticker_emoji);
+      if (m.sticker_emoji && !text) text = m.sticker_emoji;
+      return { t: m.date_unixtime ? new Date(+m.date_unixtime * 1000) : new Date(m.date), from: String(m.from), text: text || '', media: media && !text };
+    });
+    return { title: obj.name || null, messages: msgs };
+  }
+  // Instagram / Messenger
+  if (Array.isArray(obj.messages) && obj.messages.some(m => 'sender_name' in m)) {
+    const msgs = obj.messages.filter(m => m.sender_name && m.timestamp_ms).map(m => {
+      const text = fixMeta(m.content || '');
+      const media = !m.content && !!(m.photos || m.videos || m.audio_files || m.gifs || m.sticker || m.files || m.share);
+      return { t: new Date(m.timestamp_ms), from: fixMeta(m.sender_name), text, media };
+    });
+    return { title: obj.title ? fixMeta(obj.title) : null, messages: msgs };
+  }
+  return null;
+}
+
+// "Name: text" lines with no timestamps
+function parseLoose(text) {
+  const out = [];
+  let cur = null;
+  for (const line of text.replace(/\r\n?/g, '\n').split('\n')) {
+    const m = line.replace(INVISIBLE, '').match(/^\s*([^:\n]{1,40}):\s+(.+)$/);
+    if (m) { cur = { t: null, from: m[1].trim(), text: m[2] }; out.push(cur); }
+    else if (cur && line.trim()) cur.text += '\n' + line;
+  }
+  return out.length >= 4 ? out : null;
+}
+
+async function readInputs(files) {
+  let messages = [], title = null;
+  for (const f of files) {
+    const name = f.name.toLowerCase();
+    if (name.endsWith('.zip')) {
+      if (!window.JSZip) throw new Error('רכיב הפתיחה של ZIP עדיין נטען, נסו שוב בעוד שנייה.');
+      const zip = await JSZip.loadAsync(f);
+      const entries = Object.values(zip.files).filter(e => !e.dir && /\.(txt|json)$/i.test(e.name) && !/__MACOSX/.test(e.name));
+      if (!entries.length) throw new Error('לא מצאתי קובץ צ\'אט בתוך ה־ZIP.');
+      entries.sort((a, b) => (/_chat\.txt$/i.test(b.name) ? 1 : 0) - (/_chat\.txt$/i.test(a.name) ? 1 : 0));
+      for (const e of entries) {
+        const r = parseText(await e.async('string'), e.name);
+        if (r) { messages.push(...r.messages); title = title || r.title || titleFromFile(f.name); break; }
+      }
+    } else {
+      const r = parseText(await f.text(), f.name);
+      if (r) { messages.push(...r.messages); title = title || r.title || titleFromFile(f.name); }
+    }
+  }
+  return { messages, title };
+}
+function titleFromFile(n) {
+  const m = n.replace(/\.(txt|zip|json)$/i, '').replace(/^(WhatsApp Chat( with)?|צ'אט WhatsApp עם|שיחת WhatsApp עם)\s*[-–]?\s*/i, '').trim();
+  return /^(_chat|result|message_\d+|chat)$/i.test(m) || !m ? null : m;
+}
+function parseText(text, name = '') {
+  const t = text.trim();
+  if (t.startsWith('{')) {
+    try { const r = parseJSON(JSON.parse(t)); if (r && r.messages.length) return r; } catch { /* not json */ }
+  }
+  const wa = parseWhatsApp(t);
+  if (wa && wa.length) return { messages: wa, title: null };
+  const loose = parseLoose(t);
+  if (loose) return { messages: loose, title: null };
+  return null;
+}
+
+/* =========================================================
+   Analysis
+   ========================================================= */
+const STOP = new Set(('את של על זה לא אני אתה הוא היא מה גם כן יש אם אבל או רק עם כל אז לי לך לו לה שלי שלך שזה זאת היה היתה הם הן אנחנו אתם אתן עוד כבר מי איך למה כי אין אחד אחת טוב בסדר אוקיי אוקי ok okay אה וואי וואו יאללה סבבה נו אחי מתי איפה פה שם עכשיו היום מחר אתמול בא באה אולי ממש די הכי יותר פחות כמו כזה כזאת משהו שום ככה בו בה בי בך להם לנו אותו אותה אותי אותך שאני שאתה שהוא שהיא שלא מאוד ואני וזה ולא ויש וגם תודה רגע עדיין אחרי לפני בין דרך צריך רוצה יודע יודעת חושב חושבת אומר אמר אמרה הזה הזאת האלה אלה אלו שם ' +
+  'the a an to i you and is it in of that for on me my we be was are so do not no yes have just but with this at what can if your get all its it\'s i\'m im dont don\'t know like will u ur too ok okay oh yeah lol haha hahaha hey hi up out about how there one go got now then he she they them our us when why who where would could should did does been am or as from by an more some any here want see think good'
+).split(/\s+/));
+const LAUGH_RE = /(ח{3,}|חח+ח|ההה+|x{2,}d|lo+l|(ha){2,}|(he){3,}|lmao|lmfao|😂|🤣|😆|😹)/i;
+const LOVE_RE = /(אוהב|אוהבת|אהבה|מתגעגע|מתגעגעת|מאמי|מותק|חיים שלי|נשמה|יקירה|יקירי|love|miss you|❤|♥|😍|🥰|😘|💕|💖|💗|💞|💓|🫶)/i;
+const SORRY_RE = /(סליחה|סורי|מצטער|מצטערת|sorry|my bad|apolog)/i;
+const THANKS_RE = /(תודה|תודות|thank|thx|tnx)/i;
+const GN_RE = /(לילה טוב|לילה לילה|לילה מתוק|ליל"ט|לילט|good ?night|\bgn\b|nighty)/i;
+const GM_RE = /(בוקר טוב|בוקר אור|בוקר בוקר|good ?morning|\bgm\b|morning ?☀)/i;
+const NOISE_RE = /^(ח+|ה+|x+d*|(ha)+h?|(he)+|lo+l|https?|www|com|null|המדיה|נכללה|omitted|media|image|sticker|הושמטה|הושמט)$/;
+function tokens(text) {
+  const out = [];
+  for (let w of text.toLowerCase().split(/[^\p{L}\p{N}'׳]+/u)) {
+    w = w.replace(/^['׳]+|['׳]+$/g, '');
+    if (w.length < 2 || STOP.has(w) || /^\d+$/.test(w) || NOISE_RE.test(w)) continue;
+    out.push(w);
+  }
+  return out;
+}
+// words that are over-represented in a subset compared to everything else
+function distinctive(sub, total, subN, totN, minC = 3, k = 5) {
+  const otherN = Math.max(1, totN - subN);
+  const out = [];
+  for (const [w, c] of sub) {
+    if (c < minC) continue;
+    const o = (total.get(w) || 0) - c;
+    const ratio = (c / Math.max(1, subN)) / ((o + 1) / otherN);
+    if (ratio < 1.6) continue;
+    out.push([w, c, Math.log(ratio) * Math.sqrt(c)]);
+  }
+  return out.sort((a, b) => b[2] - a[2]).slice(0, k);
+}
+const PICT = /\p{Extended_Pictographic}/u;
+const seg = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('he', { granularity: 'grapheme' }) : null;
+function emojisOf(text) {
+  if (!PICT.test(text)) return [];
+  const out = [];
+  if (seg) { for (const { segment } of seg.segment(text)) if (PICT.test(segment)) out.push(segment.replace(/[\u{1F3FB}-\u{1F3FF}]/gu, '')); }
+  else { const m = text.match(/\p{Extended_Pictographic}/gu); if (m) out.push(...m); }
+  return out;
+}
+
+function analyze(rawMessages, title) {
+  let msgs = rawMessages.filter(m => m.from && (m.text || m.media) !== undefined);
+  const timed = msgs.length && msgs.every(m => m.t instanceof Date);
+  if (timed) msgs.sort((a, b) => a.t - b.t);
+  if (msgs.length < 4) throw new Error('מצאתי פחות מ־4 הודעות. בדקו שהקובץ הוא ייצוא של צ\'אט.');
+
+  const people = new Map();
+  const P = name => {
+    if (!people.has(name)) people.set(name, {
+      name, msgs: 0, words: 0, chars: 0, media: 0, deleted: 0, emojis: 0, emojiMap: new Map(),
+      questions: 0, laughs: 0, love: 0, sorry: 0, thanks: 0, night: 0, morning: 0,
+      starts: 0, lastWord: 0, doubles: 0, rts: [], longest: '', wordMap: new Map(), links: 0,
+      repliesTo: new Map(), unanswered: 0, hours: new Array(24).fill(0),
+      gn: 0, gm: 0, ily: 0, h1: 0, h2: 0, recent: 0, prevRecent: 0, firstGN: 0,
+    });
+    return people.get(name);
+  };
+
+  const totalWordMap = new Map(), totalEmoji = new Map(), dayWords = new Map(), quotes = [];
+  // story chapters: equal slices of time
+  let chapters = null, chapterOf = () => 0, mid = null, last30 = null, prev30 = null;
+  if (timed) {
+    const t0 = msgs[0].t.getTime(), t1 = msgs[msgs.length - 1].t.getTime();
+    const span = (t1 - t0) / DAY;
+    const k = span >= 120 ? 4 : span >= 45 ? 3 : span >= 21 ? 2 : 1;
+    const len = (t1 - t0) / k || 1;
+    chapters = Array.from({ length: k }, (_, i) => ({ i, start: new Date(t0 + i * len), end: new Date(t0 + (i + 1) * len), count: 0, people: new Map(), words: new Map(), emoji: new Map() }));
+    chapterOf = t => Math.min(k - 1, Math.floor((t.getTime() - t0) / len));
+    mid = new Date(t0 + (t1 - t0) / 2);
+    last30 = new Date(t1 - 30 * DAY); prev30 = new Date(t1 - 60 * DAY);
+  }
+  const heat = Array.from({ length: 7 }, () => new Array(24).fill(0));
+  const monthly = new Map(); const daily = new Map();
+  let longestGap = null;
+
+  msgs.forEach((m, i) => {
+    const p = P(m.from);
+    const text = m.text || '';
+    const isMedia = m.media || MEDIA_RE.test(text.trim());
+    const isDeleted = DELETED_RE.test(text.trim());
+    p.msgs++;
+    if (isMedia) p.media++;
+    if (isDeleted) p.deleted++;
+    if (!isMedia && !isDeleted && text) {
+      const ws = text.split(/\s+/).filter(Boolean);
+      p.words += ws.length; p.chars += text.length;
+      if (text.length > p.longest.length && text.length < 4000) p.longest = text;
+      if (/\?|؟/.test(text)) p.questions++;
+      if (LAUGH_RE.test(text)) p.laughs++;
+      if (LOVE_RE.test(text)) p.love++;
+      if (SORRY_RE.test(text)) p.sorry++;
+      if (THANKS_RE.test(text)) p.thanks++;
+      if (/https?:\/\//.test(text)) p.links++;
+      if (GN_RE.test(text)) p.gn++;
+      if (GM_RE.test(text)) p.gm++;
+      if (/\b(I love you|love you)\b|אוהב אותך|אוהבת אותך|אוהב אותה|אוהבת אותו/i.test(text)) p.ily++;
+      const ch = chapters && chapters[chapterOf(m.t)];
+      for (const e of emojisOf(text)) { p.emojis++; p.emojiMap.set(e, (p.emojiMap.get(e) || 0) + 1); totalEmoji.set(e, (totalEmoji.get(e) || 0) + 1); if (ch) ch.emoji.set(e, (ch.emoji.get(e) || 0) + 1); }
+      for (const w of tokens(text)) {
+        p.wordMap.set(w, (p.wordMap.get(w) || 0) + 1);
+        totalWordMap.set(w, (totalWordMap.get(w) || 0) + 1);
+        if (ch) ch.words.set(w, (ch.words.get(w) || 0) + 1);
+        if (timed) { const dk = dayKey(m.t); let dm = dayWords.get(dk); if (!dm) dayWords.set(dk, dm = new Map()); dm.set(w, (dm.get(w) || 0) + 1); }
+      }
+      const wc = text.split(/\s+/).length;
+      if (wc >= 4 && wc <= 30 && !/https?:\/\//.test(text) && text.length < 220) quotes.push(i);
+    }
+    if (timed) {
+      if (m.t < mid) p.h1++; else p.h2++;
+      const ch = chapters[chapterOf(m.t)];
+      ch.count++; ch.people.set(m.from, (ch.people.get(m.from) || 0) + 1);
+      if (m.t >= last30) p.recent++; else if (m.t >= prev30) p.prevRecent++;
+    }
+    if (!timed) return;
+    const h = m.t.getHours();
+    p.hours[h]++;
+    if (h < 5) p.night++; else if (h >= 5 && h < 9) p.morning++;
+    heat[m.t.getDay()][h]++;
+    const mk = m.t.getFullYear() * 12 + m.t.getMonth();
+    monthly.set(mk, (monthly.get(mk) || 0) + 1);
+    const dk = dayKey(m.t); daily.set(dk, (daily.get(dk) || 0) + 1);
+
+    const prev = msgs[i - 1], next = msgs[i + 1];
+    const gapPrev = prev ? m.t - prev.t : Infinity;
+    if (gapPrev > 6 * HOUR) p.starts++;
+    if (prev && gapPrev > (longestGap ? longestGap.gap : 0)) longestGap = { gap: gapPrev, from: prev, to: m };
+    if (prev && prev.from !== m.from && gapPrev < 12 * HOUR) {
+      p.rts.push(gapPrev);
+      p.repliesTo.set(prev.from, (p.repliesTo.get(prev.from) || 0) + 1);
+    }
+    if (prev && prev.from === m.from && gapPrev > 30 * 60e3 && gapPrev < 2 * DAY) p.doubles++;
+    if (!next || next.t - m.t > 6 * HOUR) p.lastWord++;
+    if (/\?|؟/.test(text) && (!next || (next.from === m.from && next.t - m.t > 0) || next.t - m.t > 12 * HOUR)) {
+      // question that the next person never addressed (only counts if nobody else answered soon)
+      if (!next || next.t - m.t > 12 * HOUR) p.unanswered++;
+    }
+  });
+
+  const list = [...people.values()].filter(p => p.msgs > 0).sort((a, b) => b.msgs - a.msgs);
+  const total = msgs.length;
+  list.forEach((p, i) => {
+    p.color = PALETTE[i % PALETTE.length];
+    p.share = p.msgs / total;
+    const textMsgs = Math.max(1, p.msgs - p.media - p.deleted);
+    p.avgWords = p.words / textMsgs;
+    p.rt = median(p.rts);
+    p.emojiRate = p.emojis / textMsgs;
+    p.qRate = p.questions / textMsgs;
+    p.laughRate = p.laughs / textMsgs;
+    p.loveRate = p.love / textMsgs;
+    p.nightRate = p.night / p.msgs;
+    p.morningRate = p.morning / p.msgs;
+    p.mediaRate = p.media / p.msgs;
+    p.vocab = p.wordMap.size / Math.max(1, Math.sqrt(p.words));
+    p.topEmoji = [...p.emojiMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0]);
+    p.topWords = [...p.wordMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    p.peakHour = p.hours.indexOf(Math.max(...p.hours));
+  });
+  const totalStarts = list.reduce((s, p) => s + p.starts, 0);
+  list.forEach(p => { p.startShare = totalStarts ? p.starts / totalStarts : 0; });
+
+  const first = timed ? msgs[0].t : null, last = timed ? msgs[msgs.length - 1].t : null;
+  const spanDays = timed ? Math.max(1, Math.round((last - first) / DAY) + 1) : null;
+
+  // busiest day, active days, streak
+  let busiest = null, streak = 0, bestStreak = 0, bestStreakEnd = null;
+  if (timed) {
+    for (const [k, v] of daily) if (!busiest || v > busiest.v) busiest = { k, v };
+    const days = [...daily.keys()].map(k => { const [y, mo, d] = k.split('-').map(Number); return new Date(y, mo, d).getTime(); }).sort((a, b) => a - b);
+    let prevD = null;
+    for (const d of days) {
+      streak = prevD != null && Math.round((d - prevD) / DAY) === 1 ? streak + 1 : 1;
+      if (streak > bestStreak) { bestStreak = streak; bestStreakEnd = d; }
+      prevD = d;
+    }
+    if (busiest) { const [y, mo, d] = busiest.k.split('-').map(Number); busiest.date = new Date(y, mo, d); }
+  }
+
+  const res = {
+    title: title || (list.length === 2 ? `${list[0].name} ו${list[1].name}` : 'הצ\'אט שלכם'),
+    msgs, total, timed, people: list, isPair: list.length === 2,
+    first, last, spanDays, activeDays: daily.size, busiest, bestStreak, bestStreakEnd, longestGap,
+    heat, monthly, totalWords: list.reduce((s, p) => s + p.words, 0),
+    topWords: [...totalWordMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 30),
+    topEmoji: [...totalEmoji.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12),
+    chapters, quotes, totalWordMap,
+  };
+  // signature words: what each person says that the others don't
+  const totTok = [...totalWordMap.values()].reduce((s, v) => s + v, 0);
+  for (const p of list) {
+    const n = [...p.wordMap.values()].reduce((s, v) => s + v, 0);
+    p.signature = list.length > 1 ? distinctive(p.wordMap, totalWordMap, n, totTok, 3, 4) : p.topWords.slice(0, 4);
+  }
+  if (timed) {
+    // chapters: what made each period different
+    for (const ch of chapters) {
+      const n = [...ch.words.values()].reduce((s, v) => s + v, 0);
+      ch.key = chapters.length > 1 ? distinctive(ch.words, totalWordMap, n, totTok, 2, 4) : [...ch.words.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+      ch.days = Math.max(1, (ch.end - ch.start) / DAY);
+      ch.perDay = ch.count / ch.days;
+      ch.lead = [...ch.people.entries()].sort((a, b) => b[1] - a[1])[0];
+      ch.topEmoji = [...ch.emoji.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0]);
+    }
+    const peak = chapters.reduce((b, c) => c.perDay > b.perDay ? c : b, chapters[0]);
+    res.peakChapter = peak;
+    // trend: last 30 days vs the 30 before
+    const recent = list.reduce((s, p) => s + p.recent, 0), prev = list.reduce((s, p) => s + p.prevRecent, 0);
+    res.trend = r_trend(recent, prev, res.spanDays);
+    if (res.busiest) {
+      const dw = dayWords.get(res.busiest.k);
+      res.busiest.words = dw ? distinctive(dw, totalWordMap, [...dw.values()].reduce((s, v) => s + v, 0), totTok, 2, 3) : [];
+    }
+    // peak hour of the whole chat
+    const hours = new Array(24).fill(0); list.forEach(p => p.hours.forEach((v, h) => hours[h] += v));
+    res.peakHour = hours.indexOf(Math.max(...hours));
+    // who changed the most between the first and second half
+    const h1 = list.reduce((s, p) => s + p.h1, 0), h2 = list.reduce((s, p) => s + p.h2, 0);
+    list.forEach(p => { p.shift = (h1 && h2) ? (p.h2 / h2) - (p.h1 / h1) : 0; });
+  }
+  assignArchetypes(res);
+  buildFlags(res);
+  if (res.isPair) res.interest = interestScores(res);
+  return res;
+}
+
+function r_trend(recent, prev, span) {
+  if (span < 60 || prev < 20) return null;
+  const ch = (recent - prev) / prev;
+  return { recent, prev, change: ch, dir: ch > .15 ? 'up' : ch < -.15 ? 'down' : 'flat' };
+}
+
+/* ---------- awards ---------- */
+const AWARDS = [
+  { em: '🏆', t: 'פרס מפעל חיים', v: p => p.msgs, s: v => `${fmt(v)} הודעות` },
+  { em: '⚡', any: 1, t: 'הכי מהיר במערב', v: p => p.rt != null && p.rts.length > 5 ? 1 / Math.max(p.rt, 1e3) : 0, s: (v, p) => `חציון תגובה של ${fmtDur(p.rt)}`, timed: 1 },
+  { em: '🐢', any: 1, t: 'פרס "ראיתי, אענה אחר כך"', v: p => p.rt != null && p.rts.length > 5 ? p.rt : 0, s: (v, p) => `חציון תגובה של ${fmtDur(p.rt)}`, timed: 1 },
+  { em: '🎬', t: 'פרס שובר השתיקה', v: p => p.starts, s: v => `פתח/ה ${fmt(v)} שיחות`, timed: 1 },
+  { em: '🎤', t: 'פרס המילה האחרונה', v: p => p.lastWord, s: v => `${fmt(v)} פעמים סגר/ה את השיחה`, timed: 1 },
+  { em: '🦉', t: 'פרס משמרת הלילה', v: p => p.night, s: v => `${fmt(v)} הודעות בין 00:00 ל־05:00`, timed: 1 },
+  { em: '☀️', t: 'פרס "בוקר טוב"', v: p => p.gm, s: v => `אמר/ה בוקר טוב ${fmt(v)} פעמים` },
+  { em: '🌙', t: 'פרס "לילה טוב"', v: p => p.gn, s: v => `אמר/ה לילה טוב ${fmt(v)} פעמים` },
+  { em: '🤣', t: 'פרס החחחחח', v: p => p.laughs, s: v => `צחק/ה ב־${fmt(v)} הודעות` },
+  { em: '💘', t: 'פרס הלב הפתוח', v: p => p.love, s: v => `${fmt(v)} הודעות עם אהבה` },
+  { em: '❓', t: 'פרס "שאלה קטנה"', v: p => p.questions, s: v => `${fmt(v)} שאלות` },
+  { em: '📜', any: 1, t: 'פרס טולסטוי', v: p => p.msgs >= 10 ? p.avgWords : 0, s: v => `${v.toFixed(1)} מילים בממוצע להודעה` },
+  { em: '📸', t: 'פרס הפפראצי', v: p => p.media, s: v => `${fmt(v)} תמונות, סרטונים וקבצים` },
+  { em: '🫣', t: 'פרס "לא שלחתי כלום"', v: p => p.deleted, s: v => `מחק/ה ${fmt(v)} הודעות` },
+  { em: '📨', t: 'פרס "עוד הודעה אחת"', v: p => p.doubles, s: v => `${fmt(v)} פעמים כתב/ה שוב בלי לקבל תשובה`, timed: 1 },
+  { em: '🙏', t: 'פרס הנימוס', v: p => p.thanks + p.sorry, s: (v, p) => `${fmt(p.thanks)} תודה, ${fmt(p.sorry)} סליחה` },
+  { em: '🤩', t: 'פרס האימוג\'י', v: p => p.emojis, s: (v, p) => `${fmt(v)} אימוג'ים${p.topEmoji[0] ? `, בעיקר ${p.topEmoji[0]}` : ''}` },
+  { em: '🔗', t: 'פרס "ראיתם את זה?"', v: p => p.links, s: v => `שלח/ה ${fmt(v)} קישורים` },
+];
+function computeAwards(r) {
+  const out = [];
+  for (const a of AWARDS) {
+    if (a.timed && !r.timed) continue;
+    const ranked = r.people.map(p => ({ p, v: a.v(p) })).filter(x => x.v > 0).sort((x, y) => y.v - x.v);
+    if (!ranked.length) continue;
+    const [w, ru] = ranked;
+    if (!a.any && w.v < 2) continue;
+    if (ru && ru.v === w.v) continue; // tie: no award
+    out.push({ a, w, ru, margin: ru ? w.v / ru.v : 3 });
+  }
+  return out.sort((x, y) => y.margin - x.margin).slice(0, 12);
+}
+
+/* ---------- archetypes ---------- */
+const ARCHETYPES = [
+  { id: 'engine', em: '🚂', title: 'המנוע', color: 'var(--pink-soft)', key: p => p.share, dir: 1, min: p => p.share > .2,
+    desc: p => `כתב/ה ${pct(p.msgs, 0) || Math.round(p.share * 100)}% מכל ההודעות. בלעדיו/ה הצ'אט הזה היה תיקייה ריקה.`,
+    quote: p => `אם השיחה הזאת חיה, זה בעיקר בזכותך. ${fmt(p.msgs)} הודעות זה לא תחביב, זה משרה.` },
+  { id: 'novelist', em: '📜', title: 'הסופר/ת', color: 'var(--yellow-soft)', key: p => p.avgWords, dir: 1, min: p => p.avgWords > 7,
+    desc: p => `${p.avgWords.toFixed(1)} מילים בממוצע להודעה. אף אחד לא כותב "אוקיי" כשאפשר לכתוב פסקה.`,
+    quote: p => `כל הודעה שלך היא מכתב. מישהו פה קורא עד הסוף? כנראה שכן, כי את/ה ממשיך/ה.` },
+  { id: 'emoji', em: '🤩', title: 'מלך/ת האימוג\'י', color: 'var(--violet-soft)', key: p => p.emojiRate, dir: 1, min: p => p.emojiRate > .25,
+    desc: p => `${p.emojiRate.toFixed(2)} אימוג'ים להודעה${p.topEmoji[0] ? `, והאהוב ביותר: ${p.topEmoji[0]}` : ''}.`,
+    quote: p => `מדבר/ת בשפה בינלאומית. ${p.topEmoji.join(' ') || '✨'} אומרים יותר מאלף מילים, ואת/ה בהחלט חוסך/ת מילים.` },
+  { id: 'owl', em: '🦉', title: 'הינשוף', color: 'var(--sky-soft)', key: p => p.nightRate, dir: 1, min: p => p.nightRate > .08,
+    desc: p => `${Math.round(p.nightRate * 100)}% מההודעות נשלחו בין חצות לחמש בבוקר.`,
+    quote: p => `ההודעות הכי כנות בצ'אט נשלחות אחרי חצות, ורובן שלך. השעה האהובה: ${String(p.peakHour).padStart(2, '0')}:00.` },
+  { id: 'bird', em: '🐓', title: 'משכים/ה קום', color: 'var(--yellow-soft)', key: p => p.morningRate, dir: 1, min: p => p.morningRate > .12,
+    desc: p => `${Math.round(p.morningRate * 100)}% מההודעות לפני 9 בבוקר. כולם עוד ישנים, את/ה כבר מעדכן/ת.`,
+    quote: p => `"בוקר טוב" שלך מגיע לפני שהקפה של כולם מוכן. סקופי מעריך, השאר פחות.` },
+  { id: 'starter', em: '🎬', title: 'היוזם/ת', color: 'var(--mint-soft)', key: p => p.startShare, dir: 1, min: p => p.startShare > .3,
+    desc: p => `פתח/ה ${Math.round(p.startShare * 100)}% מהשיחות אחרי שקט של 6 שעות ומעלה.`,
+    quote: p => `מישהו צריך לשבור את השקט, ובדרך כלל זה את/ה. ${fmt(p.starts)} פעמים כתבת ראשון/ה.` },
+  { id: 'flash', em: '⚡', title: 'הברק', color: 'var(--yellow-soft)', key: p => p.rt == null ? 0 : 1 / Math.max(p.rt, 5e3), dir: 1, min: p => p.rt != null && p.rts.length > 5 && p.rt < 4 * 60e3,
+    desc: p => `חציון זמן תגובה: ${fmtDur(p.rt)}. הטלפון כנראה לא יוצא לך מהיד.`,
+    quote: p => `עונה לפני שמסיימים להקליד. ${fmtDur(p.rt)} בחציון, זה כבר לא זמן תגובה, זה רפלקס.` },
+  { id: 'ghost', em: '👻', title: 'הרוח', color: '#f1eff6', key: p => p.rt == null ? 0 : p.rt, dir: 1, min: p => p.rt != null && p.rts.length > 3 && p.rt > 20 * 60e3,
+    desc: p => `חציון זמן תגובה: ${fmtDur(p.rt)}. מופיע/ה, נעלמ/ת, מופיע/ה שוב.`,
+    quote: p => `קורא/ת הכל, עונה/ה כשבא לך. ${fmtDur(p.rt)} בחציון, ואף אחד לא יודע איפה היית.` },
+  { id: 'curious', em: '🔍', title: 'החוקר/ת', color: 'var(--sky-soft)', key: p => p.qRate, dir: 1, min: p => p.qRate > .12,
+    desc: p => `${Math.round(p.qRate * 100)}% מההודעות הן שאלות. מתעניין/ת באמת, או חוקר/ת פרטי/ת.`,
+    quote: p => `${fmt(p.questions)} שאלות. חלקן סקרנות, חלקן "שאלה קטנה" שאף פעם לא באמת קטנה.` },
+  { id: 'comic', em: '🤡', title: 'הליצן/ית', color: 'var(--pink-soft)', key: p => p.laughRate, dir: 1, min: p => p.laughRate > .08,
+    desc: p => `צוחק/ת ב־${Math.round(p.laughRate * 100)}% מההודעות. חחחח הוא סימן פיסוק אצלך.`,
+    quote: p => `${fmt(p.laughs)} הודעות עם צחוק. או שכולם פה מצחיקים ממש, או שאת/ה קהל חם במיוחד.` },
+  { id: 'romantic', em: '💘', title: 'הרומנטיקן/ית', color: 'var(--pink-soft)', key: p => p.loveRate, dir: 1, min: p => p.loveRate > .04,
+    desc: p => `${fmt(p.love)} הודעות עם לבבות, "מתגעגע/ת" או "אוהב/ת".`,
+    quote: p => `הלב פה על השרוול, ובעיקר על המקלדת. ${fmt(p.love)} פעמים אמרת את זה במילים או באימוג'י.` },
+  { id: 'photo', em: '📸', title: 'הצלם/ת', color: 'var(--violet-soft)', key: p => p.mediaRate, dir: 1, min: p => p.mediaRate > .12,
+    desc: p => `${Math.round(p.mediaRate * 100)}% מההודעות הן תמונות, סרטונים, סטיקרים או הקלטות.`,
+    quote: p => `למה לכתוב כשאפשר לשלוח ${fmt(p.media)} קבצים? הגלריה שלך היא חצי מההיסטוריה של הצ'אט.` },
+  { id: 'brief', em: '🗿', title: 'המינימליסט/ית', color: '#f1eff6', key: p => p.avgWords ? 1 / p.avgWords : 0, dir: 1, min: p => p.avgWords > 0 && p.avgWords < 4,
+    desc: p => `${p.avgWords.toFixed(1)} מילים בממוצע. "כן", "לא", "סבבה" ו"👍" הם משפט שלם.`,
+    quote: p => `חוסך/ת במילים כאילו משלמים עליהן. ובכל זאת, כולם מבינים בדיוק מה התכוונת.` },
+  { id: 'polite', em: '🎩', title: 'הג\'נטלמן', color: 'var(--mint-soft)', key: p => p.thanks / Math.max(1, p.msgs), dir: 1, min: p => p.thanks / Math.max(1, p.msgs) > .035,
+    desc: p => `${fmt(p.thanks)} פעמים "תודה". אמא שלך גאה.`,
+    quote: p => `תודה על זה, תודה על ההוא. הנימוס שלך מחזיק את האווירה, גם כשאף אחד לא שם לב.` },
+  { id: 'sorry', em: '🙇', title: 'המתנצל/ת הסדרתי/ת', color: 'var(--sky-soft)', key: p => p.sorry / Math.max(1, p.msgs), dir: 1, min: p => p.sorry / Math.max(1, p.msgs) > .035,
+    desc: p => `${fmt(p.sorry)} פעמים "סליחה" או "סורי". על מה בדיוק?`,
+    quote: p => `"סורי לא ראיתי" זה כבר לא תירוץ, זה מותג. ${fmt(p.sorry)} התנצלויות, ואף אחד לא באמת כעס.` },
+  { id: 'quiet', em: '🫥', title: 'הצופה השקט/ה', color: '#f1eff6', key: p => 1 - p.share, dir: 1, min: (p, r) => r.people.length > 2 && p.share < .5 / r.people.length,
+    desc: p => `רק ${(p.share * 100).toFixed(1)}% מההודעות. קורא/ת הכל, כותב/ת כשבאמת צריך.`,
+    quote: p => `לא כותב/ת הרבה, אבל כשאת/ה כותב/ת כולם עוצרים. או שפשוט השתקת את הקבוצה לפני שנתיים.` },
+];
+const FALLBACK = { id: 'steady', em: '⚖️', title: 'העמוד היציב', color: 'var(--mint-soft)',
+  desc: p => `בדיוק באמצע בכל מדד. לא בורח/ת, לא משתלט/ת.`,
+  quote: p => `${fmt(p.msgs)} הודעות, קצב תגובה של ${fmtDur(p.rt)}. האדם הכי צפוי בצ'אט, ובמובן הטוב.` };
+
+function assignArchetypes(r) {
+  const eligible = r.people.filter(p => p.msgs >= 5);
+  const n = eligible.length;
+  const cand = [];
+  for (const a of ARCHETYPES) {
+    const vals = eligible.map(a.key);
+    const mean = vals.reduce((s, v) => s + v, 0) / Math.max(1, n);
+    eligible.forEach((p, i) => {
+      if (!a.min(p, r)) return;
+      const score = n > 1 ? (vals[i] + 1e-9) / (mean + 1e-9) : 1 + vals[i];
+      cand.push({ p, a, score: score + Math.random() * 1e-6 });
+    });
+  }
+  cand.sort((x, y) => y.score - x.score);
+  const usedP = new Set(), usedA = new Set();
+  for (const c of cand) {
+    if (usedP.has(c.p) || usedA.has(c.a.id)) continue;
+    if (n > 1 && c.score < 1.05) continue;
+    c.p.arch = c.a; usedP.add(c.p); usedA.add(c.a.id);
+  }
+  r.people.forEach(p => { if (!p.arch) p.arch = FALLBACK; });
+}
+
+/* ---------- flags ---------- */
+function buildFlags(r) {
+  const n = r.people.length;
+  const rts = r.people.filter(p => p.rt != null).map(p => p.rt);
+  const medRT = median(rts);
+  for (const p of r.people) {
+    const f = [];
+    const tm = Math.max(1, p.msgs - p.media);
+    if (r.timed && p.rt != null && medRT != null && p.rts.length > 3) {
+      if (p.rt <= medRT * .7 || p.rt < 2 * 60e3) f.push(['💚', `עונה מהר: חציון של ${fmtDur(p.rt)}`]);
+      else if (p.rt >= medRT * 1.6 && p.rt > 10 * 60e3) f.push(['🚩', `לוקח/ת את הזמן: חציון של ${fmtDur(p.rt)} לתשובה`]);
+    }
+    if (r.timed && p.startShare > 1.25 / n && p.starts >= 3) f.push(['💚', `יוזם/ת ${Math.round(p.startShare * 100)}% מהשיחות`]);
+    if (r.timed && p.startShare < .5 / n && n <= 4 && totalStarts(r) > 8) f.push(['🚩', `כמעט אף פעם לא פותח/ת שיחה (${Math.round(p.startShare * 100)}%)`]);
+    if (p.qRate > .1) f.push(['💚', `שואל/ת שאלות: ${fmt(p.questions)} פעמים`]);
+    if (p.doubles >= 3 && p.doubles / tm > .015) f.push(['🟡', `שלח/ה עוד הודעה כשלא ענו לו/ה, ${fmt(p.doubles)} פעמים`]);
+    if (p.deleted >= 2) f.push(['🚩', `מחק/ה ${fmt(p.deleted)} הודעות 👀`]);
+    if (p.unanswered >= 3) f.push(['🟡', `${fmt(p.unanswered)} שאלות שלו/ה נשארו בלי תשובה`]);
+    if (r.timed && p.lastWord / Math.max(1, totalLast(r)) > 1.4 / n && p.lastWord >= 5) f.push(['🟡', `משאיר/ה את המילה האחרונה (${fmt(p.lastWord)} פעמים)`]);
+    if (p.sorry >= 5 && p.sorry / tm > .01) f.push(['🟡', `מתנצל/ת הרבה: ${fmt(p.sorry)} "סליחה"`]);
+    if (p.love >= 3) f.push(['💚', `${fmt(p.love)} הודעות עם אהבה`]);
+    if (p.laughRate > .1) f.push(['💚', `צוחק/ת הרבה: ${fmt(p.laughs)} פעמים`]);
+    if (p.nightRate > .15 && r.timed) f.push(['🌙', `${Math.round(p.nightRate * 100)}% מההודעות אחרי חצות`]);
+    p.flags = f.slice(0, 5);
+  }
+}
+const totalStarts = r => r.people.reduce((s, p) => s + p.starts, 0);
+const totalLast = r => r.people.reduce((s, p) => s + p.lastWord, 0);
+
+/* ---------- interest (pairs) ---------- */
+function interestScores(r) {
+  const [a, b] = r.people;
+  const split = (x, y) => (x + y) ? x / (x + y) : .5;
+  const facets = [
+    { k: 'כמות הודעות', w: .22, v: split(a.msgs, b.msgs) },
+    { k: 'פתיחת שיחות', w: .26, v: r.timed ? split(a.starts, b.starts) : .5 },
+    { k: 'מהירות תגובה', w: .22, v: (a.rt != null && b.rt != null) ? split(1 / Math.max(a.rt, 3e4), 1 / Math.max(b.rt, 3e4)) : .5 },
+    { k: 'שאלות', w: .15, v: split(a.questions, b.questions) },
+    { k: 'אורך הודעות', w: .08, v: split(a.avgWords, b.avgWords) },
+    { k: 'חום (לבבות וצחוק)', w: .07, v: split(a.love + a.laughs, b.love + b.laughs) },
+  ];
+  const s = facets.reduce((acc, f) => acc + f.w * f.v, 0);
+  return { a: Math.round(s * 100), b: 100 - Math.round(s * 100), facets };
+}
+
+/* ---------- verdict ---------- */
+function verdictText(r) {
+  const P = r.people, n = P.length;
+  const nm = p => `<b>${esc(dispName(p))}</b>`;
+  const parts = [];
+  if (r.timed) parts.push(`${fmt(r.total)} הודעות לאורך ${fmt(r.spanDays)} ימים, כלומר בערך ${fmt(r.total / r.spanDays)} ביום.`);
+  else parts.push(`${fmt(r.total)} הודעות, בלי חותמות זמן, אז סקופי התמקד במה שנכתב.`);
+  if (r.isPair) {
+    const [a, b] = P, I = r.interest;
+    const lead = I.a >= I.b ? a : b, lag = lead === a ? b : a;
+    const gap = Math.abs(I.a - I.b);
+    if (gap < 8) parts.push(`זה אחד הצ'אטים המאוזנים שסקופי ראה: ${nm(a)} ו${nm(b)} משקיעים כמעט בדיוק אותו דבר (${I.a}% מול ${I.b}%). זה סימן מצוין.`);
+    else if (gap < 22) parts.push(`${nm(lead)} קצת יותר בעניין (${Math.max(I.a, I.b)}%). לא דרמה, אבל ${nm(lag)} יכול/ה להחזיר מדי פעם את הכדור.`);
+    else parts.push(`בואו נגיד את זה בעדינות: ${nm(lead)} סוחב/ת את השיחה הזאת (${Math.max(I.a, I.b)}%). ${nm(lag)}, זה הזמן לשאול שאלה בחזרה.`);
+    if (a.rt != null && b.rt != null) {
+      const fast = a.rt <= b.rt ? a : b, slow = fast === a ? b : a;
+      if (slow.rt > fast.rt * 2.5 && slow.rt > 5 * 60e3) parts.push(`${nm(fast)} עונה תוך ${fmtDur(fast.rt)}, ${nm(slow)} תוך ${fmtDur(slow.rt)}. מישהו פה מחכה ליד הטלפון.`);
+    }
+  } else {
+    const top = P[0], quiet = P[P.length - 1];
+    parts.push(`${nm(top)} הוא/היא המנוע של הקבוצה עם ${Math.round(top.share * 100)}% מההודעות${n > 2 ? `, ו${nm(quiet)} כמעט לא נשמע/ת (${(quiet.share * 100).toFixed(1)}%)` : ''}.`);
+    const glue = groupGlue(r);
+    if (glue) parts.push(`מי שכולם עונים לו/ה הכי הרבה: ${nm(glue.p)}. זה הדבק של הקבוצה.`);
+  }
+  if (r.timed && r.busiest) parts.push(`היום הכי מטורף: ${fmtDate(r.busiest.date)}, עם ${fmt(r.busiest.v)} הודעות. משהו קרה שם.`);
+  return parts.join(' ');
+}
+function groupGlue(r) {
+  const recv = new Map();
+  for (const p of r.people) for (const [to, c] of p.repliesTo) recv.set(to, (recv.get(to) || 0) + c);
+  let best = null;
+  const minShare = .6 / r.people.length;
+  for (const p of r.people) { const v = (recv.get(p.name) || 0) / Math.max(1, p.msgs); if (p.msgs >= 10 && p.share >= minShare && (!best || v > best.v)) best = { p, v }; }
+  return best;
+}
+
+/* =========================================================
+   Demo chats (fictional, generated)
+   ========================================================= */
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const DEMOS = [
+  { id: 'crush', title: 'נועה 🌙', av: '🌙', bg: 'var(--violet-soft)', tag: ['crush', 'tag-pink'], last: 'סתם 🙃 זאת אומרת לא סתם', time: '01:21', seed: 7,
+    days: 75, convs: 120,
+    people: [
+      { name: 'נועה', w: 1.25, night: .55, delay: 2, start: 1.6, lines: ['ערה? 👀', 'שאלה קטנה', 'מה עשית בשבת?', 'חחחחח אתה לא נורמלי', 'נו ספר', 'אני משועממת 🙃', 'ראית את הסטורי שלי?', 'מה אתה עושה מחר?', 'אוקיי אבל למה 😅', 'אני חושבת שזה הכי מצחיק שראיתי השבוע', 'טוב לילה 🌙', 'אתה תמיד נעלם לי', 'סתם 🙃', 'זאת אומרת לא סתם', 'חחח די', 'בא לך לראות סרט מתישהו?', 'איזה מוזיקה אתה שומע עכשיו?', '🥰', 'מה איתך היום?'] },
+      { name: 'איתי', w: 1, night: .2, delay: 14, start: .6, lines: ['חח', 'כן', 'ערב רגוע, את?', 'האמת שכלום מיוחד', 'סבבה', 'יאללה', 'מחר עובד עד מאוחר', 'לא יודע עוד', 'חחחח באמת', 'ראיתי 😂', 'למה את שואלת 🤨', 'אולי בשבוע הבא', 'לילה טוב', 'וואלה מצחיק', '👍', 'היה יום ארוך'] },
+    ] },
+  { id: 'friends', title: 'הצוות של יום חמישי 🍻', av: '🍻', bg: 'var(--yellow-soft)', tag: ['קבוצת חברים', 'tag-yellow'], last: 'דניאל: מי בא הערב? אני מזמין שולחן', time: 'אתמול', seed: 11,
+    days: 140, convs: 210,
+    people: [
+      { name: 'דניאל', w: 2.2, night: .1, delay: 3, start: 2.2, lines: ['מי בא הערב?', 'אני מזמין שולחן', 'חבר׳ה יאללה תענו', 'נו??', 'סגרתי ל-21:00', 'מי מביא רמקול', 'אני כבר בדרך', 'מישהו ראה את המשחק אתמול?', 'אחי זה היה פסיכי', 'יאללה בירה 🍻'] },
+      { name: 'מאיה', w: 1.3, night: .05, delay: 6, start: .8, lines: ['אני בפנים 🙌', 'אבל מגיעה קצת באיחור', 'חחחחחח מת', 'מישהו יכול לאסוף אותי?', 'תשלחו מיקום', '😂😂😂', 'איזה ערב היה אתמול חחח', 'אני מביאה עוגה 🎂', 'אוהבת אתכם ❤️'] },
+      { name: 'עומר', w: .9, night: .45, delay: 25, start: .6, lines: ['אני אגיע אם אסיים', 'מה הסיפור?', 'סורי לא ראיתי', 'רגע מה קרה פה', 'עדיין ערים?', 'חח', 'אני על זה', 'שולח עכשיו', '<המדיה לא נכללה>'] },
+      { name: 'שירה', w: 1, night: .08, delay: 9, start: .7, lines: ['<המדיה לא נכללה>', '<המדיה לא נכללה>', 'תראו מה מצאתי 📸', 'הנה התמונות מאתמול', '<המדיה לא נכללה>', 'איזה יפים יצאנו 😍', 'מי רוצה את הסרטון?', '🔥🔥'] },
+      { name: 'גיל', w: .25, night: .1, delay: 60, start: .2, lines: ['👍', 'אני לא יכול השבוע', 'אחלה', 'כן'] },
+    ] },
+  { id: 'family', title: 'משפחה 👨‍👩‍👧‍👦', av: '🏡', bg: 'var(--mint-soft)', tag: ['משפחה', 'tag-mint'], last: 'אמא: בוקר טוב לכולם ☀️ מי בא לארוחת שישי?', time: '07:02', seed: 23,
+    days: 160, convs: 170,
+    people: [
+      { name: 'אמא', w: 2, night: 0, morning: .55, delay: 4, start: 2.4, lines: ['בוקר טוב לכולם ☀️', 'מי בא לארוחת שישי?', 'אכלתם?', 'תתקשרו לסבתא היא מתגעגעת ❤️', 'אוהבת אתכם 😘', 'שימו מעיל קר בחוץ', 'שבת שלום ❤️🙏', 'מי לוקח את הסירים?', 'הכנתי עוגה 🍰', 'תודה חמודים', 'למה אף אחד לא עונה?', '<המדיה לא נכללה>'] },
+      { name: 'אבא', w: .9, night: 0, morning: .4, delay: 30, start: .5, lines: ['👍', 'מסכים עם אמא', 'מישהו יודע מתי המשחק?', 'תודה', 'שלחתי לכם קישור https://example.com', 'אני בדרך', 'כן'] },
+      { name: 'יעל', w: 1.2, night: .2, delay: 12, start: .6, lines: ['אני באה! מביאה סלט', 'אמאאאא 😂', 'סליחה שלא עניתי הייתי בעבודה', 'אוהבת ❤️', 'מישהו לוקח אותי מהרכבת?', 'חחחח אבא', 'מה הקוד של הוויפי?', 'תודה אמא 🥰'] },
+      { name: 'רון', w: .8, night: .5, delay: 45, start: .3, lines: ['סורי לא ראיתי', 'אני אגיע מאוחר', 'חח', 'מה', 'אחלה', 'כן אני בא', 'רגע אני מתעורר עכשיו', 'יש אוכל?'] },
+    ] },
+];
+function buildDemo(d) {
+  const R = rng(d.seed);
+  const pickW = arr => { const tot = arr.reduce((s, x) => s + x.w, 0); let r = R() * tot; for (const x of arr) { if ((r -= x.w) <= 0) return x; } return arr[0]; };
+  const start = new Date(); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - d.days);
+  const msgs = [];
+  for (let c = 0; c < d.convs; c++) {
+    const starter = (() => { const tot = d.people.reduce((s, p) => s + p.start, 0); let r = R() * tot; for (const p of d.people) if ((r -= p.start) <= 0) return p; return d.people[0]; })();
+    const day = Math.floor(R() * d.days);
+    let hour;
+    const roll = R();
+    if (roll < (starter.night || 0)) hour = Math.floor(R() * 3);
+    else if (roll < (starter.night || 0) + (starter.morning || 0)) hour = 6 + Math.floor(R() * 3);
+    else hour = 10 + Math.floor(R() * 13);
+    let t = start.getTime() + day * DAY + hour * HOUR + Math.floor(R() * 60) * 60e3;
+    let who = starter;
+    const len = 4 + Math.floor(R() * (d.people.length > 2 ? 22 : 16));
+    for (let i = 0; i < len; i++) {
+      msgs.push({ t: new Date(t), from: who.name, text: who.lines[Math.floor(R() * who.lines.length)] });
+      let next = R() < .22 ? who : pickW(d.people.filter(p => p !== who));
+      if (next === who) t += (10 + R() * 60) * 1e3;
+      else t += -Math.log(1 - R()) * next.delay * 60e3 + 5e3;
+      who = next;
+    }
+  }
+  msgs.sort((a, b) => a.t - b.t);
+  return msgs;
+}
+
+/* =========================================================
+   Rendering
+   ========================================================= */
+let R = null;        // current analysis
+let anon = false;
+const dispName = p => anon ? `משתתף/ת ${R.people.indexOf(p) + 1}` : p.name;
+
+function show(view) {
+  for (const id of ['landing', 'loading', 'reportView']) $('#' + id).classList.toggle('hidden', id !== view);
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function avatar(p, size = 48) {
+  return `<div class="av" style="background:${p.color};width:${size}px;height:${size}px;font-size:${size * .38}px">${esc(initials(dispName(p)))}</div>`;
+}
+
+function renderReport() {
+  const r = R;
+  $('#rTitle').textContent = anon ? 'צ\'אט (אנונימי)' : r.title;
+  const main = r.people.slice(0, 12);
+  const rest = r.people.slice(12);
+  let h = '';
+
+  // hero
+  h += `<section class="r-hero reveal in">
+    <span class="kicker">הדוח של סקופי</span>
+    <h1>${esc(anon ? 'הצ\'אט שלכם' : r.title)}</h1>
+    <div class="r-meta">
+      <span>💬 ${fmt(r.total)} הודעות</span>
+      <span>👥 ${r.people.length} משתתפים</span>
+      ${r.timed ? `<span>📅 ${fmtDate(r.first)} – ${fmtDate(r.last)}</span><span>🔥 ${fmt(r.activeDays)} ימים פעילים</span>` : ''}
+      <span>✍️ ${fmt(r.totalWords)} מילים</span>
+    </div>
+    <div class="verdict">
+      <svg class="face" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="#fff"/><circle cx="60" cy="60" r="38" fill="#ffe1e8"/><circle cx="47" cy="55" r="6" fill="#1a1530"/><circle cx="73" cy="55" r="6" fill="#1a1530"/><path d="M48 74 q12 9 24 0" stroke="#1a1530" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+      <p>${verdictText(r)}</p>
+    </div>
+    <button class="story-cta" id="openStory"><span class="ring"><span>▶</span></span><span>לצפות בסיפור של הצ'אט<small>${storySlides(r).length} שקופיות, כמו סיכום שנתי. מושלם לצילום מסך לקבוצה.</small></span></button>
+  </section>`;
+
+  // the written report (or the button to create it)
+  h += `<section class="r-sec reveal in" id="frSec">${R.ai ? fullReportHTML(R.ai) : `<h2>✍️ הדוח המלא</h2><p class="sub">המספרים למטה מספרים מה קרה. הדוח המלא מספר את הסיפור.</p>${aiCtaHTML()}`}</section>`;
+  if (R.ai) h += `<div class="r-divider"><span>📊 הנתונים מאחורי הסיפור</span></div>`;
+
+  // interest meter
+  if (r.isPair) {
+    const [a, b] = r.people, I = r.interest;
+    h += `<section class="r-sec reveal"><h2>💘 מי יותר בעניין?</h2><p class="sub">מדד שמשקלל שש התנהגויות. 50/50 זה איזון מושלם.</p>
+      <div class="card interest">
+        <div><div class="int-row"><span style="color:${a.color}">${esc(dispName(a))} · ${I.a}%</span><span style="color:${b.color}">${I.b}% · ${esc(dispName(b))}</span></div>
+        <div class="int-bar"><b style="width:${I.a}%;background:${a.color}"></b><b style="width:${I.b}%;background:${b.color}"></b></div></div>
+        <div class="facets">${I.facets.map(f => { const av = Math.round(f.v * 100); return `<div class="facet"><b>${f.k}</b><div class="int-bar" style="height:8px;margin:6px 0 4px"><b style="width:${av}%;background:${a.color}"></b><b style="width:${100 - av}%;background:${b.color}"></b></div>${av}% / ${100 - av}%</div>`; }).join('')}</div>
+      </div></section>`;
+  }
+
+  // people
+  h += `<section class="r-sec"><h2>🎭 מה סקופי חושב על כל אחד</h2><p class="sub">הארכיטיפ נקבע לפי התכונה שבה כל אחד הכי בולט ביחס לשאר.</p><div class="people">`;
+  for (const p of main) {
+    const a = p.arch;
+    h += `<article class="person reveal">
+      <div class="p-top">
+        <div class="p-head">${avatar(p)}<div><div class="p-name">${esc(dispName(p))}</div><div class="p-share">${(p.share * 100).toFixed(1)}% מההודעות</div></div></div>
+        <div class="arch" style="background:${a.color}"><div class="em">${a.em}</div><div><div class="at">${a.title}</div><div class="ad">${esc(a.desc(p))}</div></div></div>
+        <p class="p-quote">${esc(a.quote(p))}</p>
+      </div>
+      <div class="p-stats">
+        <div><b>${fmt(p.msgs)}</b><span>הודעות</span></div>
+        <div><b>${p.avgWords.toFixed(1)}</b><span>מילים להודעה</span></div>
+        <div><b>${r.timed ? fmtDur(p.rt) : (p.topEmoji[0] || '—')}</b><span>${r.timed ? 'זמן תגובה' : 'אימוג׳י'}</span></div>
+      </div>
+      <div class="flags">${p.flags.length ? p.flags.map(([i, t]) => `<div class="flag"><i>${i}</i><span>${esc(t)}</span></div>`).join('') : '<div class="flag"><i>✨</i><span>שום דבר חריג. וזה גם סוג של פסק דין.</span></div>'}
+        ${(p.signature && p.signature.length) ? `<div class="flag"><i>🗣️</i><span>המילים שהכי מזוהות איתו/ה: ${p.signature.slice(0, 3).map(w => `"${esc(w[0])}"`).join(', ')}</span></div>` : p.topWords.length ? `<div class="flag"><i>🗣️</i><span>אומר/ת הרבה: ${p.topWords.slice(0, 3).map(w => `"${esc(w[0])}"`).join(', ')}</span></div>` : ''}
+      </div>
+      <div class="p-foot"><button class="btn btn-ghost btn-sm" data-card="${r.people.indexOf(p)}">📸 כרטיס לשיתוף</button></div>
+    </article>`;
+  }
+  h += `</div>`;
+  if (rest.length) {
+    h += `<div class="card" style="margin-top:16px;overflow-x:auto"><table class="others"><thead><tr><th>משתתף</th><th>הודעות</th><th>מילים להודעה</th><th>זמן תגובה</th><th>ארכיטיפ</th></tr></thead><tbody>${rest.map(p => `<tr><td>${esc(dispName(p))}</td><td>${fmt(p.msgs)}</td><td>${p.avgWords.toFixed(1)}</td><td>${fmtDur(p.rt)}</td><td>${p.arch.em} ${p.arch.title}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  h += `</section>`;
+
+  // awards
+  const awards = computeAwards(r);
+  if (awards.length) {
+    h += `<section class="r-sec reveal"><h2>🏅 טקס הפרסים</h2><p class="sub">כל פרס הולך למי שהוביל/ה בפער הכי גדול. המספרים לא משקרים.</p><div class="awards">${awards.map(({ a, w, ru }) => `<div class="award">
+      <div class="aw-top"><span class="aw-em">${a.em}</span><span class="aw-title">${a.t}</span></div>
+      <div class="aw-win">${avatar(w.p, 34)}<b>${esc(dispName(w.p))}</b></div>
+      <div class="aw-stat">${esc(a.s(w.v, w.p))}</div>
+      ${ru ? `<div class="aw-runner">במקום השני: ${esc(dispName(ru.p))} (${esc(a.s(ru.v, ru.p))})</div>` : ''}
+    </div>`).join('')}</div></section>`;
+  }
+
+  // chapters (the story over time)
+  if (r.timed && r.chapters && r.chapters.length > 1) {
+    h += `<section class="r-sec reveal"><h2>📖 הסיפור של הצ'אט</h2><p class="sub">הצ'אט מחולק לפרקים לפי זמן. לכל פרק: הקצב, מי הוביל, והמילים שהיו ייחודיות לו.</p>`;
+    if (r.trend) {
+      const t = r.trend, up = t.dir === 'up', down = t.dir === 'down';
+      h += `<div class="card" style="margin-bottom:16px"><div class="trend"><div class="big" style="color:${up ? 'var(--mint)' : down ? 'var(--red)' : 'var(--ink)'}">${up ? '↗' : down ? '↘' : '→'} ${Math.abs(Math.round(t.change * 100))}%</div><div><b>${up ? 'הצ\'אט מתחמם 🔥' : down ? 'הצ\'אט מתקרר 🧊' : 'יציב כמו סלע 🪨'}</b><p class="sub" style="font-size:14.5px">${fmt(t.recent)} הודעות ב־30 הימים האחרונים, לעומת ${fmt(t.prev)} ב־30 הימים שלפניהם.</p></div></div></div>`;
+    }
+    h += `<div class="chapters">${r.chapters.map((c, i) => chapterHTML(r, c, i)).join('')}</div>`;
+    const shifters = r.people.filter(p => p.msgs >= 20).sort((a, b) => Math.abs(b.shift) - Math.abs(a.shift));
+    if (shifters[0] && Math.abs(shifters[0].shift) > .06) {
+      const s0 = shifters[0];
+      h += `<div class="moment" style="margin-top:4px"><div class="mi">${s0.shift > 0 ? '📈' : '📉'}</div><div><b>מי השתנה הכי הרבה</b><p>${esc(dispName(s0))} עבר/ה מ־${Math.round(s0.h1 / Math.max(1, s0.h1 + r.people.reduce((s, p) => s + (p === s0 ? 0 : p.h1), 0)) * 100)}% מההודעות בחצי הראשון של הצ'אט ל־${Math.round(s0.h2 / Math.max(1, r.people.reduce((s, p) => s + p.h2, 0)) * 100)}% בחצי השני. ${s0.shift > 0 ? 'מישהו נדלק.' : 'מישהו מתרחק? או סתם עסוק/ה.'}</p></div></div>`;
+    }
+    h += `</section>`;
+  }
+
+  // game
+  if (r.quotes.length >= 8 && r.people.length >= 2) {
+    h += `<section class="r-sec reveal" id="gameSec"><h2>🎯 מי אמר את זה?</h2><p class="sub">ציטוט אמיתי מהצ'אט. תנחשו מי כתב אותו, ותאתגרו את הקבוצה.</p><div class="card game" id="game"></div></section>`;
+  }
+
+  // leaderboards
+  const boards = [
+    { k: 'msgs', l: 'הודעות', v: p => p.msgs, f: v => fmt(v) },
+    { k: 'words', l: 'מילים להודעה', v: p => p.avgWords, f: v => v.toFixed(1) },
+    ...(r.timed ? [
+      { k: 'rt', l: 'הכי מהיר לענות', v: p => p.rt == null ? 0 : 1 / Math.max(p.rt, 1e3), f: (v, p) => fmtDur(p.rt) },
+      { k: 'starts', l: 'פתיחת שיחות', v: p => p.starts, f: v => fmt(v) },
+      { k: 'night', l: 'הודעות לילה', v: p => p.night, f: v => fmt(v) },
+    ] : []),
+    { k: 'emoji', l: 'אימוג\'ים', v: p => p.emojis, f: v => fmt(v) },
+    { k: 'q', l: 'שאלות', v: p => p.questions, f: v => fmt(v) },
+    { k: 'laugh', l: 'צחוקים', v: p => p.laughs, f: v => fmt(v) },
+    { k: 'media', l: 'מדיה', v: p => p.media, f: v => fmt(v) },
+  ];
+  h += `<section class="r-sec reveal"><h2>🏆 טבלאות</h2><p class="sub">בחרו קטגוריה.</p><div class="card">
+    <div class="lb-select">${boards.map((b, i) => `<button class="pill" data-board="${i}" aria-pressed="${i === 0}">${b.l}</button>`).join('')}</div>
+    <div class="lb" id="lb"></div></div></section>`;
+
+  // timeline + heatmap
+  if (r.timed) {
+    h += `<section class="r-sec reveal"><h2>📈 ציר הזמן</h2><p class="sub">הודעות לפי חודש, ומתי הצ'אט הכי חי.</p><div class="grid2">
+      <div class="card"><div class="chart-wrap">${monthlyChart(r)}</div></div>
+      <div class="card"><div class="chart-wrap">${heatmap(r)}</div><div class="legend">פחות<i style="background:#f3eff9"></i><i style="background:#ffc2d0"></i><i style="background:#ff8fa8"></i><i style="background:#ff6b8b"></i><i style="background:#c93556"></i>יותר</div></div>
+    </div></section>`;
+  }
+
+  // words & emoji
+  h += `<section class="r-sec reveal"><h2>🗣️ על מה מדברים</h2><p class="sub">המילים והאימוג'ים הכי נפוצים (בלי מילות קישור).</p><div class="grid2">
+    <div class="card"><div class="words">${r.topWords.slice(0, 24).map(([w, c]) => `<span class="word" style="font-size:${13 + Math.min(9, c / r.topWords[0][1] * 9)}px">${esc(w)}<small>${fmt(c)}</small></span>`).join('') || '<span class="sub">אין מספיק טקסט</span>'}</div></div>
+    <div class="card"><div class="emojis">${r.topEmoji.map(([e, c]) => `<div class="emo"><span>${esc(e)}</span><small>${fmt(c)}</small></div>`).join('') || '<span class="sub">אף אימוג\'י. צ\'אט רציני.</span>'}</div></div>
+  </div></section>`;
+
+  // group dynamics
+  if (r.people.length > 2 && r.timed) {
+    const pairs = [];
+    for (const p of r.people) for (const [to, c] of p.repliesTo) pairs.push({ from: p, to: r.people.find(x => x.name === to), c });
+    pairs.sort((a, b) => b.c - a.c);
+    h += `<section class="r-sec reveal"><h2>🔁 מי עונה למי</h2><p class="sub">הצמדים שהכי הרבה מגיבים אחד לשני.</p><div class="card pairs">${pairs.slice(0, 8).map(x => `<div class="pair">${avatar(x.from, 28)}<b>${esc(dispName(x.from))}</b><span class="arrow">←</span>${avatar(x.to, 28)}<b>${esc(dispName(x.to))}</b><span class="cnt">${fmt(x.c)}</span></div>`).join('')}</div></section>`;
+  }
+
+  // moments
+  if (r.timed) {
+    const ms = [];
+    const fm = r.msgs[0];
+    ms.push(['👋', 'ההודעה הראשונה', `${esc(dispName(r.people.find(p => p.name === fm.from)))} פתח/ה ב־${fmtDate(fm.t)}: "${esc(truncate(fm.text, 80))}"`]);
+    if (r.busiest) ms.push(['🔥', 'היום הכי עמוס', `${DAYS_HE[r.busiest.date.getDay()]}, ${fmtDate(r.busiest.date)}: ${fmt(r.busiest.v)} הודעות ביום אחד.`]);
+    if (r.bestStreak > 1) ms.push(['📆', 'הרצף הכי ארוך', `${fmt(r.bestStreak)} ימים ברצף שבהם מישהו כתב משהו.`]);
+    if (r.longestGap && r.longestGap.gap > DAY) {
+      const br = r.people.find(p => p.name === r.longestGap.to.from);
+      ms.push(['🤐', 'השקט הכי ארוך', `${fmtDur(r.longestGap.gap)} בלי מילה, עד ש${esc(dispName(br))} שבר/ה את השתיקה ב־${fmtDate(r.longestGap.to.t)}: "${esc(truncate(r.longestGap.to.text, 70))}"`]);
+    }
+    const longest = r.people.reduce((b, p) => p.longest.length > (b ? b.longest.length : 0) ? p : b, null);
+    if (longest && longest.longest.length > 80) ms.push(['📜', 'ההודעה הכי ארוכה', `${esc(dispName(longest))}, ${fmt(longest.longest.split(/\s+/).length)} מילים: "${esc(truncate(longest.longest, 110))}"`]);
+    h += `<section class="r-sec reveal"><h2>✨ רגעים</h2><div class="moments">${ms.map(([i, t, d]) => `<div class="moment"><div class="mi">${i}</div><div><b>${t}</b><p>${d}</p></div></div>`).join('')}</div></section>`;
+  }
+
+  $('#report').innerHTML = h;
+  renderBoard(boards, 0);
+  $$('[data-board]').forEach(b => b.onclick = () => { $$('[data-board]').forEach(x => x.setAttribute('aria-pressed', x === b)); renderBoard(boards, +b.dataset.board); });
+  $$('[data-card]').forEach(b => b.onclick = () => openCard(R.people[+b.dataset.card]));
+  try { const k = localStorage.getItem('chatscope.key'); if (k && $('#aiKey')) { $('#aiKey').value = k; $('#aiRemember').checked = true; } } catch {}
+  if ($('#aiGo')) $('#aiGo').onclick = runAI;
+  $$('[data-me]').forEach(b => b.onclick = () => { R.me = b.dataset.me || null; $$('[data-me]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+  $('#openStory').onclick = () => openStory(0);
+  if ($('#game')) newRound();
+  observeReveal();
+}
+function rangeLabel(a, b) {
+  const s = `${MONTHS_HE[a.getMonth()]} ${String(a.getFullYear()).slice(2)}`, e = `${MONTHS_HE[b.getMonth()]} ${String(b.getFullYear()).slice(2)}`;
+  return s === e ? s : `${s} – ${e}`;
+}
+function chapterHTML(r, c, i) {
+  const k = r.chapters.length;
+  const name = i === 0 ? 'ההתחלה' : i === k - 1 ? 'הפרק האחרון' : c === r.peakChapter ? 'השיא' : `פרק ${i + 1}`;
+  const lead = c.lead ? r.people.find(p => p.name === c.lead[0]) : null;
+  const prev = i > 0 ? r.chapters[i - 1] : null;
+  let mood = '';
+  if (prev && prev.perDay > 0) {
+    const d = (c.perDay - prev.perDay) / prev.perDay;
+    mood = d > .35 ? 'הקצב קפץ ב־' + Math.round(d * 100) + '% לעומת הפרק הקודם. משהו התחמם. ' : d < -.35 ? 'הקצב ירד ב־' + Math.round(-d * 100) + '% לעומת הפרק הקודם. ' : 'הקצב נשאר דומה. ';
+  }
+  const leadTxt = lead ? `${esc(dispName(lead))} הוביל/ה עם ${pct(c.lead[1], c.count)}% מההודעות. ` : '';
+  const peakTxt = c === r.peakChapter && k > 1 ? 'זה הפרק הכי פעיל בצ\'אט. ' : '';
+  return `<div class="chapter"><div class="ch-dot">${i + 1}</div><div class="card">
+    <div class="ch-head"><b>${name}${c === r.peakChapter && name !== 'השיא' ? ' 🔥' : ''}</b><span>${rangeLabel(c.start, c.end)} · ${fmt(c.count)} הודעות · ${c.perDay.toFixed(1)} ביום</span></div>
+    <p class="ch-text">${esc(mood)}${leadTxt}${esc(peakTxt)}${c.count === 0 ? 'שקט מוחלט. אף אחד לא כתב.' : ''}</p>
+    ${(c.key && c.key.length) || c.topEmoji.length ? `<div class="ch-tags">${c.key.map(w => `<span class="word">${esc(w[0])}</span>`).join('')}${c.topEmoji.map(e => `<span class="word">${esc(e)}</span>`).join('')}</div>` : ''}
+  </div></div>`;
+}
+
+/* ---------- game: who said it ---------- */
+const G = { score: 0, total: 0, streak: 0, best: 0 };
+function newRound() {
+  const r = R, box = $('#game');
+  if (!box) return;
+  const cands = r.people.slice(0, 6);
+  const pool = r.quotes.filter(i => cands.some(p => p.name === r.msgs[i].from));
+  if (!pool.length) { box.innerHTML = '<p class="sub">אין מספיק ציטוטים.</p>'; return; }
+  const m = r.msgs[pool[Math.floor(Math.random() * pool.length)]];
+  const opts = [...cands].sort(() => Math.random() - .5);
+  box.innerHTML = `<div class="g-score"><span>ניקוד <b>${G.score}/${G.total}</b></span><span>רצף <b>${G.streak}🔥</b></span><span>שיא <b>${G.best}</b></span></div>
+    <div class="g-quote">"${esc(m.text)}"${m.t ? `<small>${fmtDate(m.t)}</small>` : ''}</div>
+    <div class="g-opts">${opts.map(p => `<button class="g-opt" data-who="${esc(p.name)}">${avatar(p, 26)}${esc(dispName(p))}</button>`).join('')}</div>
+    <div class="g-res" id="gRes"></div>`;
+  $$('.g-opt', box).forEach(b => b.onclick = () => {
+    if (box.dataset.locked === '1') return; box.dataset.locked = '1';
+    const ok = b.dataset.who === m.from;
+    G.total++; if (ok) { G.score++; G.streak++; G.best = Math.max(G.best, G.streak); } else G.streak = 0;
+    $$('.g-opt', box).forEach(x => { if (x.dataset.who === m.from) x.classList.add('right'); else if (x === b) x.classList.add('wrong'); });
+    const who = r.people.find(p => p.name === m.from);
+    $('#gRes').innerHTML = (ok ? ['בול! 🎯', 'מכירים אותם טוב 😎', 'אין עליך 🔥'][G.streak % 3] : `לא… זה היה ${esc(dispName(who))} 🙈`) + ` <button class="btn btn-ink btn-sm" style="margin-inline-start:8px" id="gNext">הבא ←</button>`;
+    $('#gNext').onclick = () => { box.dataset.locked = '0'; newRound(); };
+  });
+}
+
+/* =========================================================
+   Story mode (full-screen slides)
+   ========================================================= */
+const GRADS = [
+  'linear-gradient(160deg,#ff6b8b 0%,#8b6cff 100%)',
+  'linear-gradient(160deg,#1a1530 0%,#3b2a7a 100%)',
+  'linear-gradient(160deg,#ffb020 0%,#ff6b8b 100%)',
+  'linear-gradient(160deg,#16b8c4 0%,#4c6fff 100%)',
+  'linear-gradient(160deg,#3ccf91 0%,#16b8c4 100%)',
+  'linear-gradient(160deg,#8b6cff 0%,#d65bd6 100%)',
+  'linear-gradient(160deg,#ff8a4c 0%,#c93556 100%)',
+  'linear-gradient(160deg,#2d2350 0%,#ff6b8b 140%)',
+];
+function storySlides(r) {
+  const S = [], nm = p => esc(dispName(p));
+  const push = (html, bg) => S.push({ html, bg: bg || GRADS[S.length % GRADS.length] });
+  const title = esc(anon ? 'הצ\'אט שלכם' : r.title);
+  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d2">הסיפור של</div><h2 class="anim d2">${title}</h2><p class="anim d3">סקופי קרא כל הודעה. מוכנים לשמוע מה הוא חושב?</p><p class="anim d4" style="font-size:14px;opacity:.7;margin-top:18px">הקישו בצד שמאל כדי להמשיך ←</p>`, GRADS[1]);
+  const pages = Math.max(1, Math.round(r.totalWords / 250));
+  push(`<div class="eyebrow anim d1">ביחד כתבתם</div><div class="huge anim d2" data-count="${r.total}">0</div><h2 class="anim d2">הודעות</h2>
+    <div class="sbox anim d3">✍️ ${fmt(r.totalWords)} מילים. זה בערך <b>${fmt(pages)} עמודים</b> של ספר${pages > 300 ? ', כלומר רומן שלם' : ''}.</div>
+    ${r.timed ? `<div class="sbox anim d4">📅 ${fmt(r.spanDays)} ימים, ${fmt(r.activeDays)} מהם עם לפחות הודעה אחת. בממוצע ${fmt(r.total / r.spanDays)} הודעות ביום.</div>` : ''}`);
+  // who talks
+  const top = r.people.slice(0, 6), max = top[0].msgs;
+  push(`<div class="eyebrow anim d1">מי מדבר הכי הרבה?</div><div class="mid anim d2">${nm(top[0])}</div><p class="anim d2">${Math.round(top[0].share * 100)}% מכל ההודעות</p>
+    <div class="sbars anim d3">${top.map(p => `<div class="sbar"><span>${nm(p)}</span><div class="tr"><b data-w="${p.msgs / max * 100}"></b></div><span>${Math.round(p.share * 100)}%</span></div>`).join('')}</div>`);
+  if (r.isPair) {
+    const [a, b] = r.people, I = r.interest, lead = I.a >= I.b ? a : b;
+    const gap = Math.abs(I.a - I.b);
+    push(`<div class="eyebrow anim d1">השאלה שכולם רוצים לדעת</div><h2 class="anim d1">מי יותר בעניין?</h2>
+      <div class="huge anim d2" style="font-size:clamp(54px,15vw,84px)">${Math.max(I.a, I.b)}%</div><div class="mid anim d3">${nm(lead)}</div>
+      <p class="anim d4" style="margin-top:12px">${gap < 8 ? 'כמעט תיקו. זה נדיר, וזה מתוק.' : gap < 22 ? 'קצת יותר. לא דרמה, אבל סקופי שם לב.' : 'בפער ברור. מישהו פה עובד קשה.'}</p>
+      <div class="sbox anim d5">משוקלל מפתיחת שיחות, מהירות תגובה, שאלות, כמות ואורך הודעות.</div>`, GRADS[0]);
+  } else {
+    const glue = groupGlue(r);
+    if (glue) push(`<div class="eyebrow anim d1">הדבק של הקבוצה</div><div class="emoji-xl anim d2">🧲</div><div class="mid anim d2">${nm(glue.p)}</div><p class="anim d3">על כל הודעה שלו/ה מגיעות בממוצע ${glue.v.toFixed(2)} תגובות. כשהוא/היא כותב/ת, כולם עונים.</p>`);
+  }
+  if (r.timed) {
+    const withRT = r.people.filter(p => p.rt != null && p.rts.length > 5).sort((a, b) => a.rt - b.rt);
+    if (withRT.length >= 2) {
+      const f = withRT[0], s = withRT[withRT.length - 1];
+      push(`<div class="eyebrow anim d1">זמני תגובה</div><div class="emoji-xl anim d2">⚡</div><div class="mid anim d2">${nm(f)}</div><p class="anim d2">עונה תוך <b>${fmtDur(f.rt)}</b> בחציון</p>
+        <div class="sbox anim d4">🐢 בקצה השני: <b>${nm(s)}</b>, עם ${fmtDur(s.rt)}. ${s.rt > f.rt * 4 ? 'פי ' + Math.round(s.rt / f.rt) + ' יותר זמן. סקופי לא שופט. טוב, קצת.' : ''}</div>`);
+    }
+    if (r.busiest) {
+      const bw = (r.busiest.words || []).map(w => w[0]);
+      push(`<div class="eyebrow anim d1">היום הכי מטורף</div><div class="mid anim d2">${DAYS_HE[r.busiest.date.getDay()]}, ${fmtDate(r.busiest.date)}</div><div class="huge anim d3" data-count="${r.busiest.v}">0</div><p class="anim d3">הודעות ביום אחד</p>
+        ${bw.length ? `<p class="anim d4" style="margin-top:12px">ומה דיברו עליו?</p><div class="chips anim d5">${bw.map(w => `<span>${esc(w)}</span>`).join('')}</div>` : ''}`);
+    }
+    const hh = String(r.peakHour).padStart(2, '0');
+    const owl = [...r.people].filter(p => p.msgs >= 10).sort((a, b) => b.nightRate - a.nightRate)[0];
+    push(`<div class="eyebrow anim d1">השעה של הצ'אט</div><div class="huge anim d2">${hh}:00</div><p class="anim d3">${r.peakHour < 5 ? 'אמצע הלילה. אתם בסדר?' : r.peakHour < 10 ? 'עם הקפה של הבוקר ☕' : r.peakHour < 17 ? 'באמצע היום. כולם "עובדים", כן?' : r.peakHour < 21 ? 'שעות הערב, אחרי שכל העניינים נגמרים' : 'לפני השינה. השעה של השיחות הכנות.'}</p>
+      ${owl && owl.nightRate > .04 ? `<div class="sbox anim d4">🦉 הינשוף: <b>${nm(owl)}</b>. ${Math.round(owl.nightRate * 100)}% מההודעות שלו/ה אחרי חצות.</div>` : ''}`);
+  }
+  if (r.topEmoji.length) {
+    const [e, c] = r.topEmoji[0];
+    push(`<div class="eyebrow anim d1">האימוג'י של הצ'אט</div><div class="emoji-xl anim d2" style="font-size:clamp(120px,36vw,170px)">${esc(e)}</div><p class="anim d3">נשלח ${fmt(c)} פעמים</p><div class="chips anim d4">${r.topEmoji.slice(1, 7).map(([e2, c2]) => `<span>${esc(e2)} ${fmt(c2)}</span>`).join('')}</div>`);
+  }
+  const ai = r.ai;
+  if (ai) {
+    push(`<div class="eyebrow anim d1">סקופי סיכם את זה ככה</div><h2 class="anim d2" style="font-family:'Frank Ruhl Libre',serif">${T(ai.headline)}</h2><div class="sbox anim d3" style="text-align:center">${TB(ai.one_liner)}</div>`, GRADS[1]);
+    for (const c of (ai.cast || []).slice(0, 8)) {
+      const p = personByName(c.name);
+      push(`<div class="eyebrow anim d1">סקופי חושב ש…</div><div class="mid anim d1">${T(c.name)}</div><div class="emoji-xl anim d2" style="margin-top:14px">${esc(c.emoji)}</div><h2 class="anim d2">${T(c.title)}</h2><div class="sbox anim d3">${TB(c.line)}</div>
+        ${p && p.signature && p.signature.length ? `<div class="chips anim d4">${p.signature.slice(0, 3).map(w => `<span>"${esc(w[0])}"</span>`).join('')}</div>` : ''}`);
+    }
+    const dict = (ai.sections || []).find(x => x.key === 'dictionary');
+    const terms = dict ? dict.blocks.filter(b => b.kind === 'term').slice(0, 4) : [];
+    if (terms.length) push(`<div class="eyebrow anim d1">המילון הסודי</div><h2 class="anim d1">מילים שרק אתם מבינים</h2><div class="sbars anim d2">${terms.map((t, i) => `<div class="sbox anim d${Math.min(5, i + 2)}" style="margin-top:0"><b>${esc(t.emoji)} ${T(t.title)}</b><br>${TB(t.text)}</div>`).join('')}</div>`, GRADS[5]);
+    const tp = (ai.sections || []).find(x => x.key === 'turning_points');
+    if (tp) {
+      const chat = tp.blocks.find(b => b.kind === 'chat' && b.messages.length), item = tp.blocks.find(b => b.kind === 'item');
+      if (item) push(`<div class="eyebrow anim d1">רגע מפנה</div><h2 class="anim d2">${esc(item.emoji)} ${T(item.title)}</h2><p class="anim d3">${TB(item.text)}</p>${chat ? `<div class="anim d4" style="text-align:right;margin-top:14px">${chatBlockHTML(chat.messages.slice(0, 4))}</div>` : ''}`, GRADS[3]);
+    }
+    const uns = (ai.sections || []).find(x => x.key === 'unsaid');
+    const up = uns && uns.blocks.find(b => b.kind === 'paragraph');
+    if (up) push(`<div class="eyebrow anim d1">מה שאף אחד לא אומר בקול</div><div class="emoji-xl anim d2">🤫</div><p class="anim d3" style="font-size:18px;line-height:1.6">${TB(up.text)}</p>`, GRADS[7]);
+  }
+  // per-person archetypes (when there is no written report)
+  if (!ai) for (const p of r.people.slice(0, 8).filter(p => p.msgs >= 5)) {
+    push(`<div class="eyebrow anim d1">סקופי חושב ש…</div><div class="mid anim d1">${nm(p)}</div><div class="emoji-xl anim d2" style="margin-top:14px">${p.arch.em}</div><h2 class="anim d2">${p.arch.title}</h2>
+      <p class="anim d3">${esc(p.arch.desc(p))}</p><div class="sbox anim d4">״${esc(p.arch.quote(p))}״</div>
+      ${p.signature && p.signature.length ? `<div class="chips anim d5">${p.signature.slice(0, 3).map(w => `<span>"${esc(w[0])}"</span>`).join('')}</div>` : ''}`);
+  }
+  if (r.timed && r.longestGap && r.longestGap.gap > 2 * DAY) {
+    const br = r.people.find(p => p.name === r.longestGap.to.from);
+    push(`<div class="eyebrow anim d1">השקט הכי ארוך</div><div class="emoji-xl anim d2">🤐</div><div class="mid anim d2">${fmtDur(r.longestGap.gap)}</div><p class="anim d3">בלי מילה. ואז <b>${nm(br)}</b> שבר/ה את השתיקה:</p><div class="sbox anim d4">״${esc(truncate(r.longestGap.to.text, 120))}״</div>`);
+  }
+  if (r.trend) {
+    const t = r.trend;
+    push(`<div class="eyebrow anim d1">לאן זה הולך?</div><div class="emoji-xl anim d2">${t.dir === 'up' ? '🔥' : t.dir === 'down' ? '🧊' : '🪨'}</div><h2 class="anim d2">${t.dir === 'up' ? 'הצ\'אט מתחמם' : t.dir === 'down' ? 'הצ\'אט מתקרר' : 'יציב כמו סלע'}</h2><p class="anim d3">${t.dir === 'flat' ? 'בערך אותה כמות הודעות כמו בחודש שלפני.' : `${Math.abs(Math.round(t.change * 100))}% ${t.dir === 'up' ? 'יותר' : 'פחות'} הודעות בחודש האחרון, לעומת החודש שלפניו.`}</p>`);
+  }
+  const aw = computeAwards(r).slice(0, 4);
+  if (aw.length) push(`<div class="eyebrow anim d1">טקס הפרסים</div><h2 class="anim d1">והזוכים הם…</h2><div class="sbars anim d2" style="gap:10px">${aw.map(({ a, w }, i) => `<div class="sbox anim d${Math.min(5, i + 2)}" style="margin-top:0;display:flex;gap:12px;align-items:center"><span style="font-size:30px">${a.em}</span><span><b>${esc(a.t)}</b><br>${nm(w.p)} · ${esc(a.s(w.v, w.p))}</span></div>`).join('')}</div>`, GRADS[2]);
+  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d1">פסק הדין של סקופי</div><p class="anim d2" style="font-size:17.5px;line-height:1.6">${ai ? TB(ai.verdict) : verdictText(r)}</p><p class="anim d4" style="margin-top:16px;font-weight:800">צלמו מסך ושלחו לקבוצה 👀</p>`, GRADS[1]);
+  return S;
+}
+
+let ST = { i: 0, slides: [], timer: null, start: 0, dur: 6500, paused: false, elapsed: 0 };
+function openStory(i = 0) {
+  ST.slides = storySlides(R);
+  $('#stProg').innerHTML = ST.slides.map(() => '<i><b></b></i>').join('');
+  $('#story').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  goSlide(i);
+}
+function closeStory() {
+  cancelAnimationFrame(ST.timer); $('#story').classList.add('hidden'); document.body.style.overflow = '';
+}
+function goSlide(i) {
+  if (i < 0) i = 0;
+  if (i >= ST.slides.length) { closeStory(); return; }
+  ST.i = i; ST.elapsed = 0; ST.start = performance.now(); ST.paused = false;
+  const s = ST.slides[i];
+  $('#stFrame').style.background = s.bg;
+  $('#stSlide').innerHTML = `<div class="st-slide">${s.html}</div>`;
+  $$('#stProg b').forEach((b, k) => b.style.width = k < i ? '100%' : '0');
+  // count-up numbers and bars
+  $$('[data-count]', $('#stSlide')).forEach(el => {
+    const target = +el.dataset.count, t0 = performance.now();
+    const step = now => { const f = Math.min(1, (now - t0 - 300) / 1200); el.textContent = fmt(target * (f < 0 ? 0 : 1 - Math.pow(1 - f, 3))); if (f < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+  requestAnimationFrame(() => $$('[data-w]', $('#stSlide')).forEach(b => b.style.width = b.dataset.w + '%'));
+  cancelAnimationFrame(ST.timer);
+  const tick = now => {
+    if (!ST.paused) {
+      const f = (ST.elapsed + now - ST.start) / ST.dur;
+      const bar = $$('#stProg b')[ST.i]; if (bar) bar.style.width = Math.min(100, f * 100) + '%';
+      if (f >= 1) { goSlide(ST.i + 1); return; }
+    }
+    ST.timer = requestAnimationFrame(tick);
+  };
+  ST.timer = requestAnimationFrame(tick);
+}
+function pauseStory(on) {
+  if (on && !ST.paused) { ST.elapsed += performance.now() - ST.start; ST.paused = true; }
+  else if (!on && ST.paused) { ST.start = performance.now(); ST.paused = false; }
+}
+$('#stNext').onclick = () => { if (!ST._wasHold) goSlide(ST.i + 1); };
+$('#stPrev').onclick = () => { if (!ST._wasHold) goSlide(ST.i - 1); };
+$('#stClose').onclick = closeStory;
+$('#stSkip').onclick = closeStory;
+['pointerdown'].forEach(ev => $('#stFrame').addEventListener(ev, e => { if (e.target.closest('.st-tap')) { ST._hold = setTimeout(() => pauseStory(true), 250); } }));
+['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => $('#stFrame').addEventListener(ev, () => { clearTimeout(ST._hold); if (ST.paused) { pauseStory(false); ST._wasHold = true; setTimeout(() => ST._wasHold = false, 50); } }));
+document.addEventListener('keydown', e => {
+  if ($('#story').classList.contains('hidden')) return;
+  if (e.key === 'Escape') closeStory();
+  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); goSlide(ST.i + 1); }
+  if (e.key === 'ArrowRight') goSlide(ST.i - 1);
+});
+$('#stSave').onclick = async () => {
+  pauseStory(true);
+  try {
+    if (!window.html2canvas) throw new Error('x');
+    const frame = $('#stFrame');
+    $$('.anim', frame).forEach(a => { a.style.animation = 'none'; a.style.opacity = 1; a.style.transform = 'none'; });
+    const canvas = await html2canvas(frame, { backgroundColor: null, scale: 2, useCORS: true, ignoreElements: el => el.classList && (el.classList.contains('st-bottom') || el.classList.contains('st-tap') || el.classList.contains('st-x') || el.classList.contains('st-prog')) });
+    cardBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    cardName = `chatscope-${ST.i + 1}.png`;
+    $('#modalImg').src = canvas.toDataURL('image/png');
+    $('#modal').classList.remove('hidden');
+  } catch { toast('צלמו מסך, זה עובד מצוין 📸'); }
+};
+
+function truncate(s, n) { s = (s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+
+function renderBoard(boards, i) {
+  const b = boards[i];
+  const rows = R.people.map(p => ({ p, v: b.v(p) })).sort((x, y) => y.v - x.v).slice(0, 12);
+  const max = Math.max(...rows.map(x => x.v), 1e-9);
+  $('#lb').innerHTML = rows.map(({ p, v }, idx) => `<div class="lb-row"><span class="nm">${idx === 0 ? '👑 ' : ''}${esc(dispName(p))}</span><div class="tr"><b style="width:${Math.max(2, v / max * 100)}%;background:${p.color}"></b></div><span class="vl">${b.f(v, p)}</span></div>`).join('');
+}
+
+function monthlyChart(r) {
+  const keys = [...r.monthly.keys()];
+  const minK = Math.min(...keys), maxK = Math.max(...keys);
+  const data = []; for (let k = minK; k <= maxK; k++) data.push([k, r.monthly.get(k) || 0]);
+  const W = Math.max(480, data.length * 26), H = 230, pad = 28, bw = (W - pad * 2) / data.length;
+  const max = Math.max(...data.map(d => d[1]));
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="direction:ltr" role="img" aria-label="הודעות לפי חודש">`;
+  [0, .5, 1].forEach(f => { const y = H - pad - f * (H - pad * 2); s += `<line x1="${pad}" x2="${W - pad}" y1="${y}" y2="${y}" stroke="#eee8f6"/><text x="${pad - 6}" y="${y + 4}" font-size="10" text-anchor="end" fill="#8a85a0">${fmt(max * f)}</text>`; });
+  const every = Math.ceil(data.length / 12);
+  data.forEach(([k, v], i) => {
+    const h = max ? v / max * (H - pad * 2) : 0, x = pad + i * bw + bw * .15, y = H - pad - h;
+    s += `<rect x="${x}" y="${y}" width="${bw * .7}" height="${Math.max(h, v ? 2 : 0)}" rx="${Math.min(6, bw * .3)}" fill="url(#g)"><title>${MONTHS_HE[k % 12]} ${Math.floor(k / 12)}: ${fmt(v)}</title></rect>`;
+    if (i % every === 0) s += `<text x="${x + bw * .35}" y="${H - pad + 15}" font-size="10" text-anchor="middle" fill="#8a85a0">${MONTHS_HE[k % 12]}${k % 12 === 0 || i === 0 ? ' ' + String(Math.floor(k / 12)).slice(2) : ''}</text>`;
+  });
+  s += `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6b8b"/><stop offset="1" stop-color="#8b6cff"/></linearGradient></defs></svg>`;
+  return s;
+}
+function heatmap(r) {
+  const max = Math.max(...r.heat.flat(), 1);
+  const col = v => { if (!v) return '#f3eff9'; const f = v / max; return f < .2 ? '#ffc2d0' : f < .45 ? '#ff8fa8' : f < .75 ? '#ff6b8b' : '#c93556'; };
+  let s = `<div class="heat"><div></div>`;
+  for (let h = 0; h < 24; h++) s += `<div class="hh">${h % 3 === 0 ? h : ''}</div>`;
+  for (let d = 0; d < 7; d++) {
+    s += `<div class="hl">${DAYS_SHORT[d]}</div>`;
+    for (let h = 0; h < 24; h++) s += `<div class="hc" style="background:${col(r.heat[d][h])}" title="${DAYS_HE[d]} ${h}:00: ${fmt(r.heat[d][h])}"></div>`;
+  }
+  return s + '</div>';
+}
+
+/* ---------- share card (canvas) ---------- */
+function wrapLines(ctx, text, maxW) {
+  const words = text.split(' '); const lines = []; let line = '';
+  for (const w of words) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines.push(line); line = w; } else line = t; }
+  if (line) lines.push(line); return lines;
+}
+async function cardCanvas(p) {
+  await document.fonts.ready;
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.direction = 'rtl';
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#1a1530'); g.addColorStop(1, '#2d2350');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const blob = (cx, cy, r, col) => { const rg = x.createRadialGradient(cx, cy, 0, cx, cy, r); rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = rg; x.fillRect(0, 0, W, H); };
+  blob(160, 180, 520, 'rgba(255,107,139,.45)'); blob(960, 1150, 560, 'rgba(139,108,255,.42)');
+  x.textAlign = 'right';
+  x.fillStyle = '#ffd166'; x.font = '800 34px Rubik, Heebo, sans-serif'; x.fillText('סקופי חושב ש...', W - 80, 130);
+  x.fillStyle = '#fff'; x.font = '900 84px Rubik, Heebo, sans-serif';
+  const nm = dispName(p); x.fillText(nm.length > 18 ? nm.slice(0, 17) + '…' : nm, W - 80, 240);
+  // archetype pill
+  x.fillStyle = 'rgba(255,255,255,.08)'; roundRect(x, 80, 300, W - 160, 300, 48); x.fill();
+  x.textAlign = 'center'; x.font = '150px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; x.fillText(p.arch.em, W - 230, 500);
+  x.textAlign = 'right'; x.fillStyle = '#fff'; x.font = '900 76px Rubik, Heebo, sans-serif'; x.fillText(p.arch.title, W - 360, 430);
+  x.fillStyle = '#d6d0ee'; x.font = '500 32px Heebo, sans-serif';
+  wrapLines(x, p.arch.desc(p), W - 520).slice(0, 3).forEach((l, i) => x.fillText(l, W - 360, 490 + i * 44));
+  // quote
+  x.fillStyle = '#fff'; x.font = '700 44px Heebo, sans-serif';
+  wrapLines(x, '״' + p.arch.quote(p) + '״', W - 160).slice(0, 5).forEach((l, i) => x.fillText(l, W - 80, 720 + i * 64));
+  // stats
+  const stats = [[fmt(p.msgs), 'הודעות'], [p.avgWords.toFixed(1), 'מילים להודעה'], [R.timed ? fmtDur(p.rt) : (p.topEmoji[0] || '—'), R.timed ? 'זמן תגובה' : 'אימוג׳י']];
+  const sw = (W - 160 - 40) / 3;
+  stats.forEach(([v, l], i) => {
+    const bx = W - 80 - (i + 1) * sw - i * 20;
+    x.fillStyle = 'rgba(255,255,255,.08)'; roundRect(x, bx, 1070, sw, 150, 32); x.fill();
+    x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = '900 52px Rubik, Heebo, sans-serif'; x.fillText(v, bx + sw / 2, 1140);
+    x.fillStyle = '#b9b2d8'; x.font = '600 26px Heebo, sans-serif'; x.fillText(l, bx + sw / 2, 1188);
+  });
+  x.textAlign = 'right'; x.fillStyle = '#ff6b8b'; x.font = '900 34px Rubik, Heebo, sans-serif'; x.fillText('צ\'אטסקופ', W - 80, 1290);
+  x.textAlign = 'left'; x.fillStyle = '#8f88b0'; x.font = '500 26px Heebo, sans-serif'; x.fillText(`${(p.share * 100).toFixed(1)}% מההודעות בצ'אט`, 80, 1290);
+  return c;
+}
+function roundRect(x, X, Y, w, h, r) { x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+let cardBlob = null, cardName = '';
+async function openCard(p) {
+  const c = await cardCanvas(p);
+  $('#modalImg').src = c.toDataURL('image/png');
+  cardName = `chatscope-${anon ? 'card' : p.name}.png`.replace(/[\\/:*?"<>|]/g, '');
+  cardBlob = await new Promise(r => c.toBlob(r, 'image/png'));
+  $('#modal').classList.remove('hidden');
+}
+$('#modalClose').onclick = () => { $('#modal').classList.add('hidden'); if (!$('#story').classList.contains('hidden')) pauseStory(false); };
+$('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal').classList.add('hidden'); };
+$('#modalShare').onclick = async () => {
+  if (!cardBlob) return;
+  const file = new File([cardBlob], cardName, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'מה סקופי חושב' }); return; } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(cardBlob); a.download = cardName; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast('הכרטיס נשמר');
+};
+
+/* ---------- text summary share ---------- */
+function summaryText() {
+  const r = R;
+  const lines = [`🔍 מה סקופי חושב על "${anon ? 'הצ\'אט שלנו' : r.title}"`, `${fmt(r.total)} הודעות${r.timed ? ` · ${fmt(r.spanDays)} ימים` : ''}`, ''];
+  if (r.isPair) lines.push(`💘 מי יותר בעניין: ${dispName(r.people[0])} ${r.interest.a}% · ${dispName(r.people[1])} ${r.interest.b}%`, '');
+  for (const p of r.people.slice(0, 12)) lines.push(`${p.arch.em} ${dispName(p)}: ${p.arch.title}. ${p.arch.desc(p)}`);
+  lines.push('', 'נותח בצ\'אטסקופ, בתוך הדפדפן 🔒');
+  return lines.join('\n');
+}
+$('#copyBtn').onclick = async () => {
+  const text = summaryText();
+  if (navigator.share) { try { await navigator.share({ text }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text); toast('הסיכום הועתק. אפשר להדביק בקבוצה'); }
+  catch { toast('לא הצלחתי להעתיק'); }
+};
+$('#anonToggle').onchange = e => { anon = e.target.checked; renderReport(); };
+
+/* ---------- AI: the full written report ---------- */
+// Set this to your deployed proxy (see worker.js) so visitors don't need their own key.
+const AI_PROXY = '';
+const AI_MODEL = 'claude-opus-5-5';
+const CHAR_BUDGET = 500000; // how much of the chat Claude reads (chars); longer chats are sampled in full windows
+
+const S_STR = { type: 'string' };
+const S_ARR = items => ({ type: 'array', items });
+const S_OBJ = props => ({ type: 'object', additionalProperties: false, required: Object.keys(props), properties: props });
+// A report is prose sections made of blocks: paragraphs, real chat excerpts, glossary terms, list items, notes.
+const S_BLOCK = S_OBJ({
+  kind: { type: 'string', enum: ['paragraph', 'chat', 'term', 'item', 'note'] },
+  emoji: S_STR, title: S_STR, text: S_STR, date: S_STR,
+  messages: S_ARR(S_OBJ({ from: S_STR, text: S_STR, time: S_STR })),
+});
+const REPORT_SCHEMA = S_OBJ({
+  headline: S_STR,
+  one_liner: S_STR,
+  hook: S_ARR(S_STR),
+  cast: S_ARR(S_OBJ({ name: S_STR, emoji: S_STR, title: S_STR, line: S_STR })),
+  sections: S_ARR(S_OBJ({
+    key: { type: 'string', enum: ['profile', 'dictionary', 'tension', 'turning_points', 'moments', 'awards', 'unsaid', 'predictions', 'notes'] },
+    emoji: S_STR, title: S_STR, intro: S_STR, blocks: S_ARR(S_BLOCK),
+  })),
+  verdict: S_STR,
+});
+
+const AI_SYSTEM = `אתה "סקופי". קראת צ'אט שלם, הודעה אחרי הודעה, ועכשיו אתה כותב עליו דוח ארוך, אישי ומצחיק, מהסוג שאנשים שולחים לקבוצה ומצטטים ממנו שבועות.
+
+הקול שלך:
+- חד, חם, חצוף ומצחיק. כותב כמו חבר שראה הכל, לא מפחד להגיד את זה, ואוהב את האנשים האלה.
+- אתה מספר סיפור, לא מסכם נתונים. פסקאות מלאות, עם פרטים ספציפיים: שמות של דברים שהם הזכירו, מקומות, מותגים, הרגלים, מספרים.
+- כל טענה נשענת על ראיה מהצ'אט. הדרך הכי חזקה להוכיח: לשלב קטע אמיתי מהשיחה (בלוק chat) ממש בתוך הטקסט, ואז משפט שמסביר מה רואים בו.
+- הלב של הדוח הוא הפער: איך כל אחד רואה ומציג את עצמו, מול מה שההתנהגות שלו בצ'אט מראה. תמיד עם ראיות.
+- אתה מזהה מה מיוחד רק לצ'אט הזה: כינויים, בדיחות פנימיות, ביטויים שנולדו ברגע מסוים, טקסים חוזרים.
+- הרבה הומור, ורגע או שניים של כנות אמיתית שמזכירים למה האנשים האלה ביחד.
+
+כללים:
+- ציטוטים ובלוקי chat רק מהטקסט עצמו, מילה במילה, כולל שגיאות כתיב ואימוג'ים (מותר לקצר עם "…"). לעולם אל תמציא הודעה, ציטוט או אירוע.
+- תאריכים כפי שהם מופיעים בצ'אט (למשל 14.3.2025). בלי תאריכים, תאר זמן במילים.
+- מגדר: הסק מצורות הפועל והתואר שכל אחד משתמש בהן על עצמו בהודעות שלו. אם לא ברור, נסח בניטרליות.
+- הרגיסטר משקף את הצ'אט. אם הם מקללים, מותר לך לקלל. לעולם לא ללעוג למראה, לגוף, למוצא או לזהות, ובלי אבחנות פסיכולוגיות.
+- עברית טבעית ומדוברת. אפשר להדגיש שמות ומושגים עם **כוכביות**. בלי מקפים ארוכים ובלי משפטים מליציים.
+- השתמש בשמות בדיוק כפי שהם מופיעים בצ'אט.`;
+
+function aiUserPrompt(r, sample) {
+  const nm = from => { const p = r.people.find(x => x.name === from); return p ? dispName(p) : from; };
+  const me = r.me ? r.people.find(p => p.name === r.me) : null;
+  return `זה ${sample.sampled ? 'מבחר של קטעים רצופים מתוך' : ''} צ'אט${r.isPair ? ' בין שני אנשים' : ` קבוצתי עם ${r.people.length} משתתפים`}${anon ? '' : ` בשם "${r.title}"`}: ${r.total} הודעות${r.timed ? `, מ־${fmtDate(r.first)} עד ${fmtDate(r.last)}` : ''}.
+${me ? `\nמי שקורא את הדוח הוא ${nm(me.name)}. פנה אליו/ה ישירות בגוף שני ("ואז יש אותך, ${nm(me.name)}..."), ועל כל השאר כתוב בגוף שלישי.` : '\nהדוח נקרא על ידי כל חברי הצ\'אט. כתוב על כולם בגוף שלישי, ומדי פעם פנה לכולם יחד ("אתם").'}
+
+מדדים שכבר חושבו מכל הצ'אט (שלב אותם כשהם מחזקים טענה):
+${statsForAI(r)}
+${r.isPair && r.interest ? `מדד "מי יותר בעניין": ${nm(r.people[0].name)} ${r.interest.a}%, ${nm(r.people[1].name)} ${r.interest.b}%` : ''}
+${r.busiest ? `היום הכי עמוס: ${fmtDate(r.busiest.date)} עם ${r.busiest.v} הודעות.` : ''}
+
+מבנה הדוח:
+- headline: כותרת ראשית עם אימוג'י שמסכמת את המהות של הצ'אט בצורה מפתיעה ומצחיקה.
+- one_liner: שורה תחתונה במשפט אחד.
+- hook: 2–3 פסקאות פתיחה. התחל מתצפית שתופסת (למשל מה היה חושב אדם זר שגולל בצ'אט הזה), ובסוף עבור לרגע כנות על מה שבאמת מחזיק את האנשים האלה יחד.
+- cast: לכל משתתף מרכזי (עד 8) כינוי־תפקיד קולע (title), אימוג'י, ושורה אחת (line) שמסכמת אותו.
+- sections, בסדר הזה, כל אחד עם emoji, כותרת מקורית בסגנון "נושא: הטוויסט" (title), ופסקת פתיחה (intro):
+  1. profile: הפרופיל. החלק הארוך ביותר. לכל משתתף מרכזי פסקה או שתיים: איך הוא רואה את עצמו, ומה האמת לפי הצ'אט, עם פרטים ספציפיים. לפחות שני בלוקי chat עם חילופי דברים אמיתיים שמראים את ההבדל ביניהם, ואחרי כל אחד פסקה קצרה שמפרשת אותו.
+  2. dictionary: המילון הסודי. פסקת intro על השפה שלהם, ואז 5–12 בלוקי term: title הוא המונח, emoji, text הוא ההגדרה המשועשעת, date הוא מתי ואיך זה נולד.
+  3. tension: איפה זה מתחכך. 1–2 פסקאות, בלוק chat אחד לפחות, ו־2–4 בלוקי item עם הטריגרים שחוזרים.
+  4. turning_points: רגעי המפנה בסדר כרונולוגי, 3–7. לכל אחד בלוק item (title, date, text עם הסיפור) ומיד אחריו בלוק chat מהרגע עצמו.
+  5. moments: 3–5 רגעים בלתי נשכחים מסוגים שונים (הכי מצחיק, הכי מתוק, הכי מביך, הכי כאוטי), כל אחד item ואחריו chat.
+  6. awards: 5–8 פרסים מקוריים כבלוקי item: emoji, title הוא שם הפרס, text הוא "הזוכה: שם. ..." עם נימוק וראיה.
+  7. unsaid: מה שאף אחד לא אומר בקול אבל כל ההודעות צועקות אותו. 1–2 פסקאות כנות, לא מרושעות.
+  8. predictions: 3 תחזיות קצרות ומשעשעות כבלוקי item.
+  9. notes: פתק אישי מסקופי לכל משתתף מרכזי, בלוק note עם title=שם המשתתף ו־text של 2–3 משפטים.
+- verdict: פסק דין של 2–4 משפטים.
+
+בבלוקים: שדות שלא רלוונטיים לסוג הבלוק נשארים מחרוזת ריקה או מערך ריק. בבלוק chat, messages הן הודעות רצופות ומדויקות מהצ'אט (2–8), עם from כפי שמופיע בצ'אט ו־time (שעה או תאריך ושעה).
+
+<chat>
+${sample.text}
+</chat>`;
+}
+
+function chatSample(r, budget = CHAR_BUDGET) {
+  const name = from => { const p = r.people.find(x => x.name === from); return p ? dispName(p) : from; };
+  const line = m => `${m.t ? `${fmtDate(m.t)} ${String(m.t.getHours()).padStart(2, '0')}:${String(m.t.getMinutes()).padStart(2, '0')} ` : ''}${name(m.from)}: ${(m.text || '[מדיה]').replace(/\n/g, ' ')}`;
+  const all = r.msgs.map(line);
+  const size = all.reduce((s, l) => s + l.length + 1, 0);
+  if (size <= budget) return { text: all.join('\n'), sampled: false };
+  // evenly spaced contiguous windows, so conversations stay readable
+  const win = 120, avg = size / all.length, nWin = Math.max(1, Math.floor(budget / (avg * win)));
+  const step = Math.floor(all.length / nWin), out = [];
+  for (let i = 0; i < nWin; i++) { const s = i * step; out.push(`--- קטע ${i + 1} ---`, ...all.slice(s, s + win)); }
+  return { text: out.join('\n'), sampled: true };
+}
+function statsForAI(r) {
+  return r.people.slice(0, 15).map(p => `${dispName(p)}: ${p.msgs} הודעות (${(p.share * 100).toFixed(1)}%), ${p.avgWords.toFixed(1)} מילים להודעה${r.timed ? `, חציון תגובה ${fmtDur(p.rt)}, פתח/ה ${p.starts} שיחות, ${p.night} הודעות בין חצות לחמש` : ''}, ${p.questions} שאלות, ${p.laughs} הודעות צחוק, ${p.love} הודעות אהבה, ${p.deleted} נמחקו, ${p.media} מדיה`).join('\n');
+}
+
+async function runAI() {
+  const out = $('#aiStatus');
+  let key = '';
+  if (!AI_PROXY) {
+    key = ($('#aiKey')?.value || '').trim();
+    if (!/^sk-ant-/.test(key)) { out.innerHTML = '<div class="err">צריך מפתח API של Anthropic שמתחיל ב־sk-ant-. משיגים אחד ב־console.anthropic.com.</div>'; return; }
+    try { if ($('#aiRemember').checked) localStorage.setItem('chatscope.key', key); else localStorage.removeItem('chatscope.key'); } catch {}
+  }
+  const btn = $('#aiGo'); btn.disabled = true;
+  const sample = chatSample(R);
+  const body = {
+    model: AI_MODEL,
+    max_tokens: 32000,
+    stream: true,
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'high', format: { type: 'json_schema', schema: REPORT_SCHEMA } },
+    fallbacks: 'default',
+    system: AI_SYSTEM,
+    messages: [{ role: 'user', content: aiUserPrompt(R, sample) }],
+  };
+  const phases = ['סקופי קורא את כל ההודעות…', 'מחפש את הבדיחות הפנימיות…', 'בונה פרופיל לכל אחד…', 'מאתר את רגעי המפנה…', 'כותב את המילון הסודי…'];
+  let ph = 0, chars = 0;
+  const setStatus = () => { out.innerHTML = `<div class="ai-live"><span class="dotpulse"></span><b>${chars ? `סקופי כותב… ${fmt(chars / 5)} מילים` : phases[ph % phases.length]}</b><small>דוח מלא לוקח בדרך כלל 1–3 דקות. אפשר להמשיך לגלול בינתיים.</small></div>`; };
+  setStatus();
+  const phTimer = setInterval(() => { ph++; if (!chars) setStatus(); }, 4000);
+  try {
+    const res = await fetch(AI_PROXY || 'https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: AI_PROXY ? { 'content-type': 'application/json' } : {
+        'content-type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2026-10-21',
+        'anthropic-beta': 'server-side-fallback-2026-07-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) { let msg = `שגיאה ${res.status}`; try { const j = await res.json(); msg = j?.error?.message || msg; } catch {} throw new Error(msg); }
+    // read the SSE stream
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = '', text = '', stop = null;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf('\n\n')) >= 0) {
+        const chunk = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        const dl = chunk.split('\n').find(l => l.startsWith('data:'));
+        if (!dl) continue;
+        let ev; try { ev = JSON.parse(dl.slice(5)); } catch { continue; }
+        if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') { text += ev.delta.text; const before = chars; chars = text.length; if ((chars / 5 | 0) - (before / 5 | 0) > 15) setStatus(); }
+        else if (ev.type === 'message_delta' && ev.delta?.stop_reason) stop = ev.delta.stop_reason;
+        else if (ev.type === 'error') throw new Error(ev.error?.message || 'שגיאה מהשרת');
+      }
+    }
+    if (stop === 'refusal') throw new Error('המודל סירב לכתוב דוח על התוכן הזה.');
+    if (stop === 'max_tokens') throw new Error('הדוח יצא ארוך מדי ונקטע. נסו שוב.');
+    const rep = JSON.parse(text);
+    rep.sampled = sample.sampled;
+    R.ai = rep;
+    renderReport();
+    $('#fullReport')?.scrollIntoView({ behavior: 'smooth' });
+    toast('הדוח המלא מוכן ✍️');
+  } catch (e) {
+    out.innerHTML = `<div class="err">${esc(e.message === 'Failed to fetch' ? 'לא הצלחתי להתחבר לשרת. בדקו את החיבור לאינטרנט ונסו שוב.' : e.message)}</div>`;
+  } finally {
+    clearInterval(phTimer);
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* ---------- rendering the written report ---------- */
+// in anonymous mode, swap every real name inside the AI's prose too
+function aiText(s) {
+  s = String(s || '');
+  if (!anon) return s;
+  const ps = [...R.people].sort((a, b) => b.name.length - a.name.length);
+  for (const p of ps) s = s.split(p.name).join(dispName(p));
+  return s;
+}
+const T = s => esc(aiText(s));
+const TB = s => T(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+function personByName(n) {
+  n = String(n || '').trim();
+  return R.people.find(p => p.name === n) || R.people.find(p => n && (p.name.includes(n) || n.includes(p.name)));
+}
+function avatarFor(n, size = 40) {
+  const p = personByName(n);
+  if (p) return avatar(p, size);
+  return `<div class="av" style="background:var(--muted);width:${size}px;height:${size}px;font-size:${size * .38}px">${esc(initials(aiText(n)))}</div>`;
+}
+
+function chatBlockHTML(msgs) {
+  const meName = R.me || (R.isPair ? R.people[1].name : null);
+  let prev = null;
+  return `<div class="wa">${msgs.map(m => {
+    const p = personByName(m.from), mine = p && meName && p.name === meName;
+    const showName = !mine && (!R.isPair || !meName) && m.from !== prev;
+    prev = m.from;
+    return `<div class="wa-b ${mine ? 'mine' : ''}">${showName ? `<b style="color:${p ? p.color : 'var(--violet)'}">${T(m.from)}</b>` : ''}<span>${T(m.text)}</span><i>${T(m.time)}${mine ? ' <svg viewBox="0 0 18 12" aria-hidden="true"><path d="M1 6.5l3 3L10 3M7 9.5L13 3" fill="none" stroke="#53bdeb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</i></div>`;
+  }).join('')}</div>`;
+}
+function blockHTML(b) {
+  switch (b.kind) {
+    case 'chat': return (b.messages || []).length ? chatBlockHTML(b.messages) : '';
+    case 'term': return `<div class="fr-term"><dt>${b.emoji ? `<span>${esc(b.emoji)}</span>` : ''}${T(b.title)}</dt><dd>${TB(b.text)}${b.date ? `<small>${T(b.date)}</small>` : ''}</dd></div>`;
+    case 'item': return `<div class="fr-item">${b.emoji ? `<span class="fr-item-em">${esc(b.emoji)}</span>` : ''}<div>${b.date ? `<span class="fr-date">${T(b.date)}</span>` : ''}${b.title ? `<b>${T(b.title)}</b>` : ''}<p>${TB(b.text)}</p></div></div>`;
+    case 'note': { const p = personByName(b.title); return `<div class="fr-note" style="--pc:${p ? p.color : 'var(--muted)'}"><span>אל: ${T(b.title)}</span><p>${TB(b.text)}</p><i>סקופי</i></div>`; }
+    default: return b.text ? `<p class="fr-p">${TB(b.text)}</p>` : '';
+  }
+}
+
+const SEC_ICON = { profile: '🧠', dictionary: '🗣️', tension: '⚡', turning_points: '🧭', moments: '✨', awards: '🏅', unsaid: '🤫', predictions: '🔮', notes: '💌' };
+const SEC_SHORT = { profile: 'הפרופיל', dictionary: 'המילון הסודי', tension: 'המתח', turning_points: 'רגעי המפנה', moments: 'רגעים', awards: 'פרסים', unsaid: 'מה שלא נאמר', predictions: 'תחזיות', notes: 'פתקים' };
+
+function fullReportHTML(rep) {
+  const secs = rep.sections || [];
+  let h = `<article class="fr" id="fullReport">
+    <header class="fr-head">
+      <span class="kicker">הדוח המלא${rep.demo ? ' · דוגמה' : ''}</span>
+      <h1>${T(rep.headline)}</h1>
+      <div class="fr-by"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#1a1530"/><circle cx="60" cy="60" r="38" fill="#ffe1e8"/><circle cx="47" cy="55" r="6" fill="#1a1530"/><circle cx="73" cy="55" r="6" fill="#1a1530"/><path d="M48 74 q12 9 24 0" stroke="#1a1530" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+        <div><b>סקופי</b><small>קרא ${fmt(R.total)} הודעות${rep.sampled ? ' (במבחר קטעים)' : ''}, כולל את אלה שמחקתם</small></div></div>
+    </header>
+    <div class="fr-hook">${(rep.hook || []).map(p => `<p>${TB(p)}</p>`).join('')}</div>
+    <div class="fr-oneliner">${TB(rep.one_liner)}</div>`;
+  if ((rep.cast || []).length) h += `<div class="fr-castrow">${rep.cast.map(c => `<div class="fr-cc">${avatarFor(c.name, 44)}<div><b>${T(c.name)}</b><span>${esc(c.emoji)} ${T(c.title)}</span><small>${TB(c.line)}</small></div></div>`).join('')}</div>`;
+  h += `<nav class="fr-toc"><b>בדוח הזה</b>${secs.map((s, i) => `<a href="#fr-${i}">${esc(s.emoji || SEC_ICON[s.key] || '•')} ${T(SEC_SHORT[s.key] || s.title)}</a>`).join('')}</nav>`;
+  secs.forEach((s, i) => {
+    h += `<section class="fr-sec fr-${s.key}" id="fr-${i}">
+      <div class="fr-ico">${esc(s.emoji || SEC_ICON[s.key] || '✨')}</div>
+      <h2 class="fr-h">${T(s.title)}</h2><div class="fr-orn" aria-hidden="true"><i></i><b></b><i></i></div>
+      ${s.intro ? `<p class="fr-p fr-intro">${TB(s.intro)}</p>` : ''}
+      <div class="fr-blocks${s.key === 'dictionary' ? ' fr-dict' : ''}${s.key === 'notes' ? ' fr-notes' : ''}">${(s.blocks || []).map(blockHTML).join('')}</div>
+    </section>`;
+  });
+  h += `<footer class="fr-verdict"><span>פסק הדין</span><p>${TB(rep.verdict)}</p></footer>`;
+  if (rep.demo) h += `<p class="ai-note" style="text-align:center">זה דוח לדוגמה שנכתב מראש על צ'אט בדוי. על צ'אט אמיתי סקופי כותב דוח חדש מאפס, עם ההודעות שלכם.</p>`;
+  return h + '</article>';
+}
+
+function aiCtaHTML() {
+  return `<div class="card ai-card" id="aiCta">
+    <div class="ai-cta-top"><div class="ai-cta-em">✍️</div><div><h3>הדוח המלא: סקופי כותב את הסיפור</h3>
+    <p>פרופיל לכל אחד (איך הוא רואה את עצמו מול מה שהצ'אט מראה), המילון הסודי, המתח, רגעי המפנה, פרסים ופתק אישי. עם הודעות אמיתיות מהצ'אט בתוך הטקסט.</p></div></div>
+    <div class="me-pick"><b>מי אתם בצ'אט?</b><span>סקופי ידבר אליכם ישירות.</span>
+      <div class="me-opts">${R.people.slice(0, 12).map(p => `<button class="pill" data-me="${esc(p.name)}" aria-pressed="${R.me === p.name}">${esc(dispName(p))}</button>`).join('')}<button class="pill" data-me="" aria-pressed="${!R.me}">אף אחד, רק מציץ 👀</button></div></div>
+    ${AI_PROXY ? '' : `<div class="ai-row"><input id="aiKey" type="password" placeholder="מפתח API של Anthropic (sk-ant-...)" autocomplete="off" spellcheck="false"></div>
+      <label class="toggle" style="margin-top:10px"><input type="checkbox" id="aiRemember"><span style="display:inline">לזכור את המפתח בדפדפן הזה</span></label>
+      <p class="ai-note">ההודעות נשלחות ישירות מהדפדפן שלכם ל־Anthropic, ולא עוברות דרכנו. העלות נגבית מחשבון ה־API שלכם (בדרך כלל פחות מדולר לצ'אט ארוך).${anon ? ' במצב אנונימי נשלחים כינויים במקום שמות.' : ''}</p>`}
+    <button class="btn btn-pink" id="aiGo" style="margin-top:14px;width:100%">✨ לכתוב לי את הדוח המלא</button>
+    <div id="aiStatus" style="margin-top:12px"></div>
+  </div>`;
+}
+
+/* ---------- pre-written sample reports for the fictional demo chats ---------- */
+const P_ = text => ({ kind: 'paragraph', emoji: '', title: '', text, date: '', messages: [] });
+const C_ = (...msgs) => ({ kind: 'chat', emoji: '', title: '', text: '', date: '', messages: msgs.map(([from, text, time]) => ({ from, text, time })) });
+const TERM_ = (emoji, title, text, date) => ({ kind: 'term', emoji, title, text, date, messages: [] });
+const ITEM_ = (emoji, title, text, date = '') => ({ kind: 'item', emoji, title, text, date, messages: [] });
+const NOTE_ = (title, text) => ({ kind: 'note', emoji: '', title, text, date: '', messages: [] });
+const SEC_ = (key, emoji, title, intro, blocks) => ({ key, emoji, title, intro, blocks });
+
+const DEMO_REPORTS = {
+  crush: { demo: true, me: 'איתי',
+    headline: '🌙 שתי שאלות קטנות, שעה אחת בלילה, ובחור אחד שעונה "חח"',
+    one_liner: 'נועה כותבת מכתבי אהבה בתחפושת של שאלות, ואיתי עונה כמו מזכירה אוטומטית שמאוהבת בסתר.',
+    hook: [
+      'אם מישהו זר היה גולל בצ\'אט הזה, הוא היה בטוח שמדובר בשני אנשים שעובדים במשמרות הפוכות. אחת ערה תמיד, בעיקר בין חצות לשתיים, ושואלת שאלות שנשמעות כמו סקר שביעות רצון ("מה עשית בשבת?", "איזה מוזיקה אתה שומע עכשיו?"). השני עונה בשלוש מילים, אחרי תשע דקות, ובדרך כלל אחת מהן היא "חח".',
+      'אבל סקופי קרא את כל ההודעות, ויש פה משהו שהמספרים לבד מפספסים. **איתי, אתה עונה. כל פעם.** בשום שלב לא השארת אותה על "נקרא". ומי שבאמת לא מעוניין לא כותב "לילה טוב" בחזרה בשעה אחת וחצי בלילה.',
+    ],
+    cast: [
+      { name: 'נועה', emoji: '🦉', title: 'משמרת הלילה של הרגשות', line: 'שואלת "שאלה קטנה" שאף פעם לא באמת קטנה.' },
+      { name: 'איתי', emoji: '🗿', title: 'השגריר של המילה "סבבה"', line: 'עונה בדיוק מספיק כדי שהשיחה תמשיך, ולא מילה אחת יותר.' },
+    ],
+    sections: [
+      SEC_('profile', '🧠', 'הפרופיל: החוקרת הלילית מול הבטון המזוין', 'בצ\'אט הזה יש חלוקת תפקידים ברורה: אחת שואלת, אחד עונה. אבל מי שבאמת מחזיק את ההגה פה זה פחות ברור ממה שנדמה.', [
+        P_('**נועה** רואה את עצמה כמי ששומרת על דיסטנס קליל. היא "משועממת", היא "סתם" שואלת, הכל אגבי. אבל הצ\'אט מספר סיפור אחר לגמרי: יותר ממחצית ההודעות שלה נשלחו אחרי חצות, היא פותחת כמעט שלוש מתוך ארבע שיחות, וכל "סתם" שלה מגיע עם תיקון מיידי.'),
+        C_(['נועה', 'סתם 🙃', '01:21'], ['נועה', 'זאת אומרת לא סתם', '01:21']),
+        P_('זה כל הסיפור של נועה בשתי הודעות. היא מנסה להיות מגניבה, מחזיקה מעמד בדיוק שניה, ואז הכנות מנצחת. זה לא חולשה, זה הדבר הכי אמיץ בצ\'אט הזה.'),
+        P_('**ואז יש אותך, איתי.** אתה בטוח שאתה הבחור העסוק והמסתורי. "מחר עובד עד מאוחר", "היה יום ארוך", "לא יודע עוד". אבל תסתכל על זה מבחוץ: על כל שאלה שהיא שאלה ענית. לפעמים אחרי שבע דקות, לפעמים בשתי מילים, אבל ענית. אתה לא מסתורי, אתה פשוט חוסך מילים כאילו משלמים עליהן.'),
+        C_(['נועה', 'שאלה קטנה... מה עשית בשבת?', '01:13'], ['איתי', 'למה את שואלת 🤨', '01:20']),
+        P_('שבע דקות לחשוב, ובסוף ענית בשאלה. זה ההבדל ביניכם: היא רוצה לדעת, ואתה רוצה לדעת למה היא רוצה לדעת. שניכם בעצם שואלים את אותה שאלה.'),
+      ]),
+      SEC_('dictionary', '🗣️', 'המילון הסודי: איך מדברים בשתיים בלילה', 'לצ\'אט הזה יש שפה משלו. מבחוץ זה נראה כמו הודעות רגילות. מבפנים, כל מילה פה עושה עבודה כפולה.', [
+        TERM_('🔍', '"שאלה קטנה"', 'שאלה גדולה מאוד בתחפושת. מגיעה תמיד אחרי חצות ותמיד לפני שאלה על מה שעשית בסוף השבוע.', 'מופיע כבר מהשבוע הראשון, ומאז חוזר כמו טקס.'),
+        TERM_('🙃', '"סתם"', 'בשפת נועה: "לא סתם בכלל". בדרך כלל מגיע עם תיקון תוך פחות מדקה.', 'הרגע הקלאסי: "סתם 🙃" ומיד "זאת אומרת לא סתם".'),
+        TERM_('😅', '"חח"', 'בשפת איתי: "שמעתי, אהבתי, אין לי כוח להקליד יותר". יחידת הצחוק הבסיסית שלו.', 'הודעה מספר אחת שלו בכל הצ\'אט.'),
+        TERM_('📅', '"אולי בשבוע הבא"', 'כן, אבל בפחד. התשובה הקבועה של איתי לכל הזמנה.', 'נולד מתוך "בא לך לראות סרט מתישהו?"'),
+        TERM_('🌙', '"טוב לילה"', 'הסימן שנועה מוותרת להערב. איתי עונה "לילה טוב", כלומר את אותן מילים בסדר הפוך, וזה כנראה הכי רומנטי שהוא יכול.', ''),
+      ]),
+      SEC_('tension', '⚡', 'המתח: היא רוצה תאריך, הוא רוצה "אולי"', 'אין פה ריבים. יש פה משהו יותר מתיש: הזמנה שנשארת באוויר.', [
+        P_('הדפוס חוזר שוב ושוב. נועה זורקת הצעה קונקרטית, איתי עונה בתשובה שאי אפשר לריב איתה וגם אי אפשר לקבוע איתה כלום.'),
+        C_(['נועה', 'בא לך לראות סרט מתישהו?', '23:48'], ['איתי', 'אולי בשבוע הבא', '00:02']),
+        ITEM_('⏳', 'הטריגר: הזמנה עם תאריך', 'כל פעם שנועה מתקרבת לתוכנית אמיתית, זמן התגובה של איתי קופץ, והתשובה נהיית מעורפלת.'),
+        ITEM_('👻', 'הטריגר: "אתה תמיד נעלם לי"', 'נועה אומרת את זה בחיוך, אבל היא אומרת את זה הרבה. ואיתי, בדיוק אחרי זה, עונה מהר במיוחד. הוא שומע.'),
+      ]),
+      SEC_('turning_points', '🧭', 'רגעי המפנה', 'איך הגענו מ"ערה?" ל"זאת אומרת לא סתם".', [
+        ITEM_('🚪', 'הפתיחה', 'נועה פותחת את הצ\'אט בשעה שרוב האנשים כבר ישנים, ומגדירה את הטון לכל מה שיבוא אחר כך.', 'בהתחלה'),
+        C_(['נועה', 'ערה? 👀', '01:12'], ['איתי', 'ערב רגוע, את?', '01:15']),
+        ITEM_('🎬', 'ההזמנה הראשונה', 'בפעם הראשונה נועה עוברת משאלות להצעה. מכאן והלאה, כל שיחה נמדדת לפי השאלה אם זה יקרה.', 'באמצע'),
+        C_(['נועה', 'בא לך לראות סרט מתישהו?', '22:30'], ['איתי', 'אולי בשבוע הבא', '22:41']),
+        ITEM_('💗', 'הסדק בשריון', 'איתי צוחק באמת. לא "חח", אלא "חחחח באמת". אצלו זו כמעט הצהרת אהבה.', 'בחודש האחרון'),
+        C_(['נועה', 'אני חושבת שזה הכי מצחיק שראיתי השבוע', '00:40'], ['איתי', 'חחחח באמת', '00:42'], ['איתי', 'וואלה מצחיק', '00:42']),
+      ]),
+      SEC_('awards', '🏅', 'טקס הפרסים', 'בלי נאומי תודה, בבקשה.', [
+        ITEM_('🦉', 'פרס משמרת הלילה', 'הזוכה: נועה. רוב ההודעות שלה נשלחו כשכל המדינה ישנה.'),
+        ITEM_('🧊', 'פרס הקור המחושב', 'הזוכה: איתי. חציון של תשע דקות לתשובה, גם כשהשאלה היא "מה איתך היום?"'),
+        ITEM_('🔁', 'פרס התיקון העצמי', 'הזוכה: נועה, על "סתם 🙃" ואחריו "זאת אומרת לא סתם", הרגע הכי כן בצ\'אט.'),
+        ITEM_('📅', 'פרס "אולי בשבוע הבא"', 'הזוכה: איתי. השבוע הבא עדיין לא הגיע.'),
+      ]),
+      SEC_('unsaid', '🤫', 'מה שאף אחד לא אומר בקול', '', [
+        P_('נועה לא תגיד "אני מחכה לך", אז היא שואלת מה עשית בשבת. איתי לא יגיד "גם אני", אז הוא עונה כל פעם, גם באחת בלילה. שניכם מחכים שהשני יגיד את זה ראשון, ובינתיים אתם מדברים על מוזיקה.'),
+      ]),
+      SEC_('predictions', '🔮', 'התחזיות של סקופי', '', [
+        ITEM_('🎬', 'הסרט יקרה', 'אבל רק אחרי שנועה תפסיק לשאול ואיתי ייאלץ להציע בעצמו.'),
+        ITEM_('😂', '"חח" יתפתח ל"חחחח"', 'זה כבר קרה פעם אחת. סקופי מזהה מגמה.'),
+        ITEM_('🌙', 'עוד "ערה?" אחד לפחות', 'השבוע. בסביבות 01:10.'),
+      ]),
+      SEC_('notes', '💌', 'פתק לכל אחד', '', [
+        NOTE_('נועה', 'אל תפסיקי לשאול. אבל פעם אחת, תני לו לשאול ראשון ותראי מה קורה. השקט הזה יעבוד לטובתך.'),
+        NOTE_('איתי', 'היא לא באמת רוצה לדעת מה עשית בשבת. היא רוצה לדעת אם חשבת עליה. "אולי בשבוע הבא" זו לא תשובה, זה דחיינות עם אימוג\'י.'),
+      ]),
+    ],
+    verdict: 'זה לא צ\'אט של מישהי שרודפת אחרי מישהו שלא מעוניין. זה צ\'אט של שני אנשים שמעוניינים, ורק אחת מהם מוכנה להודות בזה. איתי, הכדור אצלך.',
+  },
+
+  friends: { demo: true, me: null,
+    headline: '🍻 מנכ"ל אחד, צלמת חתונות, ובחור שעדיין לא ראה את ההודעה',
+    one_liner: 'דניאל מנהל את הקבוצה כמו אירוע חברה, ושאר החבר\'ה מתייחסים לזה כמו להמלצה.',
+    hook: [
+      'מי שנכנס לקבוצה הזאת בפעם הראשונה יחשוב שזה ערוץ תפעול של מסעדה. "מי בא הערב?", "סגרתי ל־21:00", "מי מביא רמקול", ואז "נו??". מתחת לזה יש זרם קבוע של תמונות שאף אחד לא ביקש, ובחור אחד שמגיב לכל דבר עם 👍.',
+      'אבל בין כל ההודעות האלה מסתתר משהו שקשה לזייף: כבר יותר מארבעה חודשים, כמעט כל שבוע, מישהו מכם דואג שתיפגשו. וזה לא קורה מעצמו.',
+    ],
+    cast: [
+      { name: 'דניאל', emoji: '📋', title: 'המנכ"ל בהתנדבות', line: 'פותח את רוב השיחות, סוגר את רוב השולחנות, ומתעצבן כשאין תשובה תוך דקה.' },
+      { name: 'מאיה', emoji: '🎂', title: 'מחלקת מצב הרוח', line: 'צוחקת על הכל, מגיעה באיחור עם עוגה, ואומרת "אוהבת אתכם" בלי בושה.' },
+      { name: 'שירה', emoji: '📸', title: 'הארכיון הלאומי', line: 'כל ערב קורה פעמיים: פעם אחת במציאות ופעם אחת בגלריה שלה.' },
+      { name: 'עומר', emoji: '🌙', title: 'משמרת הלילה', line: 'מגיע לשיחה כשהיא כבר נגמרה ושואל "רגע מה קרה פה".' },
+      { name: 'גיל', emoji: '👍', title: 'האגודל', line: 'משתתף נאמן במאמץ מינימלי.' },
+    ],
+    sections: [
+      SEC_('profile', '🧠', 'הפרופיל: מי מחזיק את הקבוצה הזאת בחיים', 'כל קבוצת חברים צריכה מישהו שעושה את העבודה השחורה. בקבוצה הזאת ברור לגמרי מי זה, וברור לגמרי מי נהנה מזה.', [
+        P_('**דניאל** רואה את עצמו כאחד החבר\'ה שפשוט אוהב להיפגש. בפועל הוא מנהל את הקבוצה. שליש מכל ההודעות הן שלו, הוא פותח את רוב השיחות, והוא היחיד שיודע להזמין שולחן. כשאין תשובה, הוא לא מוותר. הוא מסלים.'),
+        C_(['דניאל', 'מי בא הערב?', '18:02'], ['דניאל', 'חבר׳ה יאללה תענו', '18:31'], ['דניאל', 'נו??', '18:47'], ['מאיה', 'אני בפנים 🙌', '18:49']),
+        P_('ארבעים וחמש דקות של תחנונים, ומי שמצילה את המצב היא, כמובן, מאיה. בלעדיה דניאל היה עדיין כותב "נו??" לחלל הריק.'),
+        P_('**מאיה** בטוחה שהיא "תמיד מאחרת". והיא באמת מאחרת. אבל היא גם התשובה הראשונה כמעט לכל הצעה, ומי שמחזירה את הקבוצה לחיים עם "חחחחחח מת". אם דניאל הוא המנוע, מאיה היא הדלק.'),
+        P_('**שירה** חושבת שהיא שולחת "כמה תמונות". שליש מההודעות שלה הן מדיה. היא לא מדברת הרבה, היא מתעדת. ובזכותה יש לקבוצה הזאת זיכרון.'),
+        P_('**עומר** הוא היחיד שהקבוצה הזאת מתעוררת אליו בלילה. הוא עונה הכי לאט, מתנצל הכי הרבה, ובכל זאת מצליח לא לפספס אף ערב. **וגיל**, גיל אומר "אחלה". זה הכל. וזה גם סוג של נאמנות.'),
+        C_(['עומר', 'רגע מה קרה פה', '01:14'], ['עומר', 'עדיין ערים?', '01:15']),
+      ]),
+      SEC_('dictionary', '🗣️', 'המילון הסודי של יום חמישי', 'חמש מילים שאם תכתבו אותן בכל קבוצה אחרת, אף אחד לא יבין למה כולם צוחקים.', [
+        TERM_('❓', '"נו??"', 'השלב השלישי בפרוטוקול של דניאל. אחריו יש רק שתיקה מאוכזבת.', 'מופיע אחרי כל "מי בא הערב?" שלא קיבל תשובה תוך חצי שעה.'),
+        TERM_('🙏', '"סורי לא ראיתי"', 'החתימה הרשמית של עומר. נשלח בדרך כלל אחרי שהתוכנית כבר נסגרה, ולפעמים אחרי שכולם כבר שם.', ''),
+        TERM_('🎂', '"אני מביאה עוגה"', 'ההתנצלות המובנית של מאיה על האיחור שעוד יגיע.', ''),
+        TERM_('📸', '<המדיה לא נכללה>', 'ההודעה הכי נפוצה של שירה. מבחינת הקבוצה, זה "תראו כמה יפים היינו".', ''),
+        TERM_('👍', '👍', 'כל המילון של גיל בתו אחד. יכול להיות "כן", "לא", "אולי" או "קראתי ואני לא מגיע".', ''),
+      ]),
+      SEC_('tension', '⚡', 'המתח: דניאל מול כל השאר', 'אין דרמה גדולה, אבל יש חיכוך קבוע אחד, והוא קורה כמעט כל שבוע.', [
+        P_('דניאל רוצה תשובה עכשיו. שאר הקבוצה רוצה תשובה מתישהו. התוצאה היא הסלמה הדרגתית שכולם כבר מכירים בעל פה.'),
+        ITEM_('⏰', 'הטריגר: "סגרתי ל־21:00"', 'דניאל סוגר, ורק אחר כך שואל מי מגיע. עומר מגיב עם "אני אגיע אם אסיים", כלומר אולי.'),
+        ITEM_('😶', 'הטריגר: השתיקה של גיל', 'כשגיל לא שולח אפילו 👍, דניאל מתחיל לספור מקומות בשולחן מחדש.'),
+      ]),
+      SEC_('moments', '✨', 'רגעים שלא נשכחים', '', [
+        ITEM_('😂', 'הכי מצחיק', 'הבוקר שאחרי, כשמאיה עדיין צוחקת וכולם מנסים להבין על מה.'),
+        C_(['מאיה', 'איזה ערב היה אתמול חחח', '10:12'], ['שירה', 'הנה התמונות מאתמול', '10:15'], ['מאיה', '😂😂😂', '10:16']),
+        ITEM_('❤️', 'הכי מתוק', 'מאיה כותבת את מה שכולם מרגישים ואף אחד אחר לא כותב.'),
+        C_(['מאיה', 'אוהבת אתכם ❤️', '23:58'], ['שירה', 'איזה יפים יצאנו 😍', '23:59']),
+      ]),
+      SEC_('awards', '🏅', 'טקס הפרסים', 'השולחן שמור ל־21:00, אז נעשה את זה מהר.', [
+        ITEM_('📋', 'פרס מפעל חיים', 'הזוכה: דניאל. בלי ההודעות שלו, הקבוצה הזאת הייתה ארכיון תמונות של שירה.'),
+        ITEM_('🎂', 'פרס "מגיעה קצת באיחור"', 'הזוכה: מאיה. אבל עם עוגה, אז זה בסדר.'),
+        ITEM_('📸', 'פרס הפפראצי', 'הזוכה: שירה. אף ערב לא נגמר בלי גלריה.'),
+        ITEM_('🦉', 'פרס "רגע מה קרה פה"', 'הזוכה: עומר, שמגיע לכל שיחה אחרי שהיא נגמרה.'),
+        ITEM_('👍', 'פרס החיסכון במילים', 'הזוכה: גיל. 5% מההודעות, 100% מהנוכחות בשולחן.'),
+      ]),
+      SEC_('unsaid', '🤫', 'מה שאף אחד לא אומר בקול', '', [
+        P_('דניאל עייף מלהיות זה שתמיד מארגן, ולא יודה בזה אף פעם. ה"נו??" שלו הוא לא כעס, זה פחד קטן שאם הוא יפסיק לכתוב, אף אחד לא יכתוב במקומו. אז מישהו מכם, שבוע אחד, תכתוב "מי בא הערב?" לפניו.'),
+      ]),
+      SEC_('predictions', '🔮', 'התחזיות של סקופי', '', [
+        ITEM_('📅', 'דניאל יקבע', 'ביום חמישי הבא, בסביבות שש בערב. שלושה "נו??" לפחות.'),
+        ITEM_('📸', 'שירה תשלח', 'גלריה של 40 תמונות שאף אחד לא יעבור עליהן, וכולם יחכו להן.'),
+        ITEM_('🙏', 'עומר יגיד', '"סורי לא ראיתי". השאלה היא רק על איזו הודעה.'),
+      ]),
+      SEC_('notes', '💌', 'פתק לכל אחד', '', [
+        NOTE_('דניאל', 'בלעדיך אין קבוצה. אבל פעם אחת, תשתוק ותראה מי מרים את הכפפה. אתה עלול להיות מופתע לטובה.'),
+        NOTE_('מאיה', 'ה"אוהבת אתכם" שלך עושה יותר ממה שאת חושבת. תמשיכי, גם אם את היחידה שאומרת את זה.'),
+        NOTE_('שירה', 'בעוד עשר שנים, התמונות שלך יהיו הדבר היחיד שיישאר מהתקופה הזאת. כתבי לפעמים גם משפט.'),
+        NOTE_('עומר', 'יש התראות בטלפון. הן עובדות.'),
+        NOTE_('גיל', 'אגודל זה לא רגש. פעם אחת, תכתוב משפט שלם. רק כדי לראות את הפנים של כולם.'),
+      ]),
+    ],
+    verdict: 'זאת קבוצה שבנויה על אדם אחד שמארגן, אחת ששמחה, אחת שמתעדת, אחד שמאחר ואחד שמהנהן. זה נשמע כאוטי, אבל זה עובד כבר חודשים, וזה יותר ממה שרוב הקבוצות מצליחות.',
+  },
+};
+
+/* =========================================================
+   Flow
+   ========================================================= */
+const LOAD_STEPS = ['פותח את הקובץ', 'מפרק הודעות', 'מודד זמני תגובה', 'סופר אימוג\'ים', 'מחלק תארים', 'כותב את פסק הדין'];
+async function run(getMessages) {
+  const err = $('#err'); err.classList.add('hidden');
+  show('loading');
+  const bar = $('#loadBar'), msg = $('#loadMsg');
+  let i = 0;
+  const tick = setInterval(() => { i = Math.min(i + 1, LOAD_STEPS.length - 1); msg.textContent = LOAD_STEPS[i]; bar.style.width = `${(i + 1) / LOAD_STEPS.length * 100}%`; }, 320);
+  msg.textContent = LOAD_STEPS[0]; bar.style.width = '8%';
+  try {
+    const [{ messages, title, ai }] = await Promise.all([getMessages(), sleep(1500)]);
+    if (!messages || !messages.length) throw new Error('לא הצלחתי לזהות הודעות בקובץ. ודאו שזה ייצוא צ\'אט מוואטסאפ, טלגרם, אינסטגרם או מסנג\'ר.');
+    R = analyze(messages, title);
+    if (ai) { R.ai = ai; R.me = ai.me || null; }
+    anon = false; $('#anonToggle').checked = false;
+    clearInterval(tick); bar.style.width = '100%';
+    await sleep(250);
+    show('reportView');
+    renderReport();
+    openStory(0);
+  } catch (e) {
+    clearInterval(tick);
+    show('landing');
+    err.textContent = e.message || 'משהו השתבש בקריאת הקובץ.';
+    err.classList.remove('hidden');
+    $('#start').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// file inputs
+$('#pickBtn').onclick = () => $('#fileInput').click();
+$('#fileInput').onchange = e => { const files = [...e.target.files]; e.target.value = ''; if (files.length) run(() => readInputs(files)); };
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => { const files = [...e.dataTransfer.files]; if (files.length) run(() => readInputs(files)); });
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { if (!drop.contains(e.target) && !$('#landing').classList.contains('hidden')) { e.preventDefault(); const files = [...e.dataTransfer.files]; if (files.length) run(() => readInputs(files)); } });
+$('#pasteToggle').onclick = () => { $('#pasteBox').classList.toggle('hidden'); $('#pasteArea').focus(); };
+$('#pasteGo').onclick = () => { const t = $('#pasteArea').value; if (!t.trim()) return; run(async () => { const r = parseText(t); return r || { messages: [], title: null }; }); };
+
+// demos
+$('#demoList').innerHTML = DEMOS.map(d => `<button class="demo-item" data-demo="${d.id}">
+  <div class="demo-av" style="background:${d.bg}">${d.av}</div>
+  <div class="demo-main"><div class="demo-top"><span class="demo-name">${esc(d.title)}<span class="tag ${d.tag[1]}">${esc(d.tag[0])}</span></span><span class="demo-time">${esc(d.time)}</span></div>
+  <div class="demo-msg">${esc(d.last)}</div></div>
+  <span class="demo-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+</button>`).join('');
+$$('[data-demo]').forEach(b => b.onclick = () => { const d = DEMOS.find(x => x.id === b.dataset.demo); run(async () => ({ messages: buildDemo(d), title: d.title + ' (דוגמה)', ai: DEMO_REPORTS[d.id] || null })); });
+
+// nav
+$('#backBtn').onclick = () => { show('landing'); };
+$$('[data-home-link]').forEach(a => a.addEventListener('click', () => { if ($('#landing').classList.contains('hidden')) show('landing'); }));
+$('[data-home]').onclick = e => { e.preventDefault(); show('landing'); };
+
+// guide tabs
+$$('.tab').forEach(t => t.onclick = () => {
+  $$('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  $$('.tab-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== t.dataset.tab));
+});
+if (/android/i.test(navigator.userAgent)) $('[data-tab="wa-and"]').click();
+
+// reveal on scroll
+let io;
+function observeReveal() {
+  if (!('IntersectionObserver' in window)) { $$('.reveal').forEach(e => e.classList.add('in')); return; }
+  io = io || new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 });
+  $$('.reveal:not(.in)').forEach(e => io.observe(e));
+}
+observeReveal();
+</script>
+</body>
+</html>
