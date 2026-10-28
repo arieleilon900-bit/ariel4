@@ -1131,7 +1131,8 @@ function fmtDur(ms) {
   if (m < 60) return `${Math.round(m)} דק׳`;
   const h = m / 60;
   if (h < 24) return `${h < 10 ? h.toFixed(1).replace('.0', '') : Math.round(h)} שע׳`;
-  return `${Math.round(h / 24)} ימים`;
+  const d = Math.round(h / 24);
+  return d === 1 ? 'יום אחד' : d === 2 ? 'יומיים' : `${d} ימים`;
 }
 function fmtDate(d) { return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`; }
 function dayKey(d) { return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
@@ -2514,7 +2515,7 @@ function blockHTML(b) {
 const SEC_ICON = { reactions: '🔮', verdicts: '🔍', versus: '🥊', profile: '🧠', dictionary: '🗣️', tension: '⚡', turning_points: '🧭', moments: '✨', awards: '🏅', unsaid: '🤫', predictions: '🔮', notes: '💌' };
 const SEC_SHORT = { reactions: 'התחזית', verdicts: 'המסקנות', versus: 'הדמות מול הדמות', profile: 'הפרופיל', dictionary: 'המילון הסודי', tension: 'המתח', turning_points: 'רגעי המפנה', moments: 'רגעים', awards: 'פרסים', unsaid: 'מה שלא נאמר', predictions: 'תחזיות', notes: 'פתקים' };
 
-const SEC_ORDER = ['person', 'profile', 'verdicts', 'dictionary', 'tension', 'turning_points', 'moments', 'unsaid', 'predictions', 'versus', 'notes', 'reactions', 'awards'];
+const SEC_ORDER = ['person', 'profile', 'verdicts', 'dictionary', 'tension', 'turning_points', 'moments', 'unsaid', 'predictions', 'versus', 'notes', 'awards'];
 function fullReportHTML(rep) {
   // awards always close the report
   const secs = [...(rep.sections || [])].sort((a, b) => (SEC_ORDER.indexOf(a.key) + 1 || 50) - (SEC_ORDER.indexOf(b.key) + 1 || 50));
@@ -3240,9 +3241,12 @@ function inferGenders(r) {
 }
 // "היוזם/ת" -> "היוזם" / "היוזמת", "מלך/ת" -> "מלכת", "בלעדיו/ה" -> "בלעדיה"
 const FINALS = { 'ך': 'כ', 'ם': 'מ', 'ן': 'נ', 'ף': 'פ', 'ץ': 'צ' };
+const G_WORDS = [['את/ה', 'אתה', 'את'], ['זה/זו', 'זה', 'זו'], ['הוא/היא', 'הוא', 'היא'], ['לו/לה', 'לו', 'לה'], ['אותו/אותה', 'אותו', 'אותה'], ['שלו/שלה', 'שלו', 'שלה'], ['ממנו/ממנה', 'ממנו', 'ממנה'], ['אליו/אליה', 'אליו', 'אליה'], ['בו/בה', 'בו', 'בה']];
 function genderize(text, g) {
   if (!g) return String(text);
-  return String(text).replace(/([\u05d0-\u05ea]+)\/([\u05d0-\u05ea]{1,3})(?![\u05d0-\u05ea])/g, (all, base, suf) => {
+  let t = String(text);
+  for (const [both, m, f] of G_WORDS) t = t.split(both).join(g === 'f' ? f : m);
+  return t.replace(/([\u05d0-\u05ea]+)\/([\u05d0-\u05ea]{1,3})(?![\u05d0-\u05ea])/g, (all, base, suf) => {
     if (g === 'm') return base;
     if (base.endsWith('ו') && suf === 'ה') return base.slice(0, -1) + 'ה';
     const last = base.slice(-1), b = FINALS[last] ? base.slice(0, -1) + FINALS[last] : base;
@@ -3254,6 +3258,10 @@ const gx = (p, m, f) => m === f ? m : p.g === 'f' ? f : p.g === 'm' ? m : `${m}/
 function buildLocalReport(r) {
   inferGenders(r);
   const msgs = r.msgs, P = r.people.filter(p => p.msgs >= 3), main = P.slice(0, 8);
+  const seed = (r.total * 7 + P.reduce((x, q) => x + q.name.length * 13 + q.msgs, 0)) % 997;
+  const pick = (arr, k) => arr[(((k + seed) % arr.length) + arr.length) % arr.length];
+  const usedT = new Set();
+  const uniq = (...cands) => { for (const c of cands.flat()) if (c && !usedT.has(c)) { usedT.add(c); return c; } return cands.flat().find(Boolean); };
   const meP = r.me ? r.people.find(p => p.name === r.me) : null;
   const addressAll = !r.isPair;
   const isYou = p => p === meP || addressAll;
@@ -3348,7 +3356,7 @@ function buildLocalReport(r) {
     romantic: p => `${nm(p)} ${gx(p, 'אומר', 'אומרת')} "אוהב/ת" יותר מפרסומת לשוקולד. ${fmt(p.love)} הודעות עם לב. אף אחד לא מתלונן, אבל כולם שמו לב.`,
     photo: p => `הגלריה של ${nm(p)} עובדת שעות נוספות. ${fmt(p.media)} קבצים. מילים? למה, כשאפשר לשלוח עוד צילום מסך.`,
     brief: p => `${nm(p)} ${gx(p, 'כותב', 'כותבת')} כאילו כל מילה עולה כסף, ונראה ש${V(p).he} בתקציב. ${p.avgWords.toFixed(1)} מילים להודעה. "סבבה" זה לא רגש.`,
-    polite: p => `${nm(p)} ${gx(p, 'אמר', 'אמרה')} "תודה" ${fmt(p.thanks)} פעמים. זה כבר לא נימוס, זה תסמונת.`,
+    polite: p => `${nm(p)} ${gx(p, 'אומר', 'אומרת')} "תודה" על הכל: ${fmt(p.thanks)} פעמים. זה כבר לא נימוס, זה תסמונת.`,
     sorry: p => `${nm(p)} ${gx(p, 'מתנצל', 'מתנצלת')} כל כך הרבה שזה נשמע כמו מנטרה. ${fmt(p.sorry)} "סורי". על מה בדיוק, ומתי זה ייגמר?`,
     quiet: p => `${nm(p)} בצ'אט כמו התאורה באולם קולנוע: יודעים שהיא שם, אף אחד לא מסתכל עליה. ${(p.share * 100).toFixed(1)}% מההודעות. מותר גם לכתוב.`,
     steady: p => `${nm(p)} כל כך ${gx(p, 'יציב', 'יציבה')} שזה כמעט חשוד. בלי דרמה, בלי קיצוניות, בלי הפתעות. מה ${V(p).he} ${gx(p, 'מסתיר', 'מסתירה')}?`,
@@ -3395,7 +3403,7 @@ function buildLocalReport(r) {
   const kindTail = { couple: 'שני אנשים שלא מסוגלים להפסיק לדבר אחד עם השנייה', crush: 'שני אנשים שמשחקים אותה אדישים ולא מצליחים', friend: 'שני חברים שיודעים אחד על השני יותר מדי', group: 'קבוצה של חברים שמנהלת מדינה קטנה', family: 'משפחה שמתאמת ארוחת שישי כמו מבצע צבאי', ex: 'שני אנשים שהיה ביניהם הרבה, ועכשיו פחות', work: 'צוות שעובד קשה, או לפחות כותב על זה הרבה' };
   const hook = [
     ...(r.isPair ? [] : [`שלום ל${anon ? 'כולם' : r.title.replace(/\s*\(דוגמה\)$/, '')}. סקופי כאן. קראתי את כל ${fmt(r.total)} ההודעות שלכם, כולל אלה שקיוויתם שאף אחד לא יקרא עד הסוף. הדוח הזה לא עבר עריכה, ואף אחד לא יוצא ממנו נקי.`]),
-    `אם מישהו זר היה גולל בצ'אט הזה, הוא היה רואה ${fmt(r.total)} הודעות${r.timed ? ` ב־${fmt(r.spanDays)} ימים, שיא פעילות ב־${hh}${r.peakHour < 5 ? ' בלילה' : ''}` : ''}, והמון ${topE}. הוא היה חושב שמדובר ב${kindTail[r.kind] || (r.isPair ? 'שני אנשים שיש להם הרבה מה להגיד' : 'קבוצה שיש לה הרבה מה להגיד')}.`,
+    `${['אם מישהו זר היה גולל בצ\'אט הזה, הוא היה רואה', 'תדמיינו שמישהו מוצא את הטלפון ופותח את הצ\'אט הזה. הוא היה רואה', 'מבחוץ זה נראה פשוט:', 'בואו נתחיל מהמספרים היבשים:'][seed % 4]} ${fmt(r.total)} הודעות${r.timed ? ` ב־${fmt(r.spanDays)} ימים, שיא פעילות ב־${hh}${r.peakHour < 5 ? ' בלילה' : ''}` : ''}, והמון ${topE}. הוא היה חושב שמדובר ב${kindTail[r.kind] || (r.isPair ? 'שני אנשים שיש להם הרבה מה להגיד' : 'קבוצה שיש לה הרבה מה להגיד')}.`,
     `אבל סקופי קרא כל הודעה, ומאחורי המספרים יש משהו פשוט יותר. ${r.timed && r.bestStreak > 2 ? `${fmt(r.bestStreak)} ימים ברצף שבהם מישהו פה לא ויתר. ` : ''}${P.reduce((s, p) => s + p.love, 0) > 2 ? `${fmt(P.reduce((s, p) => s + p.love, 0))} הודעות עם לבבות, שאף אחד לא יודה שהוא שלח. ` : ''}${P.reduce((s, p) => s + p.laughs, 0) > 5 ? `ו־${fmt(P.reduce((s, p) => s + p.laughs, 0))} פעמים שמישהו פה צחק באמת.` : ''}`,
   ];
 
@@ -3466,7 +3474,6 @@ function buildLocalReport(r) {
   const chapters = [];
   const chars = (r.isPair ? P.slice(0, 2) : P.slice(0, 5));
   const usedAngles = new Map();               // angle id -> times used, so each character gets different angles
-  const pick = (arr, k) => arr[((k % arr.length) + arr.length) % arr.length];
   // a title made from the person's two strongest traits, e.g. "הינשופה ששואלת הכל"
   const TRAIT_TAGS = [
     ['owl', q => q.nightRate, q => `שלא ${gx(q, 'ישן', 'ישנה')}`],
@@ -3625,7 +3632,8 @@ function buildLocalReport(r) {
     // fear
     const fear = FEARS.map(f => ({ f, s: f.score(p) })).filter(x => x.s > 1.15).sort((x, y) => y.s - x.s)[0];
     if (fear) list.push({ id: 'fear', s: fear.s * 1.5, build: () => {
-      const t = pick([`ממה ${sub} באמת ${gx(p, 'מפחד', 'מפחדת')}`, 'הפחד שמאחורי ההודעות', `הנקודה הרגישה של ${you ? 'ך' : p.name}`.replace('של ך', 'שלך'), 'מה מסתתר מתחת'], k);
+      const FT = { ignored: `${fmt(p.doubles)} הודעות שנייה, ופחד אחד`, too_interested: `${fmtDur(p.rt)} של המתנה מחושבת`, dies: `${fmt(p.starts)} פתיחות, ושאלה אחת שאסור לשאול`, exposed: `${p.avgWords.toFixed(1)} מילים, ואף אחת לא מיותרת`, burden: `${fmt(p.sorry)} פעמים "סורי"`, outside: `${fmt(p.questions)} שאלות, ופחד אחד להישאר בחוץ`, night: `${Math.round(p.nightRate * 100)}% אחרי חצות`, said_too_much: `${fmt(p.deleted)} הודעות שנעלמו`, serious: `${fmt(p.laughs)} פעמים "חחח" כשריון`, unheard: `${(p.share * 100).toFixed(1)}% מהקול בצ'אט`, not_mutual: `${fmt(p.love)} לבבות ושאלה אחת`, words: `${p.topEmoji[0] || '🙂'} במקום מילים`, misunderstood: `${fmt(p.longest.split(/\s+/).length)} מילים כדי שיבינו` };
+      const t = uniq(FT[fear.f.id], `ממה ${sub} באמת ${gx(p, 'מפחד', 'מפחדת')}`);
       const out = [item('😨', t, fear.f.text(p))];
       const fi = fear.f.find(p);
       if (fi >= 0) out.push(chat(fear.f.id === 'misunderstood' ? [bub(msgs[fi])] : around(fi, 1, 1)));
@@ -3639,32 +3647,32 @@ function buildLocalReport(r) {
     if (rel(p, q => q.laughRate) > 1.3 && rel(p, q => q.loveRate) < .7) C.push(`${sub} ${gx(p, 'צוחק', 'צוחקת')} על הכל, חוץ מרגשות. שם פתאום נהיה שקט.`);
     if (p.share > 1.2 / n0() && rel(p, q => q.qRate) < .7) C.push(`${sub} ${gx(p, 'מדבר', 'מדברת')} הרבה ו${gx(p, 'שואל', 'שואלת')} מעט. הצ'אט שומע ${you ? 'אותך' : gx(p, 'אותו', 'אותה')} מצוין, אבל ${sub} ${gx(p, 'שומע', 'שומעת')} אותו?`);
     if (p.rt != null && rel(p, q => 1 / Math.max(q.rt || 1e9, 1e4)) > 1.3 && p.avgWords < 4) C.push(`${sub} ${gx(p, 'עונה', 'עונה')} מהר, אבל קצר. נוכחות מלאה, תוכן מינימלי.`);
-    if (C.length) list.push({ id: 'contra', s: 2.4, build: () => [item('🌓', pick(['הסתירה', 'מה לא מסתדר פה', `שני הצדדים של ${you ? 'ך' : p.name}`.replace('של ך', 'שלך')], k + 1), C[0])] });
+    if (C.length) list.push({ id: 'contra', s: 2.4, build: () => [item('🌓', uniq(`${p.name} נגד ${p.name}`, `שני הצדדים של ${p.name}`), C[0])] });
     // then vs now
-    if (r.timed && Math.abs(p.shift || 0) > .06) list.push({ id: 'shift', s: Math.abs(p.shift) * 30, build: () => [item(p.shift > 0 ? '📈' : '📉', pick([`${you ? 'אתה' : p.name} אז ועכשיו`.replace('אתה', you ? Y.He : 'אתה'), 'מה השתנה', 'הגרף לא משקר'], k + 2), p.shift > 0 ? `בהתחלה החלק ${Y.his} בשיחה היה קטן. היום ${sub} בלב העניינים: גידול של ${Math.round(p.shift * 100)} נקודות אחוז. משהו גורם ${you ? 'לך' : gx(p, 'לו', 'לה')} להתקרב.` : `בהתחלה החלק ${Y.his} בשיחה היה גדול. היום פחות: ירידה של ${Math.round(-p.shift * 100)} נקודות אחוז. ${gx(p, 'עסוק', 'עסוקה')}, או ${gx(p, 'מתרחק', 'מתרחקת')}?`)] });
+    if (r.timed && Math.abs(p.shift || 0) > .06) list.push({ id: 'shift', s: Math.abs(p.shift) * 30, build: () => [item(p.shift > 0 ? '📈' : '📉', uniq(`${p.name}: ${Math.round((p.h1 / Math.max(1, P.reduce((x, q) => x + q.h1, 0))) * 100)}% בהתחלה, ${Math.round((p.h2 / Math.max(1, P.reduce((x, q) => x + q.h2, 0))) * 100)}% היום`), p.shift > 0 ? `בהתחלה החלק ${Y.his} בשיחה היה קטן. היום ${sub} בלב העניינים: גידול של ${Math.round(p.shift * 100)} נקודות אחוז. משהו גורם ${you ? 'לך' : gx(p, 'לו', 'לה')} להתקרב.` : `בהתחלה החלק ${Y.his} בשיחה היה גדול. היום פחות: ירידה של ${Math.round(-p.shift * 100)} נקודות אחוז. ${gx(p, 'עסוק', 'עסוקה')}, או ${gx(p, 'מתרחק', 'מתרחקת')}?`)] });
     // night self vs day self
     const night = msgs.filter(m => m.from === p.name && isText(m) && m.t && m.t.getHours() < 5);
     const day = msgs.filter(m => m.from === p.name && isText(m) && m.t && m.t.getHours() >= 8 && m.t.getHours() < 20);
     if (night.length >= 8 && day.length >= 8) {
       const aw = arr => arr.reduce((x, m) => x + m.text.split(/\s+/).length, 0) / arr.length;
       const nw = aw(night), dw = aw(day);
-      if (nw > dw * 1.25 || nw < dw * .75) list.push({ id: 'night', s: 2 + Math.abs(Math.log(nw / dw)) * 3, build: () => [item('🌙', pick([`${you ? 'הגרסה הלילית שלך' : p.name + ' של הלילה'}`, 'מה שקורה אחרי חצות', 'שתי משמרות'], k + 3), nw > dw ? `ביום ${sub} ${gx(p, 'כותב', 'כותבת')} ${dw.toFixed(1)} מילים להודעה. אחרי חצות, ${nw.toFixed(1)}. בלילה ${sub} ${gx(p, 'נפתח', 'נפתחת')}, ומה שלא נאמר באור יום פתאום נכתב.` : `ביום ${sub} ${gx(p, 'כותב', 'כותבת')} ${dw.toFixed(1)} מילים להודעה, ובלילה רק ${nw.toFixed(1)}. הלילה ${Y.his} שקט וקצר, ולפעמים זה אומר יותר.`)] });
+      if (nw > dw * 1.25 || nw < dw * .75) list.push({ id: 'night', s: 2 + Math.abs(Math.log(nw / dw)) * 3, build: () => [item('🌙', uniq(`${dw.toFixed(1)} מילים ביום, ${nw.toFixed(1)} בלילה`), nw > dw ? `ביום ${sub} ${gx(p, 'כותב', 'כותבת')} ${dw.toFixed(1)} מילים להודעה. אחרי חצות, ${nw.toFixed(1)}. בלילה ${sub} ${gx(p, 'נפתח', 'נפתחת')}, ומה שלא נאמר באור יום פתאום נכתב.` : `ביום ${sub} ${gx(p, 'כותב', 'כותבת')} ${dw.toFixed(1)} מילים להודעה, ובלילה רק ${nw.toFixed(1)}. הלילה ${Y.his} שקט וקצר, ולפעמים זה אומר יותר.`)] });
     }
     // ritual
-    if (p.gm + p.gn >= 4) list.push({ id: 'ritual', s: 1.6 + (p.gm + p.gn) / 20, build: () => [item(p.gm >= p.gn ? '☀️' : '🌙', pick(['הטקס הקבוע', 'משהו שאפשר לסמוך עליו', 'השעון הביולוגי של הצ\'אט'], k + 4), `${p.gm ? `${fmt(p.gm)} פעמים "בוקר טוב"` : ''}${p.gm && p.gn ? ' ו־' : ''}${p.gn ? `${fmt(p.gn)} פעמים "לילה טוב"` : ''}. ${sub} ${gx(p, 'פותח', 'פותחת')} או ${gx(p, 'סוגר', 'סוגרת')} את היום של כולם, גם כשאף אחד לא ביקש.`)] });
+    if (p.gm + p.gn >= 4) list.push({ id: 'ritual', s: 1.6 + (p.gm + p.gn) / 20, build: () => [item(p.gm >= p.gn ? '☀️' : '🌙', uniq(p.gm >= p.gn ? `${fmt(p.gm)} בקרים טובים של ${p.name}` : `${fmt(p.gn)} לילות טובים של ${p.name}`), `${p.gm ? `${fmt(p.gm)} פעמים "בוקר טוב"` : ''}${p.gm && p.gn ? ' ו־' : ''}${p.gn ? `${fmt(p.gn)} פעמים "לילה טוב"` : ''}. ${sub} ${gx(p, 'פותח', 'פותחת')} או ${gx(p, 'סוגר', 'סוגרת')} את היום של כולם, גם כשאף אחד לא ביקש.`)] });
     // exposing message, quoted inline
     const ri = bestIdx((m) => m.from === p.name && isText(m) && m.text.length > 25 && m.text.length < 400, m => m.text.length * .4 + (m.t && m.t.getHours() < 5 ? 60 : 0) + (LOVE_RE.test(m.text) ? 50 : 0) + (/\?/.test(m.text) ? 15 : 0) + (SORRY_RE.test(m.text) ? 30 : 0));
-    if (ri >= 0) list.push({ id: 'expose', s: 1.8, build: () => [item('🔦', pick(['הרגע שחשף', 'ההודעה שהסגירה', 'שנייה של כנות', 'בלי מסכה'], k + 5), `${msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]}, ${fmtDate(msgs[ri].t)}, ${hm(msgs[ri])}: ` : ''}"${truncate(msgs[ri].text, 150)}". ${pick(['מכל ההודעות, זאת ההודעה שבה המסכה ירדה.', 'לרגע אחד, בלי בדיחות ובלי הגנות.', 'זה לא נכתב בשביל הקבוצה. זה נכתב כי היה חייב.'], k)}`)] });
+    if (ri >= 0) list.push({ id: 'expose', s: 1.8, build: () => [item('🔦', uniq(msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]} ב־${hm(msgs[ri])}, ${fmtDate(msgs[ri].t)}` : `ההודעה של ${p.name}`), `${msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]}, ${fmtDate(msgs[ri].t)}, ${hm(msgs[ri])}: ` : ''}"${truncate(msgs[ri].text, 150)}". ${pick(['מכל ההודעות, זאת ההודעה שבה המסכה ירדה.', 'לרגע אחד, בלי בדיחות ובלי הגנות.', 'זה לא נכתב בשביל הקבוצה. זה נכתב כי היה חייב.'], k)}`)] });
     // how others treat them
     const toP = rtTo.get(p.name), fromP = new Map();
     for (const [x, mm] of rtTo) if (mm.has(p.name)) fromP.set(x, median(mm.get(p.name)));
     if (other && toP && toP.get(other.name) && fromP.get(other.name) != null) {
       const theyAnswer = median(toP.get(other.name)), heAnswers = fromP.get(other.name), ratio = theyAnswer / Math.max(heAnswers, 1e3);
-      list.push({ id: 'mirror', s: 1.5 + Math.abs(Math.log(ratio)), build: () => [Object.assign(item('🪞', pick([`איך ${other.name} ${gx(other, 'רואה', 'רואה')} ${you ? 'אותך' : 'את ' + p.name}`, 'המראה', 'מי מחכה למי'], k + 6),
+      list.push({ id: 'mirror', s: 1.5 + Math.abs(Math.log(ratio)), build: () => [Object.assign(item('🪞', uniq(`${fmtDur(theyAnswer)} מול ${fmtDur(heAnswers)}`, `${other.name} ו${p.name}: מי מחכה למי`),
         `כש${sub} ${gx(p, 'כותב', 'כותבת')}, ${N(other)} ${gx(other, 'עונה', 'עונה')} תוך ${fmtDur(theyAnswer)}. כש${N(other)} ${gx(other, 'כותב', 'כותבת')}, ${sub} ${gx(p, 'עונה', 'עונה')} תוך ${fmtDur(heAnswers)}. ${ratio < .6 ? `${N(other)} ${gx(other, 'ממהר', 'ממהרת')} ${you ? 'אליך' : p.g === 'f' ? 'אליה' : p.g === 'm' ? 'אליו' : 'אליו/ה'}. זה אומר הרבה.` : ratio > 1.7 ? `${N(other)} לא ${gx(other, 'ממהר', 'ממהרת')}, ו${sub} ${gx(p, 'מחכה', 'מחכה')}.` : 'אותו קצב בדיוק. זה פחות דרמטי, וזה הסימן הטוב.'}`), { mixed: true })] });
     } else if (!other) {
       const fans = [...fromP.entries()].filter(([x]) => x !== p.name).sort((x, y) => x[1] - y[1]);
-      if (fans.length > 1) list.push({ id: 'mirror', s: 1.4, build: () => { const to = you ? 'לך' : gx(p, 'לו', 'לה'); return [Object.assign(item('🪞', pick([`מי הכי מחכה ${to}`, 'מי רץ לענות', 'המעריצים'], k + 6), `כש${sub} ${gx(p, 'כותב', 'כותבת')}, הכי מהר עונה ${to} ${N(pOf(fans[0][0]))}, תוך ${fmtDur(fans[0][1])}. הכי לאט: ${fans[fans.length - 1][0]}, תוך ${fmtDur(fans[fans.length - 1][1])}.`), { mixed: true })]; } });
+      if (fans.length > 1) list.push({ id: 'mirror', s: 1.4, build: () => { const to = you ? 'לך' : gx(p, 'לו', 'לה'); return [Object.assign(item('🪞', uniq(`${fans[0][0]} רץ/ה לענות ל${p.name}`, `מי עונה ל${p.name} הכי מהר`), `כש${sub} ${gx(p, 'כותב', 'כותבת')}, הכי מהר עונה ${to} ${N(pOf(fans[0][0]))}, תוך ${fmtDur(fans[0][1])}. הכי לאט: ${fans[fans.length - 1][0]}, תוך ${fmtDur(fans[fans.length - 1][1])}.`), { mixed: true })]; } });
     }
     const chosen = list.map(x => ({ ...x, s: x.s * (usedAngles.get(x.id) ? .45 / usedAngles.get(x.id) : 1) })).sort((x, y) => y.s - x.s).slice(0, 3);
     chosen.forEach(x => usedAngles.set(x.id, (usedAngles.get(x.id) || 0) + 1));
@@ -3683,14 +3691,28 @@ function buildLocalReport(r) {
     const open = p === meP ? pick([`ואז יש ${Y.him}, ${N(p)}.`, `ועכשיו, ${N(p)}. ${Y.He}.`, `${N(p)}. הגענו ${you ? 'אליך' : ''}.`], k)
       : addressAll ? pick([`${N(p)}, צריך לדבר.`, `${N(p)}, שב/י רגע.`, `${N(p)}, אין דרך עדינה להגיד את זה.`, `${N(p)}, הגיע תורך.`, `${N(p)}, סקופי ראה הכל.`], k) : '';
     const selfLine = you ? a.self(p) : `${N(p)} ${a.self(p).replace(/^(הוא|היא|הוא\/היא) /, '')}`;
-    // one long paragraph: who they think they are, what the chat shows, and everything else
-    blocks.push(para(`${open ? open + ' ' : ''}${selfLine} ${pick(['אבל הצ\'אט מספר סיפור אחר.', 'ההודעות לא מסכימות.', 'המספרים חושבים אחרת.', 'סקופי בדק, וזה לא בדיוק ככה.'], k)} ${a.real(p)} ${essay(p, k)}`.replace(/\s+/g, ' ').trim()));
-    blocks.push(...proofBlocks(p, a.proofs));
-    blocks.push(para(a.after(p)));
-    blocks.push(...angles(p, k));
-    if (ROAST[archKey(p)]) blocks.push(item('🔥', pick(['הצלייה של סקופי', 'בלי רחמים', 'סקופי לא מתאפק', 'השורה שתכאב', 'מה כולם חושבים ולא אומרים'], k), ROAST[archKey(p)](p)));
+    // every character gets a different shape of chapter: a different way in, a different order
+    const layout = (k + seed) % 5;
+    const sub = you ? Y.he : p.name;
+    const revealI = bestIdx((m) => m.from === p.name && isText(m) && m.text.length > 20 && m.text.length < 200, m => m.text.length * .3 + (m.t && m.t.getHours() < 5 ? 50 : 0) + (LOVE_RE.test(m.text) ? 40 : 0) + (/\?/.test(m.text) ? 10 : 0));
+    const bigNum = [[p.starts, `פעמים ${sub} ${gx(p, 'פותח', 'פותחת')} שיחה מאפס`], [p.questions, 'סימני שאלה'], [p.laughs, 'פעמים "חחח"'], [p.love, 'הודעות עם לב'], [p.doubles, 'פעמים הודעה שנייה בלי תשובה'], [p.media, 'תמונות וקבצים'], [p.night, 'הודעות אחרי חצות']].sort((x, y) => y[0] / Math.max(1, P.reduce((t, q) => t + 1, 0)) - x[0] / Math.max(1, P.length))[0];
+    const others = P.filter(q => q !== p).slice(0, 3).map(q => q.name);
+    const ways = [
+      () => `${open ? open + ' ' : ''}${selfLine} ${pick(['אבל הצ\'אט מספר סיפור אחר.', 'ההודעות לא מסכימות.', 'המספרים חושבים אחרת.', 'סקופי בדק, וזה לא בדיוק ככה.'], k)} ${a.real(p)}`,
+      () => revealI >= 0 ? `${msgs[revealI].t ? `${DAYS_HE[msgs[revealI].t.getDay()]}, ${hm(msgs[revealI])}. ` : ''}"${truncate(msgs[revealI].text, 120)}". זה ${N(p)}, בלי פילטרים. ${a.real(p)}` : `${selfLine} ${a.real(p)}`,
+      () => `${fmt(bigNum[0])}. זה המספר שמגדיר את ${you ? 'מי שאת/ה' : p.name}: ${fmt(bigNum[0])} ${bigNum[1]}. ${selfLine}`,
+      () => `${others.length ? `${others.join(', ')}, ו${N(p)}.` : N(p) + '.'} ${others.length ? `מכל ${r.isPair ? 'הצ\'אט' : 'הקבוצה'}, ${sub} ${gx(p, 'זה', 'זו')} ש${pick([gx(p, 'מתנהג', 'מתנהגת') + ' הכי אחרת', gx(p, 'בולט', 'בולטת') + ' בלי להתאמץ', gx(p, 'מסתתר', 'מסתתרת') + ' הכי טוב'], k)}.` : ''} ${a.real(p)}`,
+      () => `${ROAST[archKey(p)] ? ROAST[archKey(p)](p) : selfLine} ${pick(['ועכשיו, ברצינות.', 'טוב, בלי צחוק עכשיו.', 'אבל זה רק הקצה.'], k)}`,
+    ];
+    blocks.push(para(`${ways[layout]()} ${essay(p, k)}`.replace(/\s+/g, ' ').trim()));
+    const proof = proofBlocks(p, a.proofs), ang = angles(p, k);
+    // vary where the proof and the angles sit
+    if (layout % 2) { blocks.push(...ang.slice(0, 1), ...proof, para(a.after(p)), ...ang.slice(1)); }
+    else { blocks.push(...proof, para(a.after(p)), ...ang); }
+    if (ROAST[archKey(p)] && layout !== 4) blocks.push(item('🔥', uniq(pick(['הצלייה של סקופי', 'בלי רחמים', 'סקופי לא מתאפק', 'השורה שתכאב', 'מה כולם חושבים ולא אומרים'], k), ['הצלייה של סקופי', 'בלי רחמים', 'סקופי לא מתאפק', 'השורה שתכאב', 'מה כולם חושבים ולא אומרים']), ROAST[archKey(p)](p)));
     const good = GOOD.map(([f, t]) => ({ s: f(p), t })).sort((x, y) => y.s - x.s)[0];
-    blocks.push(item('💎', pick([`הדבר הכי טוב ב${you ? 'ך' : p.name}`, `למה בלי ${you ? 'אותך' : p.name} זה לא אותו דבר`, 'מה שאף אחד לא אומר בקול', `הצד ${you ? 'שלך' : gx(p, 'שלו', 'שלה')} שכולם אוהבים`, 'ובכל זאת'], k), good.t(p)));
+    const goodT = [`הדבר הכי טוב ב${you ? 'ך' : p.name}`, `למה בלי ${you ? 'אותך' : p.name} זה לא אותו דבר`, `מה שאף אחד לא אומר ל${p.name}`, `הצד של ${p.name} שכולם אוהבים`, `ובכל זאת, ${p.name}`];
+    blocks.push(item('💎', uniq(pick(goodT, k), goodT), good.t(p)));
     blocks.forEach(b => { if (b.kind !== 'chat' && !b.mixed && p.g) { b.text = genderize(b.text, p.g); b.title = genderize(b.title, p.g); } });
     chapters.push({ key: 'person', emoji: p.arch.em, title: `${p.name}: ${title}`, intro: genderize(p.arch.desc(p), p.g), blocks, toc: p.name });
   });
@@ -3770,10 +3792,13 @@ function buildLocalReport(r) {
 
   // --- tension ---
   const tension = [];
+  let tensionTitle = '';
   const unans = P.filter(p => p.unanswered >= 2).sort((a, b) => b.unanswered - a.unanswered);
   if (r.timed) {
     const qi = bestIdx((m, i) => isText(m) && /\?/.test(m.text) && m.text.length > 10 && (i === msgs.length - 1 || (msgs[i + 1].t - m.t) > 10 * HOUR), (m) => m.text.length);
     if (qi >= 0) {
+      const nxq = msgs[qi + 1];
+      if (nxq && nxq.t) tensionTitle = `השאלה שחיכתה ${fmtDur(nxq.t - msgs[qi].t)}`;
       tension.push(para(`נתחיל בשאלות שנשארו באוויר. ${unans.length ? unans.slice(0, 3).map(p => `${N(p)} (${fmt(p.unanswered)})`).join(', ') + ' ' + (unans.length > 1 ? 'שאלו שאלות שחיכו יותר מחצי יום לתשובה.' : `${gx(unans[0], 'שאל', 'שאלה')} שאלות שחיכו יותר מחצי יום לתשובה.`) : 'יש פה שאלה אחת לפחות שחיכתה הרבה זמן.'}`));
       const nx = msgs[qi + 1];
       tension.push(chat([bub(msgs[qi]), ...(nx ? [{ ...bub(nx), time: nx.t ? `${fmtDate(nx.t)} ${hm(nx)}` : '' }] : [])]));
@@ -3781,6 +3806,7 @@ function buildLocalReport(r) {
     }
     const dbl = [...P].sort((a, b) => b.doubles - a.doubles)[0];
     if (dbl && dbl.doubles >= 2) {
+      if (!tensionTitle) tensionTitle = `${dbl.name} ו־${fmt(dbl.doubles)} ההודעות הנוספות`;
       tension.push(item('📨', `"עוד הודעה אחת": ${dbl.name}`, `${fmt(dbl.doubles)} פעמים ${N(dbl)} ${gx(dbl, 'כתב', 'כתבה')} שוב אחרי חצי שעה בלי תשובה.`));
       const di = F.double(dbl); if (di >= 0) tension.push(chat(around(di, 1, 1)));
     }
@@ -3878,38 +3904,25 @@ function buildLocalReport(r) {
   };
   const notes = main.slice(0, 8).map(p => ({ kind: 'note', emoji: '', title: p.name, text: (NOTE[archKey(p)] || NOTE.steady)(p), date: '', messages: [] }));
 
-  const REACT = {
-    engine: p => `${gx(p, 'יקרא', 'תקרא')} ראשון/ה, ${gx(p, 'ישלח', 'תשלח')} לקבוצה תוך דקה, ו${gx(p, 'יוסיף', 'תוסיף')} שלוש הודעות ברצף כשאף אחד לא יגיב.`,
-    novelist: p => `${gx(p, 'יכתוב', 'תכתוב')} פסקה של 200 מילים למה הדוח לא מדויק. היא תוכיח בדיוק את מה שכתוב בו.`,
-    emoji: p => `${p.topEmoji[0] || '😂'}${p.topEmoji[0] || '😂'}${p.topEmoji[1] || '🔥'}. זה הכל. זאת התגובה.`,
-    owl: p => `${gx(p, 'יקרא', 'תקרא')} את זה בשתיים בלילה, ו${gx(p, 'יגיב', 'תגיב')} כשכולם כבר ישנים.`,
-    bird: p => `${gx(p, 'יגיב', 'תגיב')} מחר ב־06:30 עם "בוקר טוב, קראתי". אף אחד לא יהיה ער.`,
-    starter: p => `${gx(p, 'יפתח', 'תפתח')} שיחה חדשה בקבוצה רק על הדוח. כמובן.`,
-    flash: p => `${gx(p, 'יגיב', 'תגיב')} לפני ש${gx(p, 'סיים', 'סיימה')} לקרוא את הכותרת.`,
-    ghost: p => `${gx(p, 'יקרא', 'תקרא')} עכשיו, ${gx(p, 'יגיב', 'תגיב')} בעוד שלוש שעות עם "מה".`,
-    curious: p => `${gx(p, 'ישאל', 'תשאל')} "רגע, איך הוא יודע את זה?" ואחר כך עוד ארבע שאלות.`,
-    comic: p => `"חחחחחחחחח" ואז "לא, אבל באמת".`,
-    romantic: p => `${gx(p, 'יגיד', 'תגיד')} שזה הדבר הכי מתוק שקרא/ה השנה, עם לב.`,
-    photo: p => `${gx(p, 'ישלח', 'תשלח')} צילום מסך של הדוח. בלי טקסט.`,
-    brief: p => `👍`,
-    polite: p => `"תודה סקופי". באמת.`,
-    sorry: p => `"סורי על מה שכתוב עליי". שוב.`,
-    quiet: p => `${gx(p, 'יקרא', 'תקרא')} הכל, לא ${gx(p, 'יגיב', 'תגיב')}, ו${gx(p, 'יחשוב', 'תחשוב')} על זה שבוע.`,
-    steady: p => `"מדויק". מילה אחת, ואז חוזר/ת לעניינים.`,
-  };
-  const reactions = (r.isPair ? P.slice(0, 2) : P.slice(0, 8)).map(p => item(p.arch.em, p.name, genderize((REACT[archKey(p)] || REACT.steady)(p), p.g)));
 
+  const chatName = anon ? 'הצ\'אט' : r.title.replace(/\s*\(דוגמה\)$/, '');
+  const domP = dom[0] && dom[0].p;
+  const loveTag = ls > 22 ? 'ויש פה אהבה גדולה' : ls > 10 ? 'ויש פה ניצוץ' : ls > 4 ? 'ויש פה חום' : 'והלב נשאר בבית';
+  const dictWords = dict.filter(x => x.title.startsWith('"')).slice(0, 2).map(x => x.title);
+  const firstT = msgs.find(m => isText(m)), lastT = [...msgs].reverse().find(m => isText(m));
+  const vsWins = vs.filter(x => x.kind === 'vs');
+  const wa = vsWins.filter(x => P[0] && x.text === P[0].name).length, wb = vsWins.filter(x => P[1] && x.text === P[1].name).length;
+  const awardWinners = new Set(computeAwards(r).slice(0, 8).map(x => x.w.p.name));
   const sections = [
     ...chapters,
-    { key: 'verdicts', emoji: '🔍', title: 'המסקנות של סקופי', intro: 'אחרי שקראתי הכל, הנה מה שאני באמת חושב.', blocks: conc },
-    { key: 'dictionary', emoji: '🗣️', title: 'המילון הסודי: איך מדברים פה', intro: 'מילים שלמישהו מבחוץ לא אומרות כלום, ולכם אומרות הכל.', blocks: dict },
-    { key: 'tension', emoji: '⚡', title: 'המתח: איפה זה מתחכך', intro: '', blocks: tension },
-    ...(turns.length ? [{ key: 'turning_points', emoji: '🧭', title: r.isPair ? 'רגעי המפנה' : 'תיק האירועים: הרגעים שעיצבו את הקבוצה', intro: 'כל קבוצה צריכה היסטוריה. הנה שלכם, עם ההודעות המקוריות.', blocks: turns.flatMap(x => x.blocks) }] : []),
-    ...(moments.length ? [{ key: 'moments', emoji: '✨', title: 'רגעים שלא נשכחים', intro: '', blocks: moments }] : []),
-    ...(vs.length ? [{ key: 'versus', emoji: '🥊', title: `הדמות מול הדמות: ${P[0].name} נגד ${P[1].name}`, intro: '', blocks: vs }] : []),
-    { key: 'notes', emoji: '💌', title: 'פתק לכל אחד', intro: '', blocks: notes },
-    { key: 'reactions', emoji: '🔮', title: 'התחזית: מה כל אחד יעשה אחרי שיקרא את זה', intro: 'סקופי מכיר אתכם כבר מספיק טוב.', blocks: reactions },
-    { key: 'awards', emoji: '🏆', title: `פרסי "${anon ? 'הצ\'אט' : r.title.replace(/\s*\(דוגמה\)$/, '')}" הרשמיים`, intro: 'ולסיום, הרגע שכולם חיכו לו. בלי נאומי תודה, בבקשה.', blocks: awards },
+    { key: 'verdicts', emoji: '🔍', title: uniq(domP ? `${domP.name} ${gx(domP, 'מוביל', 'מובילה')}, ${loveTag}` : 'מה המספרים אומרים'), intro: '', blocks: conc },
+    { key: 'dictionary', emoji: '🗣️', title: uniq(dictWords.length ? `${dictWords.join(', ')} ועוד ${Math.max(0, dict.length - dictWords.length)}: השפה הפרטית של ${chatName}` : `השפה הפרטית של ${chatName}`), intro: '', blocks: dict },
+    { key: 'tension', emoji: '⚡', title: uniq(tensionTitle || `איפה ${chatName} מתחכך`), intro: '', blocks: tension },
+    ...(turns.length ? [{ key: 'turning_points', emoji: '🧭', title: uniq(firstT && lastT ? `מ"${truncate(firstT.text, 24)}" ועד "${truncate(lastT.text, 24)}"` : 'הדרך עד היום'), intro: '', blocks: turns.flatMap(x => x.blocks) }] : []),
+    ...(moments.length ? [{ key: 'moments', emoji: '✨', title: uniq(`${moments.filter(x => x.kind === 'item').length} רגעים מתוך ${fmt(r.total)} הודעות`), intro: '', blocks: moments }] : []),
+    ...(vs.length ? [{ key: 'versus', emoji: '🥊', title: uniq(`${P[0].name} נגד ${P[1].name}: ${wa}–${wb}`), intro: '', blocks: vs }] : []),
+    { key: 'notes', emoji: '💌', title: uniq(main.length <= 4 ? `פתקים ל${main.slice(0, 4).map(q => q.name).join(', ')}` : `${main.length} פתקים, אחד לכל אחד`), intro: '', blocks: notes },
+    { key: 'awards', emoji: '🏆', title: uniq(`${awards.length} פרסים, ${awardWinners.size} זוכים: הטקס של ${chatName}`), intro: '', blocks: awards },
   ].filter(s => s.blocks.length);
 
   return {
