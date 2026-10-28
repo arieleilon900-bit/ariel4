@@ -445,6 +445,89 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .seen-lines p{font-family:'Frank Ruhl Libre','Rubik',serif;font-size:clamp(20px,3.2vw,28px);line-height:1.35;font-weight:700;color:#e9e4fb;}
 .seen-lines em{font-style:normal;color:var(--pink);}
 .seen-end{margin:22px auto 0;max-width:520px;color:#c9c3e3;font-size:17px;}
+/* ---------- wizard ---------- */
+#wizard{min-height:calc(100vh - 62px);display:flex;flex-direction:column;}
+.wz-head{position:sticky;top:62px;z-index:15;background:rgba(255,248,241,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+.wz-head-in{max-width:560px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px;}
+.wz-back{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--line);flex:none;}
+.wz-back svg{width:20px;height:20px;}
+.wz-prog{flex:1;height:8px;border-radius:99px;background:#ece6f6;overflow:hidden;direction:rtl;}
+.wz-prog b{display:block;height:100%;border-radius:99px;background:linear-gradient(270deg,var(--pink),var(--violet));transition:width .45s cubic-bezier(.2,.8,.2,1);}
+.wz-count{font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap;}
+.wz-body{flex:1;max-width:560px;width:100%;margin:0 auto;padding:26px 20px 120px;}
+.wz-step{animation:wzIn .4s cubic-bezier(.2,.8,.2,1);}
+@keyframes wzIn{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.wz-h{font-size:clamp(26px,6vw,34px);font-weight:900;line-height:1.15;text-wrap:balance;}
+.wz-sub{color:var(--muted);font-size:15.5px;margin-top:6px;}
+.wz-list{display:grid;gap:10px;margin-top:20px;}
+.wz-opt{display:flex;align-items:center;gap:14px;width:100%;text-align:right;background:#fff;border:2px solid transparent;border-radius:20px;padding:12px 14px;box-shadow:var(--shadow);transition:transform .12s,border-color .15s,background .15s;}
+.wz-opt:hover{transform:translateY(-2px);}
+.wz-opt[aria-pressed="true"]{border-color:var(--pink);background:#fff6f8;}
+.wz-opt b{display:block;font-size:16.5px;font-weight:800;}
+.wz-opt small{display:block;font-size:13.5px;color:var(--muted);margin-top:1px;}
+.wz-ico{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:24px;flex:none;}
+.wz-foot{position:fixed;bottom:0;left:0;right:0;z-index:16;background:linear-gradient(transparent,var(--bg) 35%);padding:26px 0 calc(16px + env(safe-area-inset-bottom,0px));}
+.wz-foot-in{max-width:560px;margin:0 auto;padding:0 20px;}
+.wz-foot .btn{width:100%;padding:16px;font-size:16.5px;}
+.wz-foot .btn[disabled]{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+/* upload card */
+.up-card{position:relative;display:block;width:100%;height:280px;margin-top:20px;border-radius:26px;background:#fff;border:2px dashed rgba(26,21,48,.15);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;}
+.up-card.over{border-color:var(--pink);}
+.up-idle{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:opacity .3s;}
+.up-file{width:54px;height:64px;color:var(--ink);}
+.up-idle b{font-size:17px;}
+.up-idle small{color:var(--muted);}
+.up-wave{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(160deg,#ff6b8b,#ffb020);transition:height 1.6s cubic-bezier(.4,.1,.2,1);}
+.up-wave svg{position:absolute;left:0;top:-22px;width:200%;height:24px;fill:#ff8a7a;animation:wave 2s linear infinite;}
+@keyframes wave{to{transform:translateX(-50%)}}
+.up-spin{position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.15);opacity:0;transition:opacity .2s;}
+.up-spin::after{content:'';position:absolute;inset:11px;border-radius:50%;border:3px solid var(--ink);border-left-color:transparent;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.up-card.loading .up-idle{opacity:.15;}
+.up-card.loading .up-wave{height:78%;}
+.up-card.loading .up-spin{opacity:1;}
+.up-done{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;opacity:0;transform:scale(.9);transition:opacity .4s,transform .5s cubic-bezier(.2,1.4,.4,1);z-index:2;}
+.up-card.done{border-style:solid;border-color:transparent;background:radial-gradient(circle at 30% 20%,#ffd166,transparent 55%),linear-gradient(160deg,#ff6b8b,#ff8a4c 60%,#ffb020);}
+.up-card.done .up-idle,.up-card.done .up-wave,.up-card.done .up-spin{opacity:0;}
+.up-card.done .up-done{opacity:1;transform:none;}
+.up-num{font-family:'Rubik';font-weight:900;font-size:clamp(56px,16vw,76px);line-height:1;text-shadow:0 4px 18px rgba(0,0,0,.18);font-variant-numeric:tabular-nums;}
+.up-lbl{font-weight:800;font-size:18px;}
+.up-done small{position:absolute;bottom:16px;font-size:13px;opacity:.9;}
+.up-confetti{position:absolute;inset:0;pointer-events:none;z-index:1;}
+.up-confetti i{position:absolute;top:-10px;width:8px;height:12px;border-radius:2px;opacity:0;animation:conf 1.8s ease-out forwards;}
+@keyframes conf{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),300px) rotate(var(--r))}}
+.up-paste{height:auto;padding:14px;cursor:default;border-style:solid;}
+.up-paste textarea{width:100%;min-height:180px;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:14px/1.5 Heebo,sans-serif;resize:vertical;}
+.up-priv{font-size:13px;color:var(--muted);margin-top:12px;text-align:center;font-weight:600;}
+.up-guide{margin-top:16px;background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:4px 16px;}
+.up-guide summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 0;font-weight:800;}
+.up-guide summary::-webkit-details-marker{display:none;}
+.up-play{width:34px;height:34px;border-radius:50%;background:var(--sky);color:#fff;display:grid;place-items:center;font-size:13px;flex:none;}
+.up-guide ol{padding-inline-start:22px;display:grid;gap:8px;padding-bottom:14px;font-size:15px;}
+.up-guide .note{font-size:13px;color:var(--muted);background:#faf8ff;border-radius:12px;padding:10px 12px;margin-bottom:14px;}
+/* who talks */
+.talk{display:grid;gap:14px;margin-top:22px;}
+.talk-top{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:15px;margin-bottom:6px;}
+.talk-top span:first-child{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.talk-top span:last-child{color:var(--muted);font-size:13.5px;white-space:nowrap;}
+.talk-top i{width:10px;height:10px;border-radius:50%;flex:none;}
+.talk-tr{height:12px;border-radius:99px;background:#efe9f7;overflow:hidden;}
+.talk-tr b{display:block;height:100%;width:0;border-radius:99px;transition:width 1.1s cubic-bezier(.2,.8,.2,1);}
+.talk-tease{margin-top:22px;background:var(--yellow-soft);border-radius:18px;padding:14px 16px;font-size:15.5px;}
+/* names */
+.names{display:grid;gap:10px;margin-top:20px;}
+.name-row{display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:10px 14px;}
+.name-in{flex:1;min-width:0;}
+.name-in small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.name-in input{width:100%;border:0;border-bottom:1.5px solid var(--line);padding:4px 0;font:700 17px Heebo,sans-serif;background:transparent;color:var(--ink);}
+.name-in input:focus{outline:none;border-color:var(--pink);}
+/* language */
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
+.wz-opt.lang{padding:12px;justify-content:flex-start;}
+.flag{font-size:24px;}
+.ready{display:flex;gap:12px;align-items:flex-start;margin-top:22px;background:var(--ink);color:#e9e4fb;border-radius:20px;padding:16px;font-size:15px;}
+.ready span{font-size:26px;}
+.ready b{color:#fff;}
 /* story button in hero */
 .story-cta{display:flex;align-items:center;gap:14px;margin-top:18px;background:linear-gradient(90deg,var(--pink),var(--violet));color:#fff;border-radius:20px;padding:14px 18px;font-weight:800;font-size:16px;width:100%;text-align:right;box-shadow:0 14px 30px -14px rgba(255,107,139,.9);transition:transform .15s;}
 .story-cta:hover{transform:translateY(-2px);}
@@ -496,7 +579,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .story{position:fixed;inset:0;z-index:90;background:#0d0a1a;display:flex;align-items:center;justify-content:center;}
 .st-frame{position:relative;width:min(100vw,calc(100dvh * 9 / 16));height:min(100dvh,calc(100vw * 16 / 9));max-height:100dvh;overflow:hidden;color:#fff;border-radius:0;}
 @media (min-width:640px){.st-frame{height:min(92dvh,860px);width:calc(min(92dvh,860px) * 9 / 16);border-radius:26px;}}
-.st-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:70px 28px 90px;text-align:center;}
+.st-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:70px 62px 90px;text-align:center;}
 .st-slide .eyebrow{font-weight:800;font-size:14px;letter-spacing:.08em;opacity:.85;text-transform:uppercase;margin-bottom:10px;}
 .st-slide h2{font-family:'Rubik';font-weight:900;font-size:clamp(28px,7.5vw,40px);line-height:1.08;margin-bottom:12px;}
 .st-slide .huge{font-family:'Rubik';font-weight:900;font-size:clamp(64px,19vw,104px);line-height:1;letter-spacing:-.03em;margin:8px 0;}
@@ -518,8 +601,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
 .st-top{position:absolute;top:24px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;z-index:6;font-weight:800;font-size:14px;}
 .st-top .brand{display:flex;align-items:center;gap:8px;}
 .st-x{width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.25);display:grid;place-items:center;color:#fff;font-size:20px;}
-.st-tap{position:absolute;top:70px;bottom:80px;width:50%;z-index:4;}
-.st-tap.prev{right:0;}.st-tap.next{left:0;}
+.st-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);color:var(--ink);display:grid;place-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.5);transition:transform .15s,opacity .2s;}
+.st-arrow:hover{transform:translateY(-50%) scale(1.08);}
+.st-arrow:active{transform:translateY(-50%) scale(.94);}
+.st-arrow svg{width:22px;height:22px;}
+.st-arrow.next{right:10px;}.st-arrow.prev{left:10px;}
+.st-arrow[disabled]{opacity:0;pointer-events:none;}
+.st-arrow.next.pulse{animation:nudge 1.4s ease-in-out infinite;}
+@keyframes nudge{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-50%) translateX(6px)}}
+.st-slide.from-next{animation:slideFromRight .38s cubic-bezier(.2,.8,.2,1);}
+.st-slide.from-prev{animation:slideFromLeft .38s cubic-bezier(.2,.8,.2,1);}
+@keyframes slideFromRight{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slideFromLeft{from{transform:translateX(-60px);opacity:0}to{transform:none;opacity:1}}
 .st-bottom{position:absolute;bottom:18px;left:16px;right:16px;display:flex;gap:8px;z-index:6;}
 .st-bottom .btn{flex:1;padding:12px 14px;font-size:14px;}
 .st-btn-w{background:#fff;color:var(--ink);}
@@ -545,7 +638,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
       <a href="#how" data-home-link>איך זה עובד</a>
       <a href="#privacy" data-home-link>פרטיות</a>
       <a href="#faq" data-home-link>שאלות</a>
-      <a class="btn btn-ink btn-sm" href="#start" data-home-link>לנתח צ'אט</a>
+      <button class="btn btn-ink btn-sm" data-start>לנתח צ'אט</button>
     </nav>
   </div>
 </header>
@@ -569,10 +662,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
           </div>
           <div class="drop-actions">
             <button class="btn btn-pink" id="pickBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-              בחירת קובץ
+              נסו עכשיו
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
             </button>
-            <button class="btn btn-ghost" id="pasteToggle">הדבקת טקסט</button>
+            <a class="btn btn-ghost" href="#demo">לראות דוגמה</a>
           </div>
           <input type="file" id="fileInput" class="sr" accept=".txt,.zip,.json,text/plain,application/zip,application/json" multiple>
           <div class="paste-box hidden" id="pasteBox">
@@ -650,7 +743,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
           <p>ראיתי "סבבה" שאומר "אני פגוע/ה", ו"לילה טוב" שאומר "תישאר/י עוד קצת".</p>
         </div>
         <p class="seen-end">אני לא סופר הודעות. אני קורא אותן. ואז אני כותב לכם מה ראיתי, בלי פילטר.</p>
-        <a href="#start" class="btn btn-pink" style="margin-top:22px">תראה לי את הצ'אט שלי</a>
+        <button class="btn btn-pink" data-start style="margin-top:22px">תראה לי את הצ'אט שלי</button>
       </div>
     </div>
   </section>
@@ -790,9 +883,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
     <div class="wrap">
       <h2 class="h2">הצ'אט הבא בתור הוא שלכם.</h2>
       <p class="sub" style="margin:0 auto 26px">תייצאו, תעלו, ותשלחו לקבוצה את מה שסקופי חושב.</p>
-      <a href="#start" class="btn btn-pink" style="font-size:17px;padding:16px 30px">לנתח צ'אט עכשיו</a>
+      <button class="btn btn-pink" data-start style="font-size:17px;padding:16px 30px">לנתח צ'אט עכשיו</button>
     </div>
   </section>
+</main>
+
+<!-- ================= WIZARD ================= -->
+<main id="wizard" class="hidden">
+  <div class="wz-head"><div class="wz-head-in">
+    <button class="wz-back" id="wzBack" aria-label="חזרה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <div class="wz-prog"><b id="wzBar"></b></div>
+    <span class="wz-count" id="wzCount"></span>
+  </div></div>
+  <div class="wz-body" id="wzBody"></div>
+  <div class="wz-foot"><div class="wz-foot-in"><button class="btn btn-ink" id="wzNext" disabled>המשך ←</button></div></div>
 </main>
 
 <!-- ================= LOADING ================= -->
@@ -839,8 +943,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
     <div class="st-prog" id="stProg"></div>
     <div class="st-top"><span class="brand">🔍 צ'אטסקופ</span><button class="st-x" id="stClose" aria-label="סגירה">✕</button></div>
     <div id="stSlide"></div>
-    <button class="st-tap prev" id="stPrev" aria-label="הקודם"></button>
-    <button class="st-tap next" id="stNext" aria-label="הבא"></button>
+    <button class="st-arrow prev" id="stPrev" aria-label="השקופית הקודמת"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button class="st-arrow next" id="stNext" aria-label="השקופית הבאה"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="st-bottom"><button class="btn st-btn-g" id="stSave">📸 שמירת השקופית</button><button class="btn st-btn-w" id="stSkip">לדוח המלא</button></div>
   </div>
 </div>
@@ -1519,7 +1623,7 @@ let anon = false;
 const dispName = p => anon ? `משתתף/ת ${R.people.indexOf(p) + 1}` : p.name;
 
 function show(view) {
-  for (const id of ['landing', 'loading', 'reportView']) $('#' + id).classList.toggle('hidden', id !== view);
+  for (const id of ['landing', 'wizard', 'loading', 'reportView']) $('#' + id).classList.toggle('hidden', id !== view);
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
@@ -1758,7 +1862,7 @@ function storySlides(r) {
   const S = [], nm = p => esc(dispName(p));
   const push = (html, bg) => S.push({ html, bg: bg || GRADS[S.length % GRADS.length] });
   const title = esc(anon ? 'הצ\'אט שלכם' : r.title);
-  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d2">הסיפור של</div><h2 class="anim d2">${title}</h2><p class="anim d3">סקופי קרא כל הודעה. מוכנים לשמוע מה הוא חושב?</p><p class="anim d4" style="font-size:14px;opacity:.7;margin-top:18px">הקישו בצד שמאל כדי להמשיך ←</p>`, GRADS[1]);
+  push(`<div class="emoji-xl anim d1">🔍</div><div class="eyebrow anim d2">הסיפור של</div><h2 class="anim d2">${title}</h2><p class="anim d3">סקופי קרא כל הודעה. מוכנים לשמוע מה הוא חושב?</p><p class="anim d4" style="font-size:14px;opacity:.7;margin-top:18px">לחצו על החץ ימינה כדי להמשיך →</p>`, GRADS[1]);
   const pages = Math.max(1, Math.round(r.totalWords / 250));
   push(`<div class="eyebrow anim d1">ביחד כתבתם</div><div class="huge anim d2" data-count="${r.total}">0</div><h2 class="anim d2">הודעות</h2>
     <div class="sbox anim d3">✍️ ${fmt(r.totalWords)} מילים. זה בערך <b>${fmt(pages)} עמודים</b> של ספר${pages > 300 ? ', כלומר רומן שלם' : ''}.</div>
@@ -1841,6 +1945,7 @@ function storySlides(r) {
 
 let ST = { i: 0, slides: [], timer: null, start: 0, dur: 6500, paused: false, elapsed: 0 };
 function openStory(i = 0) {
+  ST.i = 0;
   ST.slides = storySlides(R);
   $('#stProg').innerHTML = ST.slides.map(() => '<i><b></b></i>').join('');
   $('#story').classList.remove('hidden');
@@ -1853,11 +1958,15 @@ function closeStory() {
 function goSlide(i) {
   if (i < 0) i = 0;
   if (i >= ST.slides.length) { closeStory(); return; }
-  ST.i = i; ST.elapsed = 0; ST.start = performance.now(); ST.paused = false;
+  const dir = i >= ST.i ? 'from-next' : 'from-prev';
+  ST.i = i;
   const s = ST.slides[i];
   $('#stFrame').style.background = s.bg;
-  $('#stSlide').innerHTML = `<div class="st-slide">${s.html}</div>`;
-  $$('#stProg b').forEach((b, k) => b.style.width = k < i ? '100%' : '0');
+  $('#stSlide').innerHTML = `<div class="st-slide ${i ? dir : ''}">${s.html}</div>`;
+  $$('#stProg b').forEach((b, k) => b.style.width = k <= i ? '100%' : '0');
+  $('#stPrev').disabled = i === 0;
+  $('#stNext').classList.toggle('pulse', i === 0);
+  $('#stNext').setAttribute('aria-label', i === ST.slides.length - 1 ? 'סיום' : 'השקופית הבאה');
   // count-up numbers and bars
   $$('[data-count]', $('#stSlide')).forEach(el => {
     const target = +el.dataset.count, t0 = performance.now();
@@ -1865,32 +1974,20 @@ function goSlide(i) {
     requestAnimationFrame(step);
   });
   requestAnimationFrame(() => $$('[data-w]', $('#stSlide')).forEach(b => b.style.width = b.dataset.w + '%'));
-  cancelAnimationFrame(ST.timer);
-  const tick = now => {
-    if (!ST.paused) {
-      const f = (ST.elapsed + now - ST.start) / ST.dur;
-      const bar = $$('#stProg b')[ST.i]; if (bar) bar.style.width = Math.min(100, f * 100) + '%';
-      if (f >= 1) { goSlide(ST.i + 1); return; }
-    }
-    ST.timer = requestAnimationFrame(tick);
-  };
-  ST.timer = requestAnimationFrame(tick);
 }
 function pauseStory(on) {
   if (on && !ST.paused) { ST.elapsed += performance.now() - ST.start; ST.paused = true; }
   else if (!on && ST.paused) { ST.start = performance.now(); ST.paused = false; }
 }
-$('#stNext').onclick = () => { if (!ST._wasHold) goSlide(ST.i + 1); };
-$('#stPrev').onclick = () => { if (!ST._wasHold) goSlide(ST.i - 1); };
+$('#stNext').onclick = () => goSlide(ST.i + 1);
+$('#stPrev').onclick = () => goSlide(ST.i - 1);
 $('#stClose').onclick = closeStory;
 $('#stSkip').onclick = closeStory;
-['pointerdown'].forEach(ev => $('#stFrame').addEventListener(ev, e => { if (e.target.closest('.st-tap')) { ST._hold = setTimeout(() => pauseStory(true), 250); } }));
-['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => $('#stFrame').addEventListener(ev, () => { clearTimeout(ST._hold); if (ST.paused) { pauseStory(false); ST._wasHold = true; setTimeout(() => ST._wasHold = false, 50); } }));
 document.addEventListener('keydown', e => {
   if ($('#story').classList.contains('hidden')) return;
   if (e.key === 'Escape') closeStory();
-  if (e.key === 'ArrowLeft' || e.key === ' ') { e.preventDefault(); goSlide(ST.i + 1); }
-  if (e.key === 'ArrowRight') goSlide(ST.i - 1);
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goSlide(ST.i + 1); }
+  if (e.key === 'ArrowLeft') goSlide(ST.i - 1);
 });
 $('#stSave').onclick = async () => {
   pauseStory(true);
@@ -1898,7 +1995,7 @@ $('#stSave').onclick = async () => {
     if (!window.html2canvas) throw new Error('x');
     const frame = $('#stFrame');
     $$('.anim', frame).forEach(a => { a.style.animation = 'none'; a.style.opacity = 1; a.style.transform = 'none'; });
-    const canvas = await html2canvas(frame, { backgroundColor: null, scale: 2, useCORS: true, ignoreElements: el => el.classList && (el.classList.contains('st-bottom') || el.classList.contains('st-tap') || el.classList.contains('st-x') || el.classList.contains('st-prog')) });
+    const canvas = await html2canvas(frame, { backgroundColor: null, scale: 2, useCORS: true, ignoreElements: el => el.classList && (el.classList.contains('st-bottom') || el.classList.contains('st-arrow') || el.classList.contains('st-x') || el.classList.contains('st-prog')) });
     cardBlob = await new Promise(r => canvas.toBlob(r, 'image/png'));
     cardName = `chatscope-${ST.i + 1}.png`;
     $('#modalImg').src = canvas.toDataURL('image/png');
@@ -2072,8 +2169,10 @@ const AI_SYSTEM = `אתה "סקופי". קראת צ'אט שלם, הודעה אח
 function aiUserPrompt(r, sample) {
   const nm = from => { const p = r.people.find(x => x.name === from); return p ? dispName(p) : from; };
   const me = r.me ? r.people.find(p => p.name === r.me) : null;
-  return `זה ${sample.sampled ? 'מבחר של קטעים רצופים מתוך' : ''} צ'אט${r.isPair ? ' בין שני אנשים' : ` קבוצתי עם ${r.people.length} משתתפים`}${anon ? '' : ` בשם "${r.title}"`}: ${r.total} הודעות${r.timed ? `, מ־${fmtDate(r.first)} עד ${fmtDate(r.last)}` : ''}.
-${me ? `\nמי שקורא את הדוח הוא ${nm(me.name)}. פנה אליו/ה ישירות בגוף שני ("ואז יש אותך, ${nm(me.name)}..."), ועל כל השאר כתוב בגוף שלישי.` : '\nהדוח נקרא על ידי כל חברי הצ\'אט. כתוב על כולם בגוף שלישי, ומדי פעם פנה לכולם יחד ("אתם").'}
+  const kind = KINDS.find(k => k.id === r.kind);
+  const langLine = r.lang && r.lang !== 'he' ? `\nכתוב את כל הדוח ב${LANG_NAME[r.lang]} (גם כותרות, מונחים ופתקים), אבל ציטוטים מהצ'אט נשארים בשפת המקור.` : '';
+  return `${kind ? `סוג הקשר לפי מי שהעלה: ${kind.t}. כוון את הדוח לשאלות שהכי מעניינות בקשר כזה.\n` : ''}זה ${sample.sampled ? 'מבחר של קטעים רצופים מתוך' : ''} צ'אט${r.isPair ? ' בין שני אנשים' : ` קבוצתי עם ${r.people.length} משתתפים`}${anon ? '' : ` בשם "${r.title}"`}: ${r.total} הודעות${r.timed ? `, מ־${fmtDate(r.first)} עד ${fmtDate(r.last)}` : ''}.
+${langLine}${me ? `\nמי שקורא את הדוח הוא ${nm(me.name)}. פנה אליו/ה ישירות בגוף שני ("ואז יש אותך, ${nm(me.name)}..."), ועל כל השאר כתוב בגוף שלישי.` : '\nהדוח נקרא על ידי כל חברי הצ\'אט. כתוב על כולם בגוף שלישי, ומדי פעם פנה לכולם יחד ("אתם").'}
 
 מדדים שכבר חושבו מכל הצ'אט (שלב אותם כשהם מחזקים טענה):
 ${statsForAI(r)}
@@ -2518,10 +2617,195 @@ const DEMO_REPORTS = {
 };
 
 /* =========================================================
+   Wizard: type → platform → upload → who talks → names → me → language
+   ========================================================= */
+const KINDS = [
+  { id: 'couple', em: '💞', bg: 'var(--pink-soft)', t: 'זוגיות', d: 'בן או בת זוג, דייט, משהו שמתחיל…' },
+  { id: 'crush', em: '💘', bg: '#ffe9f3', t: 'קראש', d: 'מישהו שאולי בעניין. ואולי לא.' },
+  { id: 'friend', em: '🤝', bg: 'var(--mint-soft)', t: 'חבר או חברה', d: 'הבסטי, החבר מהצבא, מישהי מהעבודה' },
+  { id: 'group', em: '🍻', bg: 'var(--yellow-soft)', t: 'קבוצת חברים', d: 'החבר\'ה, הכיתה, קבוצת הטיול' },
+  { id: 'family', em: '🏡', bg: '#ffeedd', t: 'משפחה', d: 'אמא, אבא, האחים, קבוצת המשפחה' },
+  { id: 'ex', em: '💔', bg: '#f1eff6', t: 'האקס', d: 'מתי בדיוק זה התחיל להתקרר?' },
+  { id: 'work', em: '💼', bg: 'var(--sky-soft)', t: 'עבודה או צוות', d: 'קבוצת הצוות, קולגות, הבוס' },
+  { id: 'other', em: '✨', bg: 'var(--violet-soft)', t: 'משהו אחר', d: 'שותפים לדירה, שכנים, כל דבר אחר' },
+];
+const PLATFORMS = [
+  { id: 'whatsapp', t: 'WhatsApp', c: '#25d366', ico: '<path d="M12 3a9 9 0 00-7.8 13.5L3 21l4.6-1.2A9 9 0 1012 3z" fill="#fff"/><path d="M9.2 7.8c.2-.4.4-.4.6-.4h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2 0 .4-.1.6l-.5.6c-.1.1-.2.3 0 .5.5.9 1.3 1.7 2.3 2.2.2.1.4.1.5-.1l.6-.7c.2-.2.4-.2.6-.1l1.6.8c.2.1.4.2.4.4 0 .6-.2 1.3-.8 1.7-.6.4-1.5.5-2.6.1-1.8-.6-3.5-2.2-4.3-3.9-.6-1.2-.5-2.3.1-3z" fill="#25d366"/>', files: '‎.zip או ‎.txt', panel: null },
+  { id: 'instagram', t: 'Instagram', c: 'linear-gradient(45deg,#f9a825,#e91e63,#7b1fa2)', ico: '<rect x="5" y="5" width="14" height="14" rx="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="12" cy="12" r="3.2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16.3" cy="7.7" r="1" fill="#fff"/>', files: 'קבצי message_1.json', panel: 'ig' },
+  { id: 'telegram', t: 'Telegram', c: '#2aabee', ico: '<path d="M5 11.5l13-5-2.3 11.3-4-3-2 2 .3-3.3 5.5-5-6.8 4.2L5 11.5z" fill="#fff"/>', files: 'הקובץ result.json', panel: 'tg' },
+  { id: 'messenger', t: 'Messenger', c: '#0084ff', ico: '<path d="M12 4C7.6 4 4 7.3 4 11.4c0 2.3 1.1 4.3 2.9 5.7V20l2.7-1.5c.8.2 1.6.3 2.4.3 4.4 0 8-3.3 8-7.4S16.4 4 12 4z" fill="#fff"/><path d="M7.8 13.6l2.6-2.8 1.6 1.4 2.3-1.4-2.6 2.8-1.6-1.4-2.3 1.4z" fill="#0084ff"/>', files: 'קבצי message_1.json', panel: 'fb' },
+  { id: 'other', t: 'iMessage או אחר', c: '#8e8e93', ico: '<path d="M12 5c-4.4 0-8 2.9-8 6.5 0 2 1.1 3.8 2.9 5L6 19.5l3.2-1.6c.9.2 1.8.3 2.8.3 4.4 0 8-2.9 8-6.5S16.4 5 12 5z" fill="#fff"/>', files: 'העתק־הדבק של השיחה', panel: 'other' },
+];
+const LANGS = [['he', '🇮🇱', 'עברית'], ['en', '🇬🇧', 'English'], ['ru', '🇷🇺', 'Русский'], ['ar', '🇸🇦', 'العربية'], ['fr', '🇫🇷', 'Français'], ['es', '🇪🇸', 'Español'], ['de', '🇩🇪', 'Deutsch'], ['pt', '🇧🇷', 'Português']];
+const LANG_NAME = { he: 'עברית', en: 'אנגלית', ru: 'רוסית', ar: 'ערבית', fr: 'צרפתית', es: 'ספרדית', de: 'גרמנית', pt: 'פורטוגזית' };
+const WZ_STEPS = ['type', 'platform', 'upload', 'talk', 'names', 'me', 'lang'];
+let W = null;
+function wzReset() { W = { step: 0, kind: null, platform: null, messages: null, title: null, names: {}, me: undefined, lang: 'he', counted: false }; }
+
+function cleanName(n) {
+  let s = String(n).replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|[‍️]/gu, '').replace(/[~|•·*_]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (/^\+?[\d\s\-()]{7,}$/.test(s)) return '';
+  return s;
+}
+function rawCounts() {
+  const m = new Map();
+  for (const x of W.messages) m.set(x.from, (m.get(x.from) || 0) + 1);
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+function finalName(raw) { const v = (W.names[raw] ?? cleanName(raw)).trim(); return v || raw; }
+
+function openWizard(files) {
+  wzReset();
+  show('wizard');
+  wzGo(0);
+  if (files && files.length) wzLoadFiles(files);
+}
+function wzGo(i) {
+  W.step = Math.max(0, Math.min(WZ_STEPS.length - 1, i));
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  wzRender();
+}
+function wzCanNext() {
+  const s = WZ_STEPS[W.step];
+  if (s === 'type') return !!W.kind;
+  if (s === 'platform') return !!W.platform;
+  if (s === 'upload') return !!(W.messages && W.counted);
+  if (s === 'me') return W.me !== undefined;
+  return true;
+}
+function wzRender() {
+  const s = WZ_STEPS[W.step], n = WZ_STEPS.length;
+  $('#wzCount').textContent = `שלב ${W.step + 1} מתוך ${n}`;
+  $('#wzBar').style.width = `${(W.step + 1) / n * 100}%`;
+  const body = $('#wzBody');
+  const next = $('#wzNext');
+  next.textContent = s === 'lang' ? '✨ ליצור את הדוח שלי' : 'המשך ←';
+  next.classList.toggle('btn-pink', s === 'lang');
+  next.classList.toggle('btn-ink', s !== 'lang');
+  let h = '';
+  if (s === 'type') {
+    h = `<h1 class="wz-h">על איזה צ'אט סקופי עובד היום?</h1><p class="wz-sub">ככה הוא יידע מה לחפש: ניצוצות, מלחמות, או מי שוכח לענות לאמא.</p>
+      <div class="wz-list">${KINDS.map(k => `<button class="wz-opt" data-kind="${k.id}" aria-pressed="${W.kind === k.id}"><span class="wz-ico" style="background:${k.bg}">${k.em}</span><span><b>${k.t}</b><small>${k.d}</small></span></button>`).join('')}</div>`;
+  } else if (s === 'platform') {
+    h = `<h1 class="wz-h">מאיפה הצ'אט?</h1><p class="wz-sub">בכל אחת מהן הייצוא לוקח פחות מדקה. נראה לכם בדיוק איך.</p>
+      <div class="wz-list">${PLATFORMS.map(p => `<button class="wz-opt" data-plat="${p.id}" aria-pressed="${W.platform === p.id}"><span class="wz-ico" style="background:${p.c}"><svg viewBox="0 0 24 24" width="26" height="26">${p.ico}</svg></span><span><b>${p.t}</b><small>${p.files}</small></span></button>`).join('')}</div>`;
+  } else if (s === 'upload') {
+    const p = PLATFORMS.find(x => x.id === W.platform) || PLATFORMS[0];
+    const isPaste = p.id === 'other';
+    h = `<h1 class="wz-h">מעלים את הצ'אט מ־${esc(p.t)}</h1>
+      ${isPaste ? `<div class="up-card up-paste"><textarea id="wzPaste" placeholder="מדביקים כאן את השיחה, כל הודעה בשורה בפורמט&#10;שם: הודעה">${''}</textarea><button class="btn btn-ink" id="wzPasteGo" style="width:100%;margin-top:10px">לקרוא את השיחה</button></div>`
+        : `<button class="up-card" id="upCard" aria-label="בחירת קובץ"><div class="up-wave"><svg viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0 20 Q50 0 100 20 T200 20 T300 20 T400 20 V40 H0z"/></svg></div>
+          <div class="up-idle"><svg class="up-file" viewBox="0 0 48 56" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M8 3h22l12 12v36a2 2 0 01-2 2H8a2 2 0 01-2-2V5a2 2 0 012-2z"/><path d="M30 3v12h12"/><path d="M24 22v14M18 31l6 6 6-6" stroke-linecap="round"/></svg><b>לחצו לבחירת הקובץ</b><small>${esc(p.files)}</small></div>
+          <div class="up-spin"></div>
+          <div class="up-done"><div class="up-num" id="upNum">0</div><div class="up-lbl">הודעות</div><small>לחצו כדי להחליף צ'אט</small></div>
+          <div class="up-confetti" id="upConfetti"></div>
+        </button>`}
+      <div class="up-priv">🔒 הצ'אט נקרא רק בתוך הדפדפן שלכם, ושום דבר לא נשמר אצלנו.</div>
+      <div class="err hidden" id="wzErr"></div>
+      <details class="up-guide" ${W.messages ? '' : 'open'}><summary><span class="up-play">▶</span>איך מייצאים את הצ'אט? (חצי דקה)</summary><div id="wzGuide"></div></details>`;
+  } else if (s === 'talk') {
+    const rows = rawCounts(), total = W.messages.length, max = rows[0][1];
+    const top = rows[0], second = rows[1];
+    const ratio = second ? top[1] / second[1] : 0;
+    h = `<h1 class="wz-h">מי מדבר יותר?</h1><p class="wz-sub">${fmt(total)} הודעות. וכבר מהמספר הראשון, סקופי שם לב למשהו.</p>
+      <div class="talk">${rows.slice(0, 8).map(([nm, c], i) => `<div class="talk-row"><div class="talk-top"><span><i style="background:${PALETTE[i % PALETTE.length]}"></i>${esc(nm)}</span><span>💬 ${fmt(c)} · ${pct(c, total)}%</span></div><div class="talk-tr"><b data-w="${c / max * 100}" style="background:${PALETTE[i % PALETTE.length]}"></b></div></div>`).join('')}
+      ${rows.length > 8 ? `<p class="wz-sub" style="margin-top:6px">ועוד ${rows.length - 8} משתתפים</p>` : ''}</div>
+      ${second ? `<div class="talk-tease">👀 ${ratio >= 1.3 ? `<b>${esc(top[0])}</b> כותב/ת פי ${ratio.toFixed(1)} יותר מ${esc(second[0])}. נראה בדוח אם זה אומר מה שאתם חושבים.` : `כמעט תיקו בין <b>${esc(top[0])}</b> ל<b>${esc(second[0])}</b>. זה נדיר, ובדרך כלל זה סימן טוב.`}</div>` : ''}`;
+  } else if (s === 'names') {
+    const rows = rawCounts().slice(0, 12);
+    h = `<h1 class="wz-h">מסדרים את השמות</h1><p class="wz-sub">החליפו כינויים, מספרי טלפון ואימוג'ים בשם פרטי פשוט, כדי שסקופי ידע על מי הוא כותב.</p>
+      <div class="names">${rows.map(([nm], i) => `<label class="name-row"><span class="av" style="background:${PALETTE[i % PALETTE.length]};width:42px;height:42px;font-size:16px">${esc(initials(cleanName(nm) || nm))}</span><span class="name-in"><small>בצ'אט: ${esc(nm)}</small><input type="text" data-raw="${esc(nm)}" value="${esc(W.names[nm] ?? cleanName(nm))}" placeholder="מי זה?" maxlength="30"></span></label>`).join('')}</div>`;
+  } else if (s === 'me') {
+    const rows = rawCounts().slice(0, 12);
+    h = `<h1 class="wz-h">ומי מהם אתם?</h1><p class="wz-sub">סקופי ידבר אליכם ישירות, ועל כל השאר הוא ידבר מאחורי הגב. כמו חבר אמיתי.</p>
+      <div class="wz-list">${rows.map(([nm], i) => `<button class="wz-opt" data-me="${esc(nm)}" aria-pressed="${W.me === nm}"><span class="av" style="background:${PALETTE[i % PALETTE.length]};width:44px;height:44px;font-size:17px">${esc(initials(finalName(nm)))}</span><span><b>${esc(finalName(nm))}</b></span></button>`).join('')}
+      <button class="wz-opt" data-me="" aria-pressed="${W.me === null}"><span class="wz-ico" style="background:#f1eff6">👀</span><span><b>אף אחד, אני רק מציץ</b><small>הדוח ייכתב על כולם בגוף שלישי</small></span></button></div>`;
+  } else if (s === 'lang') {
+    h = `<h1 class="wz-h">באיזו שפה לכתוב את הדוח?</h1><p class="wz-sub">יכולה להיות שונה מהשפה של הצ'אט.</p>
+      <div class="lang-grid">${LANGS.map(([id, f, t]) => `<button class="wz-opt lang" data-lang="${id}" aria-pressed="${W.lang === id}"><span class="flag">${f}</span><b>${t}</b></button>`).join('')}</div>
+      <div class="ready"><span>🔍</span><div><b>סקופי מוכן.</b> ${fmt(W.messages.length)} הודעות, ${rawCounts().length} משתתפים. עוד שנייה תקבלו את הסיפור, הסטטיסטיקות והפרסים, ואת הדוח הכתוב המלא.</div></div>`;
+  }
+  body.innerHTML = `<div class="wz-step">${h}</div>`;
+  next.disabled = !wzCanNext();
+  wzBind(s);
+}
+function wzBind(s) {
+  const auto = () => { $('#wzNext').disabled = !wzCanNext(); setTimeout(() => wzCanNext() && wzGo(W.step + 1), 260); };
+  $$('[data-kind]').forEach(b => b.onclick = () => { W.kind = b.dataset.kind; $$('[data-kind]').forEach(x => x.setAttribute('aria-pressed', x === b)); auto(); });
+  $$('[data-plat]').forEach(b => b.onclick = () => { if (W.platform !== b.dataset.plat) { W.messages = null; W.counted = false; } W.platform = b.dataset.plat; $$('[data-plat]').forEach(x => x.setAttribute('aria-pressed', x === b)); auto(); });
+  $$('[data-me]').forEach(b => b.onclick = () => { W.me = b.dataset.me || null; $$('[data-me]').forEach(x => x.setAttribute('aria-pressed', x === b)); auto(); });
+  $$('[data-lang]').forEach(b => b.onclick = () => { W.lang = b.dataset.lang; $$('[data-lang]').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+  $$('.names input').forEach(inp => inp.oninput = () => { W.names[inp.dataset.raw] = inp.value; });
+  if (s === 'talk') requestAnimationFrame(() => setTimeout(() => $$('.talk-tr b').forEach(b => b.style.width = b.dataset.w + '%'), 60));
+  if (s === 'upload') {
+    const p = PLATFORMS.find(x => x.id === W.platform);
+    const panel = $(`.tab-panel[data-panel="${p && p.panel ? p.panel : (/android/i.test(navigator.userAgent) ? 'wa-and' : 'wa-ios')}"]`);
+    if (panel) $('#wzGuide').innerHTML = panel.innerHTML;
+    const card = $('#upCard');
+    if (card) {
+      card.onclick = () => $('#fileInput').click();
+      if (W.messages && W.counted) { card.classList.add('done'); $('#upNum').textContent = fmt(W.messages.length); }
+      ['dragenter', 'dragover'].forEach(ev => card.addEventListener(ev, e => { e.preventDefault(); card.classList.add('over'); }));
+      ['dragleave', 'drop'].forEach(ev => card.addEventListener(ev, e => { e.preventDefault(); card.classList.remove('over'); }));
+      card.addEventListener('drop', e => { const f = [...e.dataTransfer.files]; if (f.length) wzLoadFiles(f); });
+    }
+    const pg = $('#wzPasteGo');
+    if (pg) pg.onclick = () => {
+      const r = parseText($('#wzPaste').value || '');
+      if (!r || r.messages.length < 4) return wzError('לא הצלחתי לקרוא את השיחה. כל הודעה צריכה להיות בשורה משלה, בפורמט "שם: הודעה".');
+      W.messages = r.messages; W.title = r.title; W.counted = true;
+      toast(`נקראו ${fmt(r.messages.length)} הודעות`); wzGo(W.step + 1);
+    };
+  }
+}
+function wzError(msg) { const e = $('#wzErr'); if (e) { e.textContent = msg; e.classList.remove('hidden'); } else toast(msg); }
+async function wzLoadFiles(files) {
+  if (!W) wzReset();
+  if (!W.platform) W.platform = files.some(f => /\.json$/i.test(f.name)) ? 'instagram' : 'whatsapp';
+  if (WZ_STEPS[W.step] !== 'upload' && W.kind) wzGo(WZ_STEPS.indexOf('upload'));
+  const card = $('#upCard');
+  W.counted = false;
+  if (card) { card.classList.remove('done'); card.classList.add('loading'); $('#wzErr')?.classList.add('hidden'); }
+  $('#wzNext').disabled = true;
+  try {
+    const [{ messages, title }] = await Promise.all([readInputs(files), sleep(1700)]);
+    if (!messages || messages.length < 4) throw new Error('לא מצאתי הודעות בקובץ הזה. ודאו שזה הקובץ שייצאתם מהצ\'אט (ראו הוראות למטה).');
+    W.messages = messages; W.title = title; W.names = {};
+    if (!card || WZ_STEPS[W.step] !== 'upload') { W.counted = true; if (WZ_STEPS[W.step] === 'upload') wzRender(); return; }
+    card.classList.remove('loading'); card.classList.add('done');
+    burstConfetti($('#upConfetti'));
+    const target = messages.length, t0 = performance.now(), el = $('#upNum');
+    const step = now => { const f = Math.min(1, (now - t0) / 1400); el.textContent = fmt(target * (1 - Math.pow(1 - f, 3))); if (f < 1) requestAnimationFrame(step); else { W.counted = true; $('#wzNext').disabled = false; $('.up-guide')?.removeAttribute('open'); } };
+    requestAnimationFrame(step);
+  } catch (e) {
+    W.messages = null;
+    if (card) card.classList.remove('loading');
+    wzError(e.message || 'משהו השתבש בקריאת הקובץ.');
+  }
+}
+function burstConfetti(box) {
+  if (!box) return;
+  const cols = ['#ffd166', '#fff', '#ff6b8b', '#8b6cff', '#3ccf91'];
+  box.innerHTML = Array.from({ length: 34 }, (_, i) => {
+    const x = Math.random() * 100, d = Math.random() * .5, r = Math.random() * 360, dx = (Math.random() - .5) * 120;
+    return `<i style="left:${x}%;background:${cols[i % cols.length]};animation-delay:${d}s;--r:${r}deg;--dx:${dx}px"></i>`;
+  }).join('');
+}
+async function wzFinish() {
+  const map = {};
+  for (const [raw] of rawCounts()) map[raw] = finalName(raw);
+  const msgs = W.messages.map(m => ({ ...m, from: map[m.from] || m.from }));
+  const kind = W.kind, lang = W.lang, me = W.me ? map[W.me] : null, title = W.title;
+  await run(async () => ({ messages: msgs, title }), { kind, lang, me });
+}
+$('#wzNext').onclick = () => { if (!wzCanNext()) return; if (WZ_STEPS[W.step] === 'lang') wzFinish(); else wzGo(W.step + 1); };
+$('#wzBack').onclick = () => { if (W.step === 0) show('landing'); else wzGo(W.step - 1); };
+
+/* =========================================================
    Flow
    ========================================================= */
 const LOAD_STEPS = ['פותח את הקובץ', 'מפרק הודעות', 'מודד זמני תגובה', 'סופר אימוג\'ים', 'מחלק תארים', 'כותב את פסק הדין'];
-async function run(getMessages) {
+async function run(getMessages, opts = {}) {
   const err = $('#err'); err.classList.add('hidden');
   show('loading');
   const bar = $('#loadBar'), msg = $('#loadMsg');
@@ -2533,6 +2817,9 @@ async function run(getMessages) {
     if (!messages || !messages.length) throw new Error('לא הצלחתי לזהות הודעות בקובץ. ודאו שזה ייצוא צ\'אט מוואטסאפ, טלגרם, אינסטגרם או מסנג\'ר.');
     R = analyze(messages, title);
     if (ai) { R.ai = ai; R.me = ai.me || null; }
+    if (opts.kind) R.kind = opts.kind;
+    if (opts.lang) R.lang = opts.lang;
+    if (opts.me !== undefined && !ai) R.me = opts.me;
     anon = false; $('#anonToggle').checked = false;
     clearInterval(tick); bar.style.width = '100%';
     await sleep(250);
@@ -2541,6 +2828,7 @@ async function run(getMessages) {
     openStory(0);
   } catch (e) {
     clearInterval(tick);
+    if (opts.kind) { show('wizard'); wzRender(); toast(e.message || 'משהו השתבש'); return; }
     show('landing');
     err.textContent = e.message || 'משהו השתבש בקריאת הקובץ.';
     err.classList.remove('hidden');
@@ -2549,16 +2837,17 @@ async function run(getMessages) {
 }
 
 // file inputs
-$('#pickBtn').onclick = () => $('#fileInput').click();
-$('#fileInput').onchange = e => { const files = [...e.target.files]; e.target.value = ''; if (files.length) run(() => readInputs(files)); };
+$('#pickBtn').onclick = () => openWizard();
+$('#fileInput').onchange = e => { const files = [...e.target.files]; e.target.value = ''; if (!files.length) return; if ($('#wizard').classList.contains('hidden')) openWizard(files); else wzLoadFiles(files); };
 const drop = $('#drop');
 ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => { const files = [...e.dataTransfer.files]; if (files.length) run(() => readInputs(files)); });
+drop.addEventListener('drop', e => { const files = [...e.dataTransfer.files]; if (files.length) openWizard(files); });
 window.addEventListener('dragover', e => e.preventDefault());
-window.addEventListener('drop', e => { if (!drop.contains(e.target) && !$('#landing').classList.contains('hidden')) { e.preventDefault(); const files = [...e.dataTransfer.files]; if (files.length) run(() => readInputs(files)); } });
-$('#pasteToggle').onclick = () => { $('#pasteBox').classList.toggle('hidden'); $('#pasteArea').focus(); };
+window.addEventListener('drop', e => { if (!drop.contains(e.target) && !$('#landing').classList.contains('hidden')) { e.preventDefault(); const files = [...e.dataTransfer.files]; if (files.length) openWizard(files); } });
 $('#pasteGo').onclick = () => { const t = $('#pasteArea').value; if (!t.trim()) return; run(async () => { const r = parseText(t); return r || { messages: [], title: null }; }); };
+
+$$('[data-start]').forEach(b => b.onclick = () => openWizard());
 
 // demos
 $('#demoList').innerHTML = DEMOS.map(d => `<button class="demo-item" data-demo="${d.id}">
