@@ -3450,6 +3450,54 @@ function buildLocalReport(r) {
     [p => rel(p, q => q.thanks / Math.max(1, q.msgs)), p => `${V(p).He} ${gx(p, 'רואה', 'רואה')} את האנשים סביבו/ה ולא ${gx(p, 'שוכח', 'שוכחת')} להגיד תודה. זה הופך את הצ'אט הזה למקום נעים.`],
     [() => 1, p => `${V(p).He} העוגן. כשהכל סביב משתגע, ${he(p)} ${gx(p, 'נשאר', 'נשארת')} ${gx(p, 'יציב', 'יציבה')}, וכולם סומכים על זה בלי לשים לב.`],
   ];
+  // per-person extras for the portrait
+  const wd = new Map(P.map(q => [q.name, new Array(7).fill(0)]));
+  const qrt = new Map(P.map(q => [q.name, []]));
+  for (let i = 1; i < msgs.length; i++) {
+    const m = msgs[i]; if (m.t && wd.has(m.from)) wd.get(m.from)[m.t.getDay()]++;
+    const pr = msgs[i - 1];
+    if (m.t && pr.t && pr.from !== m.from && qrt.has(m.from) && /\?/.test(pr.text || '') && m.t - pr.t < 12 * HOUR) qrt.get(m.from).push(m.t - pr.t);
+  }
+  const recvPer = q => { let n = 0; for (const [, mm] of rtTo) if (mm.has(q.name)) { /* replies q gave */ } for (const x of P) if (x !== q && x.repliesTo.has(q.name)) n += x.repliesTo.get(q.name); return n / Math.max(1, q.msgs); };
+  const cmpWord = (v, f, more, less, same) => { const rr = rel({ ...v }, f); return rr > 1.25 ? more : rr < .8 ? less : same; };
+  function portrait(p) {
+    const out = [], rank = P.indexOf(p) + 1, Y = V(p), you = isYou(p);
+    const who = you ? Y.he : p.name;
+    // role in the group
+    const roles = [];
+    if (r.timed && rel(p, q => q.startShare) > 1.3) roles.push(`${gx(p, 'זה', 'זו')} ש${gx(p, 'מתחיל', 'מתחילה')} את רוב השיחות`);
+    if (P.length > 2 && rel(p, recvPer) > 1.25) roles.push(`הדבק: על ההודעות ${Y.his} עונים יותר מכל אחד אחר`);
+    if (r.timed && rel(p, q => q.lastWord / Math.max(1, q.msgs)) > 1.3) roles.push(`${gx(p, 'זה', 'זו')} ש${gx(p, 'סוגר', 'סוגרת')} את השיחות`);
+    if (p.rt != null && rel(p, q => 1 / Math.max(q.rt || 1e9, 1e4)) > 1.3) roles.push(`${gx(p, 'זה', 'זו')} ש${gx(p, 'עונה', 'עונה')} הכי מהר`);
+    if (p.share < .5 / P.length) roles.push(`${gx(p, 'הצופה', 'הצופה')} ${gx(p, 'השקט', 'השקטה')}`);
+    out.push(para(`**${you ? 'התפקיד שלך' : 'התפקיד של ' + p.name}${r.isPair ? ' בצ\'אט' : ' בקבוצה'}.** ${rank === 1 ? 'הכי הרבה הודעות' : `מקום ${rank} מתוך ${P.length} בכמות ההודעות`}: ${fmt(p.msgs)}, שהם ${Math.round(p.share * 100)}% מהכל. ${roles.length ? `${you ? Y.He : p.name} ${roles.slice(0, 2).join(', ו')}.` : `${you ? Y.He : p.name} לא ${gx(p, 'מוביל', 'מובילה')} ולא ${gx(p, 'נגרר', 'נגררת')}, ${gx(p, 'נמצא', 'נמצאת')} בדיוק באמצע. זה תפקיד בפני עצמו.`}`));
+    // how they talk
+    const sig = (p.signature || []).slice(0, 3).map(w => `"${w[0]}"`);
+    out.push(para(`**איך ${who} ${gx(p, 'מדבר', 'מדברת')}.** ${p.avgWords.toFixed(1)} מילים בממוצע להודעה, ${cmpWord(p, q => q.avgWords, 'יותר מכולם', 'פחות מכולם', 'בערך כמו כולם')}. ${p.emojis > 5 ? `${fmt(p.emojis)} אימוג'ים, והאהוב: ${p.topEmoji[0]}. ` : `כמעט בלי אימוג'ים. ${you ? Y.He : p.name} ${gx(p, 'סומך', 'סומכת')} על מילים. `}${sig.length ? `המילים שמזהות ${you ? 'אותך' : gx(p, 'אותו', 'אותה')}: ${sig.join(', ')}. ` : ''}${p.questions > 5 ? `${fmt(p.questions)} שאלות` : 'כמעט בלי שאלות'}, ${p.laughs > 5 ? `${fmt(p.laughs)} צחוקים` : 'וכמעט בלי צחוקים'}${p.media > 5 ? `, ו־${fmt(p.media)} תמונות וקבצים` : ''}.`));
+    // when they are alive
+    if (r.timed) {
+      const days = wd.get(p.name) || [], bd = days.indexOf(Math.max(...days));
+      out.push(para(`**מתי ${who} ${gx(p, 'חי', 'חיה')}.** השעה ${Y.his}: ${String(p.peakHour).padStart(2, '0')}:00. היום ${Y.his}: יום ${DAYS_HE[bd]}. ${p.nightRate > .12 ? `${Math.round(p.nightRate * 100)}% מההודעות אחרי חצות, כשכולם כבר ישנים.` : p.morningRate > .15 ? `${Math.round(p.morningRate * 100)}% מההודעות לפני 9 בבוקר. ${gx(p, 'ער', 'ערה')} לפני כולם.` : 'שעות נורמליות של בן אדם נורמלי. כמעט חשוד.'}`));
+    }
+    // who they talk with (groups)
+    if (!r.isPair && p.repliesTo.size) {
+      const to = [...p.repliesTo.entries()].sort((x, y) => y[1] - x[1])[0];
+      const from = P.filter(x => x !== p && x.repliesTo.has(p.name)).sort((x, y) => y.repliesTo.get(p.name) - x.repliesTo.get(p.name))[0];
+      out.push(Object.assign(para(`**עם מי ${who} באמת ${gx(p, 'מדבר', 'מדברת')}.** הכי הרבה ${you ? Y.he : gx(p, 'הוא', 'היא')} ${gx(p, 'עונה', 'עונה')} ל${N(pOf(to[0]))} (${fmt(to[1])} פעמים).${from ? ` ומי שהכי עונה ${you ? 'לך' : gx(p, 'לו', 'לה')}: ${N(from)}. ${from.name === to[0] ? 'ציר אמיתי בתוך הקבוצה.' : 'משולש מעניין.'}` : ''}`), { mixed: true }));
+    }
+    // in every situation
+    const q = qrt.get(p.name) || [], qm = median(q);
+    const S = [];
+    if (r.timed) S.push(['🤫', 'כשהצ\'אט שותק', rel(p, x => x.startShare) > 1.2 ? `${you ? Y.He : p.name} ${gx(p, 'זה', 'זו')} ש${gx(p, 'שובר', 'שוברת')} את השקט. ${fmt(p.starts)} פעמים.` : `${you ? Y.He : p.name} ${gx(p, 'מחכה', 'מחכה')} שמישהו אחר יכתוב ראשון. ${fmt(p.starts)} פתיחות בלבד.`]);
+    if (qm != null && q.length >= 3) S.push(['❓', `כששואלים ${you ? 'אותך' : gx(p, 'אותו', 'אותה')} שאלה`, `${gx(p, 'עונה', 'עונה')} תוך ${fmtDur(qm)}. ${qm < 3 * 60e3 ? 'בלי לחשוב פעמיים.' : qm > 30 * 60e3 ? 'אחרי שחשב/ה על זה טוב טוב, או שכח/ה.' : 'בקצב סביר.'}`]);
+    S.push(['😂', 'כשמשהו מצחיק', rel(p, x => x.laughRate) > 1.2 ? `${gx(p, 'הראשון', 'הראשונה')} לצחוק. ${fmt(p.laughs)} פעמים "חחח".` : rel(p, x => x.laughRate) < .7 ? `קשה להצחיק ${you ? 'אותך' : gx(p, 'אותו', 'אותה')}. ${fmt(p.laughs)} צחוקים בכל הצ'אט.` : `${gx(p, 'צוחק', 'צוחקת')} כשבאמת מצחיק. לא יותר.`]);
+    if (r.timed) S.push(['📨', `כשלא עונים ${you ? 'לך' : gx(p, 'לו', 'לה')}`, p.doubles >= 3 ? `${gx(p, 'כותב', 'כותבת')} שוב. ${fmt(p.doubles)} פעמים, אחרי חצי שעה של שקט.` : `${gx(p, 'מחכה', 'מחכה')} בשקט. לא ${gx(p, 'רודף', 'רודפת')} אחרי אף אחד.`]);
+    S.push(['❤️', 'כשמגיע רגע רגשי', rel(p, x => x.loveRate) > 1.2 ? `לא ${gx(p, 'מתבייש', 'מתביישת')}. ${fmt(p.love)} הודעות עם לב.` : rel(p, x => x.laughRate) > 1.2 ? `${gx(p, 'בורח', 'בורחת')} להומור. זה יותר בטוח.` : `${gx(p, 'שותק', 'שותקת')}, ומשאיר/ה את זה לאחרים.`]);
+    out.push(para(`**${you ? Y.He : p.name} בכל מצב:**`));
+    S.forEach(([e, t, x]) => out.push(item(e, t, x)));
+    return out;
+  }
+
   const chapters = [];
   const chars = (r.isPair ? P.slice(0, 2) : P.slice(0, 5));
   chars.forEach(p => {
@@ -3460,12 +3508,13 @@ function buildLocalReport(r) {
     blocks.push(para(`אבל הצ'אט מספר סיפור אחר. ${a.real(p)}`));
     blocks.push(...proofBlocks(p, a.proofs));
     blocks.push(para(a.after(p)));
+    blocks.push(...portrait(p));
     // fear
     const fear = FEARS.map(f => ({ f, s: f.score(p) })).filter(x => x.s > 1.15).sort((x, y) => y.s - x.s)[0];
     if (fear) {
       blocks.push(item('😨', `ממה ${isYou(p) ? V(p).he : p.name} באמת ${gx(p, 'מפחד', 'מפחדת')}`, fear.f.text(p)));
       const fi = fear.f.find(p);
-      if (fi >= 0) blocks.push(chat(fear.f.id === 'misunderstood' ? [bub(msgs[fi])] : around(fi, 1, 2)));
+      if (fi >= 0) blocks.push(chat(fear.f.id === 'misunderstood' ? [bub(msgs[fi])] : around(fi, 1, 1)));
     }
     // how the other(s) see them
     const toP = rtTo.get(p.name), fromP = new Map();
@@ -3479,14 +3528,9 @@ function buildLocalReport(r) {
       const fans = [...fromP.entries()].filter(([x]) => x !== p.name).sort((x, y) => x[1] - y[1]);
       if (fans.length) { const to = isYou(p) ? 'לך' : gx(p, 'לו', 'לה'); blocks.push(Object.assign(item('🪞', `מי הכי מחכה ${to}`, `כש${isYou(p) ? V(p).he : p.name} ${gx(p, 'כותב', 'כותבת')}, הכי מהר עונה ${to} ${N(r.people.find(q => q.name === fans[0][0]) || { name: fans[0][0] })}, תוך ${fmtDur(fans[0][1])}.${fans.length > 1 ? ` הכי לאט: ${fans[fans.length - 1][0]}, תוך ${fmtDur(fans[fans.length - 1][1])}.` : ''}`), { mixed: true })); }
     }
-    // the moment that exposed them: the most revealing message they wrote
+    // the moment that exposed them: quoted in one line, no extra bubbles
     const ri = bestIdx((m) => m.from === p.name && isText(m) && m.text.length > 25 && m.text.length < 400, m => m.text.length * .4 + (m.t && m.t.getHours() < 5 ? 60 : 0) + (LOVE_RE.test(m.text) ? 50 : 0) + (/\?/.test(m.text) ? 15 : 0) + (SORRY_RE.test(m.text) ? 30 : 0));
-    if (ri >= 0) {
-      blocks.push(item('🔦', `הרגע שחשף ${isYou(p) ? V(p).him : gx(p, 'אותו', 'אותה')}`, `${msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]}, ${fmtDate(msgs[ri].t)}, ${hm(msgs[ri])}. ` : ''}מכל ההודעות ${V(p).his}, זאת ההודעה שבה המסכה ירדה.`));
-      blocks.push(chat(around(ri, 1, 2)));
-    }
-    const story = traitStory(p);
-    if (story) blocks.push(para(story));
+    if (ri >= 0) blocks.push(item('🔦', `הרגע שחשף ${isYou(p) ? V(p).him : gx(p, 'אותו', 'אותה')}`, `${msgs[ri].t ? `${DAYS_HE[msgs[ri].t.getDay()]}, ${fmtDate(msgs[ri].t)}, ${hm(msgs[ri])}: ` : ''}"${truncate(msgs[ri].text, 150)}". מכל ההודעות ${V(p).his}, זאת ההודעה שבה המסכה ירדה.`));
     if (ROAST[archKey(p)]) blocks.push(item('🔥', 'הצלייה של סקופי', ROAST[archKey(p)](p)));
     const good = GOOD.map(([f, t]) => ({ s: f(p), t })).sort((x, y) => y.s - x.s)[0];
     blocks.push(item('💎', `הדבר הכי טוב ב${isYou(p) ? 'ך' : p.name}`, good.t(p)));
