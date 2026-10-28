@@ -40,6 +40,12 @@ CLAUDE_MODEL = "claude-sonnet-5-5"
 PAYMENT_LINK = "REPLACE_WITH_PAYMENT_LINK"
 SALES_SETUP_PRICE = "3,500"
 SALES_DEPOSIT = "500"
+SALES_MONTHLY = "590"
+# ניסוי: מודעה עם חודש ניסיון מול מודעה בלי. מי שמגיע ממודעה שה-ID שלה (או מילה מהכותרת שלה) כאן, מקבל את הצעת הניסיון.
+# כמה מודעות: מופרדות בפסיק. ריק = אף אחד לא מקבל ניסיון (כמו בהנחיה)
+SALES_TRIAL_ADS = ""
+# מה בדיוק הניסיון (נאמר לבוט כמו שהוא). ריק = אין ניסיון
+SALES_TRIAL_TERMS = ""
 # לאן נשלחות ההתראות HOT_LEAD / PAID / HANDOFF (כמה כתובות: מופרדות בפסיק)
 SALES_ALERT_EMAILS = "eliyabuis12@gmail.com"
 

@@ -12,6 +12,7 @@ export default {
     prompt,
     setupPrice: '3,500',
     deposit: '500',
+    monthly: '590',
     // אחרי 24 שעות מותר רק תבנית מאושרת, ורק למי שכתב שמותר לכתוב לו
     templates: [
       { name: 'sales_followup_v1', category: 'MARKETING', body: 'היי, כאן עונה ראשון. אמרת שאפשר לכתוב לך: עדיין רלוונטי לך לשמוע על המזכירה בוואטסאפ? להסרה השב הסר' },

@@ -1533,7 +1533,9 @@ test('sales bot: voice note is transcribed and answered, ad referral saved, pric
     assert.deepEqual(textsTo(PRO), ['סבבה! בוא תבדוק אותי: תכתוב או תקליט לי כאילו אתה לקוח שלך עם תקלה.', 'אני אענה כמו שהמזכירה שלך תענה.']);
     const sys = aiRequests[0].system.map((b) => b.text).join('\n');
     assert.ok(sys.includes('הקמה 3,500 ₪') && sys.includes('https://pay.example/deposit') && sys.includes('500 ₪'), 'values filled in');
-    assert.ok(!/\{SETUP_PRICE\}|\{DEPOSIT\}|\{PAYMENT_LINK\}|<!--|הערות להטמעה/.test(sys), 'no placeholders, comments or implementation notes');
+    assert.ok(sys.includes('590 ₪ בחודש') && !sys.includes('600 ₪'), 'monthly 590');
+    assert.ok(!/\{SETUP_PRICE\}|\{DEPOSIT\}|\{PAYMENT_LINK\}|\{MONTHLY\}|<!--|הערות להטמעה/.test(sys), 'no placeholders, comments or implementation notes');
+    assert.ok(!sys.includes('מודעה שמציעה ניסיון'), 'no trial unless the ad is a trial ad');
     assert.match(sys, /עכשיו בישראל: יום רביעי 14\/10 בשעה 11:00/);
     const ref = JSON.parse(env.DB.raw.prepare('SELECT referral FROM sales_leads WHERE phone = ?').get(PRO).referral);
     assert.equal(ref.source_id, 'ad123');
@@ -1665,4 +1667,23 @@ test('sales bot: the prompt the server uses is exactly Eliya\'s file (without im
   const built = (await import('../clients/oneh-rishon-sales/sales-prompt.js')).default;
   assert.equal(built, cleanPrompt(md), 'run: node scripts/build-sales-prompt.mjs clients/oneh-rishon-sales');
   assert.ok(!built.includes('יש חשבונית') && !built.includes('לקוח שלנו שעובד'), 'unapproved claims stay out');
+});
+
+test('sales bot: the ad experiment: only people from a trial ad get the trial offer, and the weekly report splits the ads', async () => {
+  await withSalesClient(async () => {
+    sent.length = 0; aiRequests = []; outSeq = 0;
+    const mails = [];
+    const env = { ...salesEnv(mails), SALES_TRIAL_ADS: 'ad-trial', SALES_TRIAL_TERMS: 'חודש ראשון בלי לשלם' };
+    const t0 = new Date('2026-10-14T08:00:00Z');
+    aiQueue = [salesOut({ replies: ['אהלן'] }), salesOut({ replies: ['אהלן'] })];
+    await processWebhook(env, inbound('972540000001', { type: 'text', text: { body: 'היי' }, referral: { source_id: 'ad-trial', headline: 'חודש ראשון עלינו' } }, 't1'), t0);
+    await processWebhook(env, inbound('972540000002', { type: 'text', text: { body: 'היי' }, referral: { source_id: 'ad-plain', headline: 'מקדמה 500' } }, 't2'), t0);
+    const live = (i) => aiRequests[i].system.map((b) => b.text).join('\n');
+    assert.match(live(0), /מודעה שמציעה ניסיון.*חודש ראשון בלי לשלם/);
+    assert.doesNotMatch(live(1), /מודעה שמציעה ניסיון/);
+    const { salesWeeklyReport } = await import('../src/sales.js');
+    await salesWeeklyReport(env, new Date(t0.getTime() + 86400000));
+    assert.match(mails.at(-1).text, /חודש ראשון עלינו \(עם ניסיון\): 1 פנו/);
+    assert.match(mails.at(-1).text, /מקדמה 500: 1 פנו/);
+  });
 });

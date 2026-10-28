@@ -38,6 +38,7 @@ export function salesValues(env) {
   return {
     SETUP_PRICE: env.SALES_SETUP_PRICE || SALES.setupPrice || '',
     DEPOSIT: env.SALES_DEPOSIT || SALES.deposit || '',
+    MONTHLY: env.SALES_MONTHLY || SALES.monthly || '',
     PAYMENT_LINK: env.PAYMENT_LINK && !/^REPLACE/.test(env.PAYMENT_LINK) ? env.PAYMENT_LINK : '',
   };
 }
@@ -58,11 +59,23 @@ export function salesSystemPrompt(env) {
   const text = String(SALES.prompt || '')
     .replaceAll('{SETUP_PRICE}', v.SETUP_PRICE)
     .replaceAll('{DEPOSIT}', v.DEPOSIT)
+    .replaceAll('{MONTHLY}', v.MONTHLY)
     .replaceAll('{PAYMENT_LINK}', v.PAYMENT_LINK || '(קישור למקדמה: אין)');
   return `${text}\n\n${OUTPUT_RULES}`;
 }
 
-function liveContext(now, lead) {
+// ניסוי המודעות: האם הפונה הגיע ממודעה של "חודש ניסיון"
+export function trialFor(env, lead) {
+  const terms = String(env.SALES_TRIAL_TERMS || '').trim();
+  const ads = String(env.SALES_TRIAL_ADS || '').split(',').map((x) => x.trim()).filter(Boolean);
+  if (!terms || !ads.length || !lead?.referral) return '';
+  let r = null;
+  try { r = JSON.parse(lead.referral); } catch { return ''; }
+  const hit = ads.some((a) => a === r.source_id || (r.headline && r.headline.includes(a)));
+  return hit ? terms : '';
+}
+
+function liveContext(now, lead, trial = '') {
   const p = ilParts(now);
   const known = lead ? LEAD_FIELDS.filter((k) => lead[k]).map((k) => `${k}: ${lead[k]}`).join(', ') : '';
   let ref = '';
@@ -71,6 +84,7 @@ function liveContext(now, lead) {
     `עכשיו בישראל: ${ilDateTimeLabel(now)}${p.dow === 6 ? ' (שבת)' : p.dow === 5 && +p.hh >= 13 ? ' (שישי אחרי הצהריים)' : ''}.`,
     known ? `מה שכבר ידוע עליו: ${known}.` : '',
     ref,
+    trial ? `הפונה הגיע ממודעה שמציעה ניסיון. אצלו, במקום "אין ניסיון", ההצעה היא: ${trial}. בכל מקום אחר שמדבר על ניסיון, תשלום או מקדמה, ההצעה הזו גוברת. לא ממציאים תנאים מעבר לזה.` : '',
   ].filter(Boolean).join('\n');
 }
 
@@ -107,7 +121,7 @@ export async function runSalesTurn(env, { history, image = null, now = new Date(
       fallbacks: 'default',
       system: [
         { type: 'text', text: salesSystemPrompt(env), cache_control: { type: 'ephemeral', ttl: '1h' } },
-        { type: 'text', text: liveContext(now, lead) },
+        { type: 'text', text: liveContext(now, lead, trialFor(env, lead)) },
       ],
       messages,
       output_config: { effort: env.CLAUDE_EFFORT || 'low', format: { type: 'json_schema', schema: SALES_SCHEMA } },
@@ -274,6 +288,7 @@ export async function salesWeeklyReport(env, now = new Date()) {
   for (const l of rows) {
     let ad = 'בלי מודעה';
     try { const r = l.referral ? JSON.parse(l.referral) : null; if (r) ad = r.headline || r.source_id || 'מודעה'; } catch { /* */ }
+    if (trialFor(env, l)) ad = `${ad} (עם ניסיון)`;
     const x = (byAd[ad] ||= { n: 0, hot: 0, paid: 0 });
     x.n++; if (l.hot_sent_at) x.hot++; if (l.paid_at) x.paid++;
   }
