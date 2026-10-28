@@ -46,7 +46,7 @@
 ## מצב נוכחי (26/10/2026)
 - **שיחה חדשה? קרא קודם את `automation-agency/logs/session-2026-10-26.md`:** מי אנחנו, קהל היעד, ההצעה, מה השתנה בבוט, מה פתוח, וכל חומרי המכירה והשיווק.
 - **חנן באוויר:** הבוט עונה לכל הלקוחות שלו מ-21/10/2026. הכל בתיק: `automation-agency/clients/hanan-locksmith/client-summary.md`.
-- **בוט המכירות של עונה ראשון** (28/10): `bots/agency-bot/clients/oneh-rishon-sales/`, ההנחיה של אליה (גרסה 3). בנוי ונבדק (49 בדיקות + 4 שיחות מדומות עם ה-AI האמיתי), **עוד לא באוויר**: חסרים קישור תשלום, המספר ב-Dualhook (Phone ID, WABA, סודות בקידומת `ONEH_RISHON_SALES_`), מסד נתונים D1 `oneh-rishon-sales-bot`, ומייל של אריאל להתראות. **בלי חודש ניסיון** (אריאל, 28/10): `SALES_TRIAL_ADS` ו-`SALES_TRIAL_TERMS` נשארים ריקים. המודעות הישנות שכתוב בהן "חודש ראשון עלינו" צריכות עדכון.
+- **בוט המכירות של עונה ראשון** (28/10): `bots/agency-bot/clients/oneh-rishon-sales/`, ההנחיה של אליה (גרסה 3). בנוי ונבדק (49 בדיקות + 4 שיחות מדומות עם ה-AI האמיתי), **עוד לא באוויר**: חסרים קישור תשלום, המספר ב-Dualhook (Phone ID, WABA, סודות בקידומת `ONEH_RISHON_SALES_`), מסד נתונים D1 `oneh-rishon-sales-bot`. התראות: eliyabuis12@gmail.com בלבד (אריאל אישר). **בלי חודש ניסיון** (אריאל, 28/10): `SALES_TRIAL_ADS` ו-`SALES_TRIAL_TERMS` נשארים ריקים. המודעות הישנות שכתוב בהן "חודש ראשון עלינו" צריכות עדכון.
 - 26/10: הבוט שולח גם הצעות מחיר (סוג 1 ביש חשבונית). חשבונית עסקה: מחכים שחנן יפיק אחת. התראות תקלה לוואטסאפ של אריאל: אריאל החליט שלא.
 - `wrangler.toml`: `BOT_OFF = "0"`, `TEST_PHONES = ""` (פתוח לכולם), `OWNER_EMAIL = "Hananlocks@gmail.com"`, `CLAUDE_MODEL = "claude-sonnet-5-5"`, `WORKER_URL = "https://bot.onerishon.com"`.
 - בדיקה יומית אוטומטית כל בוקר ב-07:56 (`hanan-bot.yml` עם `daily_check`), התוצאה נכתבת לאריאל.
