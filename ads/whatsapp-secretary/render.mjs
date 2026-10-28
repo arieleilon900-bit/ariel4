@@ -1,4 +1,4 @@
-// Renders ad.html to ad.png (1080x1350 at 2x). Usage: node ads/whatsapp-secretary/render.mjs
+// Renders <name>.html to <name>.png (1080x1350 at 2x). Usage: node ads/whatsapp-secretary/render.mjs [name]
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -11,7 +11,8 @@ catch { ({ chromium } = await import('/opt/node22/lib/node_modules/playwright/in
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 });
-await page.goto('file://' + path.join(dir, 'ad.html'));
+const name = process.argv[2] || 'ad';
+await page.goto('file://' + path.join(dir, name + '.html'));
 await page.evaluate(() => document.fonts.ready);
-await page.screenshot({ path: path.join(dir, 'ad.png') });
+await page.screenshot({ path: path.join(dir, name + '.png') });
 await browser.close();
