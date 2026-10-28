@@ -1,0 +1,256 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>הצעה ל__BIZ__</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#1c1c1c;--muted:#666;--line:#d9d9d9;--acc:#1f4e79}
+body{font-family:Assistant,Arial,sans-serif;color:var(--ink);font-size:15px;line-height:1.6}
+.page{width:210mm;height:297mm;padding:20mm 22mm 18mm;position:relative;page-break-after:always;overflow:hidden}
+.page:last-child{page-break-after:auto}
+header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:26px}
+header .logo{font-weight:800;font-size:19px;letter-spacing:.2px}
+header .logo small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+header .d{font-size:12.5px;color:var(--muted);text-align:left}
+h1{font-size:23px;font-weight:800;margin:14px 0 14px;line-height:1.3}
+h2{font-size:18px;font-weight:700;margin:22px 0 6px;color:var(--acc)}
+p{margin:0 0 10px}
+.to{font-size:14.5px;line-height:1.5}
+ol,ul{margin:4px 22px 10px 0}
+li{margin:4px 0}
+.foot{position:absolute;bottom:10mm;right:22mm;left:22mm;font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+/* chat */
+.demo{display:flex;gap:22px;align-items:flex-start;margin-top:10px}
+.phone{width:78mm;flex:none;border:1px solid #bbb;border-radius:18px;overflow:hidden;background:#efeae2}
+.bar{background:#f6f6f6;border-bottom:1px solid #ddd;padding:8px 10px;display:flex;align-items:center;gap:8px;font-size:13px}
+.bar .av{width:28px;height:28px;border-radius:50%;background:#c8d6e5;display:grid;place-items:center;font-weight:700;font-size:13px;color:#30475e}
+.bar b{display:block;font-size:13.5px}
+.bar small{color:#888;font-size:10.5px}
+.chat{padding:10px 8px 12px;display:flex;flex-direction:column;gap:5px}
+.day{align-self:center;background:#fff;color:#777;font-size:10px;padding:2px 8px;border-radius:6px;margin-bottom:3px}
+.m{max-width:85%;padding:5px 8px 14px;border-radius:7px;font-size:11.8px;line-height:1.35;position:relative}
+.m i{position:absolute;bottom:2px;left:6px;font-size:9px;color:#8a8a8a;font-style:normal}
+.in{background:#fff;align-self:flex-start}
+.out{background:#d9fdd3;align-self:flex-end}
+.photo{width:120px;height:80px;border-radius:5px;background:linear-gradient(135deg,#cfc6b8,#a99d8b);margin-bottom:2px}
+.side{flex:1}
+.side h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.msg{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.55;background:#fafafa}
+.msg div{display:flex;gap:8px}
+.msg span:first-child{color:var(--muted);min-width:48px}
+.side p{font-size:13.5px;margin-top:10px}
+table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:14.5px}
+td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:left;white-space:nowrap;font-weight:600}
+tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
+.faq p{margin-bottom:8px}
+.faq b{display:block}
+.box{border:1px solid var(--ink);padding:12px 16px;margin:12px 0}
+.box table{margin:0}
+.sig{margin-top:22px;line-height:1.5}
+.sig b{font-size:16px}
+
+.call{background:#f2f5f8;border-right:4px solid var(--acc);padding:10px 14px;margin:10px 0}
+.call h3{font-size:16px;font-weight:800;margin-bottom:6px}
+.nums{display:flex;gap:28px;margin:6px 0 4px}
+.nums div{font-size:13.5px;line-height:1.3}
+.nums b{display:block;font-size:30px;font-weight:800;color:var(--acc);line-height:1.1}
+.save{display:flex;gap:12px;margin:10px 0}
+.save div{flex:1;border:1px solid var(--line);padding:10px 12px;font-size:13.5px}
+.save b{display:block;font-size:22px;font-weight:800}
+s.old{color:#999;font-weight:400;margin-left:6px}
+.green{color:#1b6e3a}
+.pk{display:flex;gap:10px;margin:12px 0 4px;align-items:stretch}
+.pk .p{flex:1;border:1px solid var(--line);padding:12px 12px 8px;position:relative;font-size:12.8px;line-height:1.45}
+.pk .rec{border:2px solid var(--acc);background:#f4f8fc}
+.pk .tag{position:absolute;top:-11px;right:10px;background:var(--acc);color:#fff;font-size:11.5px;font-weight:700;padding:1px 9px}
+.pk .pn{font-weight:800;font-size:16px}
+.pk .pp{font-size:26px;font-weight:800;color:var(--acc);line-height:1.15;margin-top:4px}
+.pk .pp small{font-size:12.5px;font-weight:600;color:var(--muted);margin-right:4px}
+.pk .ps{font-weight:700;margin:2px 0 6px}
+.pk ul{margin:0 16px 0 0;padding:0}
+.pk li{margin:3px 0}
+</style></head><body>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">__DATE__</div></header>
+  <div class="to">לכבוד<br>__OWNER__, __BIZ__</div>
+  <h1>הנדון: הצעה למענה אוטומטי ללקוחות בוואטסאפ</h1>
+
+  <p>שלום __OWNER__,</p>
+  <p>תודה על השיחה. כמו שסיכמנו, אני שולח לך הסבר מסודר: מה זה, איך זה עובד אצלך ביום-יום, דוגמה לשיחה, ובסוף המחיר.</p>
+
+  <h2>מה הבעיה שזה פותר</h2>
+  <p>רוב העבודות שלך מתחילות בהודעה בוואטסאפ. הבעיה היא שהן מגיעות בדיוק כשאתה מתחת לכיור, בנסיעה, או אצל לקוח אחר. לקוח שלא מקבל תשובה תוך כמה דקות שולח הודעה לעוד אינסטלטור או שניים, והראשון שעונה מקבל את העבודה.</p>
+  <p>גם כשאתה כן מספיק לענות, כל פנייה זה כמה הודעות הלוך וחזור: מה קרה, איפה אתה גר, תשלח תמונה. וזה בדרך כלל באמצע עבודה אחרת.</p>
+
+  <h2>מה אנחנו עושים</h2>
+  <p>אנחנו מחברים למספר הוואטסאפ שלך מענה אוטומטי שעונה ללקוחות שלך תוך שניות, בשם העסק ובסגנון שלך. הוא שואל מה קרה, מבקש תמונה וכתובת, ושולח לך את כל הפרטים בהודעה אחת מסודרת. אתה רק מתקשר וסוגר את העבודה.</p>
+  <div class="call"><h3>בשורה התחתונה, מה זה נותן לך</h3>
+    <div class="save" style="margin:4px 0 0">
+      <div><b class="green">כ-2,000 ₪</b>בחודש של עבודות שלא הולכות יותר לאינסטלטור אחר</div>
+      <div><b class="green">כ-12 שעות</b>בחודש שאתה לא מבזבז על שאלות בטלפון</div>
+      <div><b class="green">יותר ביקורות</b>בגוגל, ויותר שיחות חדשות בלי לשלם על פרסום</div>
+    </div>
+  </div>
+
+  <h2>איך זה עובד ביום-יום</h2>
+  <ol>
+    <li>לקוח כותב למספר הרגיל שלך. לא צריך מספר חדש או אפליקציה חדשה.</li>
+    <li>הוא מקבל תשובה תוך שניות, גם בערב ובשבת. מחוץ לשעות העבודה שלך הוא מקבל הודעה מתי תחזור אליו.</li>
+    <li>אתה מקבל הודעה אחת עם שם, טלפון, הבעיה, כתובת עם קישור לוויז, והתמונות. מקרה דחוף כמו הצפה מגיע אליך מיד.</li>
+    <li>ברגע שאתה עונה ללקוח בעצמך, המענה האוטומטי יוצא מהשיחה. למשפחה, לחברים ולספקים שלך הוא לא עונה בכלל. ומחירים הוא לא נותן אף פעם, כל שאלה על מחיר מגיעה אליך.</li>
+  </ol>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>1</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
+  <h2 style="margin-top:0">דוגמה לשיחה</h2>
+  <p>ככה הלקוח שלך רואה את זה בטלפון שלו, ומשמאל ההודעה שאתה מקבל בסוף.</p>
+  <div class="demo">
+    <div class="phone">
+      <div class="bar"><div class="av">__INITIAL__</div><div><b>__BIZ__</b><small>חשבון עסקי</small></div></div>
+      <div class="chat">
+        <div class="day">היום</div>
+        <div class="m in">היי, יש לי נזילה מהתקרה בשירותים, אפשר מישהו היום?<i>21:47</i></div>
+        <div class="m out">אהלן, מה נשמע? מצטער לשמוע. זה מטפטף או ממש זורם? ויש מים ליד שקעים או חשמל?<i>21:47</i></div>
+        <div class="m in">מטפטף, לא ליד חשמל<i>21:48</i></div>
+        <div class="m out">טוב שכך. אפשר לשלוח תמונה של התקרה? ככה __OWNER__ יידע מה להביא<i>21:48</i></div>
+        <div class="m in"><div class="photo"></div><i>21:49</i></div>
+        <div class="m out">רואים, תודה. מה הכתובת? רחוב, מספר, עיר וקומה<i>21:49</i></div>
+        <div class="m in">הרצל 12 נתניה, קומה 3. כמה זה עולה בערך?<i>21:50</i></div>
+        <div class="m out">את המחיר __OWNER__ נותן בעצמו אחרי שהוא רואה את התמונה. העברתי לו את כל הפרטים והוא יחזור אליך מחר בבוקר. ערב טוב<i>21:50</i></div>
+      </div>
+    </div>
+    <div class="side">
+      <h3>ההודעה שאתה מקבל</h3>
+      <div class="msg">
+        <div><span>שם</span><span>דני כהן</span></div>
+        <div><span>טלפון</span><span>050-1234567</span></div>
+        <div><span>בעיה</span><span>נזילה מטפטפת מהתקרה בשירותים, לא ליד חשמל</span></div>
+        <div><span>כתובת</span><span>הרצל 12, נתניה, קומה 3 (קישור לוויז)</span></div>
+        <div><span>תמונה</span><span>מצורפת</span></div>
+        <div><span>שאלה</span><span>שואל כמה זה עולה בערך</span></div>
+      </div>
+      <p>בהודעה יש גם כפתורים: "וואטסאפ ללקוח", "בדרך" (הלקוח מקבל שאתה בדרך), "קבע תור" (הלקוח מקבל אישור ותזכורת יום לפני) ו"סיימתי" (הלקוח מקבל בקשה לכתוב עליך ביקורת בגוגל).</p>
+      <p>הלקוח קיבל מענה מלא תוך 3 דקות, בעשר בלילה, ואתה לא נגעת בטלפון.</p>
+    </div>
+  </div>
+
+  <h2>מה עוד כלול</h2>
+  <ul>
+    <li>תזכורת אליך אם לא חזרת ללקוח, אחרי שעה ושוב אחרי שעתיים.</li>
+    <li>לקוח שהפסיק לענות באמצע מקבל תזכורת, ואתה מקבל את מה שנאסף.</li>
+    <li>הבנה של הודעות קוליות ותמונות, ומענה גם בערבית, רוסית ואנגלית.</li>
+    <li>טבלה של כל הפניות עם הורדה לאקסל, ודוח שבועי.</li>
+    <li>חשבוניות מתוכנת החשבוניות שלך יכולות להישלח ללקוח לבד (תלוי בתוכנה).</li>
+    <li>תחזוקה מלאה. אתה לא נוגע בשום הגדרה.</li>
+  </ul>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>2</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
+  <h2 style="margin-top:0">זה כבר עובד אצל בעלי מקצוע</h2>
+  <div class="call"><h3>מנעולן בנתניה, 4 הימים הראשונים אחרי החיבור:</h3>
+    <div class="nums">
+      <div><b>19</b>פניות חדשות קיבלו תשובה תוך שניות</div>
+      <div><b>11</b>חשבוניות נשלחו ללקוחות לבד</div>
+      <div><b>6</b>בקשות לביקורת בגוגל יצאו</div>
+    </div>
+    <p style="margin:6px 0 0;font-size:13.5px">וכל זה בלי שהוא היה צריך לעשות שום דבר חוץ מלהגיע לעבודות.</p>
+  </div>
+
+  <h2>החשבון</h2>
+  <p>דוגמה עם מספרים זהירים. כדאי לשים במקום את המספרים שלך:</p>
+  <table>
+    <tr><td>פניות בשבוע שנכנסות כשאתה באמצע עבודה</td><td>5</td></tr>
+    <tr><td>מתוכן הולכות לבעל מקצוע אחר</td><td>1 בשבוע</td></tr>
+    <tr><td>שווי עבודה ממוצעת</td><td>500 ₪</td></tr>
+    <tr><td>כסף שהולך לאחר בחודש</td><td>2,000 ₪</td></tr>
+    <tr><td>זמן שנחסך על שאלות בטלפון</td><td>כ-12 שעות בחודש</td></tr>
+    <tr class="t"><td>מספיק שזה מחזיר לך עבודה אחת בחודש כדי שזה ישתלם</td><td></td></tr>
+  </table>
+
+  <h2>שאלות שבדרך כלל שואלים</h2>
+  <div class="faq">
+    <p><b>הלקוחות ירגישו שזה אוטומטי?</b>ההודעות קצרות ואנושיות, בשם העסק ובסגנון שלך. מי ששואל ישירות מקבל תשובה כנה.</p>
+    <p><b>יחסמו לי את הוואטסאפ?</b>לא. החיבור נעשה בדרך הרשמית של Meta (החברה של וואטסאפ). המספר והאפליקציה נשארים שלך.</p>
+    <p><b>אני צריך להבין בטכנולוגיה?</b>לא. אנחנו מחברים הכל בשיחה קצרה, גם מרחוק. אתה ממשיך לענות ללקוחות כמו היום.</p>
+    <p><b>ואם אני רוצה לענות בעצמי?</b>עונים כרגיל מהטלפון. ברגע שענית, המענה האוטומטי יוצא מהשיחה.</p>
+    <p><b>ואם זה לא מתאים לי?</b>את היתרה של ההקמה משלמים רק ביום החיבור, כשרואים שזה עובד. את המנוי מבטלים מתי שרוצים, בהודעה 30 יום מראש. אין חוזה לשנה.</p>
+  </div>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>3</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מענה אוטומטי בוואטסאפ לבעלי מקצוע</small></div><div class="d">הצעה ל__BIZ__</div></header>
+  <h2 style="margin-top:0">הצעת מחיר: שלוש חבילות</h2>
+  <p>לפני המחיר, כדאי לזכור למה להשוות: מזכירה אמיתית עולה 6,000 ₪ בחודש ויותר, ולא עונה בלילה ובשבת. לקוח אחד בשבוע שנשאר אצלך שווה כ-2,000 ₪ בחודש.</p>
+
+  <div class="pk">
+    <div class="p">
+      <div class="pn">בסיסית</div>
+      <div class="pp">490 ₪<small>לחודש</small></div>
+      <div class="ps">הקמה 2,000 ₪</div>
+      <ul>
+        <li>מענה לכל לקוח תוך שניות, 24/7, בשם העסק</li>
+        <li>הודעה אחת מסודרת אליך על כל פנייה, עם וויז ותמונות</li>
+        <li>מבין הודעות קוליות ותמונות</li>
+        <li>תזכורת אליך כשלא חזרת ללקוח</li>
+        <li>טבלה של כל הפניות</li>
+      </ul>
+    </div>
+    <div class="p rec">
+      <div class="tag">הכי משתלמת</div>
+      <div class="pn">עסק</div>
+      <div class="pp">540 ₪<small>לחודש</small></div>
+      <div class="ps">הקמה 2,900 ₪</div>
+      <ul>
+        <li><b>כל מה שבבסיסית, ועוד:</b></li>
+        <li>בקשת ביקורת בגוגל אחרי כל עבודה, לבד</li>
+        <li>כפתורים "בדרך" ו"קבע תור", והלקוח מקבל אישור ותזכורת</li>
+        <li>מענה גם בערבית, רוסית ואנגלית</li>
+        <li>לימוד מהשיחות שלך, כדי שיכתוב בדיוק כמוך</li>
+        <li>דוח שבועי למייל</li>
+      </ul>
+    </div>
+    <div class="p">
+      <div class="pn">מלאה</div>
+      <div class="pp">590 ₪<small>לחודש</small></div>
+      <div class="ps">הקמה 3,900 ₪</div>
+      <ul>
+        <li><b>כל מה שבחבילת עסק, ועוד:</b></li>
+        <li>חיבור לתוכנת החשבוניות: קבלות, חשבוניות והצעות מחיר נשלחות ללקוח בוואטסאפ לבד (כרגע עם יש חשבונית)</li>
+        <li>עדכון התשובות של הבוט כל חודש לפי מה שקרה בשטח</li>
+        <li>מענה מאיתנו באותו יום לכל בקשה</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="green" style="font-weight:700;margin-top:10px">ההבדל בין עסק לבסיסית: 50 ₪ בחודש. ביקורת אחת בגוגל או תור אחד שלא נשכח מחזירים את זה כמה פעמים.</p>
+
+  <h2>איך משלמים</h2>
+  <ol>
+    <li><b>500 ₪ מקדמה</b> כדי להתחיל. אנחנו בונים ומתאימים הכל לעסק שלך.</li>
+    <li><b>את היתרה של ההקמה משלמים רק ביום החיבור,</b> כשאתה רואה בעיניים שזה עונה ללקוחות שלך.</li>
+    <li><b>המנוי מתחיל מיום החיבור.</b> מבטלים מתי שרוצים, בהודעה 30 יום מראש.</li>
+  </ol>
+  <p style="font-size:13.5px;color:var(--muted)">המחירים סופיים, בלי מע"מ (עוסק פטור). ההקמה לוקחת שבוע עד שבועיים, בעיקר בגלל האימות של Meta.</p>
+
+  <h2>איך מתחילים</h2>
+  <ol>
+    <li>עונים לי בוואטסאפ איזו חבילה.</li>
+    <li>משלמים את המקדמה בקישור ששולחים לך, וממלאים טופס קצר על העסק, בערך 5 דקות.</li>
+    <li>קובעים שיחת חיבור של רבע שעה, ומאותו רגע כל לקוח מקבל תשובה.</li>
+  </ol>
+
+  <div class="sig">
+    בברכה,<br>
+    <b>__SENDER__</b><br>
+    עונה ראשון<br>
+    052-4666175
+  </div>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>4</span></div>
+</section>
+</body></html>
