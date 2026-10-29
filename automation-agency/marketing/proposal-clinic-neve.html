@@ -1,0 +1,288 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>הצעה לנווה</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#1c1c1c;--muted:#666;--line:#d9d9d9;--acc:#7a2c5a}
+body{font-family:Assistant,Arial,sans-serif;color:var(--ink);font-size:15px;line-height:1.6}
+.page{width:210mm;height:297mm;padding:20mm 22mm 18mm;position:relative;page-break-after:always;overflow:hidden}
+.page:last-child{page-break-after:auto}
+header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--ink);padding-bottom:8px;margin-bottom:26px}
+header .logo{font-weight:800;font-size:19px;letter-spacing:.2px}
+header .logo small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+header .d{font-size:12.5px;color:var(--muted);text-align:left}
+h1{font-size:23px;font-weight:800;margin:14px 0 14px;line-height:1.3}
+h2{font-size:18px;font-weight:700;margin:22px 0 6px;color:var(--acc)}
+p{margin:0 0 10px}
+.to{font-size:14.5px;line-height:1.5}
+ol,ul{margin:4px 22px 10px 0}
+li{margin:4px 0}
+.foot{position:absolute;bottom:10mm;right:22mm;left:22mm;font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+/* chat */
+.demo{display:flex;gap:22px;align-items:flex-start;margin-top:10px}
+.phone{width:78mm;flex:none;border:1px solid #bbb;border-radius:18px;overflow:hidden;background:#efeae2}
+.bar{background:#f6f6f6;border-bottom:1px solid #ddd;padding:8px 10px;display:flex;align-items:center;gap:8px;font-size:13px}
+.bar .av{width:28px;height:28px;border-radius:50%;background:#ecd3e2;display:grid;place-items:center;font-weight:700;font-size:13px;color:#7a2c5a}
+.bar b{display:block;font-size:13.5px}
+.bar small{color:#888;font-size:10.5px}
+.chat{padding:10px 8px 12px;display:flex;flex-direction:column;gap:5px}
+.day{align-self:center;background:#fff;color:#777;font-size:10px;padding:2px 8px;border-radius:6px;margin-bottom:3px}
+.m{max-width:85%;padding:5px 8px 14px;border-radius:7px;font-size:11.8px;line-height:1.35;position:relative}
+.m i{position:absolute;bottom:2px;left:6px;font-size:9px;color:#8a8a8a;font-style:normal}
+.in{background:#fff;align-self:flex-start}
+.out{background:#d9fdd3;align-self:flex-end}
+.photo{width:120px;height:80px;border-radius:5px;background:linear-gradient(135deg,#cfc6b8,#a99d8b);margin-bottom:2px}
+.side{flex:1}
+.side h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.msg{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.55;background:#fafafa}
+.msg div{display:flex;gap:8px}
+.msg span:first-child{color:var(--muted);min-width:48px}
+.side p{font-size:13.5px;margin-top:10px}
+table{width:100%;border-collapse:collapse;margin:6px 0 10px;font-size:14.5px}
+td{padding:7px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:left;white-space:nowrap;font-weight:600}
+tr.t td{border-top:1.5px solid var(--ink);border-bottom:0;font-weight:700}
+.faq p{margin-bottom:8px}
+.faq b{display:block}
+.box{border:1px solid var(--ink);padding:12px 16px;margin:12px 0}
+.box table{margin:0}
+.sig{margin-top:22px;line-height:1.5}
+.sig b{font-size:16px}
+
+.call{background:#f8f1f5;border-right:4px solid var(--acc);padding:10px 14px;margin:10px 0}
+.call h3{font-size:16px;font-weight:800;margin-bottom:6px}
+.nums{display:flex;gap:28px;margin:6px 0 4px}
+.nums div{font-size:13.5px;line-height:1.3}
+.nums b{display:block;font-size:30px;font-weight:800;color:var(--acc);line-height:1.1}
+.save{display:flex;gap:12px;margin:10px 0}
+.save div{flex:1;border:1px solid var(--line);padding:10px 12px;font-size:13.5px}
+.save b{display:block;font-size:22px;font-weight:800}
+s.old{color:#999;font-weight:400;margin-left:6px}
+.green{color:#1b6e3a}
+.pk{display:flex;gap:10px;margin:12px 0 4px;align-items:stretch}
+.pk .p{flex:1;border:1px solid var(--line);padding:12px 12px 8px;position:relative;font-size:12.8px;line-height:1.45}
+.pk .rec{border:2px solid var(--acc);background:#fbf3f8}
+.pk .tag{position:absolute;top:-11px;right:10px;background:var(--acc);color:#fff;font-size:11.5px;font-weight:700;padding:1px 9px}
+.pk .pn{font-weight:800;font-size:16px}
+.pk .pp{font-size:26px;font-weight:800;color:var(--acc);line-height:1.15;margin-top:4px}
+.pk .pp small{font-size:12.5px;font-weight:600;color:var(--muted);margin-right:4px}
+.pk .ps{font-weight:700;margin:2px 0 6px}
+.pk ul{margin:0 16px 0 0;padding:0}
+.pk li{margin:3px 0}
+.win{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 6px}
+.win div{border:1px solid var(--line);border-top:4px solid var(--acc);padding:12px 14px;font-size:13.5px;line-height:1.45;background:#fff}
+.win b{display:block;font-size:30px;font-weight:800;color:var(--acc);line-height:1.1}
+.win i{display:block;font-style:normal;font-weight:800;font-size:15px;margin:2px 0 4px}
+.year{background:var(--acc);color:#fff;padding:14px 18px;margin:14px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.year b{font-size:34px;font-weight:800}
+.year span{font-size:15px;line-height:1.4}
+</style></head><body>
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מזכירה בוואטסאפ לעסקים</small></div><div class="d">29/10/2026</div></header>
+  <div class="to">לכבוד<br>נווה, מכון לייזר</div>
+  <h1>הנדון: מזכירה בוואטסאפ לקליניקה</h1>
+  <p>שלום נווה,</p>
+  <p>תודה על השיחה. כמו שסיכמנו, אני שולח לך הסבר מסודר: מה זה, איך זה עובד אצלך ביום-יום, דוגמה לשיחה, ובסוף שלוש חבילות לבחירה.</p>
+
+  <h2>מה הבעיה שזה פותר</h2>
+  <p>רוב הלקוחות החדשות שלך מתחילות בהודעה בוואטסאפ, הרבה פעמים אחרי שראו מודעה ששילמת עליה. הבעיה היא שההודעות מגיעות בדיוק כשאת באמצע טיפול. לקוחה שלא מקבלת תשובה תוך כמה דקות כותבת לעוד שני מכונים, והראשון שעונה מקבל אותה, ואת כל סדרת הטיפולים שלה.</p>
+  <p>וגם כשאת כן עונה, זה אותן שאלות כל יום: "כמה עולה?", "זה כואב?", "כמה טיפולים צריך?". ואחרי שנקבע תור, חלק מהלקוחות פשוט שוכחות ולא מגיעות.</p>
+
+  <h2>מה אנחנו עושים</h2>
+  <p>אנחנו מחברים למספר הוואטסאפ של הקליניקה מזכירה שעונה לכל פנייה תוך שניות, בשם הקליניקה ובסגנון שלך. היא עונה על השאלות הנפוצות, שואלת את הלקוחה מה היא מחפשת, ושולחת לך הכל בהודעה אחת מסודרת. את רק קובעת תור, ומשם היא דואגת לאישור ולתזכורות.</p>
+  <div class="call"><h3>בשורה התחתונה, מה זה נותן לך</h3>
+    <div class="save" style="margin:4px 0 0">
+      <div><b class="green">אף לקוחה</b>לא הולכת למכון אחר כי לא ענו לה. כל שקל על מודעות עובד</div>
+      <div><b class="green">שעה ביום</b>חוזרת אלייך, בלי לענות 20 פעם על אותן שאלות</div>
+      <div><b class="green">פחות הברזות</b>כל לקוחה מקבלת אישור ותזכורות לפני התור</div>
+    </div>
+  </div>
+
+  <h2>איך זה עובד ביום-יום</h2>
+  <ol>
+    <li>לקוחה כותבת למספר הרגיל של הקליניקה. לא צריך מספר חדש או אפליקציה חדשה.</li>
+    <li>היא מקבלת תשובה תוך שניות, גם בערב ובשבת. מחוץ לשעות שלך היא מקבלת הודעה מתי תחזרי אליה.</li>
+    <li>את מקבלת הודעה אחת: שם, טלפון, איזה טיפול, אם זו פעם ראשונה, ומה היא עוד שאלה.</li>
+    <li>את כותבת בתשובה "תור מחר 14:30", והלקוחה מקבלת אישור. יום לפני ושעתיים לפני היא מקבלת תזכורת, ואת מקבלת תזכורת שעה לפני.</li>
+    <li>ברגע שאת עונה ללקוחה בעצמך, המזכירה יוצאת מהשיחה. לאנשי הקשר השמורים אצלך היא לא עונה בכלל.</li>
+  </ol>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>1</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מזכירה בוואטסאפ לעסקים</small></div><div class="d">הצעה לנווה</div></header>
+  <h1 style="margin-top:0">מה את מרוויחה מזה</h1>
+  <p>בקצרה: יותר לקוחות, יותר כסף מכל שקל שאת שמה על מודעות, והרבה פחות זמן בטלפון. ככה זה נראה במספרים:</p>
+  <div class="win">
+    <div><b>3,000 ₪+</b><i>בחודש שחוזרים אלייך</i>2 לקוחות בחודש שהיו הולכות למכון אחר כי לא ענו להן מהר, נשארות אצלך. כל אחת שווה סדרה של 6 עד 8 טיפולים.</div>
+    <div><b>20 שעות</b><i>בחודש שאת מקבלת בחזרה</i>שעה ביום שהלכה על "כמה עולה?", "זה כואב?", "יש תור?". עכשיו המזכירה עונה, ואת מטפלת או נחה.</div>
+    <div><b>0</b><i>לקוחות שהולכות לאיבוד</i>כל פנייה מקבלת תשובה תוך שניות: באמצע טיפול, בערב, בשבת ובחג. ואם לא חזרת למישהי, את מקבלת תזכורת עד שתחזרי.</div>
+    <div><b>פחות הברזות</b><i>יותר תורים שמתקיימים</i>כל לקוחה מקבלת אישור, תזכורת יום לפני ותזכורת שעתיים לפני. תור שלא בוטל בזמן הוא שעה ריקה שאי אפשר להחזיר.</div>
+    <div><b>כל שקל</b><i>על מודעות מתחיל לעבוד</i>את משלמת על כל פנייה מפייסבוק ואינסטגרם. היום חלק מהן הולכות לאיבוד. עם המזכירה, כל פנייה ששילמת עליה מקבלת מענה.</div>
+    <div><b>יותר ביקורות</b><i>בגוגל, בלי לבקש</i>אחרי כל טיפול הלקוחה מקבלת בקשה לכתוב ביקורת. עוד ביקורות זה עוד לקוחות חדשות שמגיעות לבד, בלי לשלם על פרסום.</div>
+  </div>
+  <div class="year"><span>בשנה אחת זה יוצא בערך:<br>כסף שנשאר אצלך, ו-240 שעות פנויות</span><b>36,000 ₪</b></div>
+  <p><b>ומה זה עולה לך?</b> המנוי מתחיל מ-490 ₪ בחודש. כלומר, מספיק שהמזכירה תציל לך לקוחה אחת בחודש, וזה כבר מחזיר את עצמו כמה פעמים. כל לקוחה נוספת היא רווח נקי.</p>
+  <p style="font-size:13px;color:var(--muted)">המספרים הם דוגמה זהירה לקליניקה עם כ-20 פניות בשבוע. אצלך הם יכולים להיות גבוהים יותר.</p>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>2</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מזכירה בוואטסאפ לעסקים</small></div><div class="d">הצעה לנווה</div></header>
+  <h2 style="margin-top:0">דוגמה לשיחה</h2>
+  <p>ככה הלקוחה רואה את זה בטלפון שלה, ומשמאל ההודעה שאת מקבלת בסוף.</p>
+  <div class="demo">
+    <div class="phone">
+      <div class="bar"><div class="av">נ</div><div><b>מכון לייזר</b><small>חשבון עסקי</small></div></div>
+      <div class="chat">
+        <div class="day">היום</div>
+        <div class="m in">היי, ראיתי את המודעה. כמה עולה הסרת שיער לרגליים?<i>13:20</i></div>
+        <div class="m out">היי, איזה כיף שפנית ✨ רגליים מלאות או חצי? וזו פעם ראשונה שלך בלייזר?<i>13:20</i></div>
+        <div class="m in">מלאות. פעם ראשונה. זה כואב?<i>13:21</i></div>
+        <div class="m out">רוב הלקוחות מרגישות רק עקצוץ קל, והמכשיר מקרר את העור תוך כדי. בדרך כלל צריך 6 עד 8 טיפולים, אחד כל חודש-חודשיים<i>13:21</i></div>
+        <div class="m in">מעולה. ומה המחיר?<i>13:22</i></div>
+        <div class="m out">המחיר תלוי בסוג השיער והעור, אז נווה תחזור אלייך עוד היום עם מחיר ותור פנוי. מתי נוח לך בדרך כלל, בוקר או ערב?<i>13:22</i></div>
+        <div class="m in">ערב, אחרי 18:00<i>13:23</i></div>
+        <div class="m out">רשמתי 🙂 נווה תחזור אלייך היום<i>13:23</i></div>
+      </div>
+    </div>
+    <div class="side">
+      <h3>ההודעה שאת מקבלת</h3>
+      <div class="msg">
+        <div><span>שם</span><span>שירן לוי</span></div>
+        <div><span>טלפון</span><span>050-1234567</span></div>
+        <div><span>טיפול</span><span>הסרת שיער, רגליים מלאות</span></div>
+        <div><span>ניסיון</span><span>פעם ראשונה בלייזר</span></div>
+        <div><span>מתי נוח</span><span>ערבים, אחרי 18:00</span></div>
+        <div><span>מחכה ל</span><span>מחיר ותור פנוי</span></div>
+        <div><span>הגיעה מ</span><span>המודעה</span></div>
+      </div>
+      <p>הלקוחה קיבלה תשובה תוך 3 שניות, בזמן שאת היית באמצע טיפול. כשאת מתפנה, את רק שולחת מחיר וכותבת "תור". כל השאר קורה לבד.</p>
+      <p><b>מחירים:</b> את מחליטה. אפשר שהמזכירה תענה לפי המחירון שלך, ואפשר שכל שאלה על מחיר תגיע אלייך, כמו בדוגמה.</p>
+    </div>
+  </div>
+
+  <h2>תורים ותזכורות: המזכירה זוכרת הכל בשבילך</h2>
+  <ul>
+    <li><b>אישור תור:</b> כותבים "תור" עם יום ושעה, והלקוחה מקבלת אישור מיד.</li>
+    <li><b>תזכורת ללקוחה:</b> יום לפני התור ושעתיים לפני. אם משהו השתנה, היא כותבת, ואת מקבלת הודעה.</li>
+    <li><b>תזכורת אלייך:</b> שעה לפני כל תור.</li>
+    <li><b>לא חזרת ללקוחה?</b> תזכורת אלייך אחרי שעה ושוב אחרי שעתיים, שאף פנייה לא תישכח.</li>
+    <li><b>לקוחה שהפסיקה לענות באמצע:</b> מקבלת הודעה עדינה, ואת מקבלת את מה שכבר נאסף.</li>
+    <li><b>ביטול:</b> כותבים "ביטול", והתזכורות של התור נעצרות.</li>
+  </ul>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>3</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מזכירה בוואטסאפ לעסקים</small></div><div class="d">הצעה לנווה</div></header>
+  <h2 style="margin-top:0">מה עוד כלול</h2>
+  <ul>
+    <li><b>ביקורות בגוגל:</b> אחרי טיפול כותבים "סיום", והלקוחה מקבלת בקשה לכתוב ביקורת. עוד ביקורות זה עוד לקוחות בלי לשלם על פרסום.</li>
+    <li><b>הודעות קוליות ותמונות:</b> המזכירה מבינה אותן, ומעבירה אלייך תמונות (למשל של אזור הטיפול).</li>
+    <li><b>שפות:</b> עונה גם בערבית, רוסית ואנגלית, למי שכותבת בשפות האלה.</li>
+    <li><b>טבלה של כל הפניות</b> עם הורדה לאקסל, ודוח שבועי.</li>
+    <li><b>תחזוקה מלאה.</b> את לא נוגעת בשום הגדרה.</li>
+  </ul>
+
+  <h2>החשבון</h2>
+  <p>דוגמה עם מספרים זהירים. כדאי לשים במקום את המספרים שלך:</p>
+  <table>
+    <tr><td>פניות חדשות בשבוע</td><td>20</td></tr>
+    <tr><td>מתוכן הולכות למכון אחר כי לא ענו מהר (בחודש)</td><td>2</td></tr>
+    <tr><td>שווי לקוחה חדשה (סדרת טיפולים)</td><td>1,500 ₪</td></tr>
+    <tr><td>כסף שהולך למכון אחר בחודש</td><td>3,000 ₪</td></tr>
+    <tr><td>זמן שנחסך על שאלות חוזרות</td><td>כ-20 שעות בחודש</td></tr>
+    <tr class="t"><td>מספיק שזה מחזיר לך לקוחה אחת בחודש כדי שזה ישתלם</td><td></td></tr>
+  </table>
+
+  <div class="call"><h3>זה כבר עובד בשטח. מנעולן בנתניה, 4 הימים הראשונים אחרי החיבור:</h3>
+    <div class="nums">
+      <div><b>19</b>פניות חדשות קיבלו תשובה תוך שניות</div>
+      <div><b>11</b>חשבוניות נשלחו ללקוחות לבד</div>
+      <div><b>6</b>בקשות לביקורת בגוגל יצאו</div>
+    </div>
+  </div>
+
+  <h2>שאלות שבדרך כלל שואלים</h2>
+  <div class="faq">
+    <p><b>הלקוחות ירגישו שזה אוטומטי?</b>ההודעות קצרות וחמות, בשם הקליניקה ובסגנון שלך. מי ששואלת ישירות מקבלת תשובה כנה.</p>
+    <p><b>יחסמו לי את הוואטסאפ?</b>לא. החיבור נעשה בדרך הרשמית של Meta (החברה של וואטסאפ). המספר והאפליקציה נשארים שלך.</p>
+    <p><b>ואם זה לא מתאים לי?</b>את היתרה של ההקמה משלמים רק ביום החיבור, כשרואים שזה עובד. את המנוי מבטלים מתי שרוצים, בהודעה 30 יום מראש.</p>
+  </div>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>4</span></div>
+</section>
+
+<section class="page">
+  <header><div class="logo">עונה ראשון<small>מזכירה בוואטסאפ לעסקים</small></div><div class="d">הצעה לנווה</div></header>
+  <h2 style="margin-top:0">הצעת מחיר: שלוש חבילות</h2>
+  <p>לפני המחיר, כדאי לזכור למה להשוות: מזכירה בקליניקה עולה 6,000 ₪ בחודש ויותר, ולא עונה בערב ובשבת. לקוחה חדשה אחת בחודש שנשארת אצלך שווה כ-1,500 ₪.</p>
+
+  <div class="pk">
+    <div class="p">
+      <div class="pn">בסיסית</div>
+      <div class="pp">490 ₪<small>לחודש</small></div>
+      <div class="ps">הקמה 2,000 ₪</div>
+      <ul>
+        <li>מענה לכל לקוחה תוך שניות, 24/7, בשם הקליניקה</li>
+        <li>תשובות לשאלות הנפוצות ("זה כואב?", "כמה טיפולים?")</li>
+        <li>הודעה אחת מסודרת אלייך על כל פנייה</li>
+        <li>מבינה הודעות קוליות ותמונות</li>
+        <li>תזכורת אלייך כשלא חזרת ללקוחה</li>
+        <li>טבלה של כל הפניות</li>
+      </ul>
+    </div>
+    <div class="p rec">
+      <div class="tag">הכי מתאימה לקליניקה</div>
+      <div class="pn">עסק</div>
+      <div class="pp">540 ₪<small>לחודש</small></div>
+      <div class="ps">הקמה 2,900 ₪</div>
+      <ul>
+        <li><b>כל מה שבבסיסית, ועוד:</b></li>
+        <li><b>תורים:</b> אישור ללקוחה, תזכורת יום לפני ושעתיים לפני</li>
+        <li>תזכורת אלייך שעה לפני כל תור</li>
+        <li>בקשת ביקורת בגוגל אחרי טיפול</li>
+        <li>מענה גם בערבית, רוסית ואנגלית</li>
+        <li>לימוד מהשיחות שלך, כדי שתכתוב בדיוק כמוך</li>
+        <li>דוח שבועי למייל</li>
+      </ul>
+    </div>
+    <div class="p">
+      <div class="pn">מלאה</div>
+      <div class="pp">590 ₪<small>לחודש</small></div>
+      <div class="ps">הקמה 3,900 ₪</div>
+      <ul>
+        <li><b>כל מה שבחבילת עסק, ועוד:</b></li>
+        <li>חיבור לתוכנת החשבוניות: קבלות והצעות מחיר נשלחות ללקוחה בוואטסאפ לבד (כרגע עם יש חשבונית)</li>
+        <li>עדכון התשובות של המזכירה כל חודש לפי מה שקרה בשטח</li>
+        <li>מענה מאיתנו באותו יום לכל בקשה</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="green" style="font-weight:700;margin-top:10px">ההבדל בין עסק לבסיסית: 50 ₪ בחודש. לקוחה אחת שלא הבריזה מחזירה את זה כמה פעמים.</p>
+
+  <h2>איך משלמים</h2>
+  <ol>
+    <li><b>500 ₪ מקדמה</b> כדי להתחיל. אנחנו בונים ומתאימים הכל לקליניקה שלך.</li>
+    <li><b>את היתרה של ההקמה משלמים רק ביום החיבור,</b> כשאת רואה בעיניים שזה עונה ללקוחות שלך.</li>
+    <li><b>המנוי מתחיל מיום החיבור.</b> מבטלים מתי שרוצים, בהודעה 30 יום מראש.</li>
+  </ol>
+  <p style="font-size:13.5px;color:var(--muted)">המחירים סופיים, בלי מע"מ (עוסק פטור). ההקמה לוקחת שבוע עד שבועיים, בעיקר בגלל האימות של Meta.</p>
+
+  <h2>איך מתחילים</h2>
+  <ol>
+    <li>עונים לי בוואטסאפ איזו חבילה.</li>
+    <li>משלמים את המקדמה וממלאים טופס קצר על הקליניקה (טיפולים, שעות, שאלות נפוצות), בערך 5 דקות.</li>
+    <li>קובעים שיחת חיבור של רבע שעה, ומאותו רגע כל לקוחה מקבלת תשובה.</li>
+  </ol>
+
+  <div class="sig">
+    בברכה,<br>
+    <b>אריאל</b><br>
+    עונה ראשון<br>
+    052-4666175
+  </div>
+  <div class="foot"><span>עונה ראשון · 052-4666175</span><span>5</span></div>
+</section>
+</body></html>
