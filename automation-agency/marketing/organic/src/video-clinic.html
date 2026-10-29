@@ -1,0 +1,132 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#170C14;--bg2:#2A1222;--ink:#F7EEF1;--mute:#C3A9B6;--wa:#25D366;--gold:#EBC7A0;--rose:#F48FB5}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden}
+body{position:relative;font-family:Heebo,Arial,sans-serif;color:var(--ink);
+  background:radial-gradient(800px 800px at 50% 58%, rgba(244,143,181,.26), transparent 70%),radial-gradient(600px 500px at 90% 0%, rgba(235,199,160,.14), transparent 70%),linear-gradient(180deg,var(--bg),var(--bg2))}
+.brand{position:absolute;top:70px;right:0;left:0;display:flex;justify-content:center;align-items:center;gap:14px;font-family:Rubik;font-weight:800;font-size:34px}
+.brand i{width:48px;height:48px;border-radius:14px;background:var(--wa);display:grid;place-items:center}
+.brand i svg{width:28px;height:28px}
+.cap{position:absolute;top:170px;right:60px;left:60px;text-align:center;font-family:Rubik;font-weight:900;font-size:76px;line-height:1.08;letter-spacing:-1.5px;opacity:0}
+.cap em{font-style:normal;color:var(--rose)}
+/* phone */
+.phone{position:absolute;top:470px;left:50%;width:720px;height:1300px;margin-left:-360px;border-radius:84px;background:#0b0b0d;padding:20px;
+  box-shadow:0 0 0 3px #3a2632,0 60px 140px rgba(0,0,0,.6),0 0 120px rgba(244,143,181,.18)}
+.scr{position:relative;width:100%;height:100%;border-radius:66px;overflow:hidden;background:#EFE7DE}
+.notch{position:absolute;top:18px;left:50%;width:210px;height:58px;margin-left:-105px;background:#0b0b0d;border-radius:30px;z-index:5}
+.head{position:absolute;top:0;right:0;left:0;height:200px;background:#5B2346;padding:96px 34px 0;display:flex;align-items:center;gap:20px;color:#fff;z-index:3}
+.av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#F7C9DB,#EBC7A0);display:grid;place-items:center;font-family:Rubik;font-weight:800;color:#5B2346;font-size:34px}
+.head b{display:block;font-family:Rubik;font-size:34px;font-weight:700}
+.head small{font-size:23px;opacity:.8}
+.chat{position:absolute;top:200px;bottom:0;right:0;left:0;padding:24px 26px 40px;display:flex;flex-direction:column;justify-content:flex-end;gap:14px}
+.m{max-width:80%;padding:16px 22px 34px;border-radius:24px;font-size:33px;line-height:1.32;position:relative;box-shadow:0 2px 2px rgba(0,0,0,.06);display:none}
+.m i{position:absolute;bottom:8px;left:18px;font-size:19px;color:#8a8a8a;font-style:normal}
+.in{background:#fff;color:#1d1d1d;align-self:flex-start;border-top-right-radius:6px}
+.out{background:#D9FDD3;color:#1d1d1d;align-self:flex-end;border-top-left-radius:6px}
+.out i:after{content:" ✓✓";color:#53bdeb}
+.typing{align-self:flex-end;background:#D9FDD3;padding:22px 28px;border-radius:24px;display:none;gap:10px}
+.typing span{width:14px;height:14px;border-radius:50%;background:#7aa874;display:inline-block}
+/* chips & cards */
+.chip{position:absolute;right:40px;top:930px;display:flex;align-items:center;gap:18px;background:#1f1a1d;border:1px solid rgba(255,255,255,.12);color:#fff;padding:20px 28px;border-radius:26px;box-shadow:0 30px 60px rgba(0,0,0,.45);opacity:0;z-index:8}
+.chip b{width:64px;height:64px;border-radius:18px;background:var(--wa);display:grid;place-items:center;font-family:Rubik;font-weight:800;font-size:28px;color:#08361b}
+.chip div{font-family:Rubik;font-weight:700;font-size:32px}
+.chip small{display:block;font-family:Heebo;font-weight:500;font-size:22px;color:#cbb6c1}
+.card{position:absolute;left:70px;right:70px;top:820px;background:#fff;color:#1d1d1d;border-radius:36px;padding:34px 38px;box-shadow:0 50px 120px rgba(0,0,0,.55);opacity:0;z-index:9}
+.card h4{display:flex;align-items:center;gap:16px;font-family:Rubik;font-weight:800;font-size:38px;margin-bottom:18px}
+.card h4 b{width:52px;height:52px;border-radius:14px;background:var(--wa);color:#fff;display:grid;place-items:center;font-size:30px}
+.row{display:flex;gap:20px;font-size:31px;padding:12px 0;border-top:1px solid #eee}
+.row span:first-child{color:#8b7f86;min-width:150px}
+.row span:last-child{font-weight:700}
+.btns{display:flex;gap:16px;margin-top:22px}
+.btns div{flex:1;text-align:center;padding:18px;border-radius:20px;font-family:Rubik;font-weight:700;font-size:28px}
+.b1{background:#5B2346;color:#fff}.b2{background:#E9F9EE;color:#167a3c}
+.cmd{position:absolute;left:70px;right:70px;top:860px;background:#1f1a1d;border:1px solid rgba(255,255,255,.14);border-radius:36px;padding:34px 38px;color:#fff;box-shadow:0 50px 120px rgba(0,0,0,.55);opacity:0;z-index:9}
+.cmd .you{font-size:24px;color:#cbb6c1;margin-bottom:12px}
+.cmd .typed{display:inline-block;background:#D9FDD3;color:#1d1d1d;font-size:40px;font-weight:700;padding:16px 26px;border-radius:22px;direction:rtl}
+.cmd .ok{margin-top:22px;font-size:30px;line-height:1.4;color:#b8f5cc;opacity:0}
+/* end */
+.end{position:absolute;inset:0;background:radial-gradient(800px 700px at 50% 45%, rgba(244,143,181,.22), transparent 70%),linear-gradient(180deg,#170C14,#2A1222);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0;z-index:20}
+.end h2{font-family:Rubik;font-weight:900;font-size:96px;line-height:1.05;letter-spacing:-2px}
+.end h2 em{font-style:normal;color:var(--rose)}
+.end p{font-size:38px;color:var(--mute);margin-top:28px;line-height:1.4}
+.end .cta{margin-top:70px;background:var(--wa);color:#063b1c;border-radius:40px;padding:34px 60px;font-family:Rubik;font-weight:900;font-size:72px;letter-spacing:1px;box-shadow:0 30px 80px rgba(37,211,102,.35)}
+.end .cta small{display:block;font-size:32px;font-weight:700;letter-spacing:0;margin-bottom:4px}
+.end .br{margin-top:60px;display:flex;align-items:center;gap:14px;font-family:Rubik;font-weight:800;font-size:38px}
+.end .br i{width:52px;height:52px;border-radius:14px;background:var(--wa);display:grid;place-items:center}
+.end .br i svg{width:30px;height:30px}
+</style></head><body>
+<div class="brand"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.1z"/></svg></i>עונה ראשון</div>
+
+<div class="cap" data-a="0.2" data-b="2.6">את באמצע<br><em>טיפול...</em></div>
+<div class="cap" data-a="2.8" data-b="5.2">ולקוחה חדשה<br>שואלת <em>כמה עולה</em></div>
+<div class="cap" data-a="5.4" data-b="10.6">המזכירה עונה<br><em>תוך 3 שניות</em></div>
+<div class="cap" data-a="10.8" data-b="14.2">את מקבלת<br><em>הכל מסודר</em></div>
+<div class="cap" data-a="14.4" data-b="17.6">את רק<br><em>קובעת תור</em></div>
+
+<div class="phone"><div class="scr">
+  <div class="notch"></div>
+  <div class="head"><div class="av">נ</div><div><b>מכון לייזר</b><small>חשבון עסקי</small></div></div>
+  <div class="chat">
+    <div class="m in" data-a="3.0">היי, ראיתי את המודעה 😊 כמה עולה לייזר לרגליים?<i>13:20</i></div>
+    <div class="typing" data-a="3.9" data-b="5.1"><span></span><span></span><span></span></div>
+    <div class="m out" data-a="5.2">היי, איזה כיף שפנית ✨ רגליים מלאות? ופעם ראשונה בלייזר?<i>13:20</i></div>
+    <div class="m in" data-a="7.0">מלאות, פעם ראשונה. זה כואב?<i>13:21</i></div>
+    <div class="typing" data-a="7.6" data-b="8.4"><span></span><span></span><span></span></div>
+    <div class="m out" data-a="8.5">רוב הלקוחות מרגישות רק עקצוץ קל 💜 נווה תחזור אלייך עוד היום עם מחיר ותור פנוי<i>13:21</i></div>
+    <div class="m out" data-a="16.4">נקבע לך תור מחר ב-18:30 ✨ נשלח לך תזכורת יום לפני<i>13:40</i></div>
+  </div>
+</div></div>
+
+<div class="chip" data-a="5.5" data-b="10.6"><b>3s</b><div>נענתה תוך 3 שניות<small>בזמן שאת בטיפול</small></div></div>
+
+<div class="card" data-a="11.0" data-b="14.2">
+  <h4><b>✓</b>פנייה חדשה מהמודעה</h4>
+  <div class="row"><span>טיפול</span><span>הסרת שיער · רגליים מלאות</span></div>
+  <div class="row"><span>ניסיון</span><span>פעם ראשונה בלייזר</span></div>
+  <div class="row"><span>מחכה ל</span><span>מחיר ותור פנוי</span></div>
+  <div class="btns"><div class="b1">📅 קבע תור</div><div class="b2">💬 וואטסאפ ללקוחה</div></div>
+</div>
+
+<div class="cmd" data-a="14.5" data-b="16.2">
+  <div class="you">את כותבת:</div>
+  <div class="typed" id="typed"></div>
+  <div class="ok" id="ok">✓ נקבע. הלקוחה תקבל אישור, ותזכורת יום לפני ושעתיים לפני</div>
+</div>
+
+<div class="end" data-a="17.8">
+  <h2>אף לקוחה<br><em>לא הולכת לאיבוד</em></h2>
+  <p>מזכירה בוואטסאפ לקליניקה<br>עונה תוך שניות, גם כשאת באמצע טיפול</p>
+  <div class="cta"><small>לפרטים ולהדגמה</small>052-4666175</div>
+  <div class="br"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg></i>עונה ראשון</div>
+</div>
+
+<script>
+const ease = (x) => 1 - Math.pow(1 - Math.min(Math.max(x, 0), 1), 3);
+const els = [...document.querySelectorAll('[data-a]')];
+const CMD = 'תור מחר 18:30';
+window.render = (t) => {
+  for (const el of els) {
+    const a = +el.dataset.a, b = el.dataset.b ? +el.dataset.b : 1e9;
+    const pin = ease((t - a) / 0.45), pout = ease((t - b) / 0.35);
+    const v = pin * (1 - pout);
+    if (el.classList.contains('m') || el.classList.contains('typing')) {
+      el.style.display = t >= a && t < b ? (el.classList.contains('typing') ? 'flex' : 'block') : 'none';
+      el.style.opacity = v; el.style.transform = `translateY(${(1 - pin) * 30}px) scale(${0.96 + 0.04 * pin})`;
+    } else if (el.classList.contains('cap')) {
+      el.style.opacity = v; el.style.transform = `translateY(${(1 - pin) * 40 - pout * 20}px)`;
+    } else {
+      el.style.opacity = v; el.style.transform = `translateY(${(1 - pin) * 70}px) scale(${0.94 + 0.06 * pin})`;
+    }
+  }
+  // typing dots bounce
+  document.querySelectorAll('.typing span').forEach((s, i) => { s.style.transform = `translateY(${Math.sin(t * 9 - i * 0.9) * 6}px)`; });
+  // owner command types out
+  const k = Math.max(0, Math.min(CMD.length, Math.floor((t - 14.8) * 14)));
+  document.getElementById('typed').textContent = CMD.slice(0, k) || ' ';
+  document.getElementById('ok').style.opacity = ease((t - 15.6) / 0.3);
+};
+window.render(0);
+</script>
+</body></html>
