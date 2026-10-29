@@ -1,0 +1,286 @@
+diff --git a/bots/agency-bot/clients/_template/wrangler.toml b/bots/agency-bot/clients/_template/wrangler.toml
+index 59a62a4..f1accac 100644
+--- a/bots/agency-bot/clients/_template/wrangler.toml
++++ b/bots/agency-bot/clients/_template/wrangler.toml
+@@ -33,6 +33,10 @@ OWNER_PHONE = ""
+ # מי מקבל התראות על תקלות (אריאל)
+ ADMIN_PHONE = "972524666175"
+ SHEET_ID = ""
++# יומן גוגל (רשות): המייל של היומן של בעל העסק. הוא משתף את היומן עם המייל של ה-Service Account (GOOGLE_SA_JSON), עם "ביצוע שינויים באירועים"
++CALENDAR_ID = ""
++# כמה דקות כל תור תופס ביומן
++CALENDAR_EVENT_MINUTES = "60"
+ REVIEW_LINK = ""
+ TEMPLATE_LANG = "he"
+ 
+diff --git a/bots/agency-bot/migrations/0010_calendar.sql b/bots/agency-bot/migrations/0010_calendar.sql
+new file mode 100644
+index 0000000..7b34c83
+--- /dev/null
++++ b/bots/agency-bot/migrations/0010_calendar.sql
+@@ -0,0 +1,2 @@
++-- יומן גוגל: המזהה של התור ביומן של בעל העסק, כדי למחוק אותו בביטול
++ALTER TABLE jobs ADD COLUMN gcal_event_id TEXT;
+diff --git a/bots/agency-bot/src/gcal.js b/bots/agency-bot/src/gcal.js
+new file mode 100644
+index 0000000..a7586b1
+--- /dev/null
++++ b/bots/agency-bot/src/gcal.js
+@@ -0,0 +1,56 @@
++// יומן גוגל: כל תור שבעל העסק קובע ("תור ...") נכנס גם ליומן שלו, וביטול מוחק אותו.
++// משתמש באותו Service Account של הגיליון (GOOGLE_SA_JSON). בעל העסק משתף את היומן שלו עם המייל של ה-Service Account
++// ("ביצוע שינויים באירועים"), ו-CALENDAR_ID = המייל של היומן (בדרך כלל ה-Gmail שלו). אם CALENDAR_ID ריק, לא עושה כלום.
++
++import { getAccessToken } from './sheets.js';
++import { displayPhone } from './util.js';
++
++const SCOPE = 'https://www.googleapis.com/auth/calendar.events';
++const TZ = 'Asia/Jerusalem';
++
++export const calendarConfigured = (env) => !!(env.CALENDAR_ID && env.GOOGLE_SA_JSON);
++
++const eventsUrl = (env, id = '') => `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(env.CALENDAR_ID)}/events${id ? `/${encodeURIComponent(id)}` : ''}`;
++
++// אורך התור ביומן בדקות (CALENDAR_EVENT_MINUTES, ברירת מחדל 60)
++const eventMinutes = (env) => Math.max(5, Number(env.CALENDAR_EVENT_MINUTES) || 60);
++
++export function buildEvent(env, { phone, name, issue, address, at }) {
++  const end = new Date(at.getTime() + eventMinutes(env) * 60000);
++  const who = name || displayPhone(phone);
++  return {
++    summary: issue ? `${who} · ${issue}` : who,
++    location: address || undefined,
++    description: [`טלפון: ${displayPhone(phone)}`, `וואטסאפ: https://wa.me/${phone}`, issue ? `פנייה: ${issue}` : null, 'נקבע דרך הבוט'].filter(Boolean).join('\n'),
++    start: { dateTime: at.toISOString(), timeZone: TZ },
++    end: { dateTime: end.toISOString(), timeZone: TZ },
++  };
++}
++
++// מכניס תור ליומן ומחזיר את המזהה שלו (או null אם היומן לא מחובר). שגיאה נזרקת, והקורא מחליט מה לעשות
++export async function addAppointment(env, details) {
++  if (!calendarConfigured(env)) return null;
++  const token = await getAccessToken(env, SCOPE);
++  const res = await fetch(eventsUrl(env), {
++    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(buildEvent(env, details)),
++  });
++  if (!res.ok) throw new Error(`calendar insert ${res.status} ${await res.text()}`);
++  return (await res.json()).id;
++}
++
++// מוחק תור מהיומן. אירוע שכבר נמחק ביד (404 / 410) נחשב הצלחה
++export async function removeAppointment(env, eventId) {
++  if (!calendarConfigured(env) || !eventId) return false;
++  const token = await getAccessToken(env, SCOPE);
++  const res = await fetch(eventsUrl(env, eventId), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
++  if (!res.ok && res.status !== 404 && res.status !== 410) throw new Error(`calendar delete ${res.status} ${await res.text()}`);
++  return true;
++}
++
++// בדיקה (setup): יש גישה ליומן? קורא אירוע אחד בלבד
++export async function checkCalendar(env) {
++  const token = await getAccessToken(env, SCOPE);
++  const res = await fetch(`${eventsUrl(env)}?maxResults=1`, { headers: { Authorization: `Bearer ${token}` } });
++  if (!res.ok) throw new Error(`calendar ${res.status} ${(await res.text()).slice(0, 200)}`);
++  return true;
++}
+diff --git a/bots/agency-bot/src/owner.js b/bots/agency-bot/src/owner.js
+index 7132bfd..8fe1a8a 100644
+--- a/bots/agency-bot/src/owner.js
++++ b/bots/agency-bot/src/owner.js
+@@ -6,6 +6,7 @@ import { aiRespond, customerLang, forwardPhotosToOwner, refKey, isPaused, logEve
+ import { weeklyReport } from './cron.js';
+ import { tableLink } from './table.js';
+ import { deliverReceipt } from './receipts.js';
++import { addAppointment, calendarConfigured, removeAppointment } from './gcal.js';
+ import * as wa from './whatsapp.js';
+ 
+ const HELP_TEXT = `הכי פשוט: עונים (החלקה ימינה) על ההודעה שקיבלת על הלקוח, וכותבים רק את הפקודה. בלי טלפון.
+@@ -284,11 +285,25 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
+       if (!at) return sendToOwner(env, 'לא הבנתי את התאריך או השעה. כתוב למשל: תור 17/10 14:30', now);
+       if (at.getTime() < now.getTime()) return sendToOwner(env, `התאריך והשעה כבר עברו (${whenLabel(at, now)}). כתוב שוב עם תאריך עתידי.`, now);
+       const conv = await latestConv(env, c.phone);
+-      await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+-        .bind(c.phone, conv?.id || null, conv?.issue || null, c.address || conv?.address || null, at.toISOString(), nowIso(now)).run();
++      const address = c.address || conv?.address || null;
++      const job = await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
++        .bind(c.phone, conv?.id || null, conv?.issue || null, address, at.toISOString(), nowIso(now)).run();
+       if (conv) await env.DB.prepare("UPDATE conversations SET followup_sent = 1 WHERE id = ?").bind(conv.id).run();
+       await upsertLead(env, c.phone, { status: `תור נקבע: ${whenLabel(at, now)}`, address: c.address }, now);
+-      return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.`, now);
++      // יומן גוגל (אם מחובר). תקלה ביומן לא מבטלת את התור: התזכורות עובדות גם בלי
++      let calNote = '';
++      if (calendarConfigured(env)) {
++        try {
++          const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(c.phone).first();
++          const eventId = await addAppointment(env, { phone: c.phone, name: cust?.name, issue: conv?.issue, address, at });
++          await env.DB.prepare('UPDATE jobs SET gcal_event_id = ? WHERE id = ?').bind(eventId, job.meta?.last_row_id).run();
++          calNote = ' נכנס גם ליומן.';
++        } catch (e) {
++          console.error('calendar add', e);
++          calNote = ' (לא הצלחתי להכניס ליומן, צריך להוסיף ביד.)';
++        }
++      }
++      return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.${calNote}`, now);
+     }
+ 
+     case 'done': {
+@@ -325,7 +340,9 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
+       return sendToOwner(env, `✓ סומן שטיפלת ב-${displayPhone(c.phone)}.`, now);
+ 
+     case 'cancel': {
++      const { results: inCal } = await env.DB.prepare("SELECT gcal_event_id FROM jobs WHERE phone = ? AND status = 'open' AND gcal_event_id IS NOT NULL").bind(c.phone).all();
+       await env.DB.prepare("UPDATE jobs SET status = 'cancelled' WHERE phone = ? AND status = 'open'").bind(c.phone).run();
++      for (const j of inCal || []) await removeAppointment(env, j.gcal_event_id).catch((e) => console.error('calendar delete', e));
+       await upsertLead(env, c.phone, { status: 'עבודה בוטלה' }, now);
+       return sendToOwner(env, `✓ בוטלה העבודה של ${displayPhone(c.phone)}.`, now);
+     }
+diff --git a/bots/agency-bot/src/setup.js b/bots/agency-bot/src/setup.js
+index a597060..2011a82 100644
+--- a/bots/agency-bot/src/setup.js
++++ b/bots/agency-bot/src/setup.js
+@@ -6,6 +6,7 @@ import { BUSINESS, FEATURES, TEMPLATE_DEFS } from './config.js';
+ import { MODEL } from './ai.js';
+ import { ensureHeader, getAccessToken } from './sheets.js';
+ import { yeshCall, yeshConfigured } from './yesh.js';
++import { calendarConfigured, checkCalendar } from './gcal.js';
+ import { DUAL, is360, isDual, isUltra } from './whatsapp.js';
+ 
+ const D360 = 'https://waba-v2.360dialog.io';
+@@ -192,6 +193,13 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
+     ok(`גיליון: יש גישה${r === 'created' ? ', ונוספה שורת כותרות' : ''}`);
+   });
+ 
++  // ---------- יומן גוגל (רשות) ----------
++  if (env.CALENDAR_ID && !env.GOOGLE_SA_JSON) warn('יומן: יש CALENDAR_ID אבל חסר GOOGLE_SA_JSON');
++  else if (calendarConfigured(env)) await step('יומן', async () => {
++    await checkCalendar(env);
++    ok('יומן: יש גישה, תורים חדשים ייכנסו ליומן');
++  });
++
+   // ---------- יש חשבונית ----------
+   if (!FEATURES.receipts) { /* קבלות כבויות: לא בודקים את יש חשבונית */ } else if (!yeshConfigured(env)) warn('יש חשבונית: לא מחובר (YESH_USERKEY / YESH_SECRET). חנן שולח קבלות ידנית בינתיים');
+   else await step('יש חשבונית', async () => {
+diff --git a/bots/agency-bot/src/sheets.js b/bots/agency-bot/src/sheets.js
+index 1414c59..b61f693 100644
+--- a/bots/agency-bot/src/sheets.js
++++ b/bots/agency-bot/src/sheets.js
+@@ -2,7 +2,8 @@
+ 
+ import { buildLeadRow, leadContext, sheetHeaders, stamp } from './leadrow.js';
+ 
+-let cachedToken = null; // { token, exp }
++const cachedTokens = {}; // scope → { token, exp }
++const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets';
+ 
+ function b64url(input) {
+   const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : new Uint8Array(input);
+@@ -11,13 +12,15 @@ function b64url(input) {
+   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+ }
+ 
+-async function getAccessToken(env) {
++// scope: גיליון (ברירת מחדל) או יומן (gcal.js). לכל אחד טוקן משלו
++async function getAccessToken(env, scope = SHEETS_SCOPE) {
+   const now = Math.floor(Date.now() / 1000);
+-  if (cachedToken && cachedToken.exp - 60 > now) return cachedToken.token;
++  const cached = cachedTokens[scope];
++  if (cached && cached.exp - 60 > now) return cached.token;
+   const sa = JSON.parse(env.GOOGLE_SA_JSON);
+   const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+   const claim = b64url(JSON.stringify({
+-    iss: sa.client_email, scope: 'https://www.googleapis.com/auth/spreadsheets',
++    iss: sa.client_email, scope,
+     aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600,
+   }));
+   const pem = sa.private_key.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
+@@ -32,8 +35,8 @@ async function getAccessToken(env) {
+   });
+   const data = await res.json();
+   if (!res.ok) throw new Error(`google token ${res.status} ${JSON.stringify(data)}`);
+-  cachedToken = { token: data.access_token, exp: now + (data.expires_in || 3600) };
+-  return cachedToken.token;
++  cachedTokens[scope] = { token: data.access_token, exp: now + (data.expires_in || 3600) };
++  return data.access_token;
+ }
+ 
+ // טבלת הלקוחות: שורה אחת לכל פנייה, והסטטוס שלה מתעדכן עד הסוף (פנייה ← הועבר לחנן ← תור ← הסתיים).
+diff --git a/bots/agency-bot/test/flow.test.js b/bots/agency-bot/test/flow.test.js
+index f392f07..ddc41d9 100644
+--- a/bots/agency-bot/test/flow.test.js
++++ b/bots/agency-bot/test/flow.test.js
+@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
+ // ---------- D1 מדומה ----------
+ function makeD1() {
+   const db = new DatabaseSync(':memory:');
+-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
++  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql', '0010_calendar.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+   return {
+     prepare(sql) {
+       let args = [];
+@@ -34,6 +34,8 @@ let outSeq = 0;
+ let yeshQueue = [], yeshRequests = [];
+ const dualRequests = [];
+ const sheet = [];        // גיליון הגוגל המדומה
++const calCalls = [];     // קריאות ליומן גוגל המדומה
++let calFail = false;
+ globalThis.fetch = async (url, init = {}) => {
+   url = String(url);
+   if (url.includes('api.anthropic.com')) {
+@@ -61,6 +63,13 @@ globalThis.fetch = async (url, init = {}) => {
+   }
+   if (url.startsWith('https://ultra-media.example/')) return new Response(new Uint8Array([1, 2, 3]), { status: 200, headers: { 'content-type': 'image/jpeg' } });
+   if (url.startsWith('https://oauth2.googleapis.com/token')) return Response.json({ access_token: 'g', expires_in: 3600 });
++  if (url.startsWith('https://www.googleapis.com/calendar/v3/')) {
++    calCalls.push({ url, method: init.method || 'GET', body: init.body ? JSON.parse(init.body) : null });
++    if (calFail) return new Response('forbidden', { status: 403 });
++    if (init.method === 'POST') return Response.json({ id: `ev${calCalls.length}` });
++    if (init.method === 'DELETE') return new Response(null, { status: 204 });
++    return Response.json({ items: [] });
++  }
+   if (url.startsWith('https://sheets.googleapis.com/')) {
+     const range = decodeURIComponent(url.split('/values/')[1].split('?')[0]);
+     if (!init.method) return Response.json({ values: range === 'A1:J1' ? sheet.slice(0, 1) : sheet });
+@@ -1687,3 +1696,43 @@ test('sales bot: the ad experiment: only people from a trial ad get the trial of
+     assert.match(mails.at(-1).text, /מקדמה 500: 1 פנו/);
+   });
+ });
++
++test('google calendar: appointment goes into the owner calendar, cancel removes it, failure does not block the appointment', async () => {
++  sent.length = 0; calCalls.length = 0; calFail = false;
++  const { generateKeyPairSync } = await import('node:crypto');
++  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
++  const sa = JSON.stringify({ client_email: 'bot@x.iam', private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }) });
++  const env = { ...makeEnv(), GOOGLE_SA_JSON: sa, CALENDAR_ID: 'neve@gmail.com', CALENDAR_EVENT_MINUTES: '45' };
++  const t0 = new Date('2026-10-14T08:00:00Z');
++  aiQueue = [ai({ reply: 'העברתי', issue: 'הסרת שיער לרגליים', address: 'הרצל 5 חולון', customer_name: 'שירן', ready_for_handoff: true, summary_for_owner: 'פעם ראשונה' })];
++  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'כמה עולה לייזר לרגליים?' } }, 'gc1'), t0);
++
++  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 16/10/2026 14:30' } }, 'gc2'), t0);
++  const add = calCalls.find((c) => c.method === 'POST');
++  assert.ok(add.url.includes(encodeURIComponent('neve@gmail.com')));
++  assert.match(add.body.summary, /הסרת שיער לרגליים/);
++  assert.match(add.body.description, /054-1234567/);
++  assert.equal(add.body.start.dateTime, '2026-10-16T11:30:00.000Z');
++  assert.equal(add.body.end.dateTime, '2026-10-16T12:15:00.000Z');
++  assert.equal(add.body.start.timeZone, 'Asia/Jerusalem');
++  assert.equal(env.DB.raw.prepare("SELECT gcal_event_id g FROM jobs WHERE status='open'").get().g, 'ev1');
++  assert.ok(textsTo(OWNER).some((t) => t.includes('נכנס גם ליומן')));
++
++  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'ביטול 0541234567' } }, 'gc3'), t0);
++  const del = calCalls.find((c) => c.method === 'DELETE');
++  assert.ok(del.url.endsWith('/events/ev1'));
++
++  // היומן נופל: התור נשמר בכל זאת, ובעל העסק יודע להוסיף ביד
++  calFail = true; sent.length = 0;
++  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 17/10/2026 10:00' } }, 'gc4'), t0);
++  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM jobs WHERE status='open'").get().n, 1);
++  assert.ok(textsTo(OWNER).some((t) => t.includes('לא הצלחתי להכניס ליומן')));
++  calFail = false;
++
++  // בלי CALENDAR_ID: אין שום קריאה ליומן
++  calCalls.length = 0; sent.length = 0;
++  const plain = makeEnv();
++  await processWebhook(plain, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 18/10/2026 10:00' } }, 'gc5'), t0);
++  assert.equal(calCalls.length, 0);
++  assert.ok(!textsTo(OWNER).some((t) => t.includes('יומן')));
++});
