@@ -52,4 +52,4 @@
 - `wrangler.toml`: `BOT_OFF = "0"`, `TEST_PHONES = ""` (פתוח לכולם), `OWNER_EMAIL = "Hananlocks@gmail.com"`, `CLAUDE_MODEL = "claude-sonnet-5-5"`, `WORKER_URL = "https://bot.onerishon.com"`.
 - בדיקה יומית אוטומטית כל בוקר ב-07:56 (`hanan-bot.yml` עם `daily_check`), התוצאה נכתבת לאריאל.
 - חירום: אריאל כותב "תכבה ותעלה" ← `BOT_OFF = "1"`.
-- פתוח: גבייה של 1,500 ₪, אישור נטפרי, 3 תבניות Meta (`quote_v1` מחכה לאישור, `referral_v1` ו-`yearly_checkup_v1` לא נוצרו), החלפת המילה הסודית של Dualhook, הקבוצות של חנן שלא שולחות מאז החיבור.
+- פתוח: גבייה של 1,500 ₪, אישור נטפרי, תבניות Meta: כולן מאושרות (`referral_v1` אושרה 31/10), חוץ מ-`yearly_checkup_v1` שלא צריך (הבדיקה השנתית כבויה), החלפת המילה הסודית של Dualhook, הקבוצות של חנן שלא שולחות מאז החיבור.
