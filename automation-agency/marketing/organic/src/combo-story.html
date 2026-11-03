@@ -1,0 +1,93 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#FBF5F1;--blush:#F3E2DA;--plum:#3E1631;--plum2:#5B2346;--rose:#C27B6A;--gold:#B98B5E;--mute:#8A6F7C;--wa:#25D366}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden}
+body{position:relative;font-family:Heebo,Arial,sans-serif;color:var(--plum);
+  background:radial-gradient(700px 520px at 18% 46%, #F6E1D8 0%, transparent 70%),radial-gradient(520px 420px at 96% 0%, #F4E6DC 0%, transparent 70%),var(--cream)}
+.wrap:before{content:"";position:absolute;inset:26px;border:1.5px solid rgba(185,139,94,.35);border-radius:34px;pointer-events:none}
+.top{position:absolute;top:62px;right:72px;left:72px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:25px;color:var(--plum)}
+.brand i{width:38px;height:38px;border-radius:11px;background:var(--wa);display:grid;place-items:center}
+.brand i svg{width:22px;height:22px}
+.who{font-size:18px;font-weight:500;color:var(--gold);letter-spacing:.3px;border:1px solid rgba(185,139,94,.45);padding:8px 18px;border-radius:999px;background:rgba(255,255,255,.5)}
+h1{position:absolute;top:134px;right:72px;left:72px;font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:66px;line-height:1.06;letter-spacing:-.5px}
+h1 em{font-style:normal;color:var(--rose);position:relative}
+h1 em:after{content:"";position:absolute;right:0;left:0;bottom:4px;height:14px;background:rgba(194,123,106,.18);border-radius:8px;z-index:-1}
+.lede{position:absolute;top:362px;right:72px;width:600px;font-size:27px;line-height:1.42;color:#5c4250;font-weight:400}
+.lede b{color:var(--plum);font-weight:700}
+/* phone */
+.phone{position:absolute;top:350px;left:66px;width:318px;height:560px;border-radius:46px;background:#1b1418;padding:11px;box-shadow:0 40px 80px rgba(62,22,49,.28),0 0 0 1px rgba(0,0,0,.2);transform:rotate(-4deg)}
+.scr{width:100%;height:100%;border-radius:36px;overflow:hidden;background:#EFE7DE;position:relative}
+.ph{height:92px;background:var(--plum2);padding:44px 18px 0;display:flex;align-items:center;gap:10px;color:#fff}
+.ph .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#F7C9DB,#EBC7A0);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--plum2)}
+.ph b{font-size:16px}
+.ch{padding:12px 10px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:86%;padding:8px 11px 17px;border-radius:13px;font-size:15px;line-height:1.3;position:relative;color:#1d1d1d}
+.m i{position:absolute;bottom:3px;left:9px;font-size:10px;color:#8a8a8a;font-style:normal}
+.in{background:#fff;align-self:flex-start}.out{background:#D9FDD3;align-self:flex-end}
+.tag{position:absolute;top:212px;right:-150px;background:#fff;border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 20px 40px rgba(62,22,49,.18);transform:rotate(4deg)}
+.tag b{width:44px;height:44px;border-radius:12px;background:var(--wa);color:#063b1c;display:grid;place-items:center;font-weight:800;font-size:18px}
+.tag div{font-weight:800;font-size:19px;line-height:1.15}.tag small{display:block;font-weight:500;font-size:14px;color:var(--mute)}
+.ok{position:absolute;bottom:22px;right:14px;left:14px;background:var(--plum2);color:#fff;border-radius:16px;padding:12px 14px;font-size:15px;line-height:1.35}
+.ok b{display:block;font-size:17px}
+/* benefits */
+.bens{position:absolute;top:500px;right:72px;width:560px;display:flex;flex-direction:column;gap:12px}
+.b{display:flex;gap:16px;align-items:flex-start}
+.b .ic{flex:none;width:50px;height:50px;border-radius:15px;background:#fff;border:1px solid rgba(185,139,94,.35);display:grid;place-items:center;font-size:24px;box-shadow:0 6px 14px rgba(62,22,49,.06)}
+.b h3{font-size:24px;font-weight:800;line-height:1.2}
+.b p{font-size:19px;color:var(--mute);line-height:1.3;margin-top:2px}
+/* stats */
+.stats{position:absolute;top:948px;right:72px;left:72px;display:flex;background:#fff;border-radius:26px;box-shadow:0 20px 50px rgba(62,22,49,.1);border:1px solid rgba(185,139,94,.25)}
+.s{flex:1;text-align:center;padding:20px 10px}
+.s+.s{border-right:1px solid #EFE3DC}
+.s b{display:block;font-family:'Frank Ruhl Libre',serif;font-weight:900;font-size:50px;color:var(--rose);line-height:1}
+.s span{display:block;font-size:19px;font-weight:500;color:#5c4250;margin-top:8px;line-height:1.25}
+/* cta */
+.cta{position:absolute;bottom:64px;right:72px;left:72px;height:150px;background:var(--plum);border-radius:30px;display:flex;align-items:center;justify-content:space-between;padding:0 34px;color:#fff;box-shadow:0 24px 50px rgba(62,22,49,.3)}
+.cta .t{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:44px;line-height:1.2}
+.cta .t small{display:block;font-family:Heebo;font-weight:400;font-size:20px;color:#E8CFC4;margin-top:4px}
+.cta .btn{display:flex;align-items:center;gap:14px;background:var(--wa);color:#063b1c;border-radius:22px;padding:14px 26px}
+.cta .btn svg{width:46px;height:46px}
+.cta .btn small{display:block;font-weight:800;font-size:23px}
+.cta .btn b{font-weight:900;font-size:38px;direction:ltr;display:block;letter-spacing:.5px}
+.wrap{position:absolute;top:285px;left:0;width:1080px;height:1350px}
+.hook{position:absolute;top:120px;right:0;left:0;text-align:center;font-family:"Frank Ruhl Libre",serif;font-weight:700;font-size:40px;color:#C27B6A}
+</style></head><body><div class="hook">לבעלות קליניקות בלבד ✨</div><div class="wrap">
+<div class="top"><div class="brand"><i><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2z"/></svg></i>עונה ראשון</div><div class="who">לבעלות קליניקות לייזר ואסתטיקה</div></div>
+
+<h1>בזמן שאת מטפלת,<br><em>לקוחות חדשות</em><br>הולכות למתחרה.</h1>
+<p class="lede">מזכירה בוואטסאפ שעונה לכל פנייה <b>תוך 3 שניות</b>, בשם הקליניקה ובסגנון שלך.<br><b>גם באמצע טיפול, בערב ובשבת.</b></p>
+
+<div class="bens">
+  <div class="b"><div class="ic">⚡</div><div><h3>אף פנייה לא נשארת בלי תשובה</h3><p>הראשון שעונה מקבל את הלקוחה. מעכשיו זו את.</p></div></div>
+  <div class="b"><div class="ic">💬</div><div><h3>עונה על "זה כואב?" ו"כמה טיפולים?"</h3><p>במקומך, באותו סגנון, בלי שתיגעי בטלפון.</p></div></div>
+  <div class="b"><div class="ic">📋</div><div><h3>כל פנייה מגיעה אלייך מסודרת</h3><p>איזה טיפול, פעם ראשונה, מתי נוח לה. את רק קובעת.</p></div></div>
+  <div class="b"><div class="ic">📅</div><div><h3>פחות הברזות</h3><p>אישור תור, תזכורת יום לפני ושעתיים לפני.</p></div></div>
+  <div class="b"><div class="ic">⭐</div><div><h3>יותר ביקורות בגוגל</h3><p>אחרי כל טיפול היא מקבלת בקשה לביקורת.</p></div></div>
+</div>
+
+<div class="phone"><div class="scr">
+  <div class="ph"><div class="av">נ</div><b>מכון לייזר</b></div>
+  <div class="ch">
+    <div class="m in">היי, ראיתי את המודעה 😊 כמה עולה לייזר לרגליים?<i>13:20</i></div>
+    <div class="m out">היי, איזה כיף שפנית ✨ פעם ראשונה בלייזר?<i>13:20</i></div>
+    <div class="m in">כן. זה כואב?<i>13:21</i></div>
+    <div class="m out">רוב הלקוחות מרגישות רק עקצוץ קל 💜<i>13:21</i></div>
+  </div>
+  <div class="ok"><b>✓ נקבע תור: מחר 18:30</b>תזכורת תישלח יום לפני ושעתיים לפני</div>
+</div></div>
+<div class="tag" style="left:250px;right:auto;top:690px"><b>3s</b><div>נענתה תוך 3 שניות<small>בזמן שאת בטיפול</small></div></div>
+
+<div class="stats">
+  <div class="s"><b>3,000 ₪</b><span>בחודש שחוזרים אלייך<br>במקום ללכת למתחרה</span></div>
+  <div class="s"><b>20 שעות</b><span>בחודש פנויות<br>מ"כמה עולה?"</span></div>
+  <div class="s"><b>24/7</b><span>כל שקל על מודעות<br>מקבל מענה</span></div>
+</div>
+
+<div class="cta">
+  <div class="t">רוצה לשמוע עוד פרטים?</div>
+  <div class="btn"><svg viewBox="0 0 24 24" fill="#063b1c"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.6 2.1 1.1 1 2.1 1.3 2.4 1.4.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.1z"/></svg><div><small>לפרטים</small><b>052-4666175</b></div></div>
+</div>
+</div></body></html>
