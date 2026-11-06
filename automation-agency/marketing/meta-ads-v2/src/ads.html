@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plum:#3a1530; --plum2:#2a0f23; --terra:#b9705a; --terra-d:#9c5642;
+    --cream:#f7efe9; --ink:#241019; --wa:#25d366; --wa-d:#128c4a; --bubble:#dcf8c6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#888;font-family:Heebo,sans-serif;color:var(--ink)}
+  .ad{width:1080px;height:1350px;position:relative;overflow:hidden;margin:0 0 40px;background:var(--cream);display:flex;flex-direction:column}
+  .top{display:flex;align-items:center;gap:18px;padding:44px 64px 0}
+  .logo{width:66px;height:66px;border-radius:16px;background:linear-gradient(145deg,#1d5a45,#0d3a2b);display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+  .logo span{font:800 24px Rubik;color:#e6c46a;border:2.5px solid #e6c46a;border-radius:50% 50% 50% 8px;width:46px;height:40px;display:grid;place-items:center;direction:ltr}
+  .brand{font:700 32px Rubik;color:var(--plum);direction:ltr}
+  h1{font:900 82px/1.06 Rubik;color:var(--plum);padding:26px 64px 0;letter-spacing:-1px}
+  h1 .hl{background:var(--terra);color:#fff;border-radius:18px;padding:0 22px 6px;display:inline-block;margin:8px 0}
+  .sub{font:500 32px/1.35 Heebo;color:#5a3a4c;padding:16px 64px 0}
+  .sub b{color:var(--plum);font-weight:800}
+  .stage{flex:1;position:relative;padding:0 64px 24px;display:flex;flex-direction:column;justify-content:center}
+  .feats{background:#fff;padding:20px 64px;display:grid;grid-template-columns:1fr 1fr;gap:14px 30px}
+  .feats div{font:700 26px/1.25 Heebo;color:var(--plum);display:flex;align-items:center;gap:12px}
+  .feats div::before{content:"✓";flex:none;width:38px;height:38px;border-radius:50%;background:var(--terra);color:#fff;display:grid;place-items:center;font:800 22px Rubik}
+  .foot{background:var(--plum);padding:26px 64px;display:flex;align-items:center;justify-content:space-between;gap:30px}
+  .foot .q{font:800 34px/1.2 Rubik;color:#fff}
+  .foot .q small{display:block;font:500 26px Heebo;color:#e3c9d6;margin-top:6px}
+  .cta{background:var(--wa);border-radius:26px;padding:16px 34px;display:flex;align-items:center;gap:18px;box-shadow:0 8px 24px rgba(0,0,0,.25);flex:none}
+  .cta .t{font:700 24px Heebo;color:#0b3d22}
+  .cta .n{font:900 42px Rubik;color:#0b3d22;direction:ltr;letter-spacing:1px}
+  .cta svg{width:56px;height:56px}
+
+  /* notification cards */
+  .notif{background:rgba(255,255,255,.96);border-radius:26px;padding:14px 22px;display:flex;gap:18px;align-items:center;box-shadow:0 10px 30px rgba(58,21,48,.16);margin-bottom:12px}
+  .notif .ic{width:60px;height:60px;border-radius:15px;background:var(--wa);display:grid;place-items:center;flex:none}
+  .notif .ic svg{width:38px;height:38px}
+  .notif .bd{flex:1;min-width:0}
+  .notif .nm{font:800 28px Heebo;display:flex;justify-content:space-between}
+  .notif .nm i{font:500 22px Heebo;color:#9a8790;font-style:normal}
+  .notif .tx{font:500 25px/1.3 Heebo;color:#3b2a33}
+  .notif.bot{background:var(--bubble)}
+  .badge{display:inline-flex;align-items:center;gap:10px;background:#e0412f;color:#fff;font:800 28px Rubik;border-radius:40px;padding:10px 26px;box-shadow:0 6px 18px rgba(224,65,47,.35)}
+  .pill{display:inline-flex;align-items:center;gap:10px;background:#fff;color:var(--plum);font:800 28px Rubik;border-radius:40px;padding:10px 24px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+
+  /* chat */
+  .chat{padding:20px 22px!important;background:#efe6dd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23d9cbbf'/%3E%3C/svg%3E");border-radius:34px;padding:24px 26px;box-shadow:0 18px 50px rgba(58,21,48,.22);border:10px solid #1b1b1f}
+  .chat .hdr{display:flex;align-items:center;gap:14px;background:#075e54;margin:-20px -22px 14px;padding:12px 20px;border-radius:24px 24px 0 0;color:#fff}
+  .chat .hdr .av{width:48px;height:48px;border-radius:50%;background:#cfe9dd;display:grid;place-items:center;font:800 20px Rubik;color:#075e54}
+  .chat .hdr b{font:700 27px Heebo}
+  .chat .hdr small{display:block;font:400 20px Heebo;opacity:.85}
+  .msg{max-width:84%;padding:10px 18px 8px;border-radius:20px;font:500 25px/1.3 Heebo;margin-bottom:10px;box-shadow:0 1px 1px rgba(0,0,0,.1);position:relative}
+  .msg i{display:block;font:400 17px Heebo;color:#7d8a85;text-align:left;font-style:normal;margin-top:2px}
+  .in{background:#fff;margin-left:auto;border-top-right-radius:6px}
+  .out{background:var(--bubble);margin-right:auto;border-top-left-radius:6px}
+  .out i{color:#53bdeb}
+  .tag{font:800 20px Rubik;color:var(--wa-d);display:block;margin-bottom:2px}
+
+  /* night ad */
+  .night{background:radial-gradient(circle at 80% 10%,#4a2244 0,#1a0b17 60%)}
+  .night h1,.night .brand{color:#fff}
+  .night .sub{color:#e6cfdc}
+  .night .sub b{color:#fff}
+  .moon{position:absolute;top:60px;left:70px;width:120px;height:120px;border-radius:50%;box-shadow:-26px 14px 0 0 #f3d98a;transform:rotate(-20deg);opacity:.9}
+  .star{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;opacity:.7}
+
+  .mail{background:#fff;border-radius:24px;padding:20px 26px;box-shadow:0 14px 40px rgba(0,0,0,.25);border-right:10px solid var(--terra)}
+  .mail .h{font:800 24px Rubik;color:var(--terra-d);margin-bottom:6px}
+  .mail .r{font:600 27px/1.45 Heebo;color:var(--ink)}
+  .mail .r span{color:#8a7680;font-weight:500}
+
+  .lost{background:#fff;border-radius:26px;padding:16px 26px;box-shadow:0 10px 30px rgba(58,21,48,.14);display:flex;align-items:center;gap:20px;margin-bottom:16px}
+  .lost .x{width:54px;height:54px;border-radius:50%;background:#fde3df;color:#d63b28;display:grid;place-items:center;font:900 30px Rubik;flex:none}
+  .lost .nm{font:800 29px Heebo}
+  .lost .tx{font:500 25px Heebo;color:#6d5763}
+  .lost s{color:#d63b28;text-decoration:none;font-weight:800}
+
+  .proof{background:var(--plum);color:#fff;border-radius:28px;padding:20px 26px;box-shadow:0 14px 40px rgba(58,21,48,.3)}
+  .proof .h{font:700 25px Heebo;color:#e3c9d6;margin-bottom:12px}
+  .proof .row{display:flex;gap:16px}
+  .proof .row div{flex:1;background:rgba(255,255,255,.08);border-radius:18px;padding:14px 10px;text-align:center}
+  .proof .row b{display:block;font:900 52px Rubik;color:#ffd27a;line-height:1}
+  .proof .row span{font:600 23px/1.2 Heebo}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. הודעות שמחכות ============ -->
+<div class="ad" id="ad1">
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div></div>
+  <h1>כל הודעה שמחכה,<br><span class="hl">היא לקוחה</span><br>שבודקת מכון אחר.</h1>
+  <div class="sub">בזמן שאת עם הלייזר ביד, <b>המזכירה בוואטסאפ עונה לכל פנייה תוך שניות.</b></div>
+  <div class="stage" style="padding-top:34px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div class="pill">🧴 את באמצע טיפול</div>
+      <div class="badge">4 הודעות מחכות</div>
+    </div>
+    <div class="notif"><div class="ic">WA</div><div class="bd"><div class="nm">נועה <i>לפני 38 דק'</i></div><div class="tx">היי, ראיתי את המודעה. אפשר פרטים על לייזר לרגליים?</div></div></div>
+    <div class="notif"><div class="ic">WA</div><div class="bd"><div class="nm">שירן <i>לפני 24 דק'</i></div><div class="tx">יש לכם תור פנוי השבוע?</div></div></div>
+    <div class="notif" style="opacity:.75"><div class="ic">WA</div><div class="bd"><div class="nm">מאיה <i>לפני 9 דק'</i></div><div class="tx">שלום?? 🙂</div></div></div>
+  </div>
+  <div class="feats">
+    <div>עונה בשם המכון, מהמספר שלך</div>
+    <div>שואלת אזור, עיר ומתי נוח</div>
+    <div>כל פנייה מגיעה אלייך מסודרת</div>
+    <div>את נכנסת לשיחה מתי שבא לך</div>
+  </div>
+  <div class="foot">
+    <div class="q">רוצה לשמוע איך זה<br>יעבוד אצלך?<small>מזכירה דיגיטלית למכוני לייזר</small></div>
+    <div class="cta">WAICON<div><div class="t">לפרטים בוואטסאפ</div><div class="n">052-4666175</div></div></div>
+  </div>
+</div>
+
+<!-- ============ 2. לילה ============ -->
+<div class="ad night" id="ad2">
+  <div class="moon"></div>
+  <div class="star" style="top:220px;left:260px"></div><div class="star" style="top:130px;left:330px"></div><div class="star" style="top:300px;left:90px"></div>
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div></div>
+  <h1>23:14. לקוחה<br>חדשה כותבת.<br>את ישנה.<br><span class="hl">המזכירה עונה.</span></h1>
+  <div class="stage" style="padding-top:24px">
+    <div class="chat">
+      <div class="hdr"><div class="av">✦</div><div><b>המכון שלך</b><small>מקליד/ה…</small></div></div>
+      <div class="msg in">היי, אפשר פרטים על לייזר לרגליים?<i>23:14</i></div>
+      <div class="msg out"><span class="tag">המזכירה</span>היי! שמחה שפנית 😊 איזה אזורים מעניינים אותך, ומאיזו עיר את?<i>23:14 ✓✓</i></div>
+      <div class="msg in" style="margin-bottom:0">רגליים ובית שחי, מנתניה. אפשר שיחזרו אליי מחר אחרי 12?<i>23:15</i></div>
+    </div>
+    <div class="mail" style="margin-top:22px">
+      <div class="h">☀️ 07:30 · מחכה לך במייל</div>
+      <div class="r">נועה · נתניה · רגליים + בית שחי · <span>לחזור אחרי 12:00</span></div>
+    </div>
+  </div>
+  <div class="foot" style="margin-top:24px">
+    <div class="q">קמה בבוקר עם לקוחות<br>מוכנות, לא עם הודעות קרות.</div>
+    <div class="cta">WAICON<div><div class="t">לפרטים בוואטסאפ</div><div class="n">052-4666175</div></div></div>
+  </div>
+</div>
+
+<!-- ============ 3. כמה הלכו ============ -->
+<div class="ad" id="ad3">
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div></div>
+  <h1>כמה לקוחות<br>הלכו החודש<br><span class="hl">כי לא ענית בזמן?</span></h1>
+  <div class="sub">לקוחה שכותבת ולא מקבלת תשובה, <b>כותבת למכון הבא.</b> ולקוחה ללייזר זו לא פגישה אחת, זו סדרה שלמה.</div>
+  <div class="stage" style="padding-top:30px">
+    <div class="lost"><div class="x">✕</div><div><div class="nm">נועה, רגליים</div><div class="tx">כתבה בשלישי ב-11:20 · ענית ב-15:40 · <s>קבעה במקום אחר</s></div></div></div>
+    <div class="lost"><div class="x">✕</div><div><div class="nm">שירן, בית שחי</div><div class="tx">כתבה בשבת בערב · ענית בראשון · <s>כבר לא ענתה</s></div></div></div>
+    <div class="lost" style="background:#e8f8ee"><div class="x" style="background:var(--wa);color:#fff">✓</div><div><div class="nm">עם המזכירה</div><div class="tx">כל אחת מקבלת תשובה תוך שניות, ואת מקבלת אותה מסודרת</div></div></div>
+  </div>
+  <div class="feats">
+    <div>עונה 24/7, גם בשבת ובלילה</div>
+    <div>בשם המכון, מהמספר שלך</div>
+    <div>מבינה הודעות קוליות ותמונות</div>
+    <div>אישור תור ותזכורות ללקוחה</div>
+  </div>
+  <div class="foot">
+    <div class="q">רוצה להפסיק לאבד<br>לקוחות?<small>מזכירה דיגיטלית למכוני לייזר</small></div>
+    <div class="cta">WAICON<div><div class="t">לפרטים בוואטסאפ</div><div class="n">052-4666175</div></div></div>
+  </div>
+</div>
+
+<!-- ============ 4. הברזות ============ -->
+<div class="ad" id="ad4">
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div></div>
+  <h1>קבעה תור.<br><span class="hl">ולא הגיעה.</span><br>שוב.</h1>
+  <div class="sub">את קובעת את התור, <b>והמזכירה שולחת ללקוחה אישור ותזכורת</b> בוואטסאפ של המכון. פחות מיטות ריקות.</div>
+  <div class="stage" style="padding-top:30px">
+    <div class="chat">
+      <div class="hdr"><div class="av">✦</div><div><b>המכון שלך</b><small>מחובר/ת</small></div></div>
+      <div class="msg out"><span class="tag">אישור תור</span>היי נועה 😊 נקבע לך טיפול לייזר ביום רביעי ב-14:30. נתראה!<i>✓✓</i></div>
+      <div class="msg out"><span class="tag">תזכורת</span>מזכירות: מחר ב-14:30 טיפול במכון. מחכות לך 🌸<i>✓✓</i></div>
+      <div class="msg in" style="margin-bottom:0">תודה! מגיעה 🙏<i>✓</i></div>
+    </div>
+  </div>
+  <div class="feats">
+    <div>אישור תור מיד אחרי שקבעת</div>
+    <div>תזכורת לפני הטיפול</div>
+    <div>ביקורת בגוגל אחרי הטיפול</div>
+    <div>עונה לפניות חדשות 24/7</div>
+  </div>
+  <div class="foot">
+    <div class="q">רוצה פחות הברזות?<small>מזכירה דיגיטלית למכוני לייזר</small></div>
+    <div class="cta">WAICON<div><div class="t">לפרטים בוואטסאפ</div><div class="n">052-4666175</div></div></div>
+  </div>
+</div>
+
+<!-- ============ 5. בעלי מקצוע / ניקוי ספות ============ -->
+<div class="ad" id="ad5">
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div></div>
+  <h1>אתה באמצע עבודה.<br><span class="hl">הלקוח הבא</span><br>כבר כתב למתחרה.</h1>
+  <div class="sub">מזכירה בוואטסאפ <b>עונה לכל לקוח תוך שניות,</b> אוספת את כל הפרטים ושולחת לך הכל מסודר.</div>
+  <div class="stage" style="padding-top:28px">
+    <div class="chat" style="padding-bottom:14px">
+      <div class="hdr"><div class="av">✦</div><div><b>העסק שלך</b><small>מחובר/ת</small></div></div>
+      <div class="msg in">נשפך לי קפה על הספה, אתם מגיעים היום?<i>10:02</i></div>
+      <div class="msg out" style="margin-bottom:0"><span class="tag">המזכירה</span>אפשר תמונה של הכתם ובאיזו עיר את? 📸<i>10:02 ✓✓</i></div>
+    </div>
+    <div class="proof" style="margin-top:22px">
+      <div class="h">תוצאה אמיתית: מנעולן בנתניה, 4 הימים הראשונים</div>
+      <div class="row">
+        <div><b>19</b><span>פניות נענו</span></div>
+        <div><b>11</b><span>חשבוניות נשלחו לבד</span></div>
+        <div><b>6</b><span>ביקורות בגוגל</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot" style="margin-top:28px">
+    <div class="q">המספר שלך נשאר שלך.<br>אנחנו מחברים הכל.</div>
+    <div class="cta">WAICON<div><div class="t">לפרטים בוואטסאפ</div><div class="n">052-4666175</div></div></div>
+  </div>
+</div>
+
+<script>
+  const WA='<svg viewBox="0 0 32 32"><path fill="#fff" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-2a13 13 0 0 0 6.6 1.8c7.2 0 13-5.7 13-12.8S23.2 3 16 3z"/><path fill="#25d366" d="M16 5.2c-6 0-10.8 4.8-10.8 10.6 0 2.3.7 4.4 2 6.2l-1.3 3.9 4-1.3a10.9 10.9 0 0 0 6.1 1.9c6 0 10.8-4.8 10.8-10.7S22 5.2 16 5.2z"/><path fill="#fff" d="M12.2 10.3c-.3-.6-.5-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.8 5.9 5.2 2.9 1.1 3.5.9 4.1.8.6-.1 2-.8 2.3-1.6.3-.8.3-1.5.2-1.6-.1-.1-.3-.2-.7-.4l-2.4-1.1c-.3-.1-.6-.2-.8.2l-1.1 1.4c-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.6.1-.2.1-.5 0-.7l-1-2.6z"/></svg>';
+  const WA_DARK=WA.replace('fill="#fff" d="M16 3','fill="#0b3d22" d="M16 3').replace('fill="#25d366"','fill="#25d366"');
+  document.querySelectorAll('.cta').forEach(e=>e.innerHTML=e.innerHTML.replace('WAICON',WA.replace('<path fill="#fff" d="M16 3','<path fill="#0b3d22" d="M16 3')));
+  document.querySelectorAll('.notif .ic').forEach(e=>e.innerHTML=WA);
+</script>
+</body>
+</html>
