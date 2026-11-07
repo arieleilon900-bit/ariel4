@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800;900&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--plum:#3a1530;--terra:#b9705a;--terra-d:#9c5642;--cream:#f7efe9;--ink:#241019;--wa:#25d366;--bubble:#dcf8c6}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#888;font-family:Heebo,sans-serif;color:var(--ink)}
+  .ad{width:1080px;height:1350px;background:var(--cream);margin-bottom:40px;display:flex;flex-direction:column;padding:44px 56px 40px;position:relative;overflow:hidden}
+  .top{display:flex;align-items:center;gap:16px}
+  .logo{width:60px;height:60px;border-radius:15px;background:linear-gradient(145deg,#1d5a45,#0d3a2b);display:grid;place-items:center}
+  .logo span{font:800 22px Rubik;color:#e6c46a;border:2.5px solid #e6c46a;border-radius:50% 50% 50% 8px;width:42px;height:36px;display:grid;place-items:center;direction:ltr}
+  .brand{font:700 30px Rubik;color:var(--plum);direction:ltr}
+  .tag{margin-right:auto;background:#fff;border:3px dashed var(--terra);color:var(--terra-d);font:800 26px Rubik;border-radius:14px;padding:6px 20px}
+  h1{font:900 64px/1.08 Rubik;color:var(--plum);margin:30px 0 22px}
+  h1 .hl{background:var(--terra);color:#fff;border-radius:14px;padding:0 16px 4px;display:inline-block}
+  .row{display:flex;gap:26px;flex:1;min-height:0}
+  .chat{flex:1;background:#efe6dd;border-radius:30px;border:10px solid #1b1b1f;padding:0 20px 18px;box-shadow:0 18px 50px rgba(58,21,48,.22);display:flex;flex-direction:column;overflow:hidden}
+  .hdr{display:flex;align-items:center;gap:14px;background:#075e54;margin:0 -20px 16px;padding:14px 20px;color:#fff}
+  .hdr .av{width:46px;height:46px;border-radius:50%;background:#cfe9dd;display:grid;place-items:center;font:800 20px Rubik;color:#075e54}
+  .hdr b{font:700 26px Heebo}.hdr small{display:block;font:400 19px Heebo;opacity:.85}
+  .msg{max-width:86%;padding:10px 18px 8px;border-radius:20px;font:500 25px/1.32 Heebo;margin-bottom:11px;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+  .msg i{display:block;font:400 17px Heebo;color:#7d8a85;text-align:left;font-style:normal}
+  .in{background:#fff;margin-left:auto;border-top-right-radius:6px}
+  .out{background:var(--bubble);margin-right:auto;border-top-left-radius:6px}
+  .out i{color:#53bdeb}
+  .side{width:300px;display:flex;flex-direction:column;justify-content:space-around;gap:14px}
+  .call{background:#fff;border-radius:22px;padding:18px 20px;box-shadow:0 8px 24px rgba(58,21,48,.12);border-right:8px solid var(--terra)}
+  .call b{display:block;font:800 26px/1.2 Rubik;color:var(--plum);margin-bottom:4px}
+  .call span{font:500 21px/1.35 Heebo;color:#5a3a4c}
+  .foot{margin-top:22px;font:500 22px Heebo;color:#7a5c6b;text-align:center}
+  .mail{background:#fff;border-radius:24px;box-shadow:0 12px 34px rgba(58,21,48,.15);overflow:hidden}
+  .mail .mh{background:#f1ece8;padding:14px 24px;font:600 21px Heebo;color:#6d5763;display:flex;justify-content:space-between}
+  .mail .mb{padding:22px 28px 24px;font:500 28px/1.55 Heebo}
+  .mail .mb .t{font:800 30px Rubik;color:var(--plum);margin-bottom:8px}
+  .mail .q{background:#fff6e0;border-radius:12px;padding:8px 14px;margin:6px 0 10px;font-weight:700}
+  .mail .k{color:#8a7680;display:inline-block;width:150px}
+  .step{display:flex;align-items:center;gap:16px;margin:40px 0 16px}
+  .step .n{width:50px;height:50px;border-radius:50%;background:var(--terra);color:#fff;font:900 26px Rubik;display:grid;place-items:center;flex:none}
+  .step b{font:800 32px Rubik;color:var(--plum)}
+  .bubbles{display:flex;flex-direction:column;gap:12px}
+  .own{background:var(--plum);color:#fff;border-radius:20px;padding:14px 22px;font:700 28px Heebo;align-self:flex-start;box-shadow:0 6px 16px rgba(58,21,48,.25)}
+  .own small{display:block;font:500 19px Heebo;color:#e3c9d6}
+</style>
+</head>
+<body>
+
+<div class="ad" id="d1">
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div><div class="tag">דוגמה להמחשה</div></div>
+  <h1>22:41. לקוחה חדשה כותבת.<br><span class="hl">המזכירה עונה בשם המכון.</span></h1>
+  <div class="row">
+    <div class="chat">
+      <div class="hdr"><div class="av">✦</div><div><b>המכון שלך</b><small>מחובר/ת</small></div></div>
+      <div class="msg in">היי, ראיתי אתכם באינסטגרם. כמה עולה לייזר לרגליים?<i>22:41</i></div>
+      <div class="msg out">היי! כיף שפנית 😊 את המחיר המכון ייתן לך לפי האזורים. איזה אזורים מעניינים אותך?<i>22:41 ✓✓</i></div>
+      <div class="msg in">רגליים ובית שחי. זה כואב?<i>22:42</i></div>
+      <div class="msg out">את זה המטפלת תסביר לך הכי טוב, היא תחזור אלייך. מאיזו עיר את, ומתי נוח שיחזרו אלייך?<i>22:42 ✓✓</i></div>
+      <div class="msg in">מנתניה, מחר אחרי 12<i>22:43</i></div>
+      <div class="msg out">רשמתי 🙏 המכון יחזור אלייך מחר אחרי 12. לילה טוב!<i>22:43 ✓✓</i></div>
+    </div>
+    <div class="side">
+      <div class="call"><b>⚡ תוך שניות</b><span>גם ב-22:41, גם בשבת, גם באמצע טיפול</span></div>
+      <div class="call"><b>💬 בסגנון שלך</b><span>קצר, אנושי, בשם המכון ומהמספר שלו</span></div>
+      <div class="call"><b>🩺 שאלה רפואית?</b><span>לא עונה. משאירה לך</span></div>
+      <div class="call"><b>💰 מחיר?</b><span>לא זורקת מספר. את נותנת מחיר</span></div>
+    </div>
+  </div>
+  <div class="foot">דוגמה להמחשה. השמות והפרטים בדויים.</div>
+</div>
+
+<div class="ad" id="d2">
+  <div class="top"><div class="logo"><span>AE</span></div><div class="brand">A.E Automations</div><div class="tag">דוגמה להמחשה</div></div>
+  <h1>ומה <span class="hl">את</span> מקבלת?</h1>
+
+  <div class="step"><div class="n">1</div><b>מייל אחד מסודר על כל פנייה</b></div>
+  <div class="mail">
+    <div class="mh"><span>מאת: המזכירה בוואטסאפ</span><span>22:46</span></div>
+    <div class="mb">
+      <div class="t">🔔 פנייה חדשה: נועה</div>
+      <div class="q">❓ מחכה לתשובה ממך: שאלה כמה זה עולה, והאם זה כואב</div>
+      <div><span class="k">טלפון:</span>050-0000000</div>
+      <div><span class="k">עיר:</span>נתניה</div>
+      <div><span class="k">אזור טיפול:</span>רגליים + בית שחי</div>
+      <div><span class="k">לחזור:</span>מחר אחרי 12:00</div>
+    </div>
+  </div>
+
+  <div class="step"><div class="n">2</div><b>את קובעת תור במשפט אחד</b></div>
+  <div class="bubbles">
+    <div class="own">תור מחר 14:30<small>את כותבת. זהו.</small></div>
+  </div>
+
+  <div class="step"><div class="n">3</div><b>הלקוחה מקבלת אישור ותזכורת</b></div>
+  <div class="bubbles">
+    <div class="msg out" style="max-width:80%;margin:0">היי נועה 😊 נקבע לך תור מחר ב-14:30. נתראה!<i>✓✓</i></div>
+    <div class="msg out" style="max-width:80%;margin:0">תזכורת: היום ב-14:30 יש לך תור במכון. מחכות לך 🌸<i>✓✓</i></div>
+  </div>
+  <div class="foot" style="margin-top:auto">דוגמה להמחשה. הנוסח המדויק נבנה לפי המכון.</div>
+</div>
+</body>
+</html>
