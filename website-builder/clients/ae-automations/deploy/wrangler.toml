@@ -1,0 +1,9 @@
+# The A.E Automations website as a static Cloudflare Worker (no code, only files).
+# Deployed by .github/workflows/ae-site.yml on every push that changes the site.
+name = "ae-automations-site"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[assets]
+directory = "./public"
+not_found_handling = "404-page"

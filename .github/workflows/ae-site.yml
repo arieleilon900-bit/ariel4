@@ -1,0 +1,38 @@
+name: Deploy A.E Automations website
+
+# Publishes website-builder/clients/ae-automations to Cloudflare (static files only).
+on:
+  push:
+    branches: [claude/friendly-ritchie-lbq1j5, main]
+    paths:
+      - 'website-builder/clients/ae-automations/**'
+      - '.github/workflows/ae-site.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ae-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website-builder/clients/ae-automations/deploy
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Collect the site files
+        run: |
+          mkdir -p public/assets
+          cp ../*.html public/
+          cp ../assets/* public/assets/
+          cp public/index.html public/404.html
+          ls -R public
+      - name: Deploy
+        run: npx -y wrangler@4 deploy
