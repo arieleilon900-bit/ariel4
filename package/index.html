@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>המחלקה שלך | מזכירה, אתר ופרסום לעסק</title>
-<meta name="description" content="מזכירה שעונה לכל פנייה תוך 3 שניות, ומסביבה אתר, פרסום, ביקורות וגבייה. כל מה שעסק צריך כדי שיגיעו לקוחות, בתשלום חודשי אחד. שבוע ניסיון בחינם.">
+<title>המחלקה שלך | מזכירה, אתר ורשתות לעסק</title>
+<meta name="description" content="מזכירה שעונה לכל פנייה תוך 3 שניות, ומסביבה כל המעטפת של העסק: אתר, מותג, כרטיסי ביקור, ניהול העמודים ברשתות, רילסים, ביקורות וגבייה. תשלום חודשי אחד. שבוע ניסיון בחינם.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='14' fill='%2318201e'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%23c43d24' stroke-width='8'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,6 +143,22 @@
   .role.lead p{color:rgba(243,239,230,.75);font-size:17px;max-width:760px;}
   .role.lead .pay{color:#ffb3a3;}
 
+  /* kit */
+  .kit{padding:88px 0;}
+  .kit .lede{margin-bottom:36px;}
+  .kit-cols{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:6px;background:var(--card);}
+  .kit-col{padding:28px 28px 24px;}
+  .kit-col + .kit-col{border-inline-start:1px solid var(--line);}
+  .kit-col h3{font-size:22px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--ink);}
+  .kit-list{list-style:none;counter-reset:k;}
+  .kit-list.second{counter-reset:k 18;}
+  .kit-list li{counter-increment:k;}
+  .kit-list li{display:grid;grid-template-columns:28px 1fr;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:15.5px;}
+  .kit-list li:last-child{border-bottom:0;}
+  .kit-list li::before{content:counter(k);font-family:var(--mono);font-size:13px;color:var(--stamp);font-weight:600;}
+  .kit-foot{margin-top:16px;font-size:15px;color:var(--ink-soft);}
+  @media (max-width:820px){.kit-cols{grid-template-columns:1fr;}.kit-col + .kit-col{border-inline-start:0;border-top:1px solid var(--line);}.kit-col{padding:22px 18px;}}
+
   /* receipt */
   .stack{padding:96px 0;}
   .stack .wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center;}
@@ -189,6 +205,15 @@
   .plan-table .group td{background:var(--paper);font-weight:700;text-align:right;font-size:14px;color:var(--ink-soft);}
   .yes{color:var(--ink);font-weight:700;}
   .no{color:#c3bdb0;}
+  @media (max-width:600px){
+    .plan-table{min-width:0;font-size:13.5px;}
+    .plan-table th,.plan-table td{padding:10px 6px;}
+    .plan-table th:first-child,.plan-table td:first-child{width:40%;padding-inline-start:12px;}
+    .plan-table thead th{font-size:16px;}
+    .plan-table thead th small{font-size:11px;}
+    .plan-table .price td{font-size:15px;}
+    .plan-table .setup td{font-size:12.5px;}
+  }
   .plans-foot{margin-top:18px;font-size:15px;color:var(--ink-soft);max-width:760px;}
 
   /* promise letter */
@@ -283,7 +308,7 @@
 
 <header>
   <div class="wrap">
-    <a class="brand" href="#top">המחלקה שלך<small>מזכירה, אתר ופרסום לעסק</small></a>
+    <a class="brand" href="#top">המחלקה שלך<small>מזכירה, אתר ורשתות לעסק</small></a>
     <a class="head-cta" href="#start">שבוע ניסיון בחינם</a>
   </div>
 </header>
@@ -294,7 +319,7 @@
   <div class="wrap">
     <div>
       <h1>כל פנייה לעסק שלך נענית תוך <em>3 שניות</em>. גם ב-23:47.</h1>
-      <p class="lede">בזמן שאתה בעבודה, בפגישה או ישן, המזכירה עונה ללקוח בוואטסאפ בשמך, שואלת את מה שאתה היית שואל, קובעת פגישה ביומן ושולחת לך מייל מסודר. ומסביבה אנחנו בונים לך את האתר, מנהלים את הפרסום ודואגים לביקורות ולגבייה. תשלום אחד בחודש.</p>
+      <p class="lede">בזמן שאתה בעבודה, בפגישה או ישן, המזכירה עונה ללקוח בוואטסאפ בשמך, שואלת את מה שאתה היית שואל, קובעת פגישה ביומן ושולחת לך מייל מסודר. ומסביבה אנחנו בונים לך את כל המעטפת: אתר, מותג וכרטיסי ביקור, ניהול כל העמודים ברשתות עם רילסים כל שבוע, ביקורות וגבייה. תשלום אחד בחודש.</p>
       <div class="hero-actions">
         <a class="btn btn-solid wa-link" href="https://wa.me/972524666175" data-text="היי, אני רוצה שבוע ניסיון של המזכירה בחינם" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.2h.01c5.46 0 9.9-4.45 9.9-9.91C21.96 6.45 17.5 2 12.04 2m4.52 11.94c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.24-.64.81-.78.97-.14.17-.29.19-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.16.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.47c-.17 0-.43.06-.66.31-.22.24-.87.85-.87 2.08s.89 2.4 1.02 2.57c.12.16 1.75 2.67 4.25 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.16-.48-.28"/></svg>
@@ -330,14 +355,16 @@
     <table class="day-table">
       <thead><tr><th>שעה</th><th>בלי המזכירה</th><th class="with">עם המזכירה</th></tr></thead>
       <tbody>
+        <tr><td class="hour">07:00</td><td class="without">אתה מחפש בוואטסאפ איפה גר הלקוח של היום ומתי קבעתם. אחד מהם שכחת.</td><td class="with">הודעת בוקר: <b>שלוש פגישות, עם כתובות וקישור לוויז</b>, ושתי הצעות מחיר שמחכות לתשובה.</td></tr>
         <tr><td class="hour">08:12</td><td class="without">פנייה בוואטסאפ כשאתה על הסולם אצל לקוח. ראית אותה ב-13:40. הוא כבר סגר עם מישהו אחר.</td><td class="with">המזכירה ענתה ב-08:12, שאלה מה צריך ובאיזה אזור, <b>וקבעה מדידה ליום חמישי</b>.</td></tr>
         <tr><td class="hour">11:30</td><td class="without">שיחה שלא ענית לה. אף אחד לא חזר אליו.</td><td class="with">תוך שניות הוא קיבל וואטסאפ: "ראינו שהתקשרת, איך אפשר לעזור?" <b>הוא ענה.</b></td></tr>
+        <tr><td class="hour">14:00</td><td class="without">הצעת מחיר ששלחת לפני שלושה ימים. הלקוח לא חזר, ואתה לא נעים לך לנדנד.</td><td class="with">המזכירה שאלה אותו בעדינות אם יש שאלות על ההצעה. <b>הוא חתם מהטלפון.</b></td></tr>
         <tr><td class="hour">16:05</td><td class="without">לקוח מלפני שבועיים עוד לא שילם. אין לך כוח להתקשר ולבקש.</td><td class="with">יצאה תזכורת מנומסת עם לינק לתשלום. <b>הכסף נכנס ב-16:40.</b></td></tr>
         <tr><td class="hour">19:20</td><td class="without">סיימת עבודה מצוינת. הלקוח מרוצה, ולא ביקשת ממנו ביקורת.</td><td class="with">הלקוח קיבל בקשה לביקורת בגוגל. <b>חמישה כוכבים</b> כבר בערב.</td></tr>
         <tr><td class="hour">23:47</td><td class="without">שאלה על מחיר. ענית למחרת ב-07:30. הוא פנה גם לשלושה מתחרים.</td><td class="with">קיבל תשובה תוך 3 שניות, השאיר פרטים, <b>ואתה קמת בבוקר עם מייל מסודר</b>.</td></tr>
       </tbody>
     </table>
-    <p class="day-sum">ביום אחד: <span>שתי פגישות</span> שלא היו קורות, תשלום שנכנס, וביקורת חדשה. עכשיו תכפיל ב-22 ימי עבודה.</p>
+    <p class="day-sum">ביום אחד: <span>שתי פגישות</span> שלא היו קורות, עסקה שנחתמה, תשלום שנכנס וביקורת חדשה. עכשיו תכפיל ב-22 ימי עבודה.</p>
   </div>
 </section>
 
@@ -380,27 +407,31 @@
   <div class="wrap">
     <div class="dept-head">
       <div>
-        <h2 id="dept-h">שבעה אנשים עובדים בשבילך. אתה משלם על אחד.</h2>
-        <p class="lede">עסק גדול מחזיק מחלקה שלמה כדי שאף לקוח לא ילך לאיבוד. אנחנו נותנים לך את אותה מחלקה, מהיום הראשון.</p>
+        <h2 id="dept-h">תשעה אנשים עובדים בשבילך. אתה משלם על אחד.</h2>
+        <p class="lede">עסק גדול מחזיק מחלקה שלמה כדי שאף לקוח לא ילך לאיבוד ושהעסק ייראה טוב בכל מקום. אנחנו נותנים לך את אותה מחלקה, מהיום הראשון.</p>
       </div>
-      <p class="salary-total">שבע משכורות בשוק<b class="num">₪46,000+</b></p>
+      <p class="salary-total">המשכורות שלהם בשוק<b class="num">₪29,000+</b>בחודש, ועוד ₪31,000 בהקמה</p>
     </div>
     <div class="roles">
       <div class="role lead">
         <h3>המזכירה</h3><span class="pay num">₪9,000/חודש</span>
-        <p>עונה בוואטסאפ ובאתר תוך 3 שניות, 24 שעות, גם בשבת אם תרצה. מדברת בשפה שלך, שואלת את השאלות שלך, מסננת את מי שלא רציני, קובעת פגישות ביומן ושולחת תזכורות כדי שאנשים יגיעו. כשלא ענית לטלפון, היא שולחת וואטסאפ תוך שניות. על כל ליד אתה מקבל מייל מסודר, ובכל רגע אפשר להיכנס לשיחה ולהמשיך בעצמך.</p>
+        <p>עונה בוואטסאפ, באתר, באינסטגרם ובפייסבוק תוך 3 שניות, 24 שעות. מדברת בשפה שלך, מסננת את מי שלא רציני, קובעת פגישות ולוקחת מקדמה. כשלא ענית לטלפון היא שולחת וואטסאפ, כשהצעת מחיר נתקעת היא חוזרת ללקוח, וכל בוקר היא שולחת לך את היומן עם הכתובות. על כל ליד אתה מקבל מייל מסודר, ובכל רגע אפשר להיכנס לשיחה ולהמשיך בעצמך.</p>
+      </div>
+      <div class="role">
+        <h3>מנהל הרשתות</h3><span class="pay num">₪5,000/חודש</span>
+        <p>מנהל לך את אינסטגרם, פייסבוק וטיקטוק: 12 פוסטים בחודש, סטוריז, ומענה לכל תגובה והודעה. העמודים שלך חיים כל שבוע.</p>
+      </div>
+      <div class="role">
+        <h3>עורך הרילסים</h3><span class="pay num">₪4,500/חודש</span>
+        <p>8 רילסים בחודש מהעבודות שלך. אתה מצלם 20 שניות בטלפון, אנחנו מחזירים סרטון ערוך עם כתוביות ומוזיקה.</p>
       </div>
       <div class="role">
         <h3>בונה האתר</h3><span class="pay num">₪25,000 פעם אחת</span>
-        <p>אתר שנראה כמו שהעסק שלך באמת נראה, עם עמוד לכל שירות ולכל אזור, גלריית עבודות שמתעדכנת והמזכירה מוטמעת בפנים. אחרי שנה הוא שלך.</p>
+        <p>אתר מלא עם עמוד לכל שירות ולכל אזור, נגיש לפי החוק, עם המזכירה בפנים. תמונה שאתה שולח לבוט עולה לגלריה לבד. אחרי שנה הוא שלך.</p>
       </div>
       <div class="role">
-        <h3>איש הפרסום</h3><span class="pay num">₪5,000/חודש</span>
-        <p>מנהל את הקמפיינים בפייסבוק, אינסטגרם וגוגל, בונה דף נחיתה לכל קמפיין ומזיז תקציב לאן שבאמת מגיעים לקוחות.</p>
-      </div>
-      <div class="role">
-        <h3>יוצר התוכן</h3><span class="pay num">₪4,000/חודש</span>
-        <p>12 פוסטים ו-4 סרטונים קצרים בכל חודש, בצבעים ובלוגו שלך. אתה רק שולח תמונות מהעבודה.</p>
+        <h3>המעצב</h3><span class="pay num">₪6,000 פעם אחת</span>
+        <p>לוגו מרוענן וצבעים, כרטיס ביקור דיגיטלי ולהדפסה, מדבקות QR לרכב ולחנות, חתימת מייל, מחירון מעוצב ותיק עבודות לשליחה.</p>
       </div>
       <div class="role">
         <h3>מנהלת החשבונות</h3><span class="pay num">₪3,500/חודש</span>
@@ -408,13 +439,75 @@
       </div>
       <div class="role">
         <h3>מנהל המוניטין</h3><span class="pay num">₪2,500/חודש</span>
-        <p>בקשת ביקורת אחרי כל עבודה, מענה לביקורות, פוסט שבועי בפרופיל בגוגל, ברכות חג ללקוחות והחייאה של לקוחות ישנים שלא שמעו ממך מזמן.</p>
+        <p>בקשת ביקורת אחרי כל עבודה, בקשת הפניה מהמרוצים, התראה מיידית על ביקורת שלילית עם תשובה מוכנה, ופוסט שבועי בגוגל.</p>
+      </div>
+      <div class="role">
+        <h3>השומר</h3><span class="pay num">₪1,500/חודש</span>
+        <p>נגישות ופרטיות לפי החוק, טופס הסכמה לדיוור, חידוש דומיין בזמן וגיבוי של כל אנשי הקשר והשיחות. אם הטלפון שלך נגנב, הלקוחות שמורים.</p>
       </div>
       <div class="role">
         <h3>האנליסט</h3><span class="pay num">₪3,000/חודש</span>
-        <p>כל יום ראשון בבוקר סיכום בוואטסאפ, כל חודש פגישה עם מספרים, וכל רבעון דוח על מה המתחרים שלך עושים ובכמה הם גובים.</p>
+        <p>כל יום ראשון סיכום בוואטסאפ, כל חודש פגישה עם מספרים, וכל רבעון דוח על מה המתחרים שלך מפרסמים ובכמה הם גובים.</p>
       </div>
     </div>
+  </div>
+</section>
+
+<section class="kit" aria-labelledby="kit-h">
+  <div class="wrap">
+    <h2 id="kit-h">מה בדיוק אתה מקבל: <span class="num">38</span> דברים</h2>
+    <p class="lede">כל פריט כאן הוא משהו שבעלי עסקים משלמים עליו בנפרד לספקים שונים, או פשוט לא עושים בכלל. אצלנו הכל בחבילה אחת, וכל אחד מהם עובד עם השאר.</p>
+    <div class="kit-cols">
+      <div class="kit-col">
+        <h3>בחודש הראשון, פעם אחת</h3>
+        <ol class="kit-list">
+          <li>מזכירה בוואטסאפ שמדברת בשפה שלך</li>
+          <li>וואטסאפ עסקי מסודר: קטלוג, הודעת פתיחה ותגיות</li>
+          <li>כרטיס ביקור דיגיטלי שנשמר בטלפון בלחיצה</li>
+          <li>תבנית הצעת מחיר ממותגת עם חתימה דיגיטלית</li>
+          <li>אתר מלא עם עמוד לכל שירות ולכל אזור</li>
+          <li>נגישות לאתר והצהרת נגישות</li>
+          <li>מדיניות פרטיות וטופס הסכמה לדיוור</li>
+          <li>פרופיל עסקי בגוגל מטופל עד הסוף</li>
+          <li>רישום בגוגל מפות, וויז ואינדקסים עסקיים</li>
+          <li>הודעה ללקוחות הישנים שלך כבר בשבוע הראשון</li>
+          <li>עמוד "כל הקישורים" לביו באינסטגרם</li>
+          <li>ערכת מותג: לוגו מרוענן, צבעים וגופנים</li>
+          <li>עיצוב כרטיס ביקור להדפסה</li>
+          <li>מדבקות QR לרכב, לחנות ולחשבונית</li>
+          <li>חתימת מייל ממותגת</li>
+          <li>מחירון מעוצב לשליחה בוואטסאפ</li>
+          <li>תיק עבודות PDF ללקוחות גדולים</li>
+          <li>עיצוב העמודים ברשתות: פרופיל, באנרים וכיסויים להייליטס</li>
+        </ol>
+      </div>
+      <div class="kit-col">
+        <h3>כל חודש, כל עוד אתה איתנו</h3>
+        <ol class="kit-list second" start="19">
+          <li>מענה 24/7, סינון וקביעת פגישות</li>
+          <li>שיחה שלא נענתה הופכת לוואטסאפ</li>
+          <li>תזכורות לפגישה ומקדמה בקביעה</li>
+          <li>מעקב אחרי הצעות מחיר שלא נחתמו</li>
+          <li>חשבוניות, לינק לתשלום וגבייה</li>
+          <li>הודעת בוקר עם היומן, הכתובות והוויז</li>
+          <li>מייל על כל ליד וסיכום שבועי</li>
+          <li>מעקב אחרי לידים שלא סגרו</li>
+          <li>תזכורות שירות ללקוחות ("עברה שנה מ...")</li>
+          <li>בקשת ביקורת ובקשת הפניה אחרי כל עבודה</li>
+          <li>התראה על ביקורת שלילית ותשובה מוכנה</li>
+          <li>שולח תמונה לבוט, והיא באתר ובגוגל</li>
+          <li>2 מאמרים לגוגל ופוסט שבועי בפרופיל</li>
+          <li>שמירה על האתר, הדומיין והגיבויים</li>
+          <li>מענה בהודעות ובתגובות באינסטגרם ובפייסבוק</li>
+          <li>ניהול אינסטגרם, פייסבוק וטיקטוק</li>
+          <li>8 רילסים בחודש</li>
+          <li>12 פוסטים בחודש וסטוריז</li>
+          <li>ברכות חג ומבצעים לרשימת הלקוחות</li>
+          <li>פגישה חודשית ודוח מתחרים כל רבעון</li>
+        </ol>
+      </div>
+    </div>
+    <p class="kit-foot">הרשימה המלאה היא של המחלקה המלאה. בטבלת החבילות למטה רואים מה נכנס בכל חבילה.</p>
   </div>
 </section>
 
@@ -422,27 +515,30 @@
   <div class="wrap">
     <div class="receipt" aria-label="פירוט שווי החבילה">
       <h3>המחלקה המלאה</h3>
-      <p class="sub">פירוט לפי מחירי שוק, לחודש</p>
-      <div class="r-line"><span>מזכירה 24/7 + שיחה שלא נענתה</span><span class="dots"></span><span class="p">₪8,000</span></div>
-      <div class="r-line"><span>ניהול קמפיינים + דפי נחיתה</span><span class="dots"></span><span class="p">₪4,500</span></div>
-      <div class="r-line"><span>12 פוסטים + 4 סרטונים</span><span class="dots"></span><span class="p">₪3,500</span></div>
-      <div class="r-line"><span>החייאת לקוחות + מעקב לידים</span><span class="dots"></span><span class="p">₪2,000</span></div>
-      <div class="r-line"><span>ביקורות + פרופיל בגוגל</span><span class="dots"></span><span class="p">₪1,500</span></div>
-      <div class="r-line"><span>מאמרים לגוגל + תחזוקת אתר</span><span class="dots"></span><span class="p">₪1,500</span></div>
-      <div class="r-line"><span>דוחות + פגישת אסטרטגיה</span><span class="dots"></span><span class="p">₪1,500</span></div>
+      <p class="sub">פירוט לפי מחירי שוק</p>
+      <div class="r-line"><span>מזכירה 24/7 + הודעת בוקר</span><span class="dots"></span><span class="p">₪8,000</span></div>
+      <div class="r-line"><span>ניהול העמודים + מענה ברשתות</span><span class="dots"></span><span class="p">₪4,000</span></div>
+      <div class="r-line"><span>8 רילסים + 12 פוסטים</span><span class="dots"></span><span class="p">₪4,500</span></div>
+      <div class="r-line"><span>מעקב הצעות, לידים ותזכורות שירות</span><span class="dots"></span><span class="p">₪2,000</span></div>
+      <div class="r-line"><span>ביקורות, הפניות + גוגל</span><span class="dots"></span><span class="p">₪1,500</span></div>
+      <div class="r-line"><span>מאמרים, תחזוקה, דומיין וגיבוי</span><span class="dots"></span><span class="p">₪1,500</span></div>
+      <div class="r-line"><span>דוחות + פגישה חודשית</span><span class="dots"></span><span class="p">₪1,500</span></div>
       <div class="r-line"><span>הצעות מחיר, חשבוניות, גבייה</span><span class="dots"></span><span class="p">₪1,200</span></div>
+      <div class="r-line"><span>החייאת לקוחות + ברכות חג</span><span class="dots"></span><span class="p">₪1,000</span></div>
       <div class="r-sep"></div>
-      <div class="r-line r-total"><span>שווי בחודש</span><span class="dots"></span><span class="p">₪23,700</span></div>
-      <div class="r-line r-total"><span>אתר מלא (פעם אחת)</span><span class="dots"></span><span class="p">₪25,000</span></div>
+      <div class="r-line r-total"><span>שווי בחודש</span><span class="dots"></span><span class="p">₪25,200</span></div>
+      <div class="r-line r-total"><span>אתר מלא</span><span class="dots"></span><span class="p">₪25,000</span></div>
+      <div class="r-line r-total"><span>מותג, כרטיסים ועיצובים</span><span class="dots"></span><span class="p">₪6,000</span></div>
+      <div class="r-line r-total"><span>נגישות ופרטיות</span><span class="dots"></span><span class="p">₪4,000</span></div>
       <div class="r-sep"></div>
       <div class="r-line r-pay"><span>לתשלום בחודש</span><span class="dots"></span><span class="p">₪9,900</span></div>
       <div class="stamp">האתר במתנה</div>
     </div>
     <div class="stack-text">
-      <h2 id="stack-h">שווה ₪23,700 בחודש. אצלנו ₪9,900.</h2>
-      <p>מזכירה במשרה מלאה לבד עולה כמעט כמו כל החבילה, והיא הולכת הביתה ב-17:00. משרד פרסום גובה ₪5,000 ולא עונה ללידים שהוא מביא. אצלנו הכל מחובר: הפרסום מביא פנייה, המזכירה עונה לה תוך 3 שניות, והמערכת שולחת הצעת מחיר, גובה ומבקשת ביקורת.</p>
+      <h2 id="stack-h">שווה ₪25,200 בחודש. אצלנו ₪9,900.</h2>
+      <p>מזכירה במשרה מלאה לבד עולה כמעט כמו כל החבילה, והיא הולכת הביתה ב-17:00. מנהלת סושיאל לא עונה ללידים שהרילסים שלה מביאים. אצלנו הכל מחובר: רילס מביא הודעה, המזכירה עונה לה תוך 3 שניות, קובעת פגישה, שולחת הצעת מחיר, גובה ומבקשת ביקורת.</p>
       <p><b>אם מגיע אליך לקוח נוסף אחד או שניים בחודש, החבילה כבר החזירה את עצמה.</b> כל השאר רווח.</p>
-      <p>תקציב הפרסום עצמו משולם ישירות לפייסבוק ולגוגל, בכרטיס שלך, כדי שתראה בדיוק לאן הולך כל שקל.</p>
+      <p>ואת האתר, המותג, כרטיסי הביקור, הנגישות והפרטיות, ששווים יחד ₪35,000, אתה מקבל במתנה בתוך דמי ההקמה.</p>
     </div>
   </div>
 </section>
@@ -471,7 +567,7 @@
     <div class="table-scroll" tabindex="0" aria-label="טבלת השוואת חבילות">
       <table class="plan-table">
         <thead>
-          <tr><th></th><th>מזכירה<small>לעסק קטן</small></th><th>צמיחה<small>אתר + מוניטין</small></th><th class="best">מחלקה מלאה<small>הכל, כולל פרסום</small></th></tr>
+          <tr><th></th><th>מזכירה<small>לעסק קטן</small></th><th>צמיחה<small>אתר + גוגל</small></th><th class="best">מחלקה מלאה<small>כל המעטפת</small></th></tr>
         </thead>
         <tbody>
           <tr class="price"><td>בחודש</td><td>₪1,490</td><td>₪3,900</td><td class="best">₪9,900</td></tr>
@@ -479,22 +575,25 @@
           <tr class="group"><td colspan="4">המזכירה</td></tr>
           <tr><td>מענה בוואטסאפ 24/7, סינון וקביעת פגישות</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
           <tr><td>שיחה שלא נענתה הופכת לוואטסאפ</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr><td>מייל על כל ליד + סיכום שבועי</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr><td>הצעות מחיר, חתימה, תשלום וגבייה</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr class="group"><td colspan="4">אתר ומוניטין</td></tr>
+          <tr><td>מעקב הצעות מחיר, חשבוניות וגבייה</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr><td>הודעת בוקר, מייל על כל ליד וסיכום שבועי</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr><td>כרטיס ביקור דיגיטלי + וואטסאפ עסקי מסודר</td><td class="yes">כן</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr class="group"><td colspan="4">אתר, גוגל ומוניטין</td></tr>
           <tr><td>אתר מלא עם המזכירה בפנים</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr><td>מכונת ביקורות + פרופיל בגוגל</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr><td>החייאת לקוחות ישנים + מעקב לידים</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr><td>2 מאמרים בחודש לגוגל</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
-          <tr class="group"><td colspan="4">פרסום ותוכן</td></tr>
-          <tr><td>ניהול קמפיינים + דף נחיתה לכל קמפיין</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
-          <tr><td>12 פוסטים ו-4 סרטונים בחודש</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
-          <tr><td>ערכת מותג + אתר בשפה נוספת</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
-          <tr><td>דוח מתחרים + פגישה חודשית</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
+          <tr><td>נגישות, פרטיות וטופס הסכמה</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr><td>פרופיל בגוגל, מפות, וויז ואינדקסים</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr><td>ביקורות, הפניות והתראה על ביקורת שלילית</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr><td>מעקב לידים, תזכורות שירות והחייאת לקוחות</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr><td>מאמרים לגוגל, דומיין וגיבויים</td><td class="no">לא</td><td class="yes">כן</td><td class="yes best">כן</td></tr>
+          <tr class="group"><td colspan="4">מותג ורשתות</td></tr>
+          <tr><td>ערכת מותג, כרטיס ביקור להדפסה ומדבקות QR</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
+          <tr><td>ניהול אינסטגרם, פייסבוק וטיקטוק + מענה בהן</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
+          <tr><td>8 רילסים ו-12 פוסטים בחודש</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
+          <tr><td>פגישה חודשית + דוח מתחרים</td><td class="no">לא</td><td class="no">לא</td><td class="yes best">כן</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="plans-foot">תשלום שנתי מראש: 12 חודשים במחיר של 10. תקציב הפרסום לא כלול ומשולם ישירות לפלטפורמות. בקרוב: מזכירה קולית שעונה גם לשיחות טלפון.</p>
+    <p class="plans-foot">תשלום שנתי מראש: 12 חודשים במחיר של 10. עוברים מספק אחר (בוט, אתר או ניהול רשתות)? החודש הראשון בחינם. בקרוב: מזכירה קולית שעונה גם לשיחות טלפון.</p>
   </div>
 </section>
 
@@ -505,7 +604,10 @@
       <p class="to">זה נכנס לחוזה. בלי אותיות קטנות.</p>
       <ol>
         <li><b>שבוע ניסיון בחינם</b><span>המזכירה עובדת אצלך שבוע שלם. בסוף השבוע תקבל דוח עם כל פנייה שהיא תפסה, ואתה מחליט.</span></li>
-        <li><b>אם המזכירה מפספסת פנייה, החודש עלינו</b><span>פנייה שלא נענתה תוך 5 דקות בגלל תקלה שלנו? לא משלמים על החודש הזה.</span></li>
+        <li><b>באוויר תוך 72 שעות, אחרת ההקמה בחינם</b><span>מרגע שמילאת את השאלון, המזכירה עונה בשמך תוך שלושה ימים.</span></li>
+        <li><b>כסף ראשון בשבוע הראשון</b><span>בשבוע הראשון יוצאת הודעה ללקוחות הישנים שלך ומתחיל מעקב על כל הצעת מחיר פתוחה. העבודה מתחילה להחזיר את עצמה עוד לפני שהאתר מוכן.</span></li>
+        <li><b>₪100 על כל פנייה שפספסנו</b><span>פנייה שלא נענתה תוך 5 דקות בגלל תקלה שלנו? ₪100 יורדים לך מהחשבון הבא.</span></li>
+        <li><b>עובדים בחינם עד שזה מחזיר את עצמו</b><span>אם אחרי 90 יום העסקאות שנסגרו מהפניות שהמזכירה טיפלה בהן שוות פחות ממה ששילמת לנו, אנחנו ממשיכים לעבוד בלי תשלום עד שזה מתאזן. מה שצריך ממך: לסמן בסיכום השבועי מה נסגר ובכמה, ולחזור ללידים שהמזכירה מעבירה אליך.</span></li>
         <li><b>90 יום להתחרט</b><span>לא מרוצה בשלושת החודשים הראשונים? מחזירים לך את דמי ההקמה.</span></li>
         <li><b>האתר שלך</b><span>אחרי 12 חודשים האתר והדומיין עוברים לבעלותך, גם אם תחליט לעזוב.</span></li>
       </ol>
@@ -522,8 +624,8 @@
     <div class="city-mark">עסק אחד מכל תחום בעיר</div>
     <div>
       <h2 id="city-h">המתחרה שלך לא יקבל את זה</h2>
-      <p>אנחנו עובדים עם עסק אחד בלבד מכל תחום בכל עיר. ברגע שאתה איתנו, אף קבלן אחר בעיר שלך לא יקבל מאיתנו את המזכירה, את האתר ואת הפרסום. זה כתוב בחוזה.</p>
-      <p>חמשת העסקים הראשונים מקבלים מחיר מייסדים: המחיר החודשי נשאר אותו מחיר כל עוד אתם איתנו, גם כשהמחירים יעלו.</p>
+      <p>אנחנו עובדים עם עסק אחד בלבד מכל תחום בכל עיר. ברגע שאתה איתנו, אף קבלן אחר בעיר שלך לא יקבל מאיתנו את המזכירה, את האתר ואת הרילסים. זה כתוב בחוזה.</p>
+      <p>חמשת העסקים הראשונים מקבלים מחיר מייסדים: המחיר החודשי נשאר אותו מחיר כל עוד אתם איתנו, גם כשהמחירים יעלו. ומי שעובר אלינו מספק אחר מקבל את החודש הראשון בחינם.</p>
       <div class="seats" aria-label="5 מקומות מייסדים פנויים">
         <i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i><i class="seat"></i>
         <span>5 מקומות מייסדים פנויים</span>
@@ -535,12 +637,12 @@
 <section class="month" aria-labelledby="month-h">
   <div class="wrap">
     <h2 id="month-h">החודש הראשון שלך איתנו</h2>
-    <p class="lede">אתה נותן לנו שעה אחת בשבוע הראשון. את כל השאר אנחנו עושים.</p>
+    <p class="lede">אתה נותן לנו שעה אחת בהתחלה, ואחר כך 20 שניות של צילום מהעבודה מתי שיש. את כל השאר אנחנו עושים.</p>
     <div class="weeks">
-      <div class="week"><span class="w">שבוע 1</span><h3>מכירים</h3><p>שיחה של שעה ושאלון קצר, כדי שהמזכירה תדבר בדיוק כמוך. שולחים לנו לוגו, תמונות עבודות ומחירון.</p></div>
-      <div class="week"><span class="w">שבוע 2</span><h3>המזכירה עולה</h3><p>היא מתחילה לענות בשמך. אתה רואה כל שיחה, ואנחנו מדייקים את התשובות יחד איתך.</p></div>
-      <div class="week"><span class="w">שבוע 3</span><h3>אתר וגוגל</h3><p>האתר עולה לאוויר, הפרופיל בגוגל מסודר, וכל הלקוחות האחרונים שלך מקבלים בקשה לביקורת.</p></div>
-      <div class="week"><span class="w">שבוע 4</span><h3>פרסום</h3><p>הקמפיין הראשון יוצא, הלקוחות הישנים מקבלים הודעה ממך, ונפגשים לסכם את החודש במספרים.</p></div>
+      <div class="week"><span class="w">ימים 1–3</span><h3>המזכירה באוויר</h3><p>שיחה של שעה ושאלון קצר. תוך 72 שעות היא עונה בשמך, ואתה רואה כל שיחה ומדייק איתנו את התשובות.</p></div>
+      <div class="week"><span class="w">שבוע 1</span><h3>כסף ראשון</h3><p>הודעה ללקוחות הישנים, מעקב על הצעות מחיר פתוחות, הודעת הבוקר הראשונה וחשבוניות שיוצאות לבד.</p></div>
+      <div class="week"><span class="w">שבוע 2–3</span><h3>אתר וגוגל</h3><p>האתר עולה לאוויר, נגיש ומוגן לפי החוק. הפרופיל בגוגל מסודר, וכל הלקוחות האחרונים מקבלים בקשה לביקורת.</p></div>
+      <div class="week"><span class="w">שבוע 4</span><h3>מותג ורשתות</h3><p>לוגו, כרטיסי ביקור ומדבקות QR. העמודים שלך מעוצבים מחדש, הרילסים הראשונים עולים, ונפגשים לסכם את החודש במספרים.</p></div>
     </div>
   </div>
 </section>
@@ -548,12 +650,13 @@
 <section class="faq" aria-labelledby="faq-h">
   <div class="wrap narrow">
     <h2 id="faq-h">מה ששואלים אותנו</h2>
-    <details><summary>₪9,900 בחודש זה הרבה כסף</summary><p>זה כן. אבל תבדוק במחשבון למעלה כמה הולך לך לאיבוד היום. מזכירה אחת לבד עולה ₪9,000 בחודש ועובדת שמונה שעות ביום. כאן מקבלים אותה 24 שעות, ועוד אתר, פרסום, תוכן, ביקורות וגבייה. אם זה גדול עליך עכשיו, תתחיל מחבילת המזכירה ב-₪1,490 ותעלה כשתראה מספרים.</p></details>
+    <details><summary>₪9,900 בחודש זה הרבה כסף</summary><p>זה כן. אבל תבדוק במחשבון למעלה כמה הולך לך לאיבוד היום. מזכירה אחת לבד עולה ₪9,000 בחודש ועובדת שמונה שעות ביום. כאן מקבלים אותה 24 שעות, ועוד אתר, מותג, רילסים, ניהול העמודים, ביקורות וגבייה. אם זה גדול עליך עכשיו, תתחיל מחבילת המזכירה ב-₪1,490 ותעלה כשתראה מספרים.</p></details>
     <details><summary>מה אם הבוט יגיד ללקוח משהו לא נכון?</summary><p>המזכירה עונה רק לפי מה שאתה אישרת: שירותים, אזורים, טווחי מחירים ושעות. על שאלה שהיא לא יודעת לענות עליה היא אומרת שתחזור אליו בעצמך ומעבירה לך מיד. אתה רואה כל שיחה ויכול להיכנס אליה בכל רגע.</p></details>
     <details><summary>הלקוחות ירגישו שזה בוט?</summary><p>היא כותבת בשפה שלך, עם הביטויים שלך, אחרי שאלון שאתה ממלא. רוב הלקוחות רוצים תשובה מהירה ומדויקת, וזה מה שהם מקבלים. מי שמבקש לדבר איתך, מועבר אליך.</p></details>
     <details><summary>מה אם אני רוצה לעזוב?</summary><p>בשלושת החודשים הראשונים מחזירים לך את דמי ההקמה. ההתחייבות היא לשנה, ואחרי שנה האתר והדומיין שלך, גם אם אתה עוזב.</p></details>
-    <details><summary>כמה זמן זה לוקח לי?</summary><p>שעה בשבוע הראשון. אחר כך שולחים לנו תמונות מהעבודה מתי שיש, וקוראים את הסיכום ביום ראשון.</p></details>
-    <details><summary>מי משלם על הפרסום עצמו?</summary><p>אתה, ישירות לפייסבוק ולגוגל, בכרטיס שלך. ככה אתה רואה כל שקל. אנחנו ממליצים להתחיל מ-₪3,000 בחודש לפחות.</p></details>
+    <details><summary>כמה זמן זה לוקח לי?</summary><p>שעה בהתחלה. אחר כך שולחים לבוט תמונות וסרטונים קצרים מהעבודה מתי שיש, וקוראים את הסיכום ביום ראשון.</p></details>
+    <details><summary>אתם מנהלים גם קמפיינים ממומנים?</summary><p>לא, ואנחנו לא מתיימרים. אנחנו עושים את כל מה שמסביב: הרילסים והעמודים שמביאים פניות בחינם, והמזכירה שעונה לכל פנייה. אם יש לך איש קמפיינים, המזכירה תענה לכל ליד שהוא מביא תוך 3 שניות, וזה רק ישפר לו את התוצאות.</p></details>
+    <details><summary>מה אני צריך לעשות בשביל הרילסים?</summary><p>לצלם 20 שניות בטלפון כשאתה בעבודה, ולשלוח לבוט. אנחנו עורכים, מוסיפים כתוביות ומוזיקה ומעלים. אין צילום? יש לנו גם רילסים שנבנים מתמונות העבודות שלך.</p></details>
   </div>
 </section>
 
