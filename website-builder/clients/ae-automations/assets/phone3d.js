@@ -23,7 +23,7 @@ async function boot() {
 
   scene.add(new THREE.AmbientLight(0xffffff, .35));
   const key = new THREE.DirectionalLight(0xfff1e6, 2.2); key.position.set(-4, 6, 8); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xff6b3d, 3.2); rim.position.set(6, -2, -5); scene.add(rim);
+  const rim = new THREE.DirectionalLight(0x9fe3bb, 2.4); rim.position.set(6, -2, -5); scene.add(rim);
   const rim2 = new THREE.PointLight(0x25d366, 18, 14); rim2.position.set(-4, -3, 2); scene.add(rim2);
 
   const phone = new THREE.Group(); scene.add(phone);
@@ -118,7 +118,7 @@ async function boot() {
   const notes = [['נועה', 'היי, כמה עולה לייזר לרגליים?'], ['שירן', 'יש לכם תור השבוע?'], ['מאיה', 'אפשר פרטים על בית שחי?'], ['דנה', 'אתם פתוחים בשישי?']];
   const cards = notes.map((n, i) => {
     const c = document.createElement('canvas'); c.width = 640; c.height = 170; const x = c.getContext('2d');
-    x.fillStyle = 'rgba(255,255,255,.97)'; rr(x, 4, 4, 632, 162, 34); x.fill();
+    x.fillStyle = '#ffffff'; rr(x, 4, 4, 632, 162, 34); x.fill(); x.strokeStyle = '#dfe5e1'; x.lineWidth = 4; x.stroke();
     x.fillStyle = '#25d366'; rr(x, 520, 35, 96, 96, 24); x.fill();
     x.fillStyle = '#fff'; x.beginPath(); x.arc(568, 83, 26, 0, 7); x.fill(); x.fillStyle = '#25d366'; x.beginPath(); x.arc(568, 83, 18, 0, 7); x.fill();
     x.direction = 'rtl'; x.textAlign = 'right'; x.textBaseline = 'top';
@@ -135,7 +135,7 @@ async function boot() {
   const pg = new THREE.BufferGeometry(); const N = mobile ? 120 : 260; const pos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { pos[i * 3] = (Math.random() - .5) * 16; pos[i * 3 + 1] = (Math.random() - .5) * 11; pos[i * 3 + 2] = (Math.random() - .5) * 8 - 2; }
   pg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const dots = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0xe6c46a, size: .035, transparent: true, opacity: .55, depthWrite: false }));
+  const dots = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x18a957, size: .03, transparent: true, opacity: .28, depthWrite: false }));
   scene.add(dots);
 
   // pointer + scroll
