@@ -64,10 +64,10 @@ section{padding-block:110px}
 .proof{margin-top:30px;font-size:15px;color:var(--muted)}
 .proof b{color:var(--ink)}
 .stage{position:relative;height:620px}
-.stage::before{content:"";position:absolute;inset:6% 4% 4%;border-radius:40px;background:linear-gradient(160deg,var(--tint-2),var(--tint))}
+.stage::before{content:"";position:absolute;top:6%;right:4%;bottom:4%;left:4%;border-radius:40px;background:linear-gradient(160deg,var(--tint-2),var(--tint))}
 #phone3d{position:absolute;inset:-4% -12%;width:124%;height:108%;pointer-events:none}
 .no-webgl #phone3d{display:none}
-.phone-fallback{display:none;position:absolute;inset:0;place-items:center}
+.phone-fallback{display:none;position:absolute;top:0;right:0;bottom:0;left:0;place-items:center}
 .no-webgl .phone-fallback{display:grid}
 
 /* chat pieces */
@@ -121,7 +121,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
 
 /* before / after */
 .ba{position:relative;max-width:920px;margin:48px auto 0;height:500px;border-radius:24px;overflow:hidden;user-select:none;touch-action:pan-y}
-.ba-side{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:40px;padding:30px}
+.ba-side{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;display:flex;align-items:center;justify-content:center;gap:40px;padding:30px}
 .ba-before{background:#1d2320;color:#fff}
 .ba-after{background:var(--tint-2);clip-path:inset(0 0 0 50%)}
 .ba-side h3{font-size:26px;max-width:210px}
@@ -255,7 +255,7 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;bac
   .nums b{font-size:38px}
   .nums span{font-size:14px}
   .mail dl{grid-template-columns:96px 1fr}
-  .mbar{display:flex;position:fixed;inset:auto 0 0;z-index:45;background:rgba(255,255,255,.98);border-top:1px solid var(--line);padding:10px max(14px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(255,255,255,.98);border-top:1px solid var(--line);padding:10px max(14px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
   .mbar .btn{flex:1}
   .ftr{padding-bottom:100px}
 }
