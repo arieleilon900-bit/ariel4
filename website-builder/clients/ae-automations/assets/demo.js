@@ -64,7 +64,7 @@
   var NODANGER = /^(לא|לא,|אין|אף אחד|ריק|לא אין)/;
   var WHEN = /(עכשיו|היום|מחרתיים|מחר|בבוקר|בצהריים|אחה"צ|אחר הצהריים|בערב|בלילה|ראשון|שני|שלישי|רביעי|חמישי|שישי|מתי שאפשר|אחרי \d{1,2}|לפני \d{1,2}|\b\d{1,2}(:\d{2})?\b)/;
   var HELLO = /^(היי|הי|שלום|אהלן|הלו|בוקר טוב|ערב טוב|מה נשמע)[\s!.,?]*$/;
-  var NAME = /(קוראים לי|שמי|אני) ([א-ת]{2,})/;
+  var NAME = /(קוראים לי|שמי) ([א-ת]{2,})/;
 
   function now() { var n = new Date(); return (n.getHours() < 10 ? '0' : '') + n.getHours() + ':' + (n.getMinutes() < 10 ? '0' : '') + n.getMinutes(); }
 
@@ -144,9 +144,10 @@
         if (N.slots.indexOf('addr') > -1) { S.slots.addr = t.replace(/^(אני |זה )?(ב|ברחוב |רחוב )?/, '').slice(0, 60); got.push('addr'); }
         else { S.slots.city = city; got.push('city'); }
       }
-      var w = t.match(WHEN);
+      var tNoCity = city ? t.split(city).join(' ') : t;
+      var w = tNoCity.match(WHEN);
       if (w && N.slots.indexOf('when') > -1 && !(city && /^\d/.test(w[0]) && N.slots.indexOf('addr') > -1)) {
-        var seg = t.slice(t.indexOf(w[0])).split(/[,.!?]/)[0].trim(); S.slots.when = seg.slice(0, 40); got.push('when');
+        var seg = tNoCity.slice(tNoCity.indexOf(w[0])).split(/[,.!?]/)[0].trim(); S.slots.when = seg.slice(0, 40); got.push('when');
       }
       var danger = DANGER.test(t);
       if (N.slots.indexOf('danger') > -1) {
@@ -164,13 +165,12 @@
       var out = [], she = N.she, you = she ? 'אלייך' : 'אליך';
       if (S.urgent && u.danger) {
         out.push((N.owner === 'המנעולן' ? 'המנעולן' : N.owner) + ' מקבל את זה עכשיו. אם מישהו בסכנה, תתקשר מיד למד"א 101 או למשטרה 100.');
-        if (!S.slots.addr) out.push('תשלח לי כתובת או מיקום בוואטסאפ.');
         return finishIfReady(out);
       }
       if (S.msgs === 1 && (u.hello || u.got.length || u.price || u.med)) out.push(she ? 'היי! כיף שפנית 😊' : 'אהלן, איזה כיף שכתבת.');
       if (u.photo) out.push(N.slots.indexOf('photo') > -1 ? 'קיבלתי את התמונה, תודה 🙏' : 'קיבלתי, תודה.');
-      if (u.price) out.push(N === NICHES.laser ? 'את המחיר המכון ייתן לך לפי האזורים, רשמתי שזה חשוב לך.' : N.owner + ' ייתן לך מחיר בעצמו כשיחזור ' + you + '.');
-      if (u.med) out.push('את זה המטפלת תסביר לך הכי טוב, רשמתי לה את השאלה.');
+      if (u.price && !S.priceSaid) S.priceSaid = true, out.push(N === NICHES.laser ? 'את המחיר המכון ייתן לך לפי האזורים, רשמתי שזה חשוב לך.' : N.owner + ' ייתן לך מחיר בעצמו כשיחזור ' + you + '.');
+      if (u.med && !S.medSaid) S.medSaid = true, out.push('את זה המטפלת תסביר לך הכי טוב, רשמתי לה את השאלה.');
       if (u.got.indexOf('danger') > -1 && S.slots.danger === 'אין') out.push('מעולה.');
       return finishIfReady(out);
     }
@@ -203,7 +203,7 @@
     }
     function wrapUp() {
       step(2); S.finished = true;
-      mstatus.innerHTML = '⏳ הלקוח סיים לכתוב. בעוד כ-3 דקות המייל אצלכם…';
+      mstatus.innerHTML = S.urgent ? '🚨 פנייה דחופה: המייל נשלח מיד, בלי לחכות' : '⏳ הלקוח סיים לכתוב. בעוד כ-3 דקות המייל אצלכם…';
       later(function () { mstatus.innerHTML = '<b>✓ המייל נשלח</b> · ' + now() + ' (בהמחשה קיצרנו את 3 הדקות)'; step(3); bAppt.disabled = false; d.dispatchEvent(new CustomEvent('ae-demo-done')); }, 2200);
     }
     bAppt.addEventListener('click', function () {

@@ -222,9 +222,9 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 
 /* ---------- not-list (what she won't do) */
 .nots{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--plum)}
-.nots div{padding:26px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:52px 1fr;gap:8px}
-.nots div:nth-child(odd){padding-left:30px;border-left:1px solid var(--line)}
-.nots div:nth-child(even){padding-right:30px}
+.nots>div{padding:26px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:52px 1fr;gap:8px}
+.nots>div:nth-child(odd){padding-left:30px;border-left:1px solid var(--line)}
+.nots>div:nth-child(even){padding-right:30px}
 .nots b{font:400 24px var(--f-disp);color:var(--plum);display:block;margin-bottom:4px}
 .nots .x{font:600 22px var(--f-mono);color:var(--red)}
 .nots p{color:var(--muted);font-size:16.5px}
@@ -339,7 +339,7 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
   .demo-phone{position:relative;top:0;height:600px;max-width:400px;margin:0 auto}
   .feat article,.feat article:nth-child(n){grid-column:span 12}
   .nots{grid-template-columns:1fr}
-  .nots div:nth-child(n){padding-left:0;padding-right:0;border-left:0}
+  .nots>div:nth-child(n){padding-left:0;padding-right:0;border-left:0}
   .steps{grid-template-columns:1fr;gap:34px}
   .steps::before{display:none}
   .niche{grid-template-columns:1fr;gap:18px}
@@ -393,3 +393,6 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .gain li{padding:14px 0;border-bottom:1px solid var(--line);font-size:18px;display:grid;grid-template-columns:28px 1fr}
 .gain li::before{content:"✓";font:600 16px var(--f-mono);color:var(--wa-d);padding-top:3px}
 @media (max-width:1020px){.gain-grid{grid-template-columns:1fr}.gain-grid>div:nth-child(n){padding:34px 0 0;border-left:0}}
+.ba-lab{display:none;position:absolute;top:14px;z-index:3;font:600 14px var(--f-mono);padding:6px 12px;border-radius:var(--r);pointer-events:none}
+.ba-lab.l{left:14px;background:#000;color:#fff}.ba-lab.r{right:14px;background:var(--wa);color:#08311b}
+@media (max-width:640px){.ba-lab{display:block}.ba-side h3{display:none}.ba{min-height:430px}.ba-side{justify-content:center}.ba-side .mini{width:230px;height:380px}}

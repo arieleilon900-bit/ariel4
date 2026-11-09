@@ -146,6 +146,6 @@
     if (f.get('biz')) lines.push('העסק: ' + f.get('biz'));
     if (f.get('type')) lines.push('תחום: ' + f.get('type'));
     if (f.get('msg')) lines.push(f.get('msg'));
-    open(AE.wa(lines.join('\n')), '_blank', 'noopener');
+    var a=d.createElement('a');a.href=AE.wa(lines.join('\n'));a.target='_blank';a.rel='noopener';d.body.appendChild(a);a.click();a.remove();
   });
 })();

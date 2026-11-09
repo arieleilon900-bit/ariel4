@@ -142,6 +142,7 @@ home = head('A.E Automations · מזכירה בוואטסאפ שעונה ללק�
         <div class="mini"><div class="scr"><div class="wa-body" style="gap:6px">{m('in','כמה עולה לייזר לרגליים?','11:41')}{m('out','היי! את המחיר המכון ייתן לך לפי האזורים. מאיזו עיר את?','11:41')}{m('in','מנתניה','11:42')}{m('out','רשמתי 🙏 המכון יחזור אלייך היום.','11:42')}</div></div></div>
         <h3>עם מזכירה: כולן קיבלו תשובה, והפרטים אצלכם</h3>
       </div>
+      <span class="ba-lab l">בלי מזכירה</span><span class="ba-lab r">עם מזכירה</span>
       <div class="ba-handle" tabindex="0" role="slider" aria-label="השוואה" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><b>⇆</b></div>
     </div>
   </div>
