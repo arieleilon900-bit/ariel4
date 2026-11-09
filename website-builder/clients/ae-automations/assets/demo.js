@@ -113,7 +113,7 @@
       sys('המחשה · כתבו כאילו אתם ' + (N.she ? 'לקוחה של ' : 'לקוח של ') + N.biz.replace(' שלך', ''));
     }
     function renderMail() {
-      dl.innerHTML = '<dt>שם</dt><dd>' + N.cust + ' <span style="font-weight:400;color:#8a7a84">(מהוואטסאפ)</span></dd><dt>טלפון</dt><dd class="mono">050-0000000</dd>' +
+      dl.innerHTML = '<dt>שם</dt><dd>' + N.cust + ' <span style="font-weight:400;color:#748880">(מהוואטסאפ)</span></dd><dt>טלפון</dt><dd class="mono">050-0000000</dd>' +
         N.slots.map(function (s) { var v = S.slots[s]; return '<dt>' + N.labels[s] + '</dt><dd class="' + (v ? '' : 'empty') + '">' + (v || 'עוד לא נאמר') + '</dd>'; }).join('');
       var q = [];
       if (S.price) q.push('שאל/ה כמה זה עולה');

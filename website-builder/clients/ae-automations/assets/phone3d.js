@@ -23,7 +23,7 @@ async function boot() {
 
   scene.add(new THREE.AmbientLight(0xffffff, .35));
   const key = new THREE.DirectionalLight(0xfff1e6, 2.2); key.position.set(-4, 6, 8); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xb9705a, 3.2); rim.position.set(6, -2, -5); scene.add(rim);
+  const rim = new THREE.DirectionalLight(0xff6b3d, 3.2); rim.position.set(6, -2, -5); scene.add(rim);
   const rim2 = new THREE.PointLight(0x25d366, 18, 14); rim2.position.set(-4, -3, 2); scene.add(rim2);
 
   const phone = new THREE.Group(); scene.add(phone);
@@ -81,7 +81,7 @@ async function boot() {
       const x = who === 'in' ? 600 - 26 - tw : 26;
       g.fillStyle = who === 'in' ? '#ffffff' : '#dcf8c6';
       rr(g, x, y, tw, h, 20); g.fill();
-      g.fillStyle = '#1d0c17';
+      g.fillStyle = '#0b211c';
       lines.forEach((l, i) => { g.textAlign = 'right'; g.fillText(l, x + tw - 22, y + 14 + i * 42); });
       g.font = '400 20px "IBM Plex Mono", monospace'; g.fillStyle = who === 'in' ? '#8a9a94' : '#53bdeb'; g.textAlign = 'left';
       g.direction = 'ltr'; g.fillText(time + (who === 'out' ? '  ✓✓' : ''), x + 18, y + h - 30); g.direction = 'rtl';
@@ -122,8 +122,8 @@ async function boot() {
     x.fillStyle = '#25d366'; rr(x, 520, 35, 96, 96, 24); x.fill();
     x.fillStyle = '#fff'; x.beginPath(); x.arc(568, 83, 26, 0, 7); x.fill(); x.fillStyle = '#25d366'; x.beginPath(); x.arc(568, 83, 18, 0, 7); x.fill();
     x.direction = 'rtl'; x.textAlign = 'right'; x.textBaseline = 'top';
-    x.fillStyle = '#1d0c17'; x.font = '700 34px ' + FONT; x.fillText(n[0], 492, 34);
-    x.fillStyle = '#4a3a44'; x.font = '400 29px ' + FONT; x.fillText(n[1], 492, 86);
+    x.fillStyle = '#0b211c'; x.font = '700 34px ' + FONT; x.fillText(n[0], 492, 34);
+    x.fillStyle = '#33463f'; x.font = '400 29px ' + FONT; x.fillText(n[1], 492, 86);
     x.direction = 'ltr'; x.textAlign = 'left'; x.fillStyle = '#9a8a94'; x.font = '400 22px "IBM Plex Mono", monospace'; x.fillText('עכשיו', 34, 38);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(2.3, .61), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, depthWrite: false }));

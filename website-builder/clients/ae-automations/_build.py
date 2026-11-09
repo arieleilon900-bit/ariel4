@@ -22,7 +22,7 @@ def head(title, desc, path):
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<meta name="theme-color" content="#1d0c17">
+<meta name="theme-color" content="#0b211c">
 <link rel="canonical" href="{SITE}/{'' if path=='index.html' else path}">
 <meta property="og:type" content="website"><meta property="og:locale" content="he_IL">
 <meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">
@@ -168,11 +168,11 @@ home = head('A.E Automations · מזכירה בוואטסאפ שעונה ללק�
       <div class="field"><label for="c4">כמה שווה לקוחה אחת (₪) <output for="c4"></output></label><input type="range" id="c4" name="value" min="150" max="5000" step="50" value="1200"></div>
     </div>
     <div class="calc-out rv">
-      <span class="mono" style="color:#b89fae;font-size:14px">בערך בכל חודש, הולך למתחרים:</span>
+      <span class="mono" style="color:#9db8ad;font-size:14px">בערך בכל חודש, הולך למתחרים:</span>
       <div class="big mono">₪0</div>
       <p>זה רק מהפניות שמחכות. בלי לקוחות שלא הגיעו לתור, ובלי ביקורות שלא נכתבו.</p>
       <a class="btn wa" data-calc-cta href="#" target="_blank" rel="noopener">{WA_SVG}לשלוח לאריאל את החישוב</a>
-      <p class="calc-note" style="color:#9a8290">החישוב הוא הערכה לפי מה שהזנתם, לא הבטחה.</p>
+      <p class="calc-note" style="color:#88a398">החישוב הוא הערכה לפי מה שהזנתם, לא הבטחה.</p>
     </div>
   </div>
 </section>
