@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;overflow:hidden}
+body{font-family:'Heebo',sans-serif;color:#22151f;background:var(--bgc)}
+.bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.bg::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--f1) 0%,var(--f2) 21%,transparent 36%),linear-gradient(var(--side),var(--f3) 0%,transparent 55%)}
+.wrap{position:absolute;inset:0;padding:40px 48px 30px;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center}
+.pill{background:var(--dark);color:#fff;font-weight:700;font-size:21px;padding:7px 20px;border-radius:40px}
+.hook{margin-top:14px;font-size:27px;font-weight:500;line-height:1.32;color:var(--mut)}
+.hook b{color:var(--dark);font-weight:800}
+h1{margin-top:6px;font-size:76px;font-weight:900;line-height:1.02;letter-spacing:-1.5px;color:var(--dark)}
+h1 span{color:var(--acc)}
+.mid{flex:1;display:flex;margin-top:16px;min-height:0;justify-content:flex-start}
+body.cl .mid{justify-content:flex-end}
+.card{width:610px;background:rgba(255,255,255,.95);border-radius:28px;padding:16px 22px 10px;box-shadow:0 20px 50px rgba(0,0,0,.18);align-self:flex-start;border-top:6px solid #1faa59}
+.ch{display:flex;align-items:center;gap:12px;padding-bottom:8px;border-bottom:2px solid #eef2ee}
+.wa{flex:none;width:52px;height:52px;border-radius:50%;background:#1faa59;display:grid;place-items:center}
+.wa svg{width:32px;height:32px}
+.ch .nm{font-size:31px;font-weight:900;line-height:1;color:#22151f}
+.ch .nm small{display:block;font-size:18px;font-weight:600;color:#1a8f4a;margin-top:4px}
+.item{display:flex;gap:12px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.item:last-child{border-bottom:0}
+.ic{flex:none;width:30px;height:30px;border-radius:50%;background:#1faa59;display:grid;place-items:center;margin-top:3px}
+.ic svg{width:17px;height:17px}
+.t b{display:block;font-size:24px;font-weight:800;line-height:1.15}
+.t span{display:block;font-size:18px;color:#6b5a64;line-height:1.25;margin-top:1px}
+.t b .stars{display:inline;color:#f5b301;letter-spacing:1px;font-size:24px;margin:0 4px 0 0}
+
+.proof{margin-top:12px;background:rgba(255,255,255,.95);border-radius:22px;padding:10px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 10px 26px rgba(0,0,0,.12)}
+.proof .pl{font-size:18px;font-weight:800;line-height:1.2;color:var(--dark);width:190px;flex:none}
+.proof .pl small{display:block;font-weight:500;color:#6b5a64;font-size:15px}
+.st{flex:1;text-align:center;border-right:1px solid #eee}
+.st b{display:block;font-size:40px;font-weight:900;line-height:1;color:#1faa59}
+.st span{font-size:16px;font-weight:700;color:#3a2f36}
+
+.offer{margin-top:12px;background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff;border-radius:26px;padding:15px 24px;display:flex;align-items:center;gap:22px;box-shadow:0 16px 36px rgba(0,0,0,.28)}
+.offer .l{flex:1}.offer .k{font-size:21px;font-weight:700;color:var(--acc2)}
+.offer .big{font-size:44px;font-weight:900;line-height:1.05}.offer .big em{font-style:normal;color:var(--acc2)}
+.offer .end{font-size:18px;opacity:.85;margin-top:4px}
+.timer{display:flex;gap:8px}
+.u{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:14px;width:84px;padding:8px 0 6px;text-align:center}
+.u .n{font-size:40px;font-weight:900;line-height:1}.u .lb{font-size:16px;opacity:.8;margin-top:4px}
+.cta{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:14px;background:#1faa59;color:#fff;border-radius:60px;padding:14px;font-size:42px;font-weight:900;box-shadow:0 12px 28px rgba(31,170,89,.4)}
+.cta .arr{font-size:40px}
+.foot{margin-top:8px;align-self:center;font-size:18px;color:#4a3d45;font-weight:500;background:rgba(255,255,255,.9);padding:3px 16px;border-radius:20px}
+</style>
+</head>
+<body>
+<div class="bg" id="bg"></div>
+<div class="wrap">
+  <div class="top"><div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div></div>
+  <p class="hook" id="hook"></p>
+  <h1 id="h1"></h1>
+  <div class="mid"><div class="card">
+    <div class="ch"><div class="wa">WA</div><div class="nm">המזכירה בוואטסאפ<small>זה מה שאת מקבלת:</small></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>עונה לכל פונה תוך שניות, 24/7</b><span>גם בלילה, בשבת ובאמצע טיפול. אף לקוחה לא הולכת למתחרה</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>מבינה הודעות קוליות ותמונות</b><span>ועונה בשם הקליניקה, בסגנון שלך</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>שולחת לך סיכום מסודר על כל פנייה</b><span>איזה טיפול, מה חשוב, ישר למייל. את רק קובעת תור</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>מאשרת ומזכירה כל תור</b><span>תזכורת יום לפני ושעתיים לפני. פחות לקוחות שלא מגיעות</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>שולחת קבלות לבד</b><span>ישר מ״יש חשבונית״, בלי שתיגעי בטלפון</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>מביאה לך ביקורות בגוגל <span class="stars">★★★★★</span></b><span>בקשה לביקורת אחרי כל טיפול</span></div></div>
+  </div></div>
+  <div class="proof">
+    <div class="pl">תוצאות אמיתיות<small>הלקוח הראשון שלנו, 4 ימים ראשונים</small></div>
+    <div class="st"><b>19</b><span>פניות נענו</span></div>
+    <div class="st"><b>11</b><span>חשבוניות נשלחו לבד</span></div>
+    <div class="st"><b>6</b><span>בקשות לביקורת</span></div>
+  </div>
+  <div class="offer"><div class="l"><div class="k">ל-3 הקליניקות הראשונות בלבד</div><div class="big"><em>50%</em> הנחה על ההקמה</div><div class="end">המבצע נגמר מחר בלילה</div></div>
+    <div class="timer"><div class="u"><div class="n">1</div><div class="lb">יום</div></div><div class="u"><div class="n">09</div><div class="lb">שעות</div></div><div class="u"><div class="n">44</div><div class="lb">דקות</div></div></div></div>
+  <div class="cta"><span>לפרטים</span><span class="arr">←</span></div>
+  <div class="foot">המספר והאפליקציה נשארים שלך · חיבור רשמי דרך Meta</div>
+</div>
+<script>
+const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const WA='<svg viewBox="0 0 32 32" fill="#fff"><path d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-2c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.3c-2.1 0-4.1-.6-5.9-1.7l-.4-.3-3.8 1.2 1.2-3.7-.3-.4a10.4 10.4 0 01-1.6-5.6C5.2 10 10 5.3 16 5.3S26.8 10 26.8 15.8 22 26.3 16 26.3zm5.9-7.8c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 01-4.4-3.8c-.3-.6.3-.5 1-1.8.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.1-1.2 2.8 1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.8 5 2.1.9 3 1 4 .8.7-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5 0-.2-.3-.3-.6-.4z"/></svg>';
+document.querySelectorAll('.ic').forEach(e=>e.innerHTML=CHK);
+document.querySelector('.wa').innerHTML=WA;
+const T={
+ plum:['#fbf5f1','#2e1630','#4a2347','#c98a7d','#ffd7cb','#4b3a45'],
+ cocoa:['#f6ece2','#3a2418','#5c3a26','#c77a3a','#f5c79a','#5e4a3e'],
+ sage:['#eef3ef','#24392e','#3d5a4a','#4f8a68','#bfe3c9','#4b5d53'],
+ rose:['#fbf1f2','#5a1f33','#7d2e48','#c0506e','#ffc9d5','#6a4752'],
+ gold:['#f7f3ec','#1b1a18','#3a342b','#a8823f','#e9cf98','#5a5246'],
+ lav:['#f3f0fa','#33275a','#4e3d82','#7a62c4','#d8ccff','#554b70'],
+ white:['#ffffff','#1f2a36','#34465a','#2f8fd8','#bfe2ff','#4d5a66'],
+};
+const A={
+ 1:{img:'bg.png',th:'plum',hook:'מטפלת, עונה להודעות, שולחת קבלות ורודפת אחרי ביקורות.<br><b>ועוד לבד?</b>',h1:'את מטפלת.<br><span>היא</span> דואגת לכל השאר.'},
+ 2:{img:'p1.png',th:'cocoa',hook:'הודעה חדשה ב-23:41. את כבר מזמן בבית.<br><b>מי עונה לה?</b>',h1:'את נחה.<br><span>היא</span> עונה.'},
+ 3:{img:'p2.png',th:'sage',hook:'עונה להודעות עם כפפות, בין לקוחה ללקוחה?<br><b>יש דרך אחרת.</b>',h1:'תני לידיים שלך<br><span>רק לטפל.</span>'},
+ 4:{img:'p3.png',th:'rose',hook:'טיפול ראשון, סדרת טיפולים,<br><b>והחברות שהיא תביא איתה.</b>',h1:'כמה שווה לך<br><span>לקוחה</span> אחת?'},
+ 5:{img:'p4.png',th:'gold',hook:'4 ימים, 19 פניות, 11 חשבוניות, 6 בקשות לביקורת.<br><b>בלי להרים טלפון לענות.</b>',h1:'היא ענתה.<br><span>הוא</span> המשיך לעבוד.'},
+ 6:{img:'p5.png',th:'lav',cl:1,hook:'כמה זמן ביום הולך לך על וואטסאפ?<br><b>תחשבי רגע.</b>',h1:'שעה ביום<br><span>חוזרת</span> אלייך.'},
+ 7:{img:'whiteB.png',th:'white',cl:1,pos:'80% 100%',size:'135% auto',hook:'את מרוכזת בטיפול, והוואטסאפ לא מפסיק לזמזם.<br><b>מי עונה לפונות?</b>',h1:'הלייזר שלך עובד.<br><span>גם הוואטסאפ.</span>'},
+};
+const a=A[(location.hash||'#1').slice(1)], t=T[a.th], r=document.documentElement.style;
+const hex=(h,o)=>{const n=parseInt(h.slice(1),16);return `rgba(${n>>16},${n>>8&255},${n&255},${o})`};
+r.setProperty('--bgc',t[0]);r.setProperty('--dark',t[1]);r.setProperty('--dark2',t[2]);r.setProperty('--acc',t[3]);r.setProperty('--acc2',t[4]);r.setProperty('--mut',t[5]);
+r.setProperty('--f1',hex(t[0],.97));r.setProperty('--f2',hex(t[0],.88));r.setProperty('--f3',hex(t[0],.55));r.setProperty('--side',a.cl?'90deg':'270deg');
+const bg=document.getElementById('bg');bg.style.backgroundImage='url('+a.img+')';if(a.pos){bg.style.backgroundPosition=a.pos;bg.style.backgroundSize=a.size}
+if(a.cl)document.body.classList.add('cl');
+document.getElementById('hook').innerHTML=a.hook;document.getElementById('h1').innerHTML=a.h1;
+</script>
+</body>
+</html>
