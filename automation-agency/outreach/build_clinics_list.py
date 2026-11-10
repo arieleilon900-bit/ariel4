@@ -30,22 +30,18 @@ def first_name(biz):
     return "", "נ"
 
 def message(name, g):
-    hi = f"היי {name}, מה שלומך? 😊" if name else "היי, מה שלומך? 😊"
-    you_busy = "כשאת באמצע טיפול" if g == "נ" else "כשאתה באמצע טיפול"
-    you_focus = "ואת מתפנה" if g == "נ" else "ואתה מתפנה"
-    write = 'כתבי "הסר"' if g == "נ" else 'כתוב "הסר"'
+    f = g == "נ"
+    hi = f"היי {name}, מה שלומך? 😊" if name else "היי, מה נשמע? 😊"
     return (
         "פרסומת: עונה ראשון\n"
         f"{hi}\n"
-        "כאן אריאל מ\"עונה ראשון\". אנחנו בונים למכוני לייזר וקוסמטיקה מזכירה חכמה בוואטסאפ.\n\n"
-        f"היא עונה לכל לקוחה תוך שניות, גם {you_busy} או אחרי שעות העבודה: עונה על שאלות, "
-        "אוספת את הפרטים ושולחת לך סיכום אחד מסודר של כל פנייה.\n\n"
-        "מה זה נותן לך?\n"
-        "✔️ אף פנייה לא הולכת לאיבוד\n"
-        "✔️ פחות לקוחות שעוברות למכון אחר כי לא ענו להן מהר\n"
-        f"✔️ פחות זמן בטלפון, {you_focus} לטיפולים\n\n"
-        "אשמח לשלוח לך דוגמה קצרה איך זה נראה. מתאים?\n"
-        f"(לא רלוונטי? {write} ולא נפנה שוב)"
+        f"כאן אריאל. שאלה קצרה: כמה פניות בווטסאפ מחכות {'לך' if f else 'לך'} בסוף יום של טיפולים?\n\n"
+        "בנינו מזכירה חכמה בוואטסאפ שעונה לכל לקוחה תוך שניות, "
+        f"גם {'כשאת' if f else 'כשאתה'} באמצע טיפול: עונה על שאלות, אוספת פרטים ושולחת לך סיכום מסודר. "
+        "ככה אף לקוחה לא הולכת למכון אחר רק כי לא ענו לה בזמן.\n\n"
+        "בעסק הראשון שחיברנו, 19 פניות קיבלו מענה כבר ב-4 הימים הראשונים.\n\n"
+        f"{'רוצה' if f else 'רוצה'} שאשלח לך סרטון קצר שמראה איך זה עובד?\n"
+        f"(לא רלוונטי? {'כתבי' if f else 'כתוב'} \"הסר\" ולא נפנה שוב)"
     )
 
 def intl(phone):
@@ -80,47 +76,34 @@ for i, l in enumerate(leads, 1):
     l["n"] = i
     l["first"], l["g"] = first_name(l["name"])
     l["msg"] = message(l["first"], l["g"])
-    l["url"] = f"https://wa.me/{l['intl']}?text=" + urllib.parse.quote(l["msg"])
+    l["url"] = f"https://web.whatsapp.com/send?phone={l['intl']}&text=" + urllib.parse.quote(l["msg"])
 
-# ---- גיליון מעקב ----
+# ---- גיליון לגוגל שיטס ----
 wb = openpyxl.Workbook()
-ws = wb.active; ws.title = "מעקב"; ws.sheet_view.rightToLeft = True
-heads = ["#", "שם המכון", "עיר", "טלפון", "פונים בשם", "מקור", "סטטוס", "תאריך", "הערות", "ההודעה"]
+ws = wb.active; ws.title = "רשימה"; ws.sheet_view.rightToLeft = True
+heads = ["#", "שם המכון", "עיר", "טלפון", "שם לפנייה", "סטטוס", "תאריך שליחה", "הערות", "קישור שליחה", "ההודעה", "מקור"]
 ws.append(heads)
 for c in ws[1]:
     c.font = Font(bold=True, color="FFFFFF"); c.fill = PatternFill("solid", fgColor="1F6F5C")
 yellow = PatternFill("solid", fgColor="FFF2CC")
-statuses = ["לא נשלח", "נשלח", "ענתה - מעוניינת", "ענתה - לא עכשיו", "ביקשה הסר", "המספר לא בוואטסאפ"]
+statuses = ["לא נשלח", "נשלח", "ענתה - מעוניינת", "ענתה - לא עכשיו", "ביקשה הסר", "לא בוואטסאפ", "דילגנו"]
 dv = DataValidation(type="list", formula1='"' + ",".join(statuses) + '"', allow_blank=True)
 ws.add_data_validation(dv)
 for i, l in enumerate(leads, 2):
-    ws.append([l["n"], l["name"], l["city"], l["phone"], l["first"] or "-", l["src"], "לא נשלח", None, None, l["msg"]])
-    for col in (7, 8, 9):
+    ws.append([l["n"], l["name"], l["city"], l["phone"], l["first"], "לא נשלח", None, None, l["url"], l["msg"], l["src"]])
+    for col in (5, 6, 7, 8):
         ws.cell(i, col).fill = yellow
-    dv.add(ws.cell(i, 7))
-    ws.cell(i, 10).alignment = Alignment(wrap_text=False)
-for col, w in zip("ABCDEFGHIJ", [5, 34, 14, 14, 11, 22, 18, 11, 24, 80]):
+    dv.add(ws.cell(i, 6))
+for col, w in zip("ABCDEFGHIJK", [5, 34, 14, 14, 12, 18, 13, 24, 30, 60, 22]):
     ws.column_dimensions[col].width = w
-ws.freeze_panes = "C2"; ws.auto_filter.ref = f"A1:J{len(leads)+1}"
-g = wb.create_sheet("איך עובדים", 0); g.sheet_view.rightToLeft = True; g.column_dimensions["A"].width = 100
-for t in ["איך עובדים", "1. פותחים את הקובץ \"דף שליחה לקליניקות.pdf\" ולוחצים \"שלח בוואטסאפ\" ליד המכון.",
-          "2. הווטסאפ נפתח עם ההודעה האישית כבר כתובה. בודקים ולוחצים שליחה.",
-          "3. בגיליון \"מעקב\" (אותו מספר #) משנים סטטוס ל\"נשלח\" ומוסיפים תאריך.", "",
-          "כללים", "• הודעה אחת לכל מכון. מי שלא ענתה: לא שולחים שוב.",
-          "• מי שכתבה \"הסר\": לא פונים יותר אף פעם (סטטוס \"ביקשה הסר\").",
-          "• עד 20-25 הודעות ביום, לא ברצף. א'-ה' בין 9:00 ל-19:00. לא בשישי, שבת וחגים.",
-          "• \"פרסומת\" בראש ההודעה ו\"הסר\" בסוף: דרישה של החוק, לא מוחקים.",
-          "• מי שענתה \"מעוניינת\": מדביקים לClaude את התשובה שלה ומקבלים תשובה מוכנה."]:
-    g.append([t])
-g["A1"].font = g["A6"].font = Font(bold=True, size=13)
-wb.active = 1
-wb.save(f"{outdir}/רשימת פנייה לקליניקות - נובמבר.xlsx")
+ws.freeze_panes = "C2"
+wb.save(f"{outdir}/רשימת קליניקות - לגוגל שיטס.xlsx")
 
 # ---- דף שליחה ----
 rows = "\n".join(
     f'<div class="card"><div class="top"><span class="n">#{l["n"]}</span>'
     f'<span class="nm">{html.escape(l["name"])}</span><span class="ct">{html.escape(str(l["city"]))}</span></div>'
-    f'<a class="btn" href="{html.escape(l["url"])}">שלח בוואטסאפ ל{html.escape(l["first"] or "מכון")}</a></div>'
+    f'<a class="btn" href="{html.escape(l["url"].replace("https://web.whatsapp.com/send?phone=", "https://wa.me/").replace("&text=", "?text=", 1))}">שלח בוואטסאפ ל{html.escape(l["first"] or "מכון")}</a></div>'
     for l in leads)
 sample = html.escape(leads[0]["msg"]).replace("\n", "<br>")
 open(f"{outdir}/send-page.html", "w", encoding="utf-8").write(f"""<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8">
