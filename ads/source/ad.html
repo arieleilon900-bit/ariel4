@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --plum:#2e1630; --plum2:#4a2347; --rose:#c98a7d; --rose2:#e8b4a6;
+    --cream:#fbf5f1; --ink:#22151f; --green:#1faa59; --green2:#14904a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1080px;height:1350px;overflow:hidden;background:var(--cream)}
+  body.story,body.story html{height:1920px}
+  body{font-family:'Heebo',sans-serif;color:var(--ink);position:relative}
+  .bg{position:absolute;inset:0;background:url(bg.png) center/cover no-repeat}
+  .bg::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(251,245,241,.96) 0%,rgba(251,245,241,.88) 22%,rgba(251,245,241,0) 40%),
+               linear-gradient(270deg,rgba(251,245,241,.55) 0%,rgba(251,245,241,0) 55%)}
+  .wrap{position:absolute;inset:0;padding:44px 52px 34px;display:flex;flex-direction:column}
+
+  .pill{align-self:flex-start;background:var(--plum);color:#fff;font-weight:700;font-size:22px;
+    padding:8px 22px;border-radius:40px;letter-spacing:.2px}
+  .hook{margin-top:16px;font-size:28px;font-weight:500;line-height:1.35;color:#4b3a45}
+  .hook b{color:var(--plum);font-weight:800}
+  h1{margin-top:8px;font-size:78px;font-weight:900;line-height:1.02;letter-spacing:-1.5px;color:var(--plum)}
+  h1 .hl{color:var(--rose)}
+
+  .mid{flex:1;display:flex;justify-content:flex-start;margin-top:20px;min-height:0}
+  .card{width:580px;background:rgba(255,255,255,.93);border-radius:30px;padding:20px 26px 16px;
+    box-shadow:0 20px 50px rgba(46,22,48,.18);backdrop-filter:blur(6px);align-self:flex-start}
+  .card h3{font-size:24px;font-weight:800;color:var(--rose);margin-bottom:6px}
+  .item{display:flex;gap:14px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0e4df}
+  .item:last-of-type{border-bottom:0}
+  .ic{flex:none;width:36px;height:36px;border-radius:50%;background:var(--green);display:grid;place-items:center;margin-top:2px}
+  .ic svg{width:20px;height:20px}
+  .t b{display:block;font-size:26px;font-weight:800;line-height:1.15;color:var(--ink)}
+  .t span{display:block;font-size:20px;color:#6b5a64;line-height:1.25;margin-top:2px}
+  .proof{margin-top:8px;background:var(--cream);border-radius:14px;padding:8px 12px;font-size:18px;color:#5a4853;line-height:1.35}
+  .proof b{color:var(--plum);font-weight:800}
+
+  .offer{margin-top:16px;background:linear-gradient(135deg,var(--plum) 0%,var(--plum2) 100%);color:#fff;
+    border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:26px;box-shadow:0 18px 40px rgba(46,22,48,.35)}
+  .offer .l{flex:1}
+  .offer .k{font-size:23px;font-weight:700;color:var(--rose2)}
+  .offer .big{font-size:48px;font-weight:900;line-height:1.05;margin-top:2px}
+  .offer .big em{font-style:normal;color:#ffd7cb}
+  .offer .end{font-size:19px;opacity:.85;margin-top:6px}
+  .timer{display:flex;gap:8px;direction:rtl}
+  .u{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:14px;width:78px;padding:8px 0 6px;text-align:center}
+  .u .n{font-size:40px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+  .u .lb{font-size:16px;opacity:.8;margin-top:4px}
+
+  .cta{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:16px;background:var(--green);
+    color:#fff;border-radius:60px;padding:15px;font-size:38px;font-weight:900;box-shadow:0 12px 28px rgba(31,170,89,.4)}
+  .cta svg{width:44px;height:44px}
+  .foot{margin-top:9px;align-self:center;font-size:19px;color:#5a4853;font-weight:500;background:rgba(251,245,241,.92);padding:3px 16px;border-radius:20px}
+
+  /* ---------- story 9:16 ---------- */
+  body.story{height:1920px}
+  body.story .wrap{padding:140px 56px 230px}
+  body.story .hook{font-size:36px}
+  body.story h1{font-size:94px}
+  body.story .card{width:640px;padding:26px 30px 22px}
+  body.story .item{padding:11px 0}
+  body.story .t b{font-size:30px}
+  body.story .t span{font-size:23px}
+  body.story .proof{font-size:22px}
+  body.story .offer{flex-direction:column;align-items:stretch;text-align:center;gap:16px}
+  body.story .offer .big{font-size:62px}
+  body.story .timer{justify-content:center}
+  body.story .u{width:110px}
+  body.story .u .n{font-size:54px}
+  body.story .bg::after{
+    background:linear-gradient(180deg,rgba(251,245,241,.97) 0%,rgba(251,245,241,.9) 20%,rgba(251,245,241,0) 36%,rgba(251,245,241,0) 62%,rgba(251,245,241,.85) 75%),
+               linear-gradient(270deg,rgba(251,245,241,.5) 0%,rgba(251,245,241,0) 55%)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div>
+  <p class="hook">מטפלת, עונה להודעות, שולחת קבלות ורודפת אחרי ביקורות.<br><b>ועוד לבד?</b></p>
+  <h1>את מטפלת.<br><span class="hl">היא</span> דואגת לכל השאר.</h1>
+
+  <div class="mid">
+    <div class="card">
+      <h3>מזכירה חכמה בוואטסאפ של הקליניקה, 24/7</h3>
+      <div class="item"><div class="ic">CHK</div><div class="t"><b>אף פונה לא הולכת למתחרה</b><span>תשובה תוך שניות, גם בלילה ובשבת, בסגנון שלך</span></div></div>
+      <div class="item"><div class="ic">CHK</div><div class="t"><b>פחות לקוחות שלא מגיעות</b><span>את קובעת תור, היא שולחת אישור ושתי תזכורות</span></div></div>
+      <div class="item"><div class="ic">CHK</div><div class="t"><b>קבלות נשלחות לבד</b><span>ישר מ״יש חשבונית״, בלי שתיגעי בטלפון</span></div></div>
+      <div class="item"><div class="ic">CHK</div><div class="t"><b>יותר ביקורות בגוגל</b><span>בקשה לביקורת אחרי כל טיפול</span></div></div>
+      <div class="item"><div class="ic">CHK</div><div class="t"><b>בערך שעה ביום חוזרת אלייך</b><span>סיכום מסודר על כל פנייה, ותזכורת למי עוד לא חזרת</span></div></div>
+      <div class="proof">אצל הלקוח הראשון שלנו, ב-4 ימים: <b>19</b> פניות נענו · <b>11</b> חשבוניות נשלחו לבד · <b>6</b> בקשות לביקורת</div>
+    </div>
+  </div>
+
+  <div class="offer">
+    <div class="l">
+      <div class="k">ל-3 הקליניקות הראשונות בלבד</div>
+      <div class="big"><em>50%</em> הנחה על ההקמה</div>
+      <div class="end">המבצע נגמר ביום ראשון 15.11 ב-23:59</div>
+    </div>
+    <div class="timer">
+      <div class="u"><div class="n" id="d">0</div><div class="lb">ימים</div></div>
+      <div class="u"><div class="n" id="h">00</div><div class="lb">שעות</div></div>
+      <div class="u"><div class="n" id="m">00</div><div class="lb">דקות</div></div>
+      <div class="u"><div class="n" id="s">00</div><div class="lb">שניות</div></div>
+    </div>
+  </div>
+
+  <div class="cta">WA שלחי ״מזכירה״ בוואטסאפ</div>
+  <div class="foot">המספר והאפליקציה נשארים שלך · חיבור רשמי דרך Meta</div>
+</div>
+<script>
+  const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const WA='<svg viewBox="0 0 32 32" fill="#fff"><path d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-2c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.3c-2.1 0-4.1-.6-5.9-1.7l-.4-.3-3.8 1.2 1.2-3.7-.3-.4a10.4 10.4 0 01-1.6-5.6C5.2 10 10 5.3 16 5.3S26.8 10 26.8 15.8 22 26.3 16 26.3zm5.9-7.8c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 01-4.4-3.8c-.3-.6.3-.5 1-1.8.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.1-1.2 2.8 1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.8 5 2.1.9 3 1 4 .8.7-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5 0-.2-.3-.3-.6-.4z"/></svg>';
+  document.querySelectorAll('.ic').forEach(e=>e.innerHTML=CHK);
+  const c=document.querySelector('.cta'); c.innerHTML=WA+'<span>שלחי ״מזכירה״ בוואטסאפ</span>';
+  if(location.hash==='#story') document.body.classList.add('story');
+  const END=new Date('2026-11-15T23:59:59+02:00').getTime();
+  const p=n=>String(n).padStart(2,'0');
+  function tick(){
+    let r=Math.max(0,Math.floor((END-Date.now())/1000));
+    const d=Math.floor(r/86400); r%=86400;
+    document.getElementById('d').textContent=d;
+    document.getElementById('h').textContent=p(Math.floor(r/3600));
+    document.getElementById('m').textContent=p(Math.floor(r%3600/60));
+    document.getElementById('s').textContent=p(r%60);
+  }
+  tick(); setInterval(tick,250);
+</script>
+</body>
+</html>
