@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;overflow:hidden}
+body{font-family:'Heebo',sans-serif}
+.ad{position:absolute;inset:0;display:none;color:var(--ink);background:var(--bgc)}
+.ad.on{display:block}
+.bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.bg::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,var(--fade) 0%,var(--fade2) 22%,transparent 40%),
+             linear-gradient(var(--side),var(--fade3) 0%,transparent 55%)}
+.wrap{position:absolute;inset:0;padding:44px 52px 34px;display:flex;flex-direction:column}
+.pill{align-self:flex-start;background:var(--dark);color:#fff;font-weight:700;font-size:22px;padding:8px 22px;border-radius:40px}
+.hook{margin-top:16px;font-size:28px;font-weight:500;line-height:1.35;color:var(--mut)}
+.hook b{color:var(--dark);font-weight:800}
+h1{margin-top:8px;font-size:80px;font-weight:900;line-height:1.02;letter-spacing:-1.5px;color:var(--dark)}
+h1 span{color:var(--acc)}
+.mid{flex:1;display:flex;margin-top:22px;min-height:0;justify-content:flex-start}
+.ad.cardleft .mid{justify-content:flex-end}
+.card{width:580px;background:rgba(255,255,255,.94);border-radius:30px;padding:22px 26px 18px;box-shadow:0 20px 50px rgba(0,0,0,.16);align-self:flex-start}
+.card h3{font-size:25px;font-weight:800;color:var(--acc);margin-bottom:8px}
+.item{display:flex;gap:14px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(0,0,0,.07)}
+.item:last-child{border-bottom:0}
+.ic{flex:none;width:36px;height:36px;border-radius:50%;background:#1faa59;display:grid;place-items:center;margin-top:2px}
+.ic svg{width:20px;height:20px}
+.t b{display:block;font-size:26px;font-weight:800;line-height:1.15;color:#22151f}
+.t span{display:block;font-size:20px;color:#6b5a64;line-height:1.25;margin-top:2px}
+.small{margin-top:10px;background:var(--soft);border-radius:14px;padding:9px 13px;font-size:19px;color:#4a3d45;line-height:1.35}
+.small b{color:var(--dark)}
+
+/* chat */
+.chat{background:#efe7dd;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:9px;margin-bottom:8px}
+.m{max-width:88%;padding:9px 13px 5px;border-radius:13px;font-size:21px;line-height:1.3;box-shadow:0 1px 1px rgba(0,0,0,.1)}
+.m i{display:block;font-style:normal;text-align:left;font-size:13px;color:#7a8a85}
+.in{background:#fff;align-self:flex-end}.out{background:#d9fdd3;align-self:flex-start}
+/* before-after */
+.ba{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.07)}
+.ba:last-child{border-bottom:0}
+.ba .x{flex:1;font-size:21px;color:#9a8f95;text-decoration:line-through;text-decoration-color:#d88;line-height:1.25}
+.ba .ar{flex:none;font-size:26px;color:var(--acc);font-weight:900}
+.ba .v{flex:1.25;font-size:24px;font-weight:800;color:#22151f;line-height:1.2}
+/* tiles */
+.tiles{display:flex;gap:12px;margin-top:4px}
+.tile{flex:1;background:var(--soft);border-radius:20px;padding:16px 8px;text-align:center}
+.tile .n{font-size:84px;font-weight:900;line-height:1;color:var(--acc)}
+.tile .l{font-size:21px;font-weight:700;line-height:1.2;margin-top:6px;color:#22151f}
+
+.offer{margin-top:16px;background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff;border-radius:28px;padding:18px 26px;display:flex;align-items:center;gap:26px;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.offer .l{flex:1}.offer .k{font-size:23px;font-weight:700;color:var(--acc2)}
+.offer .big{font-size:48px;font-weight:900;line-height:1.05;margin-top:2px}.offer .big em{font-style:normal;color:var(--acc2)}
+.offer .end{font-size:19px;opacity:.85;margin-top:6px}
+.timer{display:flex;gap:8px}
+.u{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:14px;width:78px;padding:8px 0 6px;text-align:center}
+.u .n{font-size:40px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}.u .lb{font-size:16px;opacity:.8;margin-top:4px}
+.cta{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:16px;background:#1faa59;color:#fff;border-radius:60px;padding:15px;font-size:38px;font-weight:900;box-shadow:0 12px 28px rgba(31,170,89,.4)}
+.cta svg{width:44px;height:44px}
+.foot{margin-top:9px;align-self:center;font-size:19px;color:#4a3d45;font-weight:500;background:rgba(255,255,255,.88);padding:3px 16px;border-radius:20px}
+
+/* themes */
+#a1{--bgc:#f6ece2;--dark:#3a2418;--dark2:#5c3a26;--acc:#c77a3a;--acc2:#f5c79a;--mut:#5e4a3e;--soft:#f6ece2;--fade:rgba(246,236,226,.97);--fade2:rgba(246,236,226,.88);--fade3:rgba(246,236,226,.55);--side:270deg}
+#a2{--bgc:#eef3ef;--dark:#24392e;--dark2:#3d5a4a;--acc:#4f8a68;--acc2:#bfe3c9;--mut:#4b5d53;--soft:#eef3ef;--fade:rgba(238,243,239,.97);--fade2:rgba(238,243,239,.88);--fade3:rgba(238,243,239,.55);--side:270deg}
+#a3{--bgc:#fbf1f2;--dark:#5a1f33;--dark2:#7d2e48;--acc:#c0506e;--acc2:#ffc9d5;--mut:#6a4752;--soft:#fbf1f2;--fade:rgba(251,241,242,.97);--fade2:rgba(251,241,242,.88);--fade3:rgba(251,241,242,.55);--side:270deg}
+#a4{--bgc:#f7f3ec;--dark:#1b1a18;--dark2:#3a342b;--acc:#a8823f;--acc2:#e9cf98;--mut:#5a5246;--soft:#f5efe4;--fade:rgba(247,243,236,.97);--fade2:rgba(247,243,236,.88);--fade3:rgba(247,243,236,.55);--side:270deg}
+#a5{--bgc:#f3f0fa;--dark:#33275a;--dark2:#4e3d82;--acc:#7a62c4;--acc2:#d8ccff;--mut:#554b70;--soft:#f3f0fa;--fade:rgba(243,240,250,.97);--fade2:rgba(243,240,250,.88);--fade3:rgba(243,240,250,.6);--side:90deg}
+</style>
+</head>
+<body>
+
+<section class="ad" id="a1"><div class="bg" style="background-image:url(p1.png)"></div><div class="wrap">
+  <div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div>
+  <p class="hook">הודעה חדשה ב-23:41. את כבר מזמן בבית.<br><b>מי עונה לה?</b></p>
+  <h1>את נחה.<br><span>היא</span> עונה.</h1>
+  <div class="mid"><div class="card">
+    <h3>בזמן שאת לא ליד הטלפון</h3>
+    <div class="chat">
+      <div class="m in">היי, אפשר לקבוע טיפול לייזר לפנים?<i>23:41</i></div>
+      <div class="m out">היי, תודה שפנית 😊 רשמתי! נחזור אלייך מחר בבוקר עם מועד לתור<i>23:41 ✓✓</i></div>
+    </div>
+    <div class="item"><div class="ic"></div><div class="t"><b>תשובה תוך שניות</b><span>גם בלילה, בשבת ובחופש, בסגנון שלך</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>בבוקר מחכה לך סיכום מסודר</b><span>מי פנתה, איזה טיפול, ומה חשוב לדעת</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>אף פונה לא הולכת למתחרה</b><span>כי מישהו ענה לה מיד</span></div></div>
+  </div></div>
+  <div class="OFFER"></div>
+</div></section>
+
+<section class="ad" id="a2"><div class="bg" style="background-image:url(p2.png)"></div><div class="wrap">
+  <div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div>
+  <p class="hook">עונה להודעות עם כפפות, בין לקוחה ללקוחה?<br><b>יש דרך אחרת.</b></p>
+  <h1>תני לידיים שלך<br><span>רק לטפל.</span></h1>
+  <div class="mid"><div class="card">
+    <h3>מה יורד לך מהראש מהיום</h3>
+    <div class="ba"><div class="x">לענות לכל הודעה בעצמך</div><div class="ar">←</div><div class="v">היא עונה תוך שניות</div></div>
+    <div class="ba"><div class="x">לזכור למי עוד לא חזרת</div><div class="ar">←</div><div class="v">היא מזכירה לך</div></div>
+    <div class="ba"><div class="x">להזכיר ללקוחות על התור</div><div class="ar">←</div><div class="v">אישור ושתי תזכורות</div></div>
+    <div class="ba"><div class="x">לשלוח קבלות בסוף היום</div><div class="ar">←</div><div class="v">נשלחות לבד מ״יש חשבונית״</div></div>
+    <div class="ba"><div class="x">לבקש ביקורות בגוגל</div><div class="ar">←</div><div class="v">היא מבקשת אחרי כל טיפול</div></div>
+  </div></div>
+  <div class="OFFER"></div>
+</div></section>
+
+<section class="ad" id="a3"><div class="bg" style="background-image:url(p3.png)"></div><div class="wrap">
+  <div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div>
+  <p class="hook">טיפול ראשון, סדרת טיפולים,<br><b>והחברות שהיא תביא איתה.</b></p>
+  <h1>כמה שווה לך<br><span>לקוחה</span> אחת?</h1>
+  <div class="mid"><div class="card">
+    <h3>אל תפסידי אותה רק כי לא ענית מהר</h3>
+    <div class="item"><div class="ic"></div><div class="t"><b>היא מקבלת תשובה תוך שניות</b><span>ולא ממשיכה לחפש קליניקה אחרת</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>היא מרגישה שמחכים לה</b><span>תשובה חמה בשם הקליניקה, בסגנון שלך</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>היא מגיעה לתור</b><span>אישור ושתי תזכורות לפני כל טיפול</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>היא ממליצה עלייך</b><span>בקשה לביקורת בגוגל אחרי הטיפול</span></div></div>
+  </div></div>
+  <div class="OFFER"></div>
+</div></section>
+
+<section class="ad" id="a4"><div class="bg" style="background-image:url(p4.png)"></div><div class="wrap">
+  <div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div>
+  <p class="hook">4 הימים הראשונים של הלקוח הראשון שלנו.<br><b>המספרים מדברים.</b></p>
+  <h1>היא ענתה.<br><span>הוא</span> המשיך לעבוד.</h1>
+  <div class="mid"><div class="card">
+    <h3>תוך 4 ימים בלבד</h3>
+    <div class="tiles">
+      <div class="tile"><div class="n">19</div><div class="l">פניות<br>נענו</div></div>
+      <div class="tile"><div class="n">11</div><div class="l">חשבוניות<br>נשלחו לבד</div></div>
+      <div class="tile"><div class="n">6</div><div class="l">בקשות<br>לביקורת</div></div>
+    </div>
+    <div class="small"><b>עכשיו תורך.</b> מזכירה בוואטסאפ של הקליניקה, על המספר הקיים שלך: עונה, מסכמת, מזכירה ושולחת קבלות.</div>
+  </div></div>
+  <div class="OFFER"></div>
+</div></section>
+
+<section class="ad cardleft" id="a5"><div class="bg" style="background-image:url(p5.png)"></div><div class="wrap">
+  <div class="pill">לבעלות קליניקות לייזר ואסתטיקה</div>
+  <p class="hook">כמה זמן ביום הולך לך על וואטסאפ?<br><b>תחשבי רגע.</b></p>
+  <h1>שעה ביום<br><span>חוזרת</span> אלייך.</h1>
+  <div class="mid"><div class="card">
+    <h3>מה היא עושה במקומך</h3>
+    <div class="item"><div class="ic"></div><div class="t"><b>עונה לכל הפניות</b><span>מבינה גם הודעות קוליות ותמונות</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>שואלת מה צריך</b><span>ושולחת לך סיכום אחד מסודר במייל</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>מאשרת ומזכירה תורים</b><span>את קובעת, היא שולחת אישור ושתי תזכורות</span></div></div>
+    <div class="item"><div class="ic"></div><div class="t"><b>שולחת קבלות ומבקשת ביקורות</b><span>לבד, אחרי כל טיפול</span></div></div>
+    <div class="small">והיא שותקת ברגע שאת עונה בעצמך.</div>
+  </div></div>
+  <div class="OFFER"></div>
+</div></section>
+
+<script>
+const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const WA='<svg viewBox="0 0 32 32" fill="#fff"><path d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-2c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.3c-2.1 0-4.1-.6-5.9-1.7l-.4-.3-3.8 1.2 1.2-3.7-.3-.4a10.4 10.4 0 01-1.6-5.6C5.2 10 10 5.3 16 5.3S26.8 10 26.8 15.8 22 26.3 16 26.3zm5.9-7.8c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2-.8 1-1 1.2-.4.2-.7.1a8.7 8.7 0 01-4.4-3.8c-.3-.6.3-.5 1-1.8.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.1-1.2 2.8 1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.8 5 2.1.9 3 1 4 .8.7-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5 0-.2-.3-.3-.6-.4z"/></svg>';
+document.querySelectorAll('.ic').forEach(e=>e.innerHTML=CHK);
+const OFFER='<div class="offer"><div class="l"><div class="k">ל-3 הקליניקות הראשונות בלבד</div><div class="big"><em>50%</em> הנחה על ההקמה</div><div class="end">המבצע נגמר הלילה</div></div><div class="timer"><div class="u"><div class="n tH">09</div><div class="lb">שעות</div></div><div class="u"><div class="n tM">45</div><div class="lb">דקות</div></div><div class="u"><div class="n tS">00</div><div class="lb">שניות</div></div></div></div><div class="cta">'+WA+'<span>שלחי ״מזכירה״ בוואטסאפ</span></div><div class="foot">המספר והאפליקציה נשארים שלך · חיבור רשמי דרך Meta</div>';
+document.querySelectorAll('.OFFER').forEach(e=>e.outerHTML=OFFER);
+const n=(location.hash||'#1').slice(1); document.getElementById('a'+n).classList.add('on');
+const END=Date.now()+(9*3600+45*60)*1000+500, p=x=>String(x).padStart(2,'0');
+function tick(){let r=Math.max(0,Math.floor((END-Date.now())/1000));
+ document.querySelectorAll('.tH').forEach(e=>e.textContent=p(Math.floor(r/3600)));
+ document.querySelectorAll('.tM').forEach(e=>e.textContent=p(Math.floor(r%3600/60)));
+ document.querySelectorAll('.tS').forEach(e=>e.textContent=p(r%60));}
+tick(); setInterval(tick,250);
+</script>
+</body>
+</html>
