@@ -50,6 +50,17 @@ body.cl .mid{justify-content:flex-end}
 .cta{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:14px;background:#1faa59;color:#fff;border-radius:60px;padding:14px;font-size:42px;font-weight:900;box-shadow:0 12px 28px rgba(31,170,89,.4)}
 .cta .arr{font-size:40px}
 .foot{margin-top:8px;align-self:center;font-size:18px;color:#4a3d45;font-weight:500;background:rgba(255,255,255,.9);padding:3px 16px;border-radius:20px}
+
+body.anim .pill,body.anim .hook,body.anim h1,body.anim .ch,body.anim .item,body.anim .proof,body.anim .offer,body.anim .cta{opacity:0;animation:up .6s cubic-bezier(.2,.8,.2,1) forwards}
+body.anim .pill{animation-delay:.1s}body.anim .hook{animation-delay:.35s}body.anim h1{animation-delay:.6s}
+body.anim .ch{animation-delay:1.2s}
+body.anim .item:nth-of-type(2){animation-delay:1.6s}body.anim .item:nth-of-type(3){animation-delay:2.0s}body.anim .item:nth-of-type(4){animation-delay:2.4s}body.anim .item:nth-of-type(5){animation-delay:2.8s}
+body.anim .proof{animation-delay:3.4s}body.anim .offer{animation-delay:4.4s}
+body.anim .cta{animation:up .6s cubic-bezier(.2,.8,.2,1) 5s forwards,pulse 1.2s ease-in-out 5.8s infinite}
+body.anim .bg{animation:zoom 10s linear forwards}
+@keyframes up{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes zoom{from{transform:scale(1)}to{transform:scale(1.07)}}
 </style>
 </head>
 <body>
@@ -74,7 +85,6 @@ body.cl .mid{justify-content:flex-end}
   <div class="offer"><div class="l"><div class="k">ל-3 הקליניקות הראשונות בלבד</div><div class="big"><em>50%</em> הנחה על ההקמה</div><div class="end">המבצע נגמר מחר בלילה</div></div>
     <div class="timer"><div class="u"><div class="n">1</div><div class="lb">יום</div></div><div class="u"><div class="n">09</div><div class="lb">שעות</div></div><div class="u"><div class="n">44</div><div class="lb">דקות</div></div></div></div>
   <div class="cta"><span>לפרטים</span><span class="arr">←</span></div>
-  <div class="foot">המספר והאפליקציה נשארים שלך · חיבור רשמי דרך Meta</div>
 </div>
 <script>
 const CHK='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -97,6 +107,7 @@ const A={
  4:{img:'L3.png',th:'rose',hook:'טיפול ראשון, סדרת טיפולים,<br><b>והחברות שהיא תביא איתה.</b>',h1:'כמה שווה לך<br><span>לקוחה</span> אחת?'},
  5:{img:'L5.png',th:'gold',cl:1,hook:'4 ימים, 19 פניות, 11 חשבוניות, 6 בקשות לביקורת.<br><b>בלי להרים טלפון לענות.</b>',h1:'היא ענתה.<br><span>הוא</span> המשיך לעבוד.'},
  6:{img:'L6.png',th:'lav',cl:1,hook:'כמה זמן ביום הולך לך על וואטסאפ?<br><b>תחשבי רגע.</b>',h1:'שעה ביום<br><span>חוזרת</span> אלייך.'},
+ 8:{img:'L1.png',th:'plum',hook:'בזמן שאת מטפלת, הלקוחות ממשיכות לקליניקה הבאה.',h1:'כמה פניות<br><span>פספסת</span> השבוע?'},
  7:{img:'whiteA.png',th:'white',cl:1,hook:'את מרוכזת בטיפול, והוואטסאפ לא מפסיק לזמזם.<br><b>מי עונה לפונות?</b>',h1:'הלייזר שלך עובד.<br><span>גם הוואטסאפ.</span>'},
 };
 const a=A[(location.hash||'#1').slice(1)], t=T[a.th], r=document.documentElement.style;
@@ -106,6 +117,13 @@ r.setProperty('--f1',hex(t[0],.97));r.setProperty('--f2',hex(t[0],.88));r.setPro
 const bg=document.getElementById('bg');bg.style.backgroundImage='url('+a.img+')';if(a.pos){bg.style.backgroundPosition=a.pos;bg.style.backgroundSize=a.size}
 if(a.cl)document.body.classList.add('cl');
 document.getElementById('hook').innerHTML=a.hook;document.getElementById('h1').innerHTML=a.h1;
+if(location.search.includes('anim')){document.body.classList.add('anim');
+ const tm=document.querySelector('.timer');tm.insertAdjacentHTML('beforeend','<div class="u"><div class="n" id="vs">00</div><div class="lb">שניות</div></div>');
+ const ns=tm.querySelectorAll('.n');let r=33*3600+44*60;const P=x=>String(x).padStart(2,'0');
+ const draw=()=>{ns[0].textContent=Math.floor(r/86400);ns[1].textContent=P(Math.floor(r%86400/3600));ns[2].textContent=P(Math.floor(r%3600/60));ns[3].textContent=P(r%60)};
+ draw();setTimeout(()=>setInterval(()=>{r--;draw()},1000),4400);
+ document.querySelectorAll('.st b').forEach(e=>{const to=+e.textContent;e.textContent='0';setTimeout(()=>{const t0=performance.now();
+  (function f(t){const k=Math.min(1,(t-t0)/1200);e.textContent=Math.round(to*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0)},3700)});}
 </script>
 </body>
 </html>
