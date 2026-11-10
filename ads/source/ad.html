@@ -98,10 +98,9 @@
     <div class="l">
       <div class="k">ל-3 הקליניקות הראשונות בלבד</div>
       <div class="big"><em>50%</em> הנחה על ההקמה</div>
-      <div class="end">המבצע נגמר ביום ראשון 15.11 ב-23:59</div>
+      <div class="end">המבצע נגמר הלילה</div>
     </div>
     <div class="timer">
-      <div class="u"><div class="n" id="d">0</div><div class="lb">ימים</div></div>
       <div class="u"><div class="n" id="h">00</div><div class="lb">שעות</div></div>
       <div class="u"><div class="n" id="m">00</div><div class="lb">דקות</div></div>
       <div class="u"><div class="n" id="s">00</div><div class="lb">שניות</div></div>
@@ -117,12 +116,11 @@
   document.querySelectorAll('.ic').forEach(e=>e.innerHTML=CHK);
   const c=document.querySelector('.cta'); c.innerHTML=WA+'<span>שלחי ״מזכירה״ בוואטסאפ</span>';
   if(location.hash==='#story') document.body.classList.add('story');
-  const END=new Date('2026-11-15T23:59:59+02:00').getTime();
+  const END=Date.now()+(9*3600+45*60)*1000+500;
   const p=n=>String(n).padStart(2,'0');
   function tick(){
     let r=Math.max(0,Math.floor((END-Date.now())/1000));
     const d=Math.floor(r/86400); r%=86400;
-    document.getElementById('d').textContent=d;
     document.getElementById('h').textContent=p(Math.floor(r/3600));
     document.getElementById('m').textContent=p(Math.floor(r%3600/60));
     document.getElementById('s').textContent=p(r%60);
