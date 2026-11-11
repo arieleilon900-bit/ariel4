@@ -36,6 +36,9 @@ export function incomingMessages(payload) {
       for (const m of v.messages || []) {
         out.push({
           id: m.id, from: m.from, name: names[m.from] || '', type: m.type,
+          mediaId: m.audio?.id || m.image?.id || null,
+          mime: m.audio?.mime_type || m.image?.mime_type || null,
+          caption: m.image?.caption || '',
           text: m.type === 'text' ? m.text?.body || ''
             : m.type === 'button' ? m.button?.text || ''
             : m.type === 'interactive' ? (m.interactive?.button_reply?.title || m.interactive?.list_reply?.title || '')
@@ -92,4 +95,38 @@ export async function sendNotify(env, to, text) {
       },
     });
   }
+}
+
+// Incoming voice notes and photos: WhatsApp gives a media id; we fetch the
+// short-lived URL, then the bytes (both need the token).
+export async function downloadMedia(env, mediaId) {
+  const meta = await fetch(`${GRAPH}/${mediaId}`, { headers: { authorization: `Bearer ${env.WA_TOKEN}` } });
+  if (!meta.ok) throw new Error(`media meta ${meta.status}`);
+  const { url, mime_type } = await meta.json();
+  const file = await fetch(url, { headers: { authorization: `Bearer ${env.WA_TOKEN}` } });
+  if (!file.ok) throw new Error(`media download ${file.status}`);
+  return { bytes: new Uint8Array(await file.arrayBuffer()), mime: mime_type };
+}
+
+export async function sendImage(env, to, link, caption = '') {
+  if (env.OUTBOX) { env.OUTBOX.push({ to, image: link, text: caption }); return { test: true }; }
+  if (env.DRY_RUN === '1') { console.log(`[DRY_RUN image → ${to}] ${link} ${caption}`); return { dry: true }; }
+  return post(env, { to, type: 'image', image: { link, caption: caption.slice(0, 1000) } });
+}
+
+// Messages we start outside the 24-hour window must be approved templates.
+// tpl: { name, lang } from config; params fill {{1}}, {{2}}... in the body.
+// Without a template we try plain text, which only works inside the window.
+export async function sendTemplate(env, to, tpl, params, fallbackText) {
+  if (!tpl?.name) return sendText(env, to, fallbackText);
+  if (env.OUTBOX) { env.OUTBOX.push({ to, template: tpl.name, params, text: fallbackText }); return { test: true }; }
+  if (env.DRY_RUN === '1') { console.log(`[DRY_RUN template ${tpl.name} → ${to}]`, params); return { dry: true }; }
+  return post(env, {
+    to, type: 'template',
+    template: {
+      name: tpl.name,
+      language: { code: tpl.lang || env.WA_TEMPLATE_LANG || 'he' },
+      components: [{ type: 'body', parameters: params.map(p => ({ type: 'text', text: String(p).replace(/\s*\n+\s*/g, ' | ').slice(0, 1000) })) }],
+    },
+  });
 }

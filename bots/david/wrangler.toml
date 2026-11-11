@@ -8,9 +8,17 @@ compatibility_flags = ["nodejs_compat"]
 [triggers]
 crons = ["0 * * * *"]
 
-[[kv_namespaces]]
-binding = "BOT_KV"
-id = "REPLACE_WITH_KV_ID"   # npx wrangler kv namespace create BOT_KV
+# npx wrangler d1 create david-bot   → paste the id here
+# npx wrangler d1 migrations apply david-bot --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "david-bot"
+database_id = "REPLACE_WITH_D1_ID"
+migrations_dir = "migrations"
+
+# Workers AI: transcribes voice notes (Whisper)
+[ai]
+binding = "AI"
 
 [vars]
 WA_TEMPLATE_LANG = "he"
