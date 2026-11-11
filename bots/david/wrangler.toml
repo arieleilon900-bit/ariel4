@@ -1,0 +1,17 @@
+name = "david-booking-bot"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Hourly: the code checks Israel time for the 07:00 morning list, the Sunday 09:00
+# summary, and follow-ups.
+[triggers]
+crons = ["0 * * * *"]
+
+[[kv_namespaces]]
+binding = "BOT_KV"
+id = "REPLACE_WITH_KV_ID"   # npx wrangler kv namespace create BOT_KV
+
+[vars]
+WA_TEMPLATE_LANG = "he"
+# WA_NOTIFY_TEMPLATE = "owner_alert"   # approved template with one {{1}} body param
