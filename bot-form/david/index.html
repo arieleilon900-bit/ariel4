@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>שאלון הבוט של דוד</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: same single-column questionnaire as Hanan's form, plus one fieldset per apartment; one send button composes a WhatsApp message */
+:root{--bg:#f5f4f1;--fg:#1e2326;--muted:#5d666c;--line:#d9d6cf;--accent:#1f5e46;--card:#fff;--onaccent:#fff;--body:'Assistant',Arial,sans-serif;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6;margin:0;}
+.page{direction:rtl;max-width:640px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;}
+h1{font-size:clamp(26px,6vw,34px);line-height:1.2;text-wrap:balance;}
+.lead{color:var(--muted);margin:8px 0 18px;}
+fieldset{border:1px solid var(--line);border-radius:6px;background:var(--card);padding:6px 16px 14px;margin:0 0 16px;}
+legend{font-weight:700;padding:0 6px;font-size:18px;}
+.sub{font-size:15px;color:var(--muted);margin:6px 0 0;}
+.q{display:grid;gap:4px;margin-top:12px;}
+.q span{font-weight:600;}
+input,textarea{font:16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;resize:vertical;box-sizing:border-box;}
+input[type=tel],input[type=email],input[type=url]{direction:ltr;text-align:right;}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.note{font-size:15px;color:var(--muted);margin:4px 0 14px;}
+button{font:700 18px var(--body);background:var(--accent);color:var(--onaccent);border:0;border-radius:6px;padding:13px 18px;width:100%;cursor:pointer;}
+.alt{margin-top:10px;background:transparent;color:var(--fg);border:1px solid var(--line);font-size:16px;}
+#msg{min-height:1.4em;margin-top:8px;font-size:15px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="page" dir="rtl" lang="he">
+<h1>הבוט של דוד: כמה שאלות</h1>
+<p class="lead">כדי שהבוט יענה בדיוק כמוך, ויכיר כל דירה לפרטים. אפשר לענות בקצרה ולדלג על מה שלא בטוח. איפה שכתוב "מתאים?" מספיק לכתוב כן. מה שלא תמלא, הבוט לא ימציא: הוא יגיד ללקוח שהוא בודק איתך. התשובות נשמרות בטלפון, אפשר להפסיק ולהמשיך אחר כך.</p>
+<form id="form" onsubmit="return false"></form>
+<p class="note">הלחיצה פותחת וואטסאפ עם כל התשובות מוכנות לשליחה לאריאל (052-466-6175). את התמונות של הדירות אפשר לשלוח לאריאל בנפרד.</p>
+<button type="button" id="send">שליחת התשובות בוואטסאפ</button>
+<button type="button" class="alt" id="copy">העתקת התשובות</button>
+<p id="msg" aria-live="polite"></p>
+</div>
+<script>
+(function(){
+  // [id, question, placeholder, kind]  kind: t=short text, a=textarea, tel, email
+  var SECTIONS = [
+    { title: 'איך הבוט מדבר', q: [
+      ['name', 'בשם מי הבוט עונה?', 'למשל: כאן דוד, או: כאן הצוות של דירות X', 't'],
+      ['voice', 'הבוט מדבר בלשון זכר או נקבה?', 'זכר / נקבה', 't'],
+      ['langs', 'באילו שפות פונים אליך לקוחות?', 'עברית, אנגלית, רוסית, צרפתית...', 't'],
+      ['style', 'יש משפט או סגנון שאתה תמיד אומר ללקוחות?', '', 'a'],
+    ]},
+    { title: 'העסק', q: [
+      ['kind', 'איזה סוג השכרה? (נופש ללילות, השכרה לחודשים, שניהם)', '', 't'],
+      ['area', 'באיזה אזור או עיר הדירות?', '', 't'],
+      ['sources', 'מאיפה מגיעות הפניות?', 'Airbnb, Booking, יד2, פייסבוק, אינסטגרם, אתר, המלצות...', 'a'],
+      ['hours', 'מתי אתה זמין לענות בעצמך? ומה הבוט אומר מחוץ לשעות האלה?', '', 'a'],
+      ['shabbat', 'מה הבוט עושה בשבת ובחגים?', 'למשל: עונה כרגיל, ואת מה שצריך אותך מעביר במוצאי שבת', 'a'],
+    ]},
+    { apartment: 1 }, { apartment: 2 }, { apartment: 3 },
+    { title: 'הזמנה ותשלום', q: [
+      ['flow', 'מי סוגר את ההזמנה? (א) הבוט רושם ואתה מאשר בהודעה אחת. (ב) ההזמנה נסגרת אוטומטית אחרי שהלקוח שילם מקדמה', 'א / ב', 't'],
+      ['deposit', 'כמה מקדמה? ומתי משלמים את היתרה?', 'למשל: 30% בהזמנה, היתרה ביום ההגעה', 't'],
+      ['payment', 'איך משלמים? (ביט, פייבוקס, העברה, קישור לאשראי) ואם יש קישור קבוע, הדבק אותו', '', 'a'],
+      ['cancel', 'מדיניות ביטול', 'למשל: עד 14 יום לפני: החזר מלא', 'a'],
+      ['invoice', 'איך אתה מוציא קבלות או חשבוניות היום?', '', 't'],
+      ['discount', 'מתי מותר לבוט לתת הנחה, ועד כמה? (או: אף פעם בלי אישור שלך)', '', 'a'],
+    ]},
+    { title: 'תיווך לשותפים', sub: 'לקוחות שלא מתאימים לדירות שלך. למשל זוג ושלושה ילדים כשהדירה הכי גדולה מתאימה לזוג ושני ילדים, או שהכל תפוס. הבוט מעביר את הלקוח לבעל דירה אחר, ואתה מקבל עמלה.', q: [
+      ['partners', 'השותפים שלך: לכל אחד שורה עם שם, טלפון, אזור, כמה אורחים הדירה מקבלת, מחיר ללילה בערך, ומה מיוחד בה (בריכה, נגישות, חיות)', 'יוסי, 050..., צפון, עד 8 אורחים, 900-1,400 ללילה, בריכה', 'a'],
+      ['refTo', 'לאן הליד הולך? (א) רק אליך, ואתה מעביר. (ב) ישר לבעל הדירה המתאים, עם העתק אליך', 'א / ב', 't'],
+      ['refSay', 'מה הבוט אומר ללקוח? (א) שיש לנו דירות מתאימות אצל שותפים. (ב) רק שמישהו יחזור אליו, בלי לפרט', 'א / ב', 't'],
+      ['refWhen', 'מתי להעביר הלאה? מספר אורחים גדול מדי, תאריכים תפוסים, תקציב, בקשה שאין לך (בריכה, חיות, נגישות). להשאיר את כולם?', 'כן, או כתוב מה להוריד או להוסיף', 'a'],
+      ['refInfo', 'איזה פרטים בעל הדירה השני צריך? הבוט אוסף כבר: שם, טלפון, תאריכים, מבוגרים, ילדים וגילאים, תקציב, אזור ובקשות. חסר משהו?', '', 'a'],
+      ['commission', 'איך מחושבת העמלה? (אחוז, סכום קבוע לכל לקוח, לכל לילה)', '', 't'],
+    ]},
+    { title: 'מתי הבוט מעביר אליך מיד', q: [
+      ['urgent', 'מתי הבוט מעביר אליך מיד, בלי שאלות?', 'למשל: תקלה בדירה בזמן שהייה, אורח נעול בחוץ, קבוצה גדולה, בקשה לאירוע', 'a'],
+      ['never', 'דברים שהבוט אסור לו להגיד או להבטיח', '', 'a'],
+    ]},
+    { title: 'ההתראות אליך', q: [
+      ['notify', 'לאיזה מספר לשלוח לך התראות וסיכומים?', 'מספר אחר מהמספר של העסק', 'tel'],
+      ['cleaner', 'יש מנקה שצריך לקבל כל בוקר מי נכנס ומי יוצא? מה המספר?', '', 'tel'],
+      ['morning', 'כל בוקר ב-07:00: מי נכנס היום, מי יוצא, ומה מחכה לאישור שלך. מתאים?', 'כן, או כתוב מתי', 't'],
+      ['report', 'סיכום שבועי: פניות, הזמנות, הכנסה, לידים שהועברו ועמלות. יום ראשון ב-09:00. מתאים?', 'כן, או כתוב מתי', 't'],
+      ['summary', 'מה עוד חשוב לך לראות בסיכום?', '', 'a'],
+    ]},
+    { title: 'לפני ההגעה, בזמן השהייה ואחריה', q: [
+      ['followup', 'לקוח שקיבל מחיר ולא חזר: הבוט כותב לו אחרי 3 שעות ושוב אחרי כמעט יום. מתאים?', 'כן, או כתוב מה לשנות', 't'],
+      ['remind', 'יום לפני ההגעה הלקוח מקבל הוראות הגעה, קוד כניסה ו-Wi-Fi. ביום ההגעה הודעת ברוכים הבאים. בבוקר היציאה תזכורת. מתאים?', 'כן, או כתוב מה לשנות', 'a'],
+      ['reviews', 'קישורים לביקורת: גוגל, Airbnb, Booking (מה שיש)', '', 'a'],
+      ['return', 'הצעה ללקוח שחוזר: יש הטבה? (למשל 10% הנחה בהזמנה הבאה)', '', 't'],
+      ['list', 'רשימת תפוצה בוואטסאפ למבצעים וסופ"שים פנויים (רק למי שהסכים). רוצה?', 'כן / לא', 't'],
+    ]},
+    { title: 'פרטי העסק', q: [
+      ['bizname', 'שם העסק (כמו שמופיע בקבלות)', '', 't'],
+      ['address', 'כתובת העסק (בשביל האימות מול וואטסאפ)', '', 't'],
+      ['email', 'מייל של העסק', '', 'email'],
+    ]},
+  ];
+
+  function aptQuestions(n){
+    var p = 'a' + n + '_';
+    return { title: 'דירה ' + n, sub: 'הכל על הדירה הזו בלבד. את מה שמופיע אצלך במודעה באיירבנב אפשר פשוט להעתיק.', q: [
+      [p+'name', 'איך קוראים לדירה, ואיך הלקוחות מתייחסים אליה?', 'למשל: דירת הגן, או דירה 3 בבן יהודה', 't'],
+      [p+'where', 'איפה היא? (מה מותר לבוט להגיד לפני הזמנה, למשל שכונה או "5 דקות מהים")', '', 't'],
+      [p+'rooms', 'כמה חדרים, ואילו מיטות?', 'למשל: 2 חדרי שינה, מיטה זוגית + 2 מיטות יחיד + ספה נפתחת', 't'],
+      [p+'max', 'הכי הרבה כמה אנשים? כמה מבוגרים וכמה ילדים לכל היותר?', 'למשל: 2 מבוגרים ו-2 ילדים, עד 4 סה"כ', 't'],
+      [p+'baby', 'תינוק עד גיל 2 נספר? יש מיטת תינוק?', '', 't'],
+      [p+'price', 'מחיר ללילה: אמצע שבוע, ושישי-שבת', 'למשל: 600 באמצע שבוע, 800 שישי ושבת', 't'],
+      [p+'season', 'מחירים אחרים בחגים או בעונה (תאריכים ומחיר)', 'למשל: יולי-אוגוסט 900, פסח 1,100', 'a'],
+      [p+'min', 'מינימום לילות (רגיל, בסופ"ש, בחגים)', '', 't'],
+      [p+'clean', 'דמי ניקיון או תוספות (אורח נוסף, חיה)', '', 't'],
+      [p+'times', 'שעת כניסה ושעת יציאה. אפשר מוקדם או מאוחר? בתוספת?', '', 't'],
+      [p+'has', 'מה יש בדירה?', 'מזגן, חניה, מרפסת, חצר, בריכה, ג׳קוזי, מעלית, מכונת כביסה, מטבח מאובזר, נוף לים...', 'a'],
+      [p+'rules', 'חוקים: עישון, חיות, אירועים, שקט, גיל מינימום', '', 'a'],
+      [p+'access', 'הוראות הגעה, חניה, קוד או מפתח, ו-Wi-Fi (נשלח רק אחרי שההזמנה אושרה)', '', 'a'],
+      [p+'photos', 'קישור לתמונות או למודעה', '', 't'],
+      [p+'cal', 'קישור ליומן של הדירה (באיירבנב: יומן ← זמינות ← ייצוא יומן. בבוקינג: תעריפים וזמינות ← סנכרון יומנים)', 'כדי שלא תהיה הזמנה כפולה', 't'],
+      [p+'promo', 'מבצע קבוע לדירה הזו?', 'למשל: לילה שלישי בחצי מחיר', 't'],
+      [p+'nearby', 'המלצות באזור שהבוט יכול לתת (מסעדות, חוף, אטרקציות, סופר)', '', 'a'],
+    ]};
+  }
+
+  var form = document.getElementById('form');
+  var ORDER = [];
+  SECTIONS.forEach(function(s){
+    if (s.apartment) s = aptQuestions(s.apartment);
+    var fs = document.createElement('fieldset');
+    var lg = document.createElement('legend'); lg.textContent = s.title; fs.appendChild(lg);
+    if (s.sub) { var sp = document.createElement('p'); sp.className = 'sub'; sp.textContent = s.sub; fs.appendChild(sp); }
+    s.q.forEach(function(q){
+      ORDER.push({ id: q[0], label: q[1], section: s.title });
+      var l = document.createElement('label'); l.className = 'q'; l.htmlFor = q[0];
+      var t = document.createElement('span'); t.textContent = q[1]; l.appendChild(t);
+      var el;
+      if (q[3] === 'a') { el = document.createElement('textarea'); el.rows = 3; }
+      else { el = document.createElement('input'); el.type = q[3] === 'tel' ? 'tel' : q[3] === 'email' ? 'email' : 'text';
+        if (q[3] === 'tel') el.inputMode = 'tel'; if (q[3] === 'email') { el.inputMode = 'email'; el.dir = 'ltr'; } }
+      el.id = q[0]; el.placeholder = q[2] || '';
+      l.appendChild(el); fs.appendChild(l);
+    });
+    form.appendChild(fs);
+  });
+
+  // full=true: every question (for copying). full=false: only answered ones with
+  // short labels, so the WhatsApp link stays short enough to open.
+  function text(full){
+    var out = ['תשובות לשאלון האפיון של הבוט (דוד, דירות):', ''], sec = '', i = 0;
+    ORDER.forEach(function(q){
+      i++;
+      var v = document.getElementById(q.id).value.trim();
+      if (!v && !full) return;
+      if (q.section !== sec) { sec = q.section; out.push('*' + sec + '*'); }
+      var label = full ? q.label : q.label.split(/[?(:]/)[0].trim();
+      out.push(i + '. ' + label); out.push(v ? v : '(לא נענה)'); out.push('');
+    });
+    return out.join('\n');
+  }
+  function copy(t, ok){
+    var m = document.getElementById('msg');
+    try { navigator.clipboard.writeText(t).then(function(){ m.textContent = ok; }, function(){ m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }); }
+    catch(e) { m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }
+  }
+  function save(){ try { var d = {}; ORDER.forEach(function(q){ d[q.id] = document.getElementById(q.id).value; }); localStorage.setItem('davidForm', JSON.stringify(d)); } catch(e){} }
+  try { var d = JSON.parse(localStorage.getItem('davidForm') || '{}'); ORDER.forEach(function(q){ if (d[q.id]) document.getElementById(q.id).value = d[q.id]; }); } catch(e){}
+  form.addEventListener('input', save);
+  document.getElementById('send').addEventListener('click', function(){
+    var url = 'https://wa.me/972524666175?text=' + encodeURIComponent(text(false));
+    if (url.length > 15000) {
+      // Too long for a link: copy instead and open the chat empty.
+      copy(text(false), 'התשובות ארוכות, אז העתקתי אותן. בצ׳אט שנפתח פשוט להדביק ולשלוח.');
+      setTimeout(function(){ window.location.href = 'https://wa.me/972524666175'; }, 900);
+      return;
+    }
+    window.location.href = url;
+  });
+  document.getElementById('copy').addEventListener('click', function(){
+    copy(text(true), 'הועתק. עכשיו אפשר להדביק בוואטסאפ.');
+  });
+})();
+</script>
+</body>
+</html>
