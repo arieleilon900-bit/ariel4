@@ -22,10 +22,30 @@ export const BUSINESS = {
   reviewLinks: { google: '', airbnb: '', booking: '' }, // §8
   urgent: 'תקלה בדירה בזמן שהייה (מים, חשמל, נעילה בחוץ), אורח כועס, קבוצה מעל 10 אנשים, בקשה לאירוע', // §6
   never: 'לא נותנים הנחה בלי אישור של דוד. לא שולחים קוד כניסה או כתובת מדויקת לפני שההזמנה אושרה.', // §6
+  // §8 messages around the stay (Israel time). Set any hour to null to turn it off.
+  stay: {
+    reminderHour: 18,      // day before arrival: directions, door code, Wi-Fi
+    welcomeHour: 15,       // arrival day: welcome + recommendations
+    checkoutHour: 8,       // departure day: checkout time and what to do
+    reviewHour: 14,        // departure day: ask for a review
+    comebackDays: 120,     // days after departure: invite back (only to guests on the offers list)
+    comebackOffer: '10% הנחה בהזמנה הבאה',
+  },
+  // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
+  lastMinuteDays: 7,
   referral: {
     mode: 'owner',                 // §5 'owner': lead goes to David | 'direct': straight to the partner, copy to David
     tellCustomer: 'partners',      // §5 'partners': say these are partner apartments | 'quiet': just say someone will call
   },
+};
+
+// Us, not David: who gets technical alerts and the internal cost report.
+export const AGENCY = {
+  clientName: 'דוד',
+  techPhone: '',          // the partner who handles problems, digits with country code (9725XXXXXXXX)
+  reportPhones: [],       // who gets the weekly internal report (cost, errors). techPhone is added automatically
+  dailyBudgetUsd: 2,      // alert if model spend in one day passes this (normal: ~0.2-0.4 on Haiku)
+  usdToIls: 3.7,          // for showing costs in shekels
 };
 
 // §3, one block per apartment. Capacity: maxAdults/maxGuests count adults+children;
@@ -44,10 +64,12 @@ export const APARTMENTS = [
     minNights: 1,
     minNightsWeekend: 2,
     checkIn: '15:00', checkOut: '11:00',
+    checkoutNotes: '',             // what guests do before leaving (keys, trash, AC)
     features: ['parking', 'balcony', 'ac', 'wifi'],
     rules: 'בלי עישון, בלי חיות, בלי אירועים',
     amenities: 'מטבח מאובזר, מכונת קפה, מגבות ומצעים, מזגן',
-    photos: '',                    // link to photos / video
+    photos: '',                    // link to an album / the listing
+    photoUrls: [],                 // direct image links (https://...jpg) the bot sends as photos, up to 6
     location: '',                  // general area for customers (exact address only after confirmation)
     privateInfo: { address: '', door: '', wifi: '', parking: '' }, // sent only after booking is confirmed
     icalUrls: [],                  // Airbnb / Booking / Google calendar export links
@@ -65,10 +87,11 @@ export const APARTMENTS = [
     minNights: 2,
     minNightsWeekend: 2,
     checkIn: '15:00', checkOut: '11:00',
+    checkoutNotes: '',             // what guests do before leaving (keys, trash, AC)
     features: ['parking', 'ac', 'wifi', 'crib'],
     rules: 'בלי עישון, בלי אירועים',
     amenities: 'מטבח מאובזר, מיטת תינוק, מכונת כביסה',
-    photos: '', location: '',
+    photos: '', photoUrls: [], location: '',
     privateInfo: { address: '', door: '', wifi: '', parking: '' },
     icalUrls: [], promo: '', nearby: '',
   },
@@ -83,10 +106,11 @@ export const APARTMENTS = [
     minNights: 2,
     minNightsWeekend: 2,
     checkIn: '15:00', checkOut: '11:00',
+    checkoutNotes: '',             // what guests do before leaving (keys, trash, AC)
     features: ['parking', 'ac', 'wifi', 'crib', 'yard'],
     rules: 'בלי עישון, בלי אירועים',
     amenities: 'חצר, מנגל, 2 חדרי שינה, מטבח מאובזר',
-    photos: '', location: '',
+    photos: '', photoUrls: [], location: '',
     privateInfo: { address: '', door: '', wifi: '', parking: '' },
     icalUrls: [], promo: '', nearby: '',
   },
@@ -96,6 +120,19 @@ export const APARTMENTS = [
 export const PARTNERS = [
   // { id: 'p1', name: 'יוסי', phone: '9725XXXXXXXX', area: '...', maxGuests: 8, priceFrom: 800, priceTo: 1400, features: ['pool'], commission: '10%' },
 ];
+
+// WhatsApp templates (approved in Meta) for messages that go out more than 24 hours
+// after the guest last wrote. Each body has {{1}} = guest name, {{2}} = the details.
+// Suggested texts are in README.md. Empty name = try a normal message (works only
+// inside 24 hours; failures alert the tech partner).
+export const TEMPLATES = {
+  reminder: { name: '', lang: 'he' },   // יום לפני ההגעה
+  welcome:  { name: '', lang: 'he' },   // יום ההגעה
+  checkout: { name: '', lang: 'he' },   // בוקר העזיבה
+  review:   { name: '', lang: 'he' },   // בקשת ביקורת
+  comeback: { name: '', lang: 'he' },   // הזמנה לחזור
+  offer:    { name: '', lang: 'he' },   // מבצע לרשימת התפוצה (Marketing)
+};
 
 // Feature codes the bot can ask about. Keep in sync with features[] above.
 export const FEATURES = {

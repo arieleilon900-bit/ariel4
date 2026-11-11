@@ -1,6 +1,8 @@
 // Reads the iCal export links that Airbnb, Booking and Google Calendar give for
 // each listing, and turns them into busy ranges [{start, end}] (end = checkout day).
 
+import { getIcalCache, putIcalCache } from './store.js';
+
 export function parseIcal(text) {
   // Unfold lines (RFC 5545: a line starting with space/tab continues the previous one).
   const lines = String(text).replace(/\r\n[ \t]/g, '').replace(/\n[ \t]/g, '').split(/\r?\n/);
@@ -19,22 +21,25 @@ export function parseIcal(text) {
   return out;
 }
 
+const CACHE_MS = 15 * 60e3;
+
 // Busy ranges for one apartment: its own bookings plus every calendar link,
-// cached in KV for 15 minutes so we don't fetch Airbnb on every message.
-export async function busyFor(apt, env, ownBookings = []) {
+// cached for 15 minutes so we don't fetch Airbnb on every message.
+// onError(kind, detail) reports a calendar that can't be read.
+export async function busyFor(apt, env, ownBookings = [], onError = () => {}) {
   const ranges = ownBookings.map(b => ({ start: b.checkin, end: b.checkout }));
   for (const url of apt.icalUrls || []) {
-    const key = 'ical:' + url;
-    let cached = env.BOT_KV ? await env.BOT_KV.get(key, 'json') : null;
+    let cached = await getIcalCache(env, url, CACHE_MS);
     if (!cached) {
       try {
         const res = await fetch(url, { headers: { 'user-agent': 'booking-bot' } });
-        if (res.ok) {
-          cached = parseIcal(await res.text());
-          if (env.BOT_KV) await env.BOT_KV.put(key, JSON.stringify(cached), { expirationTtl: 900 });
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        cached = parseIcal(await res.text());
+        await putIcalCache(env, url, cached);
       } catch (e) {
-        console.error('ical fetch failed', apt.id, e);
+        // Fall back to the last copy we have, however old, rather than "all free".
+        cached = await getIcalCache(env, url, 1e13);
+        await onError('יומן לא נטען', `${apt.name}: ${e.message}${cached ? ' (משתמש בעותק ישן)' : ' (אין עותק, הזמינות לא בטוחה)'}`);
       }
     }
     if (cached) ranges.push(...cached);

@@ -4,8 +4,9 @@
 import { findApartments, matchPartners, REASON_HE, quote } from './logic.js';
 import { busyFor } from './ical.js';
 import { FEATURES } from './config.js';
-import { newId, putRecord, listRecords, activeBookings, bump } from './store.js';
-import { sendNotify } from './whatsapp.js';
+import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe } from './store.js';
+import { reportProblem } from './monitor.js';
+import { sendNotify, sendImage } from './whatsapp.js';
 
 const featureCodes = Object.keys(FEATURES);
 const date = { type: 'string', description: 'YYYY-MM-DD' };
@@ -72,6 +73,31 @@ export const TOOLS = [
     },
   },
   {
+    name: 'send_photos',
+    description: 'שולח ללקוח בוואטסאפ תמונות של דירה. קוראים כשהלקוח מבקש תמונות, או כשמציעים לו דירה בפעם הראשונה.',
+    strict: true,
+    input_schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: { apartment_id: { type: 'string' } },
+      required: ['apartment_id'],
+    },
+  },
+  {
+    name: 'subscribe_offers',
+    description: 'מוסיף את הלקוח לרשימת המבצעים בוואטסאפ. קוראים רק אחרי שהלקוח אמר במפורש שהוא רוצה לקבל מבצעים (חוק הספאם).',
+    strict: true,
+    input_schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        customer_consented: { type: 'boolean' },
+        language: { type: 'string', enum: ['he', 'en', 'ru', 'ar', 'fr', 'other'] },
+      },
+      required: ['customer_consented', 'language'],
+    },
+  },
+  {
     name: 'notify_owner',
     description: 'שולח הודעה לבעל הדירות: שאלה שאין לה תשובה, לקוח שמבקש לדבר איתו, תקלה, בקשה חריגה.',
     strict: true,
@@ -91,9 +117,12 @@ const nis = (n) => '₪' + Number(n).toLocaleString('en-US');
 const partyText = (p) => `${p.adults} מבוגרים${p.children ? `, ${p.children} ילדים` : ''}${p.infants ? `, ${p.infants} תינוקות` : ''}`;
 
 async function busyMap(ctx) {
-  const bookings = await listRecords(ctx.env, 'booking');
   const map = {};
-  for (const apt of ctx.apartments) map[apt.id] = await busyFor(apt, ctx.env, activeBookings(bookings, apt.id));
+  const onError = (kind, detail) => reportProblem(ctx, kind, detail);
+  for (const apt of ctx.apartments) {
+    const own = [...await activeBookingsFor(ctx.env, apt.id), ...(await blocksFor(ctx.env, apt.id)).map(b => ({ checkin: b.start, checkout: b.end }))];
+    map[apt.id] = await busyFor(apt, ctx.env, own, onError);
+  }
   return map;
 }
 
@@ -104,10 +133,12 @@ export async function runTool(name, input, ctx) {
       case 'create_booking_request': return await bookingTool(input, ctx);
       case 'refer_lead': return await referTool(input, ctx);
       case 'notify_owner': return await notifyTool(input, ctx);
+      case 'send_photos': return await photosTool(input, ctx);
+      case 'subscribe_offers': return await subscribeTool(input, ctx);
       default: return { error: 'unknown tool ' + name };
     }
   } catch (e) {
-    console.error('tool failed', name, e);
+    await reportProblem(ctx, 'כלי נכשל: ' + name, e.stack || e.message, { guest: ctx.phone });
     return { error: 'תקלה זמנית. תגיד ללקוח שבודקים ונחזור אליו, וקרא ל-notify_owner.' };
   }
 }
@@ -147,7 +178,9 @@ async function bookingTool(input, ctx) {
     party: { adults: input.adults, children: input.children, infants: input.infants },
     total: q.total, arrival: input.arrival_time, notes: input.notes,
   };
-  await putRecord(ctx.env, 'booking', rec);
+  if (!(await insertBookingIfFree(ctx.env, rec))) {
+    return { error: 'מישהו אחר הזמין את התאריכים האלה ממש עכשיו. קרא שוב ל-find_apartments והצע חלופה.' };
+  }
   await bump(ctx.env, 'bookingRequests');
   ctx.conv.bookedAt = Date.now();
 
@@ -170,7 +203,7 @@ async function referTool(input, ctx) {
     id: newId('R'), status: 'sent', createdAt: Date.now(), phone: ctx.phone, ...input,
     candidates: partners.map(p => p.id),
   };
-  await putRecord(ctx.env, 'referral', rec);
+  await insertReferral(ctx.env, rec);
   await bump(ctx.env, 'referrals');
   ctx.conv.referredAt = Date.now();
 
@@ -196,4 +229,19 @@ async function notifyTool(input, ctx) {
   await sendNotify(ctx.env, B.ownerPhone, `${input.urgent ? '🚨 *דחוף*' : '💬 *שאלה מלקוח*'}\n${input.summary}\nלקוח: ${ctx.name || ''} +${ctx.phone}\nhttps://wa.me/${ctx.phone}`);
   if (input.urgent) await bump(ctx.env, 'urgent');
   return { sent: true };
+}
+
+async function photosTool(input, ctx) {
+  const apt = ctx.apartments.find(a => a.id === input.apartment_id);
+  if (!apt) return { error: 'אין דירה כזו' };
+  const urls = (apt.photoUrls || []).slice(0, 6);
+  if (!urls.length) return apt.photos ? { sent: 0, link: apt.photos, note: 'אין תמונות לשליחה ישירה. שלח ללקוח את הקישור.' } : { error: 'אין תמונות לדירה הזו. אמור שנשלח בהמשך וקרא ל-notify_owner.' };
+  for (let i = 0; i < urls.length; i++) await sendImage(ctx.env, ctx.phone, urls[i], i === 0 ? apt.name : '');
+  return { sent: urls.length, note: 'התמונות כבר נשלחו. אל תשלח קישור, רק שאלה קצרה.' };
+}
+
+async function subscribeTool(input, ctx) {
+  if (!input.customer_consented) return { error: 'צריך הסכמה מפורשת של הלקוח.' };
+  await subscribe(ctx.env, ctx.phone, ctx.name, input.language);
+  return { subscribed: true, note: 'אפשר להגיד ללקוח שבכל רגע אפשר לכתוב "הסר".' };
 }
