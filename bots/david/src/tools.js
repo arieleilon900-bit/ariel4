@@ -208,18 +208,28 @@ async function referTool(input, ctx) {
   ctx.conv.referredAt = Date.now();
 
   const needs = input.needs.map(n => FEATURES[n] || n).join(', ');
-  const details =
-    `${input.full_name} | +${ctx.phone}\n${input.checkin} עד ${input.checkout}\n${input.adults} מבוגרים${input.children ? `, ${input.children} ילדים${input.children_ages ? ` (${input.children_ages})` : ''}` : ''}` +
-    `${input.budget ? `\nתקציב: ${input.budget}` : ''}${input.area ? `\nאזור: ${input.area}` : ''}${needs ? `\nצריך: ${needs}` : ''}${input.requests ? `\nבקשות: ${input.requests}` : ''}`;
+  const kids = input.children ? `, ${input.children} ילדים${input.children_ages ? ` (${input.children_ages})` : ''}` : '';
+  const details = [
+    `👤 ${input.full_name}`,
+    `📞 +${ctx.phone}`,
+    `📅 ${input.checkin} עד ${input.checkout}`,
+    `👨‍👩‍👧 ${input.adults} מבוגרים${kids}`,
+    input.budget && `💰 ${input.budget}`,
+    input.area && `📍 ${input.area}`,
+    needs && `✳️ צריך: ${needs}`,
+    input.requests && `📝 ${input.requests}`,
+  ].filter(Boolean).join('\n');
   const reason = REASON_HE[input.reason] || input.reason;
-  const match = partners.length ? `\nמתאים ל: ${partners.map(p => `${p.name}${p.area ? ` (${p.area})` : ''}`).join(', ')}` : '\nאין שותף שמתאים לפי הרשימה';
+  const match = partners.length ? `\nמתאים ל: ${partners.map(p => `${p.name}${p.area ? ` (${p.area})` : ''}`).join(', ')}` : '';
+  const track = B.referral.trackCommission ? `\n\nכשנסגר שלח: נסגר ${rec.id} <עמלה>\nאם לא: לא נסגר ${rec.id}` : '';
+  const chat = `\n\nלכתוב ללקוח: https://wa.me/${ctx.phone}`;
 
   if (B.referral.mode === 'direct' && partners.length) {
     const target = ctx.partners.find(p => p.id === partners[0].id);
     await sendNotify(ctx.env, target.phone, `לקוח חדש מ${B.botName} (${rec.id}):\n${details}`);
-    await sendNotify(ctx.env, B.ownerPhone, `🔁 *ליד הועבר* ${rec.id} ← ${target.name}\nסיבה: ${reason}\n${details}\n\nכשנסגר שלח: נסגר ${rec.id} <עמלה>`);
+    await sendNotify(ctx.env, B.ownerPhone, `🔁 *ליד הועבר* ${rec.id} ← ${target.name}\nלמה לא אצלך: ${reason}\n\n${details}${track}`);
   } else {
-    await sendNotify(ctx.env, B.ownerPhone, `🔁 *ליד להעברה* ${rec.id}\nסיבה: ${reason}\n${details}${match}\n\nכשנסגר שלח: נסגר ${rec.id} <עמלה>\nאם לא: לא נסגר ${rec.id}`);
+    await sendNotify(ctx.env, B.ownerPhone, `🔁 *ליד חדש להעברה* ${rec.id}\nלמה לא אצלך: ${reason}\n\n${details}${match}${chat}${track}`);
   }
   return { referral_id: rec.id, sent: true };
 }

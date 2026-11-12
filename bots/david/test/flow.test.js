@@ -11,7 +11,7 @@ import { fakeEnv, scriptedClient, toolUse, say, lastToolResult } from './helpers
 
 const OWNER = '972500000001';
 const TECH = '972500000002';
-const business = { ...BUSINESS, ownerPhone: OWNER, referral: { mode: 'owner', tellCustomer: 'partners' } };
+const business = { ...BUSINESS, ownerPhone: OWNER, referral: { mode: 'owner', tellCustomer: 'partners', trackCommission: true } };
 const agency = { ...AGENCY, techPhone: TECH };
 const partners = [{ id: 'p1', name: 'יוסי', phone: '972500000009', area: 'צפון', maxGuests: 8 }];
 const extra = (client) => ({ client, business, apartments: APARTMENTS, partners, agency });
@@ -44,7 +44,7 @@ test('couple + 3 kids becomes a referral lead for David, and the commission land
 
   const toOwner = env.OUTBOX.filter(o => o.to === OWNER);
   assert.equal(toOwner.length, 1);
-  assert.match(toOwner[0].text, /🔁 \*ליד להעברה\*/);
+  assert.match(toOwner[0].text, /🔁 \*ליד חדש להעברה\*/);
   assert.match(toOwner[0].text, /יותר מדי אורחים/);
   assert.match(toOwner[0].text, /יוסי/);
   const refId = toOwner[0].text.match(/(R\w+)/)[1];
@@ -54,7 +54,7 @@ test('couple + 3 kids becomes a referral lead for David, and the commission land
 
   const summary = await weeklyText(ctxOf(env), thisWeek());
   assert.match(summary, /פניות חדשות: 1/);
-  assert.match(summary, /לידים שהועברו: 1/);
+  assert.match(summary, /לידים להעברה:\* 1/);
   assert.match(summary, /עמלות: ₪300/);
 });
 
@@ -170,4 +170,24 @@ test('owner gets help for unknown text', async () => {
   const env = fakeEnv();
   await handleMessage(env, { from: OWNER, id: 'h1', type: 'text', text: 'מה אפשר?' }, extra(null));
   assert.match(env.OUTBOX.at(-1).text, /פקודות/);
+});
+
+test("David's setup: lead goes to his private number, organized, no partners or commission talk", async () => {
+  const env = fakeEnv();
+  const davidBusiness = { ...BUSINESS, ownerPhone: OWNER }; // the real config: quiet, no commission
+  const c = scriptedClient([
+    toolUse('refer_lead', { customer_consented: true, full_name: 'רונית כהן', checkin: '2027-03-01', checkout: '2027-03-04', adults: 2, children: 3, children_ages: '4, 8, 11', budget: '900 ללילה', area: 'צפון', needs: ['pool'], requests: 'קרוב לים', reason: 'capacity' }),
+    say('רשמתי, נחזור אלייך עם אפשרות מתאימה 🙏'),
+  ]);
+  await handleMessage(env, { from: '972541212121', id: 'd1', type: 'text', text: 'כן' }, { ...extra(c), business: davidBusiness, partners: [] });
+  const lead = env.OUTBOX.filter(o => o.to === OWNER);
+  assert.equal(lead.length, 1);
+  const t = lead[0].text;
+  for (const part of [/🔁 \*ליד חדש להעברה\*/, /למה לא אצלך: יותר מדי אורחים/, /👤 רונית כהן/, /📞 \+972541212121/, /📅 2027-03-01 עד 2027-03-04/, /👨‍👩‍👧 2 מבוגרים, 3 ילדים \(4, 8, 11\)/, /💰 900 ללילה/, /📍 צפון/, /✳️ צריך: בריכה/, /📝 קרוב לים/, /wa\.me\/972541212121/]) assert.match(t, part);
+  assert.doesNotMatch(t, /נסגר|עמלה|מתאים ל/);
+  const davidCtx = { ...ctxOf(env), business: davidBusiness };
+  assert.doesNotMatch(await weeklyText(davidCtx, thisWeek()), /עמלות/);
+  assert.match(await weeklyText(davidCtx, thisWeek()), /לידים להעברה:\* 1/);
+  assert.equal(BUSINESS.referral.tellCustomer, 'quiet');
+  assert.equal(BUSINESS.referral.trackCommission, false);
 });

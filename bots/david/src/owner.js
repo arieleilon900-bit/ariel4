@@ -130,9 +130,11 @@ export async function weeklyText(ctx, week = weekStart(Date.now() - 86400e3)) {
     `בקשות הזמנה: ${s.bookingRequests || 0}\n` +
     `הזמנות שאושרו: ${s.bookingsConfirmed || 0}\n` +
     `הכנסה מהזמנות שאושרו: ${nis(s.revenue)}\n\n` +
-    `🔁 *תיווך*\nלידים שהועברו: ${refs.length}\nנסגרו: ${refs.filter(r => r.status === 'closed').length}\n` +
-    `עמלות: ${nis(refs.reduce((x, r) => x + (r.commission || 0), 0))}` +
-    (open.length ? `\nעוד לא סימנת: ${open.map(r => r.id).join(', ')}` : '') +
+    `🔁 *לידים להעברה:* ${refs.length}` +
+    (ctx.business.referral?.trackCommission
+      ? `\nנסגרו: ${refs.filter(r => r.status === 'closed').length}\nעמלות: ${nis(refs.reduce((x, r) => x + (r.commission || 0), 0))}` +
+        (open.length ? `\nעוד לא סימנת: ${open.map(r => r.id).join(', ')}` : '')
+      : '') +
     (s.urgent ? `\n\n🚨 פניות דחופות: ${s.urgent}` : '');
 }
 

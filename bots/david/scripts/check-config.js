@@ -29,7 +29,7 @@ APARTMENTS.forEach((a, i) => {
 const ids = APARTMENTS.map(a => a.id);
 if (new Set(ids).size !== ids.length) block.push('יש שתי דירות עם אותו id.');
 
-if (!PARTNERS.length) warn.push('אין שותפים לתיווך. לידים יגיעו לדוד בלי הצעה למי להעביר.');
+if (!PARTNERS.length && B.referral.mode === 'direct') warn.push('אין שותפים לתיווך.');
 PARTNERS.forEach(p => { if (!phone(p.phone)) warn.push(`שותף ${p.name}: טלפון לא בפורמט 9725XXXXXXXX.`); });
 if (B.referral.mode === 'direct' && !PARTNERS.length) block.push('referral.mode הוא direct אבל אין שותפים.');
 
