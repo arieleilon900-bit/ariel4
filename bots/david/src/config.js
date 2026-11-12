@@ -79,6 +79,7 @@ export const APARTMENTS = [
   {
     ...COMMON,
     id: 'apt1',
+    photos: 'https://wa.me/p/8957180464402274/276480315678929', // WhatsApp catalog item (order 1-2-3 as Ariel sent them; verify)
     name: 'קו המים 1',
     summary: '',                   // TODO David: rooms, beds, view
     prices: { weekday1: 800, weekday2: 600, thu: 1000, friToSatEve: 1500, friToSun: 1700, thuToSatEve: 2200, extraChildPerNight: 100, cleaningFee: 0 },
@@ -89,6 +90,7 @@ export const APARTMENTS = [
   {
     ...COMMON,
     id: 'apt2',
+    photos: 'https://wa.me/p/25984353924563468/276480315678929', // WhatsApp catalog item (order 1-2-3 as Ariel sent them; verify)
     name: 'קו המים 2',
     summary: '',
     prices: { weekday1: 900, weekday2: 700, thu: 1200, friToSatEve: 1500, friToSun: 1700, thuToSatEve: 2200, extraChildPerNight: 100, cleaningFee: 0 },
@@ -99,6 +101,7 @@ export const APARTMENTS = [
   {
     ...COMMON,
     id: 'apt3',
+    photos: 'https://wa.me/p/27769656369311035/276480315678929', // WhatsApp catalog item (order 1-2-3 as Ariel sent them; verify)
     name: 'קו המים 3',
     summary: '',
     prices: { weekday1: 1200, weekday2: 1000, thu: 1400, friToSatEve: 1700, friToSun: 2000, thuToSatEve: 2600, extraChildPerNight: 100, cleaningFee: 0 },

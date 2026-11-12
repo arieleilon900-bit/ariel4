@@ -252,7 +252,7 @@ async function photosTool(input, ctx) {
   const apt = ctx.apartments.find(a => a.id === input.apartment_id);
   if (!apt) return { error: 'אין דירה כזו' };
   const urls = (apt.photoUrls || []).slice(0, 6);
-  if (!urls.length) return apt.photos ? { sent: 0, link: apt.photos, note: 'אין תמונות לשליחה ישירה. שלח ללקוח את הקישור.' } : { error: 'אין תמונות לדירה הזו. אמור שנשלח בהמשך וקרא ל-notify_owner.' };
+  if (!urls.length) return apt.photos ? { sent: 0, link: apt.photos, note: 'שלח ללקוח את הקישור כמו שהוא, בשורה נפרדת. בוואטסאפ הוא נפתח עם כל התמונות של הדירה בקטלוג.' } : { error: 'אין תמונות לדירה הזו. אמור שנשלח בהמשך וקרא ל-notify_owner.' };
   for (let i = 0; i < urls.length; i++) await sendImage(ctx.env, ctx.phone, urls[i], i === 0 ? apt.name : '');
   return { sent: urls.length, note: 'התמונות כבר נשלחו. אל תשלח קישור, רק שאלה קצרה.' };
 }
