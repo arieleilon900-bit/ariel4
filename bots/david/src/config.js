@@ -33,9 +33,12 @@ export const BUSINESS = {
   },
   // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
   lastMinuteDays: 7,
+  // Guests who don't fit any apartment. David asked for leads only: collect the details
+  // and send them to his private number, nothing else (no partner list, no commission tracking).
   referral: {
-    mode: 'owner',                 // §5 'owner': lead goes to David | 'direct': straight to the partner, copy to David
-    tellCustomer: 'partners',      // §5 'partners': say these are partner apartments | 'quiet': just say someone will call
+    mode: 'owner',                 // 'owner': lead goes to David | 'direct': straight to a partner, copy to David
+    tellCustomer: 'quiet',         // 'quiet': "we'll find something and get back to you" | 'partners': say these are partner apartments
+    trackCommission: false,        // true: lead message asks David to mark "נסגר R123 500", and the summary shows commissions
   },
 };
 
