@@ -4,17 +4,15 @@
 import { FEATURES } from './config.js';
 
 function aptBlock(a) {
-  const c = a.capacity;
-  const seasons = (a.seasons || []).map(s => `  - ${s.label} (${s.from} עד ${s.to}): אמצע שבוע ₪${s.weeknight}, סופ"ש ₪${s.weekend ?? s.weeknight}${s.minNights ? `, מינימום ${s.minNights} לילות` : ''}`).join('\n');
+  const c = a.capacity, P = a.prices;
+  const nis = (n) => '₪' + Number(n).toLocaleString('en-US');
   return `### ${a.name} (id: ${a.id})
-${a.summary}
-- מקסימום: ${c.maxAdults} מבוגרים, ${c.maxGuests} אורחים סה"כ (מבוגרים + ילדים)${c.infantsCount ? ', תינוקות נספרים' : `, תינוק עד גיל 2 לא נספר (עד ${c.maxInfants ?? 1})`}
-- מחיר ללילה: אמצע שבוע ₪${a.prices.weeknight}, סופ"ש (שישי ושבת בלילה) ₪${a.prices.weekend ?? a.prices.weeknight}${a.prices.cleaningFee ? `, דמי ניקיון ₪${a.prices.cleaningFee} להזמנה` : ''}
-${seasons ? `- עונות וחגים:\n${seasons}\n` : ''}- מינימום לילות: ${a.minNights || 1}${a.minNightsWeekend ? `, בסופ"ש ${a.minNightsWeekend}` : ''}
-- כניסה ${a.checkIn}, יציאה ${a.checkOut}
-- יש בדירה: ${(a.features || []).map(f => FEATURES[f] || f).join(', ')}. ${a.amenities || ''}
-- חוקים: ${a.rules || 'אין'}
-${a.location ? `- אזור: ${a.location}\n` : ''}${a.photos ? `- תמונות: ${a.photos}\n` : ''}${a.promo ? `- מבצע: ${a.promo}\n` : ''}${a.nearby ? `- המלצות באזור: ${a.nearby}\n` : ''}`;
+${a.summary || ''}
+- מתאים לזוג${c.maxGuests > c.maxAdults ? ` + ${c.maxGuests - c.maxAdults} ילדים` : ''}${c.infantsCount ? '' : ` + תינוק עד גיל 2 (חינם)`}. מעבר לזה: ליד להעברה.
+- מחירון לזוג: אמצע שבוע לילה אחד ${nis(P.weekday1)}, בהזמנת 2 לילות ומעלה ${nis(P.weekday2)} ללילה. חמישי ${nis(P.thu)}. שישי עד מוצ"ש ${nis(P.friToSatEve)}. שישי עד ראשון ${nis(P.friToSun)}. חמישי עד מוצ"ש ${nis(P.thuToSatEve)}.
+- תוספת לכל ילד: ${nis(P.extraChildPerNight)} ללילה. תינוק: בלי תוספת.${P.cleaningFee ? ` דמי ניקיון ${nis(P.cleaningFee)}.` : ''}
+- כניסה ${a.checkIn}, יציאה ${a.checkOut}. מי שיוצא בשבת יוצא במוצאי שבת.
+${(a.features || []).length ? `- יש בדירה: ${a.features.map(f => FEATURES[f] || f).join(', ')}. ${a.amenities || ''}\n` : (a.amenities ? `- ${a.amenities}\n` : '')}${a.rules ? `- חוקים: ${a.rules}\n` : ''}${a.location ? `- אזור: ${a.location}\n` : ''}${a.photos ? `- תמונות: ${a.photos}\n` : ''}${a.promo ? `- מבצע: ${a.promo}\n` : ''}${a.nearby ? `- המלצות באזור: ${a.nearby}\n` : ''}`;
 }
 
 export function buildSystemPrompt(B, apartments) {
@@ -32,7 +30,10 @@ ${apartments.map(aptBlock).join('\n')}
 3. שאלה אחת או שתיים בכל הודעה. לא מציפים.
 4. כדי להציע דירה צריך: תאריך הגעה, תאריך עזיבה, כמה מבוגרים, כמה ילדים ובני כמה (תינוק עד גיל 2 בנפרד). אם חסר משהו, שואלים.
 5. ברגע שיש תאריכים והרכב, קוראים ל-find_apartments. לעולם לא מנחשים זמינות או מחיר: המחיר והזמינות מגיעים רק מהכלי.
-6. מציעים את הדירה שהכי מתאימה, עם המחיר הכולל (לילות + ניקיון). אם כמה מתאימות, מציגים עד שתיים בקצרה.
+6. מציעים את הדירה שהכי מתאימה, עם המחיר הכולל שהכלי החזיר (כולל תוספת ילדים). אם כמה מתאימות, מציגים עד שלוש בקצרה, מהזולה ליקרה.
+   - אם הכלי מחזיר discount_pending: אומרים את המחיר הרגיל, ושבהזמנה של 3 לילות ומעלה יש הנחה נוספת ו${B.botName} יחזור עם המחיר הסופי.
+   - אם הכלי מחזיר owner_quote (חג, הזמנת דקה 90, כניסה במוצ"ש): לא נותנים מחיר. אומרים ש${B.botName} יחזור עם מחיר, וממשיכים לאסוף פרטים להזמנה.
+   - אם הכלי מחזיר checkout_after_shabbat: היציאה במוצאי שבת, אפשר לציין את זה.
 7. אם הדירה שהלקוח שאל עליה תפוסה או קטנה מדי, אבל דירה אחרת של ${B.botName} מתאימה, מציעים אותה.
 8. אם הבעיה היא רק מינימום לילות, מציעים להאריך.
 9. כשמציעים דירה בפעם הראשונה, או כשהלקוח מבקש תמונות, קוראים ל-send_photos.

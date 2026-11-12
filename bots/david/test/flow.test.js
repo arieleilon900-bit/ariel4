@@ -73,20 +73,26 @@ test('booking request → David approves → guest confirmed, dates blocked', as
   const guest = { from: '972543333333', name: 'אבי', type: 'text' };
   const c = scriptedClient([
     toolUse('create_booking_request', { apartment_id: 'apt3', full_name: 'אבי לוי', checkin: '2027-03-01', checkout: '2027-03-04', adults: 2, children: 2, infants: 0, arrival_time: '16:00', notes: '' }),
-    say('רשמתי! דוד יאשר בהקדם.', (p) => assert.equal(lastToolResult(p).total, 700 * 3 + 200)),
+    say('רשמתי! דוד יאשר בהקדם.', (p) => { const r = lastToolResult(p); assert.equal(r.total, 1000 * 3 + 2 * 100 * 3); assert.equal(r.discount_pending, true); }),
   ]);
   await handleMessage(env, { ...guest, id: 'b1', text: 'מאשר' }, extra(c));
   const alert = env.OUTBOX.find(o => o.to === OWNER);
   assert.match(alert.text, /בקשת הזמנה חדשה/);
   const id = alert.text.match(/(B\w+)/)[1];
 
-  await handleMessage(env, { from: OWNER, id: 'b2', type: 'text', text: `אושר ${id}` }, extra(null));
+  await handleMessage(env, { from: OWNER, id: 'b2', type: 'text', text: `אושר ${id} 3,300` }, extra(null));
+  assert.ok(env.OUTBOX.some(o => o.to === guest.from && /סה"כ: ₪3,300/.test(o.text)), 'David set the discounted price');
   assert.ok(env.OUTBOX.some(o => o.to === guest.from && /אושרה ✅/.test(o.text)));
 
-  // Another family asking for the same dates: apt3 is now taken → referral.
+  // Another family asking for the same dates: apt3 is now taken, the other two are offered.
   const c2 = scriptedClient([
     toolUse('find_apartments', { checkin: '2027-03-02', checkout: '2027-03-03', adults: 2, children: 2, infants: 0, needs: [], budget: null }),
-    say('תפוס', (p) => assert.equal(lastToolResult(p).suggestReferral, true)),
+    say('יש לי את קו המים 1 ו-2', (p) => {
+      const r = lastToolResult(p);
+      assert.equal(r.suggestReferral, false);
+      assert.deepEqual(r.apartments.filter(a => a.fits).map(a => a.id), ['apt1', 'apt2']);
+      assert.ok(r.apartments.find(a => a.id === 'apt3').why_not.includes('כל הדירות תפוסות בתאריכים האלה'));
+    }),
   ]);
   await handleMessage(env, { from: '972544444444', id: 'b3', type: 'text', text: '2+2 ב-2 במרץ' }, extra(c2));
 

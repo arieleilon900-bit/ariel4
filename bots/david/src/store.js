@@ -94,6 +94,10 @@ export async function setBookingStatus(env, id, status) {
     .bind(status, status, Date.now(), id).run();
 }
 
+export async function setBookingTotal(env, id, total) {
+  await db(env).prepare('UPDATE bookings SET total = ? WHERE id = ?').bind(total, id).run();
+}
+
 export async function bookingsOnDay(env, day) {
   const r = await db(env).prepare(`SELECT * FROM bookings WHERE status = 'confirmed' AND (checkin = ?1 OR checkout = ?1)`).bind(day).all();
   return r.results.map(toBooking);

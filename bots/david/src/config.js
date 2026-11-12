@@ -10,7 +10,7 @@ export const BUSINESS = {
   botName: 'דוד',                 // §1 in whose name the bot answers
   voice: 'male',                   // §1 'male' | 'female'
   style: 'חם, קצר, בגובה העיניים. פונה בשם הפרטי.', // §1
-  area: 'לא ידוע עדיין',           // §2
+  area: 'נתניה',                   // §2
   shabbat: 'הבוט עונה כרגיל, ומה שצריך את דוד ממתין למוצאי שבת', // §2
   timezone: 'Asia/Jerusalem',
   ownerPhone: '',                  // §7 David's number for alerts, digits only with country code, e.g. 9725XXXXXXXX
@@ -51,71 +51,60 @@ export const AGENCY = {
   usdToIls: 3.7,          // for showing costs in shekels
 };
 
-// §3, one block per apartment. Capacity: maxAdults/maxGuests count adults+children;
-// infants (under 2) count only if infantsCount is true.
+// §3, one block per apartment. From David (12.11.2026): price list "קו המים - מחירון",
+// all three at גד מכנס 6, נתניה. Every apartment takes a couple + 2 children
+// (+ a baby, free). Anything bigger is a lead for David (referral).
+// Capacity: adults are 18+, children 2-17; infants (under 2) don't count.
+// Prices are for a couple; extraChildPerNight is added per child per night.
+const COMMON = {
+  capacity: { maxAdults: 2, maxGuests: 4, infantsCount: false, maxInfants: 1 },
+  minNights: 1,
+  discountFromNights: 3,           // "הנחה נוספת בהזמנת 3 לילות ומעלה": David sets the final price
+  lastMinuteDays: 1,               // "המחירים אינם כוללים הזמנות דקה 90": arrival today/tomorrow → David quotes
+  ownerQuoteDates: [],             // holidays David prices himself: { label: 'פסח', from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' }
+  minNightsRanges: [],             // e.g. { from, to, minNights: 2 }
+  checkIn: '15:00',                // TODO David
+  checkOut: '11:00',               // TODO David. Leaving on Saturday = after Shabbat (in the package)
+  checkoutNotes: '',
+  location: 'נתניה',               // what the bot may say before a booking
+  privateInfo: { address: 'גד מכנס 6, נתניה', door: '', wifi: '', parking: '' }, // sent only after confirmation
+  icalUrls: [],
+  photos: '',
+  photoUrls: [],                   // https links to the photos (we host them on GitHub Pages)
+  promo: '',
+  nearby: '',
+};
+
 export const APARTMENTS = [
   {
+    ...COMMON,
     id: 'apt1',
-    name: 'דירה 1 (דוגמה)',
-    summary: 'דירת 2 חדרים לזוג, מרפסת, 5 דקות מהים',
-    capacity: { maxAdults: 2, maxGuests: 2, infantsCount: false, maxInfants: 1 },
-    prices: { weeknight: 450, weekend: 600, cleaningFee: 150 },
-    seasons: [ // holiday / high-season ranges override regular prices (inclusive dates)
-      { label: 'קיץ', from: '2027-07-01', to: '2027-08-31', weeknight: 550, weekend: 750, minNights: 2 },
-    ],
-    weekendNights: [5, 6],         // 5 = Friday night, 6 = Saturday night
-    minNights: 1,
-    minNightsWeekend: 2,
-    checkIn: '15:00', checkOut: '11:00',
-    checkoutNotes: '',             // what guests do before leaving (keys, trash, AC)
-    features: ['parking', 'balcony', 'ac', 'wifi'],
-    rules: 'בלי עישון, בלי חיות, בלי אירועים',
-    amenities: 'מטבח מאובזר, מכונת קפה, מגבות ומצעים, מזגן',
-    photos: '',                    // link to an album / the listing
-    photoUrls: [],                 // direct image links (https://...jpg) the bot sends as photos, up to 6
-    location: '',                  // general area for customers (exact address only after confirmation)
-    privateInfo: { address: '', door: '', wifi: '', parking: '' }, // sent only after booking is confirmed
-    icalUrls: [],                  // Airbnb / Booking / Google calendar export links
-    promo: '',
-    nearby: '',
+    name: 'קו המים 1',
+    summary: '',                   // TODO David: rooms, beds, view
+    prices: { weekday1: 800, weekday2: 600, thu: 1000, friToSatEve: 1500, friToSun: 1700, thuToSatEve: 2200, extraChildPerNight: 100, cleaningFee: 0 },
+    features: [],                  // TODO David: e.g. 'jacuzzi', 'sea_view', 'parking', 'ac', 'wifi'
+    rules: '',                     // TODO David
+    amenities: '',                 // TODO David
   },
   {
+    ...COMMON,
     id: 'apt2',
-    name: 'דירה 2 (דוגמה)',
-    summary: 'דירת 3 חדרים למשפחה קטנה',
-    capacity: { maxAdults: 2, maxGuests: 3, infantsCount: false, maxInfants: 1 },
-    prices: { weeknight: 550, weekend: 700, cleaningFee: 180 },
-    seasons: [],
-    weekendNights: [5, 6],
-    minNights: 2,
-    minNightsWeekend: 2,
-    checkIn: '15:00', checkOut: '11:00',
-    checkoutNotes: '',             // what guests do before leaving (keys, trash, AC)
-    features: ['parking', 'ac', 'wifi', 'crib'],
-    rules: 'בלי עישון, בלי אירועים',
-    amenities: 'מטבח מאובזר, מיטת תינוק, מכונת כביסה',
-    photos: '', photoUrls: [], location: '',
-    privateInfo: { address: '', door: '', wifi: '', parking: '' },
-    icalUrls: [], promo: '', nearby: '',
+    name: 'קו המים 2',
+    summary: '',
+    prices: { weekday1: 900, weekday2: 700, thu: 1200, friToSatEve: 1500, friToSun: 1700, thuToSatEve: 2200, extraChildPerNight: 100, cleaningFee: 0 },
+    features: [],
+    rules: '',
+    amenities: '',
   },
   {
+    ...COMMON,
     id: 'apt3',
-    name: 'דירה 3 (דוגמה)',
-    summary: 'הדירה הכי גדולה: זוג ושני ילדים',
-    capacity: { maxAdults: 2, maxGuests: 4, infantsCount: false, maxInfants: 1 },
-    prices: { weeknight: 700, weekend: 900, cleaningFee: 200 },
-    seasons: [],
-    weekendNights: [5, 6],
-    minNights: 2,
-    minNightsWeekend: 2,
-    checkIn: '15:00', checkOut: '11:00',
-    checkoutNotes: '',             // what guests do before leaving (keys, trash, AC)
-    features: ['parking', 'ac', 'wifi', 'crib', 'yard'],
-    rules: 'בלי עישון, בלי אירועים',
-    amenities: 'חצר, מנגל, 2 חדרי שינה, מטבח מאובזר',
-    photos: '', photoUrls: [], location: '',
-    privateInfo: { address: '', door: '', wifi: '', parking: '' },
-    icalUrls: [], promo: '', nearby: '',
+    name: 'קו המים 3',
+    summary: '',
+    prices: { weekday1: 1200, weekday2: 1000, thu: 1400, friToSatEve: 1700, friToSun: 2000, thuToSatEve: 2600, extraChildPerNight: 100, cleaningFee: 0 },
+    features: [],
+    rules: '',
+    amenities: '',
   },
 ];
 

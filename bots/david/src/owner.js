@@ -2,18 +2,19 @@
 // summary, follow-ups to guests who went quiet), and our internal report.
 
 import {
-  getBooking, setBookingStatus, bookingsOnDay, pendingBookings,
+  getBooking, setBookingStatus, setBookingTotal, bookingsOnDay, pendingBookings,
   getReferral, closeReferralRow, referralsBetween, getStats, bump,
   followUpCandidates, saveConv, usageBetween, errorsBetween, cleanup,
   addBlock, removeBlock, blocksFor,
 } from './store.js';
-import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights } from './journey.js';
+import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays } from './journey.js';
 import { sendText, sendNotify } from './whatsapp.js';
 import { israelToday, weekStart, parseDate, nightsBetween } from './logic.js';
 import { reportProblem } from './monitor.js';
 
 const HELP = `פקודות:
 אושר B123 : אישור הזמנה (הלקוח מקבל אישור ופרטי הגעה)
+אושר B123 2500 : אישור עם מחיר סופי (הנחת 3 לילות, דקה 90, חג)
 בוטל B123 : דחיית בקשה (הלקוח מקבל הודעה)
 נסגר R123 500 : ליד שהעברת נסגר, עם העמלה בש"ח
 לא נסגר R123 : ליד שלא נסגר
@@ -30,7 +31,7 @@ const nis = (n) => '₪' + Math.round(Number(n || 0)).toLocaleString('en-US');
 export async function handleOwner(ctx, text) {
   const t = text.trim();
   let m;
-  if ((m = t.match(/^אושר\s+(B\w+)/i))) return confirmBooking(ctx, m[1].toUpperCase());
+  if ((m = t.match(/^אושר\s+(B\w+)\s*₪?\s*([\d,]+)?/i))) return confirmBooking(ctx, m[1].toUpperCase(), m[2]);
   if ((m = t.match(/^בוטל\s+(B\w+)/i))) return cancelBooking(ctx, m[1].toUpperCase());
   if ((m = t.match(/^לא נסגר\s+(R\w+)/i))) return closeReferral(ctx, m[1].toUpperCase(), false);
   if ((m = t.match(/^נסגר\s+(R\w+)\s*₪?\s*([\d,]+)?/i))) return closeReferral(ctx, m[1].toUpperCase(), true, m[2]);
@@ -70,13 +71,15 @@ async function listBlocks(ctx) {
 async function freeText(ctx) {
   const list = await freeNights(ctx, 14);
   if (!list.length) return 'הכל תפוס בשבועיים הקרובים 🎉';
-  return list.map(x => `*${x.apt.name}*: ${x.free.map(d => d.slice(8, 10) + '.' + d.slice(5, 7)).join(', ')}`).join('\n');
+  return list.map(x => `*${x.apt.name}*: ${compressDays(x.free)}`).join('\n');
 }
 
-async function confirmBooking(ctx, id) {
+async function confirmBooking(ctx, id, price) {
   const b = await getBooking(ctx.env, id);
   if (!b) return sendText(ctx.env, ctx.phone, `לא מצאתי הזמנה ${id}`);
   if (b.status === 'confirmed') return sendText(ctx.env, ctx.phone, `${id} כבר מאושרת.`);
+  if (price) { b.total = Number(String(price).replace(/,/g, '')); await setBookingTotal(ctx.env, id, b.total); }
+  if (b.total == null) return sendText(ctx.env, ctx.phone, `בהזמנה ${id} אין מחיר. תכתוב: אושר ${id} <מחיר>`);
   await setBookingStatus(ctx.env, id, 'confirmed');
   await bump(ctx.env, 'bookingsConfirmed');
   await bump(ctx.env, 'revenue', b.total);
@@ -85,7 +88,7 @@ async function confirmBooking(ctx, id) {
   const info = [p.address && `כתובת: ${p.address}`, p.parking && `חניה: ${p.parking}`].filter(Boolean).join('\n');
   // The guest wrote recently, so this is normally inside the 24-hour window.
   await sendNotify(ctx.env, b.phone,
-    `${b.name}, ההזמנה שלך אושרה ✅\n${b.aptName}\n${b.checkin} עד ${b.checkout}\nכניסה מ-${apt.checkIn || ''}, יציאה עד ${apt.checkOut || ''}\nסה"כ: ${nis(b.total)}${info ? `\n${info}` : ''}\nקוד כניסה ו-Wi-Fi יישלחו יום לפני ההגעה. מחכים לכם!`);
+    `${b.name}, ההזמנה שלך אושרה ✅\n${b.aptName}\n${b.checkin} עד ${b.checkout}\nכניסה מ-${apt.checkIn || ''}, ${new Date(b.checkout + 'T00:00:00Z').getUTCDay() === 6 ? 'יציאה במוצאי שבת' : `יציאה עד ${apt.checkOut || ''}`}\nסה"כ: ${nis(b.total)}${info ? `\n${info}` : ''}\nקוד כניסה ו-Wi-Fi יישלחו יום לפני ההגעה. מחכים לכם!`);
   return sendText(ctx.env, ctx.phone, `אושר ✅ ${b.id}, הלקוח קיבל אישור.`);
 }
 

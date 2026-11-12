@@ -1,7 +1,7 @@
 // Tools the model can call, and what they do. Prices, capacity and availability are
 // always computed here in code, never by the model.
 
-import { findApartments, matchPartners, REASON_HE, quote } from './logic.js';
+import { findApartments, matchPartners, REASON_HE, quote, israelToday } from './logic.js';
 import { busyFor } from './ical.js';
 import { FEATURES } from './config.js';
 import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe } from './store.js';
@@ -22,8 +22,8 @@ export const TOOLS = [
       additionalProperties: false,
       properties: {
         checkin: date, checkout: date,
-        adults: int('מבוגרים, וגם ילדים מגיל 13'),
-        children: int('ילדים מגיל 2 עד 12'),
+        adults: int('מבוגרים, מגיל 18'),
+        children: int('ילדים מגיל 2 עד 17'),
         infants: int('תינוקות עד גיל 2'),
         needs: { type: 'array', items: { type: 'string', enum: featureCodes }, description: 'דרישות שהלקוח ציין במפורש' },
         budget: { type: ['integer', 'null'], description: 'תקציב כולל לשהייה בש"ח אם הלקוח ציין, אחרת null' },
@@ -144,7 +144,7 @@ export async function runTool(name, input, ctx) {
 }
 
 async function findTool(input, ctx) {
-  const r = findApartments(ctx.apartments, await busyMap(ctx), input);
+  const r = findApartments(ctx.apartments, await busyMap(ctx), { ...input, today: israelToday() });
   if (r.error) return r;
   ctx.conv.quotedAt = ctx.conv.quotedAt || Date.now();
   ctx.conv.lastSearch = input;
@@ -155,7 +155,11 @@ async function findTool(input, ctx) {
     apartments: r.results.map(x => ({
       id: x.id, name: x.name, fits: x.fits,
       why_not: x.reasons.map(k => k === 'min_nights' ? `מינימום ${x.minNights} לילות` : REASON_HE[k]),
-      total: x.quote.total, nights_total: x.quote.nightsTotal, cleaning: x.quote.cleaning,
+      total: x.quote.total,
+      breakdown: x.quote.parts.map(p => `${p.label} ₪${p.price}`).join(' + ') + (x.quote.childExtra ? ` + ילדים ₪${x.quote.childExtra}` : ''),
+      discount_pending: x.quote.discountPending,
+      owner_quote: x.quote.ownerQuote,
+      checkout_after_shabbat: x.quote.checkoutLate,
     })),
   };
 }
@@ -170,7 +174,7 @@ async function bookingTool(input, ctx) {
   if (!res.fits) return { error: 'הדירה כבר לא מתאימה: ' + res.reasons.map(k => REASON_HE[k]).join(', ') + '. קרא שוב ל-find_apartments.' };
 
   const B = ctx.business;
-  const q = quote(apt, input.checkin, input.checkout);
+  const q = quote(apt, input.checkin, input.checkout, input, israelToday());
   const rec = {
     id: newId('B'), status: 'pending', createdAt: Date.now(),
     aptId: apt.id, aptName: apt.name, phone: ctx.phone, name: input.full_name,
@@ -184,12 +188,15 @@ async function bookingTool(input, ctx) {
   await bump(ctx.env, 'bookingRequests');
   ctx.conv.bookedAt = Date.now();
 
-  const deposit = Math.round(q.total * (B.depositPercent || 0) / 100);
+  const deposit = q.total == null ? null : Math.round(q.total * (B.depositPercent || 0) / 100);
+  const priceLine = q.ownerQuote ? `מחיר: צריך ממך (${q.ownerQuote})`
+    : q.discountPending ? `מחיר לפי המחירון: ${nis(q.total)}. ${q.nights} לילות, מגיעה לו הנחה נוספת: תכתוב לו את המחיר הסופי`
+    : `סה"כ: ${nis(q.total)}`;
   await sendNotify(ctx.env, B.ownerPhone,
-    `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות)\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}\nסה"כ: ${nis(q.total)}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
+    `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
 
   return {
-    booking_id: rec.id, total: q.total, deposit,
+    booking_id: rec.id, total: q.total, deposit, discount_pending: q.discountPending, owner_quote: q.ownerQuote,
     payment_link: B.bookingFlow === 'pay_to_confirm' ? (B.paymentLink || null) : null,
     status: B.bookingFlow === 'pay_to_confirm' ? 'ממתין לתשלום מקדמה' : 'ממתין לאישור של ' + B.botName,
   };

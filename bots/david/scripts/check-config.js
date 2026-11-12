@@ -17,14 +17,16 @@ APARTMENTS.forEach((a, i) => {
   const n = `דירה ${i + 1} (${a.name})`;
   if (/דוגמה/.test(a.name)) block.push(`${n}: השם והנתונים הם דוגמה.`);
   if (!a.capacity?.maxGuests || !a.capacity?.maxAdults) block.push(`${n}: חסרה קיבולת.`);
-  if (!a.prices?.weeknight) block.push(`${n}: חסר מחיר.`);
+  for (const k of ['weekday1', 'weekday2', 'thu', 'friToSatEve', 'friToSun', 'thuToSatEve']) if (!a.prices?.[k]) block.push(`${n}: חסר מחיר ${k}.`);
+  if (!a.summary) warn.push(`${n}: אין תיאור קצר (חדרים, מיטות, נוף).`);
+  if (!a.features?.length && !a.amenities) warn.push(`${n}: לא כתוב מה יש בדירה, אז הבוט לא יוכל לענות על "יש ג'קוזי?".`);
   if (!a.privateInfo?.address) block.push(`${n}: חסרה כתובת (נשלחת רק אחרי אישור).`);
   if (!a.privateInfo?.door) warn.push(`${n}: חסר קוד או הוראות כניסה לתזכורת של יום לפני.`);
   if (!a.privateInfo?.wifi) warn.push(`${n}: חסר Wi-Fi.`);
   if (!a.icalUrls?.length) warn.push(`${n}: אין קישור יומן (Airbnb/Booking). בלי זה הבוט לא יודע על הזמנות שנסגרו שם.`);
   if (!a.photoUrls?.length && !a.photos) warn.push(`${n}: אין תמונות.`);
   for (const f of a.features || []) if (!FEATURES[f]) block.push(`${n}: מאפיין לא מוכר "${f}".`);
-  for (const s of a.seasons || []) if (!(s.from <= s.to)) block.push(`${n}: עונה "${s.label}" עם תאריכים הפוכים.`);
+  for (const s of a.ownerQuoteDates || []) if (!(s.from <= s.to)) block.push(`${n}: חג "${s.label}" עם תאריכים הפוכים.`);
 });
 const ids = APARTMENTS.map(a => a.id);
 if (new Set(ids).size !== ids.length) block.push('יש שתי דירות עם אותו id.');
