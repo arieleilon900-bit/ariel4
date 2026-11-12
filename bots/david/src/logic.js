@@ -27,25 +27,52 @@ function inRange(day, from, to) {
   return day >= from && day <= to; // inclusive, string compare works for YYYY-MM-DD
 }
 
-// Friday and Saturday nights are weekend nights in Israel.
-export function isWeekendNight(day, weekendNights = [5, 6]) {
-  return weekendNights.includes(new Date(parseDate(day)).getUTCDay());
+export const dow = (day) => new Date(parseDate(day)).getUTCDay(); // 0 = Sunday
+
+function inAnyRange(nights, ranges) {
+  return (ranges || []).find(r => nights.some(d => inRange(d, r.from, r.to)));
 }
 
-// Price for one night: a season/holiday range overrides the regular price.
-export function nightPrice(apt, day) {
-  const weekend = isWeekendNight(day, apt.weekendNights);
-  const season = (apt.seasons || []).find(s => inRange(day, s.from, s.to));
-  const src = season || apt.prices;
-  return weekend ? (src.weekend ?? src.weeknight) : src.weeknight;
-}
-
-export function quote(apt, checkin, checkout) {
+// David's price list ("קו המים - מחירון"): a price for a couple; each child adds
+// extraChildPerNight per night; infants are free.
+//   Sun-Wed nights: weekday1 for a single night, weekday2 per night when the stay is 2+ nights
+//   Thursday night alone:              thu
+//   Friday, leaving Saturday evening:  friToSatEve   (checkout date = Saturday, out after Shabbat)
+//   Friday + Saturday, leaving Sunday: friToSun
+//   Thursday + Friday, leaving Sat eve: thuToSatEve
+// 3+ nights get an extra discount David sets himself, so the bot gives the regular
+// price and says the final one comes from David. Holidays and last-minute stays
+// ("דקה 90") aren't on the list: David quotes those.
+export function quote(apt, checkin, checkout, party = {}, today = null) {
+  const P = apt.prices;
   const nights = nightsBetween(checkin, checkout);
-  const perNight = nights.map(d => ({ date: d, price: nightPrice(apt, d) }));
-  const nightsTotal = perNight.reduce((s, n) => s + n.price, 0);
-  const cleaning = apt.prices.cleaningFee || 0;
-  return { nights: nights.length, perNight, nightsTotal, cleaning, total: nightsTotal + cleaning };
+  const n = nights.length;
+  const d = nights.map(dow);
+  const parts = [];
+  let ownerQuote = null;
+  for (let i = 0; i < n;) {
+    if (d[i] === 4 && d[i + 1] === 5 && i + 2 === n) { parts.push({ label: 'חמישי עד מוצ"ש', price: P.thuToSatEve }); i += 2; }
+    else if (d[i] === 4) { parts.push({ label: 'חמישי', price: P.thu }); i += 1; }
+    else if (d[i] === 5 && d[i + 1] === 6) { parts.push({ label: 'שישי עד ראשון', price: P.friToSun }); i += 2; }
+    else if (d[i] === 5) { parts.push({ label: 'שישי עד מוצ"ש', price: P.friToSatEve }); i += 1; }
+    else if (d[i] === 6) { ownerQuote = ownerQuote || 'כניסה במוצאי שבת לא מופיעה במחירון'; parts.push({ label: 'מוצ"ש', price: 0 }); i += 1; }
+    else { parts.push({ label: 'אמצע שבוע', price: n >= 2 ? P.weekday2 : P.weekday1 }); i += 1; }
+  }
+  const holiday = inAnyRange(nights, apt.ownerQuoteDates);
+  if (holiday) ownerQuote = `${holiday.label || 'חג'}: המחיר לפי דוד`;
+  if (today && n && (parseDate(checkin) - parseDate(today)) / DAY <= (apt.lastMinuteDays ?? 1)) {
+    ownerQuote = 'הזמנת דקה 90 (הגעה היום או מחר): המחיר לפי דוד';
+  }
+  const base = parts.reduce((s, x) => s + x.price, 0);
+  const childExtra = (party.children || 0) * (P.extraChildPerNight || 0) * n;
+  const cleaning = P.cleaningFee || 0;
+  return {
+    nights: n, parts, base, childExtra, cleaning,
+    total: ownerQuote ? null : base + childExtra + cleaning,
+    discountPending: n >= (apt.discountFromNights ?? 3) && !ownerQuote,
+    ownerQuote,
+    checkoutLate: n > 0 && dow(checkout) === 6, // leaving on Saturday = after Shabbat
+  };
 }
 
 // Infants (under 2) don't take a bed unless the apartment says they count.
@@ -63,10 +90,8 @@ export function fitsCapacity(apt, party) {
 
 export function minNightsFor(apt, checkin, checkout) {
   const nights = nightsBetween(checkin, checkout);
-  const season = (apt.seasons || []).find(s => nights.some(d => inRange(d, s.from, s.to)) && s.minNights);
-  if (season) return season.minNights;
-  if (apt.minNightsWeekend && nights.some(d => isWeekendNight(d, apt.weekendNights))) return apt.minNightsWeekend;
-  return apt.minNights || 1;
+  const r = inAnyRange(nights, apt.minNightsRanges);
+  return (r && r.minNights) || apt.minNights || 1;
 }
 
 // busy: [{start:'YYYY-MM-DD', end:'YYYY-MM-DD'}], end exclusive (the checkout day).
@@ -91,8 +116,8 @@ export function findApartments(apartments, busyByApt, req) {
     if (!isFree(busyByApt[apt.id], req.checkin, req.checkout)) reasons.push('dates_taken');
     const min = minNightsFor(apt, req.checkin, req.checkout);
     if (nights.length < min) reasons.push('min_nights');
-    const q = quote(apt, req.checkin, req.checkout);
-    if (req.budget && q.total > req.budget * 1.15) reasons.push('over_budget');
+    const q = quote(apt, req.checkin, req.checkout, party, req.today);
+    if (req.budget && q.total != null && q.total > req.budget * 1.15) reasons.push('over_budget');
     return {
       id: apt.id, name: apt.name, fits: reasons.length === 0, reasons,
       missingFeatures: missing, minNights: min, quote: q,

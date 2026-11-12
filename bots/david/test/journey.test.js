@@ -91,7 +91,7 @@ test('offers list: needs consent, "הסר" removes', async () => {
 test('David blocks dates by text and the bot treats them as taken', async () => {
   const env = fakeEnv();
   await handleMessage(env, { from: OWNER, id: 'k1', type: 'text', text: 'חסום 3 2027-04-01 2027-04-05 משפחה שלי' }, extra(null));
-  assert.match(env.OUTBOX.at(-1).text, /חסמתי את דירה 3/);
+  assert.match(env.OUTBOX.at(-1).text, /חסמתי את קו המים 3/);
   const c = scriptedClient([
     toolUse('find_apartments', { checkin: '2027-04-02', checkout: '2027-04-04', adults: 2, children: 2, infants: 0, needs: [], budget: null }),
     say('תפוס', (p) => assert.ok(lastToolResult(p).apartments.find(a => a.id === 'apt3').why_not.includes('כל הדירות תפוסות בתאריכים האלה'))),
@@ -131,5 +131,5 @@ test('checkout morning and review request go on departure day', async () => {
 test('owner "פנוי" lists free nights', async () => {
   const env = fakeEnv();
   await handleMessage(env, { from: OWNER, id: 'f1', type: 'text', text: 'פנוי' }, extra(null));
-  assert.match(env.OUTBOX.at(-1).text, /\*דירה 1/);
+  assert.match(env.OUTBOX.at(-1).text, /\*קו המים 1\*: \d\d\.\d\d-\d\d\.\d\d/);
 });

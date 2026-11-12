@@ -88,7 +88,7 @@ export async function freeNights(ctx, days, now = Date.now()) {
   return out;
 }
 
-function compressDays(days) {
+export function compressDays(days) {
   // 2027-03-01, 02, 03, 07 → "01.03-03.03, 07.03"
   const fmt = (d) => `${d.slice(8, 10)}.${d.slice(5, 7)}`;
   const runs = [];
