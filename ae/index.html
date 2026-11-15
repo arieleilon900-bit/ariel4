@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A.E Automations | מזכירה בוואטסאפ לעסקים קטנים</title>
+<meta name="description" content="מזכירה בוואטסאפ שעונה לכל לקוח תוך 3 שניות, 24/7, בשם העסק שלך. שבוע ניסיון בחינם.">
+<meta property="og:title" content="A.E Automations | מזכירה בוואטסאפ לעסקים קטנים">
+<meta property="og:description" content="עונה לכל לקוח תוך 3 שניות, גם ב-02:00 בלילה. שבוע ניסיון בחינם.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta name="theme-color" content="#0a1017">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Concept: one night in a small business, told through its WhatsApp. Timestamps and
+   the blue "read" ticks are the brand marks. Karantina for poster headlines, Plex for text. */
+:root{
+  --paper:#ece5dd;      /* WhatsApp chat wallpaper */
+  --card:#fbf9f5;
+  --ink:#0d171b;
+  --muted:#55615f;
+  --line:rgba(13,23,27,.16);
+  --out:#d9fdd3;        /* outgoing bubble */
+  --tick:#1fa2e0;       /* read ticks: the one accent */
+  --night:#0a1017;
+  --on-night:#f1ece3;
+  --display:'Karantina','Arial Narrow',sans-serif;
+  --body:'IBM Plex Sans Hebrew',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:24px}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:.86;margin:0;letter-spacing:.005em}
+h2{font-size:clamp(54px,9vw,128px)}
+p{margin:0}
+.mono{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
+:focus-visible{outline:3px solid var(--tick);outline-offset:3px}
+
+/* ticks */
+.ticks{display:inline-block;width:1.15em;height:.7em;vertical-align:-.02em}
+.ticks path{fill:none;stroke:var(--tick);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;padding-block:20px}
+.brand{display:flex;align-items:baseline;gap:10px;text-decoration:none;direction:ltr}
+.brand b{font-family:var(--display);font-size:38px;line-height:1;letter-spacing:.02em}
+.brand span{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase}
+.nav-links{display:flex;gap:26px;align-items:center;font-size:16px}
+.nav-links a{text-decoration:none}
+.nav-links a:hover{text-decoration:underline;text-underline-offset:5px}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);text-decoration:none;font-weight:600;padding:14px 22px;border-radius:5px;border:2px solid var(--ink);font-size:17px;line-height:1.2}
+.btn:hover{background:transparent;color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper)}
+.btn.small{padding:9px 16px;font-size:15px}
+
+/* hero */
+.hero{padding-block:clamp(20px,5vw,64px) clamp(56px,8vw,110px)}
+.hero-top{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end}
+.hero h1{font-size:clamp(76px,11.6vw,168px)}
+.hero h1 em{font-style:normal;display:inline-block;background:var(--out);padding:0 .08em .02em;border-radius:6px 6px 6px 0;transform:rotate(-1.2deg)}
+.hero-row{margin-top:clamp(24px,3vw,40px);display:flex;gap:40px;align-items:center;flex-wrap:wrap}
+.hero-row > div{display:contents}
+.hero-row p.lead{font-size:clamp(19px,2vw,23px);max-width:38ch;line-height:1.6;flex:1 1 420px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero-chat{display:grid;gap:8px;justify-items:start;width:min(360px,30vw);padding-bottom:14px}
+.bubble{background:#fff;border-radius:10px;padding:9px 12px 7px;font-size:16.5px;line-height:1.45;max-width:320px;box-shadow:0 1px 0 rgba(13,23,27,.12)}
+.bubble .t{display:block;font-family:var(--mono);font-size:11.5px;color:#7a8684;text-align:left;direction:ltr;margin-top:2px}
+.bubble.in{border-start-start-radius:2px}
+.bubble.out{background:var(--out);justify-self:end;border-start-end-radius:2px}
+.hero-chat small{font-size:14px;color:var(--muted);justify-self:end}
+
+/* night story */
+.night{position:relative;height:520vh;background:var(--night);color:var(--on-night)}
+.night-stick{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:grid;grid-template-columns:1fr minmax(300px,380px);gap:clamp(24px,5vw,80px);align-items:center;padding-inline:max(24px,calc((100vw - 1180px)/2 + 24px))}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:var(--stars,1);background-image:radial-gradient(1.4px 1.4px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 31% 9%,#fff 50%,transparent 51%),radial-gradient(1.6px 1.6px at 47% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 63% 12%,#fff 50%,transparent 51%),radial-gradient(1.3px 1.3px at 78% 27%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 8%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 22% 38%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 55% 41%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 93% 44%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 6% 55%,#fff 50%,transparent 51%)}
+.night-text{position:relative;z-index:1}
+.clock{font-family:var(--mono);font-size:clamp(64px,13vw,190px);font-weight:500;line-height:1;direction:ltr;text-align:right;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.caps{position:relative;min-height:9.5em;margin-top:18px}
+.cap{position:absolute;inset:0 0 auto 0;opacity:0;transform:translateY(10px);transition:opacity .35s,transform .35s}
+.cap.on{opacity:1;transform:none}
+.cap h3{font-size:clamp(44px,6vw,84px)}
+.cap p{font-size:clamp(18px,1.8vw,22px);max-width:30ch;margin-top:12px;opacity:.86}
+.night-hint{position:absolute;bottom:22px;inset-inline-start:max(24px,calc((100vw - 1180px)/2 + 24px));font-family:var(--mono);font-size:12px;letter-spacing:.14em;opacity:.6}
+
+/* phone */
+.phone{position:relative;z-index:1;width:100%;max-width:380px;height:min(680px,82svh);background:#11191c;border-radius:38px;padding:11px;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+.screen{height:100%;border-radius:28px;overflow:hidden;background:#efe7dd;color:var(--ink);display:flex;flex-direction:column}
+.wa-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f6f5f3;border-bottom:1px solid rgba(13,23,27,.1);font-size:15px;line-height:1.2}
+.wa-head i{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-style:normal;font-weight:600;font-size:16px}
+.wa-head small{display:block;color:#5b6765;font-size:12px}
+.msgs{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;padding:12px;overflow:hidden}
+.msg{display:none;max-width:86%;background:#fff;border-radius:9px;padding:7px 10px 5px;font-size:14.5px;line-height:1.42;box-shadow:0 1px 0 rgba(13,23,27,.1);flex-shrink:0}
+.msg.on{display:block;animation:pop .28s ease-out}
+.msg.c{align-self:flex-start;border-start-start-radius:2px}
+.msg.b{align-self:flex-end;background:var(--out);border-start-end-radius:2px}
+.msg[dir=ltr]{text-align:left}
+.msg .t{display:block;font-family:var(--mono);font-size:10.5px;color:#73807e;direction:ltr;text-align:left;margin-top:1px}
+.msg .fast{font-family:var(--body);font-size:11px;font-weight:600;color:#0a6b46;margin-right:7px;unicode-bidi:isolate}
+.msg.sum{align-self:stretch;max-width:none;background:#fff7d1;border-radius:9px;font-size:14px}
+.msg.sum b{display:block;margin-bottom:2px}
+.voice{display:flex;align-items:center;gap:8px;direction:ltr;min-width:170px}
+.voice span{display:block;height:18px;flex:1;background:repeating-linear-gradient(90deg,#8a9694 0 2px,transparent 2px 5px);-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 30%,#000 70%,transparent 100%)}
+.voice b{font-family:var(--mono);font-weight:400;font-size:12px}
+.day{align-self:center;background:#fff;border-radius:6px;padding:2px 10px;font-size:11.5px;color:#5b6765;display:none}
+.day.on{display:block}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+
+/* industries */
+.try{padding-block:clamp(72px,10vw,150px)}
+.try-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
+.try-head p{max-width:30ch;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:0;margin-top:36px;border-bottom:2px solid var(--ink)}
+.tab{font:600 18px var(--body);background:none;border:0;padding:12px 20px;cursor:pointer;color:var(--muted);border-radius:5px 5px 0 0}
+.tab[aria-selected=true]{background:var(--ink);color:var(--paper)}
+.panel{display:none;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);padding-top:36px;align-items:start}
+.panel.on{display:grid}
+.thread{display:grid;gap:8px;justify-items:start}
+.thread .bubble{max-width:min(420px,88%)}
+.got h3{font-size:clamp(36px,4.4vw,58px);margin-bottom:14px}
+.slip{background:#fff7d1;border-radius:6px;padding:16px 18px;font-size:16.5px;line-height:1.6;white-space:pre-line;box-shadow:0 1px 0 rgba(13,23,27,.14)}
+.got p{margin-top:16px;color:var(--muted);max-width:40ch}
+.other{display:none;padding-top:36px;max-width:640px}
+.other.on{display:block}
+.other h3{font-size:clamp(40px,5vw,68px);margin-bottom:14px}
+
+/* proof: a receipt */
+.proof{background:var(--ink);color:var(--paper);padding-block:clamp(72px,9vw,130px)}
+.proof-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(32px,6vw,90px);align-items:center}
+.proof h2{font-size:clamp(54px,8.4vw,120px)}
+.proof p{margin-top:22px;max-width:36ch;opacity:.82}
+.receipt{background:#fbf9f5;color:var(--ink);font-family:var(--mono);font-size:15.5px;line-height:1.5;padding:26px 24px 34px;max-width:360px;justify-self:end;width:100%;transform:rotate(1.6deg);-webkit-mask-image:radial-gradient(circle at 8px 100%,transparent 6px,#000 6.5px);-webkit-mask-size:16px 100%;mask-image:radial-gradient(circle at 8px 100%,transparent 6px,#000 6.5px);mask-size:16px 100%}
+.receipt .r-head{text-align:center;font-family:var(--body);font-weight:600;font-size:17px;border-bottom:1px dashed var(--ink);padding-bottom:12px;margin-bottom:12px;line-height:1.4}
+.receipt .r-head small{display:block;font-weight:400;font-size:13.5px;color:var(--muted)}
+.receipt dl{margin:0;display:grid;grid-template-columns:1fr auto;gap:8px 12px;font-family:var(--body)}
+.receipt dt{font-size:16px}
+.receipt dd{margin:0;font-family:var(--mono);font-size:22px;font-weight:500;text-align:left}
+.receipt .r-foot{border-top:1px dashed var(--ink);margin-top:14px;padding-top:12px;font-family:var(--body);font-size:13.5px;color:var(--muted)}
+
+/* around */
+.around{padding-block:clamp(72px,10vw,150px)}
+.around h2{max-width:9ch}
+.around-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(28px,6vw,90px);align-items:start}
+.around-grid > div > p{margin-top:22px;color:var(--muted);max-width:30ch}
+.rows{border-top:2px solid var(--ink)}
+.rows div{display:grid;grid-template-columns:9.5em 1fr;gap:18px;padding:18px 0;border-bottom:1px solid var(--line)}
+.rows b{font-family:var(--display);font-size:32px;line-height:1;font-weight:700}
+.rows span{font-size:17px;line-height:1.6}
+
+/* plans */
+.plans{padding-block:0 clamp(72px,10vw,150px)}
+.plans table{width:100%;border-collapse:collapse;margin-top:38px;font-size:17px}
+.plans th,.plans td{text-align:start;padding:16px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.plans thead th{font-family:var(--display);font-size:clamp(34px,4vw,52px);line-height:.9;font-weight:700;border-bottom:2px solid var(--ink)}
+.plans tbody th{font-weight:500;color:var(--muted);width:9em}
+.plans .price{font-family:var(--mono);font-size:24px;font-weight:500;direction:ltr;unicode-bidi:isolate}
+.plans td:nth-child(2){background:var(--out)}
+.plans thead th:nth-child(2){background:var(--out)}
+.plans-foot{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:26px;color:var(--muted);font-size:16px}
+
+/* contract */
+.deal{padding-block:0 clamp(72px,10vw,150px)}
+.paper{background:var(--card);border:1px solid var(--line);padding:clamp(26px,5vw,64px);max-width:860px;margin-inline:auto;position:relative}
+.paper::before{content:"";position:absolute;inset:8px;border:1px solid var(--line);pointer-events:none}
+.paper h2{font-size:clamp(46px,7vw,92px);text-align:center}
+.paper .date{text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:10px;letter-spacing:.08em}
+.paper ol{margin:34px 0 0;padding:0;list-style:none;counter-reset:c}
+.paper li{counter-increment:c;display:grid;grid-template-columns:2.2em 1fr;gap:6px;padding:16px 0;border-top:1px solid var(--line);font-size:18px;line-height:1.65}
+.paper li::before{content:"§" counter(c);font-family:var(--mono);font-size:15px;color:var(--muted);padding-top:3px;direction:ltr;unicode-bidi:isolate;text-align:right}
+.paper li b{font-weight:600}
+.paper li small{display:block;color:var(--muted);font-size:14.5px;margin-top:4px;line-height:1.55}
+.sign{display:flex;justify-content:space-between;align-items:end;margin-top:34px;gap:20px;font-size:14.5px;color:var(--muted)}
+.sign svg{width:150px;height:62px;display:block}
+.sign svg path{fill:none;stroke:#143a8a;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* faq */
+.faq{padding-block:0 clamp(72px,10vw,150px)}
+.faq-grid{display:grid;grid-template-columns:.7fr 1.3fr;gap:clamp(28px,6vw,90px)}
+.faq details{border-top:1px solid var(--line);padding:4px 0}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:600;font-size:19px;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:var(--mono);font-size:22px;line-height:1}
+.faq details[open] summary::after{content:"−"}
+.faq details p{padding:0 0 18px;max-width:54ch;color:#2f3b3a}
+
+/* end */
+.end{background:var(--out);padding-block:clamp(72px,10vw,150px) clamp(96px,11vw,150px)}
+.end h2{font-size:clamp(84px,17vw,260px)}
+.end-row{display:grid;grid-template-columns:1fr auto;gap:32px;align-items:end;margin-top:28px}
+.end-row p{max-width:36ch;font-size:clamp(19px,2vw,23px);line-height:1.55}
+.end .tel{font-family:var(--mono);font-size:clamp(30px,4.6vw,56px);font-weight:500;text-decoration:none;direction:ltr;display:block;line-height:1.1}
+.end .tel:hover{text-decoration:underline;text-underline-offset:8px}
+footer{background:var(--ink);color:var(--paper);padding-block:26px 90px;font-size:14.5px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;opacity:.8}
+footer a{text-underline-offset:4px}
+
+.bar{display:none}
+
+@media (max-width:860px){
+  body{font-size:17px}
+  .nav-links a:not(.btn){display:none}
+  .hero-top,.try-head,.proof-grid,.around-grid,.faq-grid,.end-row{grid-template-columns:1fr}
+  .hero-top{gap:22px}
+  .hero-chat{width:auto;max-width:340px;padding:0}
+  br.d{display:none}
+  .night-stick{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:10px;padding-block:14px 78px;align-items:start}
+  .clock{font-size:54px;text-align:right}
+  .caps{min-height:7.2em;margin-top:6px}
+  .cap h3{font-size:38px}
+  .cap p{font-size:16px;margin-top:6px}
+  .phone{height:100%;min-height:0;max-height:none;max-width:340px;margin-inline:auto;border-radius:30px;padding:8px}
+  .screen{border-radius:23px}
+  .night-hint{display:none}
+  .panel.on{grid-template-columns:1fr}
+  .tab{padding:10px 13px;font-size:16px}
+  .receipt{justify-self:center}
+  .rows div{grid-template-columns:1fr;gap:6px}
+  .plans table,.plans tbody,.plans tr,.plans td,.plans th{display:block}
+  .plans thead{display:none}
+  .plans tr{border-top:2px solid var(--ink);padding:10px 0}
+  .plans tbody th{width:auto;border:0;padding:10px 0 2px;font-family:var(--display);font-size:34px;color:var(--ink);font-weight:700;line-height:1}
+  .plans td{border:0;padding:6px 0;background:none !important}
+  .plans td::before{content:attr(data-plan) ": ";font-weight:600}
+  .bar{display:flex;position:fixed;inset:auto 0 0 0;z-index:20;background:var(--ink);padding:10px 14px calc(10px + env(safe-area-inset-bottom));gap:10px}
+  .bar a{flex:1;text-align:center;justify-content:center;background:var(--out);color:var(--ink);border-color:var(--out)}
+}
+
+/* no-motion: the night becomes a plain list */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .night{height:auto}
+  .night-stick{position:static;height:auto;padding-block:56px;overflow:visible}
+  .cap{position:static;opacity:1;transform:none;margin-bottom:22px}
+  .caps{min-height:0}
+  .phone{height:auto}
+  .msgs{justify-content:flex-start}
+  .msg,.day{display:block;animation:none}
+  .night-hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap nav">
+  <a class="brand" href="#top" aria-label="A.E Automations"><b>A.E</b><span>Automations</span></a>
+  <nav class="nav-links" aria-label="ניווט">
+    <a href="#night">איך זה עובד</a>
+    <a href="#plans">מחירים</a>
+    <a href="#deal">ההתחייבות שלנו</a>
+    <a class="btn small" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%90%D7%AA%D7%A8%20%D7%A9%D7%9C%20A.E%20Automations%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%91%D7%95%D7%A2%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F">שבוע ניסיון</a>
+  </nav>
+</header>
+
+<main id="top">
+<section class="wrap hero">
+  <div class="hero-top">
+    <h1>מזכירה בוואטסאפ <br class="d">שעונה תוך <br class="d"><em>3 שניות</em></h1>
+    <div class="hero-chat" aria-label="שיחה לדוגמה">
+      <div class="bubble in">היי, אתם עובדים גם בשישי?<span class="t">23:47</span></div>
+      <div class="bubble out">היי! כן, בשישי עד 13:00. על מה מדובר? אשמח לעזור 🙂<span class="t">23:47 <svg class="ticks" viewBox="0 0 22 13" aria-hidden="true"><path d="M1 7l4 4L13 2"/><path d="M8 10l1.5 1.5L20 2"/></svg></span></div>
+      <small>אותה דקה. בעל העסק ישן.</small>
+    </div>
+  </div>
+  <div class="hero-row">
+    <div>
+      <p class="lead">לכל לקוח שכותב לעסק שלך, בכל שעה, בשם שלך ובסגנון שלך. היא אוספת את הפרטים, קובעת פגישה, ומעבירה אליך רק את מי שמוכן לסגור.</p>
+      <div class="hero-cta">
+        <a class="btn" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%90%D7%AA%D7%A8%20%D7%A9%D7%9C%20A.E%20Automations%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%91%D7%95%D7%A2%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F">שבוע ניסיון בחינם</a>
+        <a class="btn ghost" href="#night">לראות לילה אחד בעסק</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="night" id="night" aria-label="לילה אחד בעסק שלך">
+  <div class="night-stick" id="stick">
+    <div class="stars" aria-hidden="true"></div>
+    <div class="night-text">
+      <div class="clock" id="clock" aria-hidden="true">21:40</div>
+      <div class="caps">
+        <div class="cap on" data-from="0" data-to=".16"><h3>סגרת את היום</h3><p>הטלפון על שקט. הלקוחות ממשיכים לכתוב.</p></div>
+        <div class="cap" data-from=".16" data-to=".4"><h3>מישהו מצא אותך בגוגל</h3><p>תוך 3 שניות הוא מקבל תשובה ושאלה חזרה. הוא כבר לא כותב למתחרה הבא ברשימה.</p></div>
+        <div class="cap" data-from=".4" data-to=".64"><h3>הודעה קולית בחצות</h3><p>המזכירה מקשיבה, מבינה מה צריך, וקובעת פגישה ביומן שלך.</p></div>
+        <div class="cap" data-from=".64" data-to=".86"><h3>לקוחה כותבת באנגלית</h3><p>היא עונה בשפה שכותבים לה: עברית, אנגלית, רוסית, ערבית.</p></div>
+        <div class="cap" data-from=".86" data-to="1.01"><h3>קמת. הכל מחכה לך</h3><p>הודעה אחת מסכמת את הלילה. אתה מתקשר רק למי שכבר מוכן.</p></div>
+      </div>
+    </div>
+    <div class="phone" role="img" aria-label="הטלפון של העסק במהלך הלילה: שלוש פניות נענות לבד, ובבוקר מגיע סיכום">
+      <div class="screen">
+        <div class="wa-head"><i>ש</i><div>שיפוצים | העסק שלך<small>המזכירה עונה</small></div></div>
+        <div class="msgs" id="msgs">
+          <div class="day" data-at=".16">לקוח חדש</div>
+          <div class="msg c" data-at=".16">היי, ראיתי אתכם בגוגל. צריך לשפץ אמבטיה, אפשר הצעת מחיר?<span class="t">22:15</span></div>
+          <div class="msg b" data-at=".19">היי! בשמחה 🙂 באיזו עיר הדירה, ומה הגודל בערך? אם יש תמונה, עוד יותר טוב.<span class="t"><span class="fast" dir="rtl">תוך 3 שנ׳</span>22:15</span></div>
+          <div class="day" data-at=".4">לקוח חדש</div>
+          <div class="msg c" data-at=".4"><div class="voice"><b>▶</b><span></span><b>0:21</b></div><span class="t">23:47</span></div>
+          <div class="msg b" data-at=".43">שמעתי, תודה. שיפוץ דירת 4 חדרים בראשון לציון. מתי נוח שנגיע לראות, ראשון או שני בבוקר?<span class="t"><span class="fast" dir="rtl">תוך 3 שנ׳</span>23:47</span></div>
+          <div class="msg c" data-at=".48">שני ב-9<span class="t">23:49</span></div>
+          <div class="msg b" data-at=".51">רשמתי: יום שני, 9:00. תקבל אישור בבוקר 👍<span class="t"><span class="fast" dir="rtl">תוך 3 שנ׳</span>23:49</span></div>
+          <div class="day" data-at=".64">לקוחה חדשה</div>
+          <div class="msg c" dir="ltr" data-at=".64">Hi, do you also do kitchens? We're in Herzliya<span class="t">02:10</span></div>
+          <div class="msg b" dir="ltr" data-at=".67">Hi! Yes, kitchens too. What are you planning, and when would you like to start?<span class="t"><span class="fast">in 3 sec</span>02:10</span></div>
+          <div class="msg sum" data-at=".86"><b>☀️ בוקר טוב. 3 פניות בלילה</b>פגישה נקבעה: שני 9:00, שיפוץ דירה בראשון לציון.<br>אמבטיה: מחכים לתמונה מהלקוח.<br>מטבח בהרצליה: שלחה פרטים, מחכה להצעה ממך.<span class="t">07:00</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="night-hint" aria-hidden="true">גוללים ↓ הזמן עובר</div>
+  </div>
+</section>
+
+<section class="wrap try" id="try">
+  <div class="try-head">
+    <h2>היא מדברת בשפה של העסק שלך</h2>
+    <p>כל מזכירה נבנית על עסק אחד: השירותים שלו, המחירים שלו, הניסוחים שלו. הנה שלוש דוגמאות.</p>
+  </div>
+  <div class="tabs" role="tablist" aria-label="תחום">
+    <button class="tab" role="tab" aria-selected="true" aria-controls="p-lock" id="t-lock">מנעולן</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-stay" id="t-stay" tabindex="-1">דירות נופש</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-clinic" id="t-clinic" tabindex="-1">קליניקת לייזר</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="p-other" id="t-other" tabindex="-1">התחום שלך</button>
+  </div>
+
+  <div class="panel on" role="tabpanel" id="p-lock" aria-labelledby="t-lock">
+    <div class="thread">
+      <div class="bubble in">נתקעתי מחוץ לבית בנתניה, הדלת נטרקה 😩<span class="t">19:02</span></div>
+      <div class="bubble out">אני איתך. באיזה רחוב? והמפתח נשאר בפנים במנעול?<span class="t">19:02</span></div>
+      <div class="bubble in">הרצל 14. כן, בפנים<span class="t">19:03</span></div>
+      <div class="bubble out">קיבלתי. המנעולן מקבל עכשיו את כל הפרטים וחוזר אליך תוך כמה דקות.<span class="t">19:03</span></div>
+    </div>
+    <div class="got">
+      <h3>מה המנעולן מקבל</h3>
+      <div class="slip">🔑 פנייה דחופה
+דלת טרוקה, מפתח בפנים במנעול
+הרצל 14, נתניה
+הלקוח מחכה ליד הדלת</div>
+      <p>הוא באמצע עבודה אחרת. במקום לענות ולשאול, הוא רואה הודעה אחת ויוצא לדרך. אחרי העבודה הלקוח מקבל חשבונית ובקשה לביקורת בגוגל.</p>
+    </div>
+  </div>
+
+  <div class="panel" role="tabpanel" id="p-stay" aria-labelledby="t-stay" hidden>
+    <div class="thread">
+      <div class="bubble in">יש מקום לזוג ושני ילדים בסופ״ש הקרוב?<span class="t">21:30</span></div>
+      <div class="bubble out">כן 🙂 שישי עד מוצ״ש, 1,900 ₪ כולל הילדים. לשלוח לך תמונות של הדירה?<span class="t">21:30</span></div>
+      <div class="bubble in">כן. ואם נהיה חמישה?<span class="t">21:32</span></div>
+      <div class="bubble out">הדירות שלנו עד ארבעה ותינוק. אשמח לבדוק לכם מקום מתאים ולחזור אליך היום, בסדר?<span class="t">21:32</span></div>
+    </div>
+    <div class="got">
+      <h3>מה בעל הדירות מקבל</h3>
+      <div class="slip">🔁 ליד חדש להעברה
+למה לא אצלך: חמישה אורחים
+👤 משפחה, סופ״ש הקרוב
+📞 טלפון + קישור לשיחה</div>
+      <p>המחיר מחושב לפי המחירון שלו, לא מנוחש. לקוח שלא מתאים לדירות לא הולך לאיבוד: הפרטים שלו מגיעים מסודרים, והוא מעביר אותו הלאה.</p>
+    </div>
+  </div>
+
+  <div class="panel" role="tabpanel" id="p-clinic" aria-labelledby="t-clinic" hidden>
+    <div class="thread">
+      <div class="bubble in">היי, יש לכם תורים השבוע להסרת שיער?<span class="t">14:20</span></div>
+      <div class="bubble out">היי 🙂 יש. על איזה אזור מדובר, ומתי נוח לך, בוקר או ערב?<span class="t">14:20</span></div>
+      <div class="bubble in">רגליים, ערב<span class="t">14:21</span></div>
+      <div class="bubble out">רשמתי. בעלת הקליניקה באמצע טיפול, והיא תחזור אליך עם שעה מדויקת.<span class="t">14:21</span></div>
+    </div>
+    <div class="got">
+      <h3>מה בעלת הקליניקה מקבלת</h3>
+      <div class="slip">💬 לקוחה חדשה
+הסרת שיער ברגליים
+מעדיפה שעות ערב
+מחכה לשעה ממך</div>
+      <p>היא לא עוצרת טיפול כדי לענות. המזכירה לא נותנת מחירים שלא אישרת ולא עונה על שאלות רפואיות. כשאת עונה ללקוחה בעצמך, היא שותקת.</p>
+    </div>
+  </div>
+
+  <div class="other" role="tabpanel" id="p-other" aria-labelledby="t-other" hidden>
+    <h3>נבנה לך שיחה לדוגמה על העסק שלך</h3>
+    <p>קבלן, מיזוג, עורך דין, סטודיו, מוסך. שלח לנו בוואטסאפ מה העסק עושה, ותקבל מספר שאפשר לכתוב לו כאילו אתה לקוח. תראה איך היא עונה לפני שאתה מחליט משהו.</p>
+    <p style="margin-top:22px"><a class="btn" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%93%D7%9E%D7%95%20%D7%A9%D7%9C%20%D7%94%D7%9E%D7%96%D7%9B%D7%99%D7%A8%D7%94%20%D7%A2%D7%9C%20%D7%94%D7%A2%D7%A1%D7%A7%20%D7%A9%D7%9C%D7%99">לבקש דמו על העסק שלי</a></p>
+  </div>
+</section>
+
+<section class="proof">
+  <div class="wrap proof-grid">
+    <div>
+      <h2>ארבעה ימים אצל מנעולן בנתניה</h2>
+      <p>זה מה שקרה בארבעת הימים הראשונים אחרי שהמזכירה עלתה לאוויר. הוא המשיך לעבוד כרגיל, והיא ענתה, שלחה חשבוניות וביקשה ביקורות.</p>
+    </div>
+    <div class="receipt">
+      <div class="r-head">מנעולן, נתניה<small>מהיום שהמזכירה עלתה לאוויר</small></div>
+      <dl>
+        <dt>ימים</dt><dd>4</dd>
+        <dt>פניות שנענו</dt><dd>19</dd>
+        <dt>חשבוניות שנשלחו לבד</dt><dd>11</dd>
+        <dt>ביקורות חדשות בגוגל</dt><dd>6</dd>
+      </dl>
+      <div class="r-foot">כל שבוע בעל העסק מקבל סיכום כזה בוואטסאפ.</div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap around">
+  <div class="around-grid">
+    <div>
+      <h2>ומסביב לה, כל השאר</h2>
+      <p>המזכירה מביאה את הלקוח. כדי שהוא יגיע מלכתחילה ויחזור שוב, אנחנו בונים גם את מה שמסביב. הכל בתשלום חודשי אחד.</p>
+      <p><a class="btn ghost" href="../package/">כל 20 הדברים בפירוט</a></p>
+    </div>
+    <div class="rows">
+      <div><b>אתר</b><span>עמוד לכל שירות ולכל אזור, עם המזכירה בפנים. אחרי שנה האתר והדומיין שלך, גם אם עזבת.</span></div>
+      <div><b>גוגל</b><span>פרופיל עסקי מלא, פוסט שבועי, ומאמרים שמביאים חיפושים מהאזור שלך.</span></div>
+      <div><b>ביקורות</b><span>בקשת ביקורת אחרי כל עבודה, והתראה עם תשובה מוכנה כשמגיעה ביקורת שלילית.</span></div>
+      <div><b>כסף</b><span>הצעות מחיר עם חתימה דיגיטלית, חשבוניות, ותזכורות תשלום עד שהכסף נכנס.</span></div>
+      <div><b>סושיאל</b><span>פוסטים ורילסים מהצילומים שלך, מיתוג וכרטיסי ביקור. בחבילה המלאה.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap plans" id="plans">
+  <h2>כמה זה עולה</h2>
+  <table>
+    <thead><tr><th scope="col"><span style="font-family:var(--body);font-size:16px;font-weight:500;color:var(--muted)">חבילה</span></th><th scope="col">מזכירה</th><th scope="col">צמיחה</th><th scope="col">מחלקה מלאה</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">בחודש</th><td data-plan="מזכירה"><span class="price">₪1,490</span></td><td data-plan="צמיחה"><span class="price">₪3,900</span></td><td data-plan="מחלקה מלאה"><span class="price">₪9,900</span></td></tr>
+      <tr><th scope="row">הקמה</th><td data-plan="מזכירה"><span class="price">₪2,500</span></td><td data-plan="צמיחה"><span class="price">₪6,000</span></td><td data-plan="מחלקה מלאה"><span class="price">₪12,000</span></td></tr>
+      <tr><th scope="row">מה בפנים</th><td data-plan="מזכירה">המזכירה, זימון תורים, הצעות מחיר, גבייה וסיכום שבועי</td><td data-plan="צמיחה">כל זה, ועוד אתר, גוגל, ביקורות ורשימת תפוצה</td><td data-plan="מחלקה מלאה">הכל, כולל סושיאל, רילסים, מיתוג ופגישה חודשית</td></tr>
+      <tr><th scope="row">למי</th><td data-plan="מזכירה">עסק של אדם אחד שמפספס הודעות</td><td data-plan="צמיחה">עסק שרוצה שימצאו אותו בגוגל</td><td data-plan="מחלקה מלאה">עסק שרוצה מחלקת שיווק בלי להעסיק אחת</td></tr>
+    </tbody>
+  </table>
+  <div class="plans-foot">
+    <span>בתשלום שנתי מראש: 12 חודשים במחיר 10.</span>
+    <a href="../package/">ההשוואה המלאה בין החבילות</a>
+  </div>
+</section>
+
+<section class="wrap deal" id="deal">
+  <div class="paper">
+    <h2>ההתחייבות שלנו, בכתב</h2>
+    <div class="date">A.E AUTOMATIONS · נכנס לחוזה של כל לקוח</div>
+    <ol>
+      <li><span><b>שבוע ניסיון בחינם.</b> בסופו אתה מקבל דוח: כמה פניות היו, כמה מהן בשעות שלא היית זמין, וכמה פגישות נקבעו.</span></li>
+      <li><span><b>באוויר תוך 72 שעות</b> מהרגע שמילאת את השאלון. איחרנו? דמי ההקמה עלינו.</span></li>
+      <li><span><b>₪100 על כל פנייה שפספסנו.</b> לקוח שכתב ולא קיבל מענה תוך 5 דקות בגלל תקלה שלנו, מקוזז מהחשבון הבא.<small>לא כולל השבתה של וואטסאפ עצמו.</small></span></li>
+      <li><span><b>עובדים בחינם עד שזה מחזיר את עצמו.</b> אם אחרי 90 יום העסקאות שנסגרו מפניות שטיפלנו בהן שוות פחות ממה ששילמת לנו, ממשיכים בלי תשלום עד שזה מתאזן.<small>התנאי: אתה מסמן כל שבוע אילו פניות נסגרו ובכמה, וחוזר ללקוחות שהמזכירה מעבירה אליך.</small></span></li>
+      <li><span><b>עסק אחד מכל תחום בכל עיר.</b> אם אתה המנעולן שלנו בנתניה, המתחרה שלך בנתניה לא יקבל אותנו.</span></li>
+    </ol>
+    <div class="sign">
+      <span>לא מבטיחים מספר לקוחות.<br>מבטיחים מהירות מענה, שקיפות ודוח כל שבוע.</span>
+      <svg viewBox="0 0 150 62" role="img" aria-label="חתימה: A.E"><path d="M8 50C18 30 26 10 31 9c5-1 5 26 9 40M17 36c8-3 16-4 24-4M52 49c1 0 2 0 2 1M96 14c-12-3-22 0-24 8-1 7 9 8 17 8-11 1-21 5-20 13 1 9 16 8 27 3M104 50c12-6 26-9 40-9"/></svg>
+    </div>
+  </div>
+</section>
+
+<section class="wrap faq">
+  <div class="faq-grid">
+    <h2>מה שואלים אותנו</h2>
+    <div>
+      <details><summary>זה על המספר שלי? אני ממשיך להשתמש בוואטסאפ?</summary><p>כן. המזכירה מתחברת למספר הקיים של העסק בדרך הרשמית של וואטסאפ, ואתה ממשיך לכתוב ממנו כרגיל. כשאתה עונה ללקוח בעצמך, היא שותקת באותה שיחה.</p></details>
+      <details><summary>מה אם היא תגיד משהו לא נכון?</summary><p>היא עונה רק ממה שמילאת בשאלון. מחירים וזמינות מחושבים לפי הנתונים שלך ולא מנוחשים. שאלה שאין לה תשובה עוברת אליך, והלקוח שומע שחוזרים אליו.</p></details>
+      <details><summary>הלקוחות ירגישו שזה בוט?</summary><p>היא כותבת קצר ובסגנון שלך, כי היא לומדת משיחות אמיתיות שלך עם לקוחות. אם לקוח שואל ישירות, היא אומרת בכנות שהיא העוזרת האוטומטית שלך ושאפשר לדבר איתך.</p></details>
+      <details><summary>כמה עבודה זה דורש ממני?</summary><p>שאלון של כרבע שעה, ושיחה אחת לחיבור הוואטסאפ. מכאן אתה רק עונה למי שהיא מעבירה אליך, ומסמן פעם בשבוע מה נסגר.</p></details>
+      <details><summary>ואם אני רוצה לעזוב?</summary><p>בחבילת המזכירה ההתחייבות היא לחצי שנה, ובשאר לשנה. אם לא היית מרוצה ועזבת ב-90 הימים הראשונים, דמי ההקמה חוזרים אליך.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="end" id="start">
+  <div class="wrap">
+    <h2>שבוע אחד בחינם</h2>
+    <div class="end-row">
+      <p>שבוע שבו המזכירה עונה ללקוחות שלך. בסופו תראה בדוח כמה פניות הגיעו כשלא היית זמין, ותחליט.</p>
+      <div>
+        <a class="tel" href="tel:+972524666175">052-466-6175</a>
+        <a class="btn" style="margin-top:14px" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%90%D7%AA%D7%A8%20%D7%A9%D7%9C%20A.E%20Automations%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%91%D7%95%D7%A2%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F">לכתוב לנו בוואטסאפ</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><span class="mono">A.E Automations</span> · אריאל, <a href="tel:+972524666175" class="mono">052-466-6175</a></span>
+    <span><a href="../package/">החבילות</a> · <a href="../">אתרים שבנינו</a></span>
+  </div>
+</footer>
+
+<div class="bar"><a class="btn" href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%90%D7%AA%D7%A8%20%D7%A9%D7%9C%20A.E%20Automations%20%D7%95%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%A9%D7%91%D7%95%D7%A2%20%D7%A0%D7%99%D7%A1%D7%99%D7%95%D7%9F">שבוע ניסיון בחינם בוואטסאפ</a></div>
+
+<script>
+(function(){
+  // ---- the night: scroll scrubs the clock, the sky and the chat ----
+  var night = document.getElementById('night'), stick = document.getElementById('stick'), clock = document.getElementById('clock');
+  var items = [].slice.call(document.querySelectorAll('#msgs [data-at]'));
+  var caps = [].slice.call(document.querySelectorAll('.cap'));
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // progress → minutes since midnight (07:00 next day = 31h)
+  var TIME = [[0,21*60+40],[.16,22*60+15],[.32,22*60+19],[.4,23*60+47],[.48,23*60+49],[.57,23*60+52],[.64,26*60+10],[.79,26*60+14],[.86,31*60],[1,31*60]];
+  var SKY = [[0,'#1c2a38'],[.18,'#0a1017'],[.7,'#0a1017'],[.84,'#2c2a44'],[.92,'#e3b08c'],[1,'#ece5dd']];
+  function rgb(h){ return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; }
+  function piece(stops, p){
+    for (var i=1;i<stops.length;i++) if (p<=stops[i][0]) { var a=stops[i-1], b=stops[i]; return [a[1], b[1], (p-a[0])/((b[0]-a[0])||1)]; }
+    var l=stops[stops.length-1][1]; return [l,l,1];
+  }
+  function draw(){
+    var r = night.getBoundingClientRect(), span = r.height - window.innerHeight;
+    var p = span>0 ? Math.min(1, Math.max(0, -r.top/span)) : 0;
+    var t = piece(TIME, p), m = Math.round(t[0] + (t[1]-t[0])*t[2]) % 1440;
+    clock.textContent = ('0'+Math.floor(m/60)).slice(-2)+':'+('0'+m%60).slice(-2);
+    var s = piece(SKY, p), a = rgb(s[0]), b = rgb(s[1]);
+    var c = a.map(function(v,i){ return Math.round(v+(b[i]-v)*s[2]); });
+    stick.style.background = 'rgb('+c.join(',')+')';
+    stick.style.color = p>.88 ? '#0d171b' : '#f1ece3';
+    stick.style.setProperty('--stars', p<.7 ? 1 : Math.max(0, 1-(p-.7)/.16));
+    items.forEach(function(el){ el.classList.toggle('on', p >= +el.dataset.at); });
+    caps.forEach(function(el){ el.classList.toggle('on', p >= +el.dataset.from && p < +el.dataset.to); });
+  }
+  if (!reduce) {
+    var ticking = false;
+    window.addEventListener('scroll', function(){ if (!ticking) { ticking = true; requestAnimationFrame(function(){ draw(); ticking = false; }); } }, { passive:true });
+    window.addEventListener('resize', draw);
+    draw();
+  } else {
+    clock.textContent = '21:40 → 07:00';
+    clock.style.fontSize = 'clamp(34px,7vw,84px)';
+  }
+
+  // ---- industry tabs ----
+  var tabs = [].slice.call(document.querySelectorAll('.tab'));
+  function pick(tab){
+    tabs.forEach(function(t){
+      var on = t === tab, panel = document.getElementById(t.getAttribute('aria-controls'));
+      t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
+      panel.classList.toggle('on', on); panel.hidden = !on;
+    });
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){ pick(t); });
+    t.addEventListener('keydown', function(e){
+      // RTL: ArrowLeft moves to the next tab
+      var d = e.key === 'ArrowLeft' ? 1 : e.key === 'ArrowRight' ? -1 : 0;
+      if (!d) return;
+      var n = tabs[(i+d+tabs.length)%tabs.length]; n.focus(); pick(n);
+    });
+  });
+})();
+</script>
+</body>
+</html>
