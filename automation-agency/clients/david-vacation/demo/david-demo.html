@@ -1,0 +1,518 @@
+<title>המזכירה של קו המים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* מסך אחד מפוצל: מימין ההסבר והסיכום שדוד מקבל, משמאל הטלפון. מתחת: מה המזכירה יודעת ומה זה חוסך. מראה בהיר אחד מכוון (חול, ים, שקיעה). */
+:root{
+  --sand:#F3ECE2; --sea:#0D3B4A; --sea-2:#1F5C6E; --coral:#E36F4A; --mute:#6B6358; --line:#D6CBBB; --white:#FFFFFF;
+  --wa-head:#0F5B4E; --wa-bg:#ECE5DA; --wa-out:#DCF5E4; --gold:#B8862F;
+  --display:'Frank Ruhl Libre',Georgia,serif; --body:'IBM Plex Sans Hebrew',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--sand);color:var(--sea);margin:0;overflow-x:clip}
+body{font-family:var(--body);font-size:17px;line-height:1.65;direction:rtl}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+header.top{padding-block:22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:900;font-size:22px}
+.brand small{display:block;font-family:var(--body);font-weight:500;font-size:13px;color:var(--mute)}
+.tag{font-size:13.5px;font-weight:600;color:var(--sea-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;background:var(--white)}
+.stage{display:grid;grid-template-columns:1fr minmax(0,410px);gap:clamp(28px,5vw,72px);align-items:start;padding-block:10px 60px}
+.stage>*{min-width:0}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,5vw,60px);line-height:1.05;margin:6px 0 18px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--coral)}
+.lede{font-size:19px;color:#3E4A4F;max-width:54ch;margin:0}
+.how{margin:24px 0 0;padding:18px 20px;background:var(--white);border-radius:12px;border:1px solid var(--line)}
+.how b{display:block;font-size:15px;margin-bottom:6px}
+.how ul{margin:0;padding-inline-start:20px;font-size:15.5px;color:#3E4A4F}
+.mode{margin-top:10px;font-size:13.5px;color:var(--mute)}
+.sumcard{margin-top:24px;background:var(--sea);color:#F3ECE2;border-radius:14px;padding:22px 22px 18px}
+.sumcard h2{font-family:var(--display);font-size:24px;margin:0 0 4px}
+.sumcard p.sub{margin:0 0 14px;color:#AFC6CC;font-size:14.5px}
+.route{display:inline-block;font-weight:700;font-size:13.5px;padding:4px 11px;border-radius:6px;margin-bottom:12px}
+.route.david{background:#2E7D5B;color:#fff}
+.route.friends{background:var(--gold);color:#fff}
+.sumcard dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:15.5px}
+.sumcard dt{color:#AFC6CC}
+.sumcard dd{margin:0;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.sumcard .empty{color:#AFC6CC;font-size:15px;margin:0}
+.sumcard .ready{display:inline-block;margin-top:14px;background:var(--coral);color:#fff;font-weight:700;font-size:14px;padding:5px 12px;border-radius:6px}
+.mem{margin-top:14px;font-size:13.5px;color:#AFC6CC;border-top:1px solid rgba(255,255,255,.15);padding-top:10px}
+.phone{background:#111;border-radius:42px;padding:10px;box-shadow:0 40px 70px -34px rgba(13,59,74,.55)}
+.screen{border-radius:33px;overflow:hidden;background:var(--wa-bg);display:flex;flex-direction:column;height:min(80vh,720px);min-height:540px}
+.bar{background:var(--wa-head);color:#fff;padding:30px 16px 12px;display:flex;gap:11px;align-items:center}
+.bar .av{width:40px;height:40px;border-radius:50%;background:#F3ECE2;color:var(--wa-head);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:19px;flex:none}
+.bar b{display:block;font-size:16px;line-height:1.2}
+.bar small{font-size:12.5px;opacity:.85}
+.chat{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:7px}
+.m{max-width:85%;padding:8px 11px 18px;border-radius:12px;font-size:15px;line-height:1.45;position:relative;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.06);animation:pop .35s ease both}
+.m time{position:absolute;bottom:3px;left:9px;font-size:10.5px;color:#8B8378}
+.m.in{background:var(--white);align-self:flex-start;border-start-start-radius:3px}
+.m.out{background:var(--wa-out);align-self:flex-end;border-start-end-radius:3px}
+.m.sys{align-self:center;background:#FFF6D6;color:#6A5A1E;font-size:13px;padding:6px 12px;border-radius:8px;white-space:normal;text-align:center}
+.pics{align-self:flex-end;display:grid;grid-template-columns:1fr 1fr;gap:3px;width:78%;background:var(--wa-out);padding:3px;border-radius:12px;animation:pop .35s ease both}
+.pics img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;display:block;cursor:zoom-in}
+.typing{align-self:flex-end;background:var(--wa-out);border-radius:12px;padding:11px 14px;display:flex;gap:5px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#6E9C7E;animation:bob 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 10px 0;background:var(--wa-bg)}
+.chips button{flex:none;border:1px solid #C9BFB0;background:var(--white);color:var(--sea);border-radius:999px;padding:7px 12px;font-size:13.5px;white-space:nowrap}
+.chips button:disabled{opacity:.5;cursor:default}
+form.send{display:flex;gap:8px;padding:10px;background:var(--wa-bg)}
+form.send input{flex:1;min-width:0;border:0;border-radius:22px;padding:12px 16px;font:inherit;font-size:16px;background:var(--white);color:var(--sea)}
+form.send button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:var(--wa-head);color:#fff;display:grid;place-items:center}
+form.send button svg{width:20px;height:20px;transform:scaleX(-1)}
+form.send button:disabled{opacity:.5}
+.resets{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:10px}
+.resets button{background:none;border:0;color:var(--mute);font-size:14px;text-decoration:underline;padding:4px}
+.prices{padding-block:clamp(48px,7vw,80px);border-top:1px solid var(--line)}
+.prices h2,.save h2{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.6vw,42px);line-height:1.1;margin:0 0 10px;text-wrap:balance}
+.prices .intro,.save .intro{color:#3E4A4F;max-width:62ch;margin:0 0 26px}
+.apts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.apt{background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.apt img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.apt div{padding:14px 16px 16px}
+.apt b{font-family:var(--display);font-size:20px;display:block}
+.apt span{display:block;font-size:14.5px;color:#3E4A4F}
+.apt .p{margin-top:8px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--sea)}
+.rules{margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 28px;font-size:15px;color:#3E4A4F}
+.rules p{margin:0;border-inline-start:3px solid var(--coral);padding-inline-start:12px}
+.save{background:var(--white);border-top:1px solid var(--line);padding-block:clamp(56px,8vw,96px)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,56px);align-items:start}
+.grid2>*{min-width:0}
+.list{display:grid;gap:18px}
+.list div{border-inline-start:3px solid var(--coral);padding-inline-start:14px}
+.list b{display:block;font-family:var(--display);font-size:21px}
+.list span{color:#3E4A4F;font-size:16px}
+.calc{background:var(--sand);border-radius:14px;padding:24px;border:1px solid var(--line)}
+.calc label{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:15.5px;margin-bottom:6px}
+.calc output{font-variant-numeric:tabular-nums;color:var(--coral)}
+.calc input[type=range]{width:100%;accent-color:var(--coral);margin-bottom:18px}
+.calc .res{border-top:1px solid var(--line);padding-top:16px;margin-top:4px}
+.calc .big{font-family:var(--display);font-weight:900;font-size:clamp(40px,6vw,58px);line-height:1;color:var(--sea);font-variant-numeric:tabular-nums}
+.calc small{display:block;color:var(--mute);font-size:13.5px;margin-top:10px}
+.cta{margin-top:40px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.cta a{background:var(--coral);color:#fff;text-decoration:none;font-weight:700;padding:15px 24px;border-radius:8px}
+.cta .num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;font-weight:700;font-size:20px}
+footer{padding-block:28px;color:var(--mute);font-size:13.5px;text-align:center}
+.lb{position:fixed;inset:0;background:rgba(13,59,74,.92);display:grid;place-items:center;padding:20px;z-index:20}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:86vh;border-radius:10px}
+.lb button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:14px;background:var(--white);border:0;border-radius:50%;width:44px;height:44px;font-size:20px;color:var(--sea)}
+@media (max-width:880px){
+  .stage{grid-template-columns:1fr}
+  .phone-col{order:-1;max-width:430px;width:100%;margin:0 auto}
+  .grid2,.rules{grid-template-columns:1fr}
+  .apts{grid-template-columns:1fr}
+  .screen{height:74vh}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+
+<header class="wrap top">
+  <div class="brand">עונה ראשון<small>הדגמה עבור דוד, דירות נופש בנתניה</small></div>
+  <span class="tag">זו הדגמה. שום הודעה לא יוצאת לאף אחד</span>
+</header>
+
+<main class="wrap stage">
+  <section>
+    <h1>דוד, ככה נסגרת הזמנה <em>כשאתה לא ליד הטלפון</em>.</h1>
+    <p class="lede">לקוח כותב, והמזכירה עונה תוך שניות בסגנון שלך: מבינה מה הוא צריך, בודקת ביומן מה פנוי, שולחת תמונות של הדירה המתאימה, נותנת מחיר, ויודעת להתמקח עד הגבול שאתה קבעת. משפחה גדולה מדי? היא מעבירה אותה לחברים שלך.</p>
+    <div class="how">
+      <b>מה כדאי לנסות</b>
+      <ul>
+        <li>זוג שרוצה סופ"ש. הדירה בקומה 5 תפוסה ביומן, אז היא מציעה את הסוויטה.</li>
+        <li>להגיד "יקר לי". היא מתמקחת, אבל לא יורדת מתחת למה שמותר.</li>
+        <li>זוג עם 5 ילדים. היא מבינה שזה גדול מדי ומעבירה לחברים של דוד.</li>
+        <li>אחרי שיחה, ללחוץ "לחזור כאותו לקוח". היא זוכרת אותו.</li>
+      </ul>
+      <div class="mode" id="mode">טוען...</div>
+    </div>
+    <div class="sumcard" aria-live="polite">
+      <h2>הסיכום שמגיע אליך</h2>
+      <p class="sub">כל מה שנאסף בשיחה, בהודעה אחת. אתה רק שולח קישור לתשלום.</p>
+      <div id="sum"><p class="empty">עוד לא נאסף כלום. תתחיל שיחה בטלפון.</p></div>
+      <div class="mem" id="mem" hidden></div>
+    </div>
+  </section>
+
+  <section class="phone-col" aria-label="וואטסאפ להדגמה">
+    <div class="phone">
+      <div class="screen">
+        <div class="bar"><div class="av">ק</div><div><b>קו המים, דירות נופש</b><small>חשבון עסקי</small></div></div>
+        <div class="chat" id="chat" aria-live="polite"></div>
+        <div class="chips" id="chips" aria-label="הצעות לכתיבה"></div>
+        <form class="send" id="send" autocomplete="off">
+          <input id="msg" name="msg" placeholder="כתוב הודעה כמו לקוח..." aria-label="הודעה">
+          <button id="sendBtn" aria-label="שליחה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></button>
+        </form>
+      </div>
+    </div>
+    <div class="resets">
+      <button type="button" id="again">לחזור כאותו לקוח</button>
+      <button type="button" id="fresh">לקוח חדש</button>
+    </div>
+  </section>
+</main>
+
+<section class="prices">
+  <div class="wrap">
+    <h2>מה המזכירה יודעת</h2>
+    <p class="intro">המחירים והתאריכים התפוסים כאן הם לדוגמה, כדי שתראה איך זה עובד. אצלך היא תעבוד עם המחירון שלך והיומן שלך, ותתמקח רק עד הגבול שתקבע.</p>
+    <div class="apts" id="apts"></div>
+    <div class="rules">
+      <p>זוג: אחת משתי הסוויטות. משפחה עד זוג, 2 ילדים ותינוק: הסוויטה המשפחתית.</p>
+      <p>יותר אנשים מזה, או קבוצת חברים: מעבירה לחברים של דוד עם הפרטים.</p>
+      <p>סופ"ש (שישי-שבת): מינימום 2 לילות. תאריך תפוס: מציעה דירה אחרת או תאריך אחר.</p>
+      <p>הנחה: עד 5% בסופ"ש, עד 10% ל-3 לילות ומעלה או באמצע שבוע. או בקבוק יין מתנה. לא יותר.</p>
+    </div>
+  </div>
+</section>
+
+<section class="save">
+  <div class="wrap">
+    <h2>מה זה חוסך לך</h2>
+    <p class="intro">מי שמחפש חופשה כותב לכמה דירות במקביל, הרבה פעמים בערב ובסופ"ש. מי שעונה ראשון עם תמונות ומחיר, סוגר.</p>
+    <div class="grid2">
+      <div class="list">
+        <div><b>אף פנייה לא מחכה</b><span>תשובה תוך שניות, גם כשאתה עם אורחים, בנסיעה או ישן.</span></div>
+        <div><b>מחיר מדויק בלי שתתעסק</b><span>היא מחשבת לילות, סופ"ש ותוספות לפי המחירון שלך, ולא נותנת תאריך שתפוס ביומן.</span></div>
+        <div><b>מתמקחת בשבילך</b><span>לקוח שאומר "יקר" לא הולך. היא נותנת הנחה קטנה או מתנה, ולא יורדת מתחת לגבול.</span></div>
+        <div><b>גם לקוח שלא מתאים לך לא הולך לאיבוד</b><span>משפחה גדולה או קבוצה עוברת לחברים שלך עם כל הפרטים.</span></div>
+        <div><b>זוכרת כל לקוח</b><span>מי שחוזר אחרי חצי שנה מקבל "שלום מיכל, כיף לשמוע ממך שוב".</span></div>
+      </div>
+      <div class="calc">
+        <label for="r1">פניות חדשות בשבוע <output id="o1">15</output></label>
+        <input type="range" id="r1" min="2" max="60" value="15">
+        <label for="r2">כמה מהן הולכות למקום אחר כי לא ענו מהר <output id="o2">10%</output></label>
+        <input type="range" id="r2" min="0" max="40" value="10">
+        <label for="r3">הזמנה ממוצעת, בש״ח <output id="o3">2,000</output></label>
+        <input type="range" id="r3" min="300" max="6000" step="50" value="2000">
+        <div class="res">
+          <div>הכנסה שהולכת למקום אחר בחודש</div>
+          <div class="big" id="loss">₪0</div>
+          <small>חישוב לפי המספרים שהזנת, לא הבטחה. תזיז את הפסים למספרים של העסק שלך.</small>
+        </div>
+      </div>
+    </div>
+    <div class="cta"><a href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%20%D7%90%D7%A8%D7%99%D7%90%D7%9C%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%93%D7%9E%D7%95%20%D7%A9%D7%9C%20%D7%A7%D7%95%20%D7%94%D7%9E%D7%99%D7%9D" target="_blank" rel="noopener">רוצה את זה אצלי</a><span>או בטלפון: <span class="num">052-4666175</span>, אריאל</span></div>
+  </div>
+</section>
+<footer>עונה ראשון · מזכירה בוואטסאפ לעסקים · ההדגמה משתמשת בתמונות ובטקסטים של הדירות של דוד</footer>
+
+<div class="lb" id="lb" hidden><button type="button" id="lbx" aria-label="סגור">✕</button><img id="lbimg" alt=""></div>
+
+<script>
+/* ================= נתוני העסק (לדוגמה) ================= */
+const APTS = {
+  '1': { name: 'דירת "קו המים", קומה 5', mid: 950, wknd: 1250,
+    pics: ['p/a1-1.jpg','p/a1-2.jpg','p/a1-3.jpg','p/a1-4.jpg'],
+    facts: 'קו ראשון לים במרכז נתניה, קומה 5, נוף פנורמי. לזוגות. אמבט ספא (ג׳קוזי) פרטי במרפסת מול הים. מטבח מאובזר, מכונת אספרסו. התוספות זמינות כאן.' },
+  '2': { name: 'סוויטת הבוטיק "קו המים"', mid: 850, wknd: 1100,
+    pics: ['p/a2-1.jpg','p/a2-2.jpg','p/a2-3.jpg','p/a2-4.jpg'],
+    facts: 'סוויטה פרטית בקו ראשון, נוף פתוח לחוף סירונית. לזוגות. ג׳קוזי זוגי עם 14 זרמים, מקלחת שקופה ומקלחת חיצונית מול הים, מזרן זוגי איכותי, מטבחון, מיני־בר, אספרסו בקפסולות, טלוויזיה חכמה.' },
+  '3': { name: 'הסוויטה המשפחתית', mid: 1100, wknd: 1450,
+    pics: ['p/a3-1.jpg','p/a3-2.jpg','p/a3-3.jpg','p/a3-4.jpg'],
+    facts: 'סוויטה חדשה מעל חוף סירונית. עד זוג + 2 ילדים + תינוק. 2 חדרי שינה וסלון, מרפסת מרווחת עם ג׳קוזי זוגי, מקלחת יוקרתית, מטבח מאובזר ופינת אוכל ל-4. בית חב״ד ומסעדות כשרות למהדרין בלובי.' },
+};
+const EXTRAS = { 'בלונים': 250, 'מסאז׳ זוגי': 600, 'יין': 150, 'ארוחת בוקר': 180 };
+
+/* תאריכים יחסית להיום, כדי שההדגמה תמיד תהיה עדכנית */
+const DAY = 864e5, TODAY = new Date(); TODAY.setHours(12, 0, 0, 0);
+const addD = (d, n) => new Date(d.getTime() + n * DAY);
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dm = (d) => `${d.getDate()}/${d.getMonth() + 1}`;
+const WD = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const nextDow = (dow, minAhead) => { let d = addD(TODAY, minAhead); while (d.getDay() !== dow) d = addD(d, 1); return d; };
+const FRI = nextDow(5, 1);                 // שישי הקרוב
+const SUN2 = nextDow(0, 6);                // ראשון של השבוע הבא
+const TUE2 = nextDow(2, 6);                // שלישי הבא
+const BOOKED = {                            // לילות תפוסים ביומן לדוגמה
+  '1': [iso(FRI), iso(addD(FRI, 1))],
+  '2': [iso(addD(FRI, 14)), iso(addD(FRI, 15))],
+  '3': [iso(addD(FRI, 7)), iso(addD(FRI, 8))],
+};
+const nis = (n) => Math.round(n).toLocaleString('he-IL') + ' ₪';
+
+/* מחשבון הצעת מחיר: אותו חישוב ל-AI ולהדגמה המוקלטת */
+function quote({ apartment, checkin, nights, extras = [] }) {
+  const id = String(apartment), a = APTS[id]; if (!a) throw new Error('אין דירה כזו. דירות: 1, 2, 3');
+  const start = new Date(checkin + 'T12:00:00'); if (isNaN(start)) throw new Error('תאריך לא תקין, צריך YYYY-MM-DD');
+  nights = Math.max(1, Math.min(14, parseInt(nights) || 1));
+  const list = [], conflicts = []; let wkndNights = 0;
+  for (let i = 0; i < nights; i++) {
+    const d = addD(start, i), weekend = d.getDay() === 5 || d.getDay() === 6;
+    if (weekend) wkndNights++;
+    if (BOOKED[id].includes(iso(d))) conflicts.push(`ליל ${WD[d.getDay()]} ${dm(d)}`);
+    list.push({ night: `${WD[d.getDay()]} ${dm(d)}`, price: weekend ? a.wknd : a.mid });
+  }
+  const ex = (Array.isArray(extras) ? extras : []).map((e) => Object.keys(EXTRAS).find((k) => k === e || k.startsWith(String(e).slice(0, 3)))).filter(Boolean);
+  const extrasOk = id === '1';
+  const nightsTotal = list.reduce((s, n) => s + n.price, 0);
+  const extrasTotal = extrasOk ? ex.reduce((s, k) => s + EXTRAS[k], 0) : 0;
+  const maxDiscountPct = nights >= 3 || wkndNights === 0 ? 10 : 5;
+  return {
+    apartment: a.name, available: conflicts.length === 0, booked_nights: conflicts,
+    min_nights_ok: !(wkndNights > 0 && nights < 2), nights: list, nights_total: nightsTotal,
+    extras: extrasOk ? ex.map((k) => ({ name: k, price: EXTRAS[k] })) : [],
+    extras_note: !extrasOk && ex.length ? 'תוספות רק בדירה 1. בדירות אחרות: לבדוק עם דוד' : '',
+    total: nightsTotal + extrasTotal, max_discount_pct: maxDiscountPct,
+    lowest_allowed_total: Math.ceil(nightsTotal * (1 - maxDiscountPct / 100)) + extrasTotal,
+  };
+}
+
+/* ================= זיכרון לקוח ================= */
+let memory = null;
+try { memory = JSON.parse(localStorage.getItem('kav-memory') || 'null'); } catch { memory = null; }
+function saveMemory(lead, route) {
+  if (!lead || !String(lead.name || '').trim()) return;
+  memory = { name: String(lead.name).trim(), apt: lead.apartment || '', last: [lead.apartment, lead.dates, lead.guests, lead.occasion].filter(Boolean).join(', '), route: route || '', when: new Date().toLocaleDateString('he-IL') };
+  try { localStorage.setItem('kav-memory', JSON.stringify(memory)); } catch {}
+}
+function showMem() {
+  const el = document.getElementById('mem');
+  el.hidden = !memory;
+  if (memory) el.textContent = `בזיכרון: ${memory.name} כבר פנה (${memory.when}). ${memory.last}`;
+}
+
+/* ================= ההוראות ל-AI ================= */
+function calendarText() {
+  const rows = [];
+  for (let i = 0; i < 28; i++) { const d = addD(TODAY, i); rows.push(`${iso(d)} יום ${WD[d.getDay()]}`); }
+  return rows.join('\n');
+}
+function rules(withTools) {
+  const apts = Object.entries(APTS).map(([id, a]) => `דירה ${id}, ${a.name}: ${a.facts} מחיר ללילה: אמצע שבוע ${a.mid} ₪, ליל שישי או ליל שבת ${a.wknd} ₪.`).join('\n');
+  const booked = Object.entries(BOOKED).map(([id, ns]) => `דירה ${id}: הלילות של ${ns.join(', ')}`).join('\n');
+  return `את המזכירה בוואטסאפ של דוד, שמשכיר 3 דירות נופש יוקרתיות בקו ראשון לים בנתניה (חוף סירונית). את עונה ללקוחות שכותבים לעסק. המטרה: לסגור הזמנה.
+
+היום: ${iso(TODAY)} יום ${WD[TODAY.getDay()]}. לוח ימים לעזרה בתאריכים:
+${calendarText()}
+
+הדירות (אסור להמציא פרט שלא כתוב כאן):
+${apts}
+תוספות (רק בדירה 1): ${Object.entries(EXTRAS).map(([k, v]) => `${k} ${v} ₪`).join(', ')}.
+לילות תפוסים ביומן:
+${booked}
+
+כללי התאמה:
+- זוג → דירה 1 או 2. משפחה עד 2 מבוגרים + 2 ילדים + תינוק → דירה 3.
+- יותר מזה (למשל זוג + 3 ילדים ומעלה), או קבוצה של יותר מ-2 מבוגרים: הדירות לא מתאימות. אומרים בחום שלדוד יש חברים עם וילות ודירות גדולות שמתאימות בדיוק, אוספים תאריכים, כמה אנשים וגילאים ושם, ומעבירים. route="friends". לא נותנים להם מחיר.
+- כל השאר: route="david".
+
+מחיר וזמינות:
+- ${withTools ? 'לפני שנותנים מחיר או אומרים שתאריך פנוי, חובה לקרוא לכלי quote. משתמשים רק במספרים שהוא מחזיר.' : 'מחשבים מחיר לפי המחירון למעלה, לילה-לילה, ובודקים את הלילות התפוסים.'}
+- תאריך תפוס: לא מבטיחים אותו. מציעים דירה אחרת שמתאימה או תאריך אחר.
+- סופ"ש (ליל שישי) מינימום 2 לילות.
+- נותנים מחיר מלא עם פירוט קצר (כמה לילות × מחיר, ותוספות).
+
+התמקחות (רק אם הלקוח אומר שיקר או מבקש הנחה):
+- פעם ראשונה: בקבוק יין מתנה, או הנחה קטנה (חצי מהמקסימום).
+- אם עדיין לוחץ: עד המקסימום: 5% כשיש לילות סופ"ש ופחות מ-3 לילות; 10% ל-3 לילות ומעלה או אמצע שבוע. ההנחה רק על הלילות, לא על התוספות. לא יותר בשום מקרה. מעגלים לטובת דוד.
+- אחרי המקסימום: "זה באמת המחיר הכי טוב שאני יכולה לתת, אבדוק עם דוד אם אפשר משהו" ולא יורדים.
+- לא מציעים הנחה ביוזמתך.
+
+סגנון של דוד: חם ומזמין, "שלום 😊" בהודעה הראשונה, אימוג'י אחד או שניים בהודעה. עברית פשוטה וטבעית, כמו בעל עסק. 1-4 משפטים. שאלה אחת או שתיים בכל הודעה.
+
+התהליך: להבין מי מגיע, מתי, כמה לילות ואם יש חגיגה → להמליץ על דירה ולשלוח תמונות שלה (photos, רק בפעם הראשונה שממליצים עליה) → מחיר → לבקש שם → כשהלקוח מסכים: "מעולה! העברתי לדוד, הוא שולח לך עכשיו קישור לתשלום מקדמה ופרטי הגעה". זוג שחוגג: להציע תוספות.
+שאלה בלי תשובה בפרטים (חניה, כניסה מוקדמת, חיות): "שאלה מצוינת, אני בודקת עם דוד ומעדכנת אותך".
+${memory ? `\nלקוח חוזר! שמו ${memory.name}. בפעם הקודמת (${memory.when}): ${memory.last}. לפנות אליו בשם בחום, להזכיר בעדינות את הפעם הקודמת, ולא לשאול שוב את שמו. lead.name = "${memory.name}".` : ''}
+
+בסוף החזירי רק JSON, בלי טקסט נוסף:
+{"reply":"ההודעה ללקוח","photos":null או "1" או "2" או "3","route":"david" או "friends" או "","lead":{"name":"","dates":"","nights":"","guests":"","apartment":"","occasion":"","extras":"","price":"","discount":"","questions":""},"ready":false}
+lead = כל מה שנאסף עד עכשיו בכל השיחה (תאריכים בפורמט יום/חודש). price כולל פירוט קצר. discount = אם ביקשו הנחה ומה קיבלו. ready=true כשהלקוח הסכים להזמנה, או (ב-friends) כשיש תאריכים, הרכב ושם.`;
+}
+const QUOTE_TOOL = {
+  name: 'quote',
+  description: 'בודק זמינות ומחשב הצעת מחיר מדויקת לדירה. מחזיר אם פנוי, לילות תפוסים, מחיר לכל לילה, תוספות, סה"כ, אחוז ההנחה המקסימלי והמחיר הנמוך ביותר שמותר לתת.',
+  inputSchema: { type: 'object', properties: {
+    apartment: { type: 'string', enum: ['1', '2', '3'] },
+    checkin: { type: 'string', description: 'תאריך כניסה YYYY-MM-DD' },
+    nights: { type: 'integer', minimum: 1 },
+    extras: { type: 'array', items: { type: 'string', enum: Object.keys(EXTRAS) } },
+  }, required: ['apartment', 'checkin', 'nights'] },
+  execute: (input) => quote(input),
+};
+
+/* ================= ממשק ================= */
+const chat = document.getElementById('chat'), form = document.getElementById('send'), input = document.getElementById('msg'), btn = document.getElementById('sendBtn');
+const chipsEl = document.getElementById('chips'), modeEl = document.getElementById('mode'), sumEl = document.getElementById('sum');
+let sample = null, live = false, useTools = false, turns = [], sentPics = new Set(), busy = false, lastLead = {}, lastRoute = '';
+const now = () => new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+const scroll = () => { chat.scrollTop = chat.scrollHeight; };
+function bubble(dir, text) { const d = document.createElement('div'); d.className = 'm ' + dir; d.textContent = text; if (dir !== 'sys') { const t = document.createElement('time'); t.textContent = now(); d.append(t); } chat.append(d); scroll(); return d; }
+function pics(id) {
+  id = String(id); if (!APTS[id] || sentPics.has(id)) return; sentPics.add(id);
+  const g = document.createElement('div'); g.className = 'pics';
+  APTS[id].pics.forEach((src) => { const im = document.createElement('img'); im.src = src; im.alt = 'תמונה מ' + APTS[id].name; im.addEventListener('click', () => openLb(src)); im.addEventListener('load', scroll); g.append(im); });
+  chat.append(g); scroll();
+}
+function typing(on) { let t = chat.querySelector('.typing'); if (on && !t) { t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; chat.append(t); scroll(); } if (!on && t) t.remove(); }
+const LABELS = { name: 'שם', dates: 'תאריכים', nights: 'לילות', guests: 'אורחים', apartment: 'דירה', occasion: 'אירוע', extras: 'תוספות', price: 'מחיר', discount: 'התמקחות', questions: 'לבדוק' };
+function renderSum(lead, route, ready) {
+  lastLead = lead || {}; lastRoute = route || '';
+  const rows = Object.entries(LABELS).filter(([k]) => lead && String(lead[k] ?? '').trim());
+  sumEl.innerHTML = '';
+  if (!rows.length && !route) { sumEl.innerHTML = '<p class="empty">עוד לא נאסף כלום. תתחיל שיחה בטלפון.</p>'; return; }
+  if (route === 'david' || route === 'friends') { const r = document.createElement('span'); r.className = 'route ' + route; r.textContent = route === 'friends' ? 'להעביר לחברים של דוד: גדול מדי לדירות' : 'לקוח לדוד'; sumEl.append(r); }
+  const dl = document.createElement('dl');
+  rows.forEach(([k, l]) => { const dt = document.createElement('dt'); dt.textContent = l; const dd = document.createElement('dd'); dd.textContent = lead[k]; dl.append(dt, dd); });
+  sumEl.append(dl);
+  if (ready) {
+    const r = document.createElement('span'); r.className = 'ready';
+    r.textContent = route === 'friends' ? 'מוכן להעברה: לשלוח לחבר' : 'הלקוח הסכים: לשלוח קישור לתשלום';
+    sumEl.append(r); saveMemory(lead, route); showMem();
+  }
+}
+function setBusy(b) { busy = b; btn.disabled = b; chipsEl.querySelectorAll('button').forEach((c) => c.disabled = b); }
+
+/* ================= הדגמה מוקלטת (כשאין AI בתצוגה הזו) ================= */
+function scripts() {
+  const s1 = FRI, sd = `${dm(s1)}-${dm(addD(s1, 2))}`, q2 = quote({ apartment: '2', checkin: iso(s1), nights: 2 });
+  const disc2 = Math.ceil(q2.nights_total * 0.95);
+  const fd = `${dm(SUN2)}-${dm(addD(SUN2, 3))}`, q3 = quote({ apartment: '3', checkin: iso(SUN2), nights: 3 }), disc3 = Math.ceil(q3.nights_total * 0.9);
+  const qb = quote({ apartment: '1', checkin: iso(TUE2), nights: 1, extras: ['בלונים', 'יין'] });
+  const qb2 = quote({ apartment: '1', checkin: iso(TUE2), nights: 1, extras: ['בלונים', 'יין', 'מסאז׳ זוגי'] });
+  const L2 = { guests: 'זוג', dates: sd, nights: '2', apartment: APTS[2].name };
+  const L3 = { guests: 'זוג + 2 ילדים + תינוק', dates: fd, nights: '3', apartment: APTS[3].name };
+  const LB = { guests: 'זוג', dates: dm(TUE2), nights: '1', apartment: APTS[1].name, occasion: 'יום הולדת לאישה' };
+  const LF = { guests: 'זוג + 5 ילדים', occasion: 'חג' };
+  return [
+    { chip: 'זוג, סופ"ש הקרוב', match: /זוג(?!.*ילד)|סופ"ש|סופש|פנוי/, steps: [
+      { guest: 'היי, יש משהו פנוי לזוג בסופ"ש הקרוב?',
+        reply: `שלום 😊 בסופ"ש הקרוב (${sd}) הדירה בקומה 5 כבר תפוסה, אבל סוויטת הבוטיק פנויה! ג׳קוזי זוגי עם 14 זרמים ונוף פתוח לחוף סירונית.\n2 לילות (שישי ושבת) × ${nis(APTS[2].wknd)} = ${nis(q2.total)}. לשמור לכם?`, photos: '2',
+        lead: { ...L2, price: `${nis(q2.total)} (2 × ${nis(APTS[2].wknd)})` }, route: 'david' },
+      { guest: 'וואו יפה! אבל קצת יקר לנו. אפשר לעשות משהו במחיר?',
+        reply: `מבינה אותך 😊 אני יכולה לרדת ל-${nis(disc2)} ולהשאיר לכם בקבוק יין מתנה בסוויטה 🍷 זה המחיר הכי טוב שיש לי לסופ"ש. סוגרים?`,
+        lead: { ...L2, price: nis(disc2), discount: `ביקשו הנחה. קיבלו 5% + יין מתנה (מחירון ${nis(q2.total)})` }, route: 'david' },
+      { guest: 'סגור! אני מיכל',
+        reply: `מעולה מיכל! העברתי לדוד, הוא שולח לך עכשיו קישור לתשלום מקדמה ופרטי הגעה. סופ"ש מושלם 🌊`,
+        lead: { name: 'מיכל', ...L2, price: nis(disc2), discount: `ביקשו הנחה. קיבלו 5% + יין מתנה (מחירון ${nis(q2.total)})` }, route: 'david', ready: true } ] },
+    { chip: 'משפחה, 3 לילות', match: /2 ילדים|שני ילדים|תינוק/, steps: [
+      { guest: 'אנחנו זוג עם 2 ילדים ותינוק, רוצים 3 לילות מיום ראשון הבא',
+        reply: `שלום 😊 בשבילכם יש בדיוק את הסוויטה המשפחתית: 2 חדרי שינה, מרפסת עם ג׳קוזי מול הים ופינת אוכל ל-4. ובלובי יש בית חב״ד ומסעדות כשרות.\n${fd} פנוי! 3 לילות × ${nis(APTS[3].mid)} = ${nis(q3.total)}. איך קוראים לך?`, photos: '3',
+        lead: { ...L3, price: `${nis(q3.total)} (3 × ${nis(APTS[3].mid)})` }, route: 'david' },
+      { guest: 'יוסי. ואם נסגור כבר היום יש הנחה?',
+        reply: `בשמחה יוסי 😊 על 3 לילות אני יכולה לתת 10%: ${nis(disc3)} במקום ${nis(q3.total)}. צריכים מיטת תינוק?`,
+        lead: { name: 'יוסי', ...L3, price: nis(disc3), discount: `ביקש הנחה, קיבל 10% (מחירון ${nis(q3.total)})` }, route: 'david' },
+      { guest: 'כן צריך מיטת תינוק. סוגרים!',
+        reply: `מעולה! רשמתי מיטת תינוק. העברתי לדוד, הוא שולח לך עכשיו קישור לתשלום מקדמה ופרטי הגעה. חופשה מהנה למשפחה 🏖️`,
+        lead: { name: 'יוסי', ...L3, price: nis(disc3), discount: `ביקש הנחה, קיבל 10% (מחירון ${nis(q3.total)})`, questions: 'מיטת תינוק' }, route: 'david', ready: true } ] },
+    { chip: 'זוג + 5 ילדים', match: /[3-9] ילדים|חמישה ילדים|קבוצה|חברים/, steps: [
+      { guest: 'היי, אנחנו זוג עם 5 ילדים, יש לכם מקום לחג?',
+        reply: `שלום 😊 איזה כיף! הדירות שלנו מתאימות עד זוג עם 2 ילדים ותינוק, אז לשבעה יהיה לכם צפוף. אבל לדוד יש חברים עם וילות גדולות בנתניה שמתאימות בדיוק למשפחות כמוכם. לאיזה תאריכים, ובני כמה הילדים?`,
+        lead: LF, route: 'friends' },
+      { guest: '4 לילות בחג, ילדים בני 3 עד 14',
+        reply: `מצוין, רשמתי. איך קוראים לך? ככה החבר של דוד יחזור אליך היום עם הצעה 👌`,
+        lead: { ...LF, guests: 'זוג + 5 ילדים (3 עד 14)', nights: '4' }, route: 'friends' },
+      { guest: 'דנה',
+        reply: `תודה דנה! העברתי את כל הפרטים, ויחזרו אליך היום עם וילה שמתאימה לכם 😊 ואם פעם תרצו חופשה זוגית, הסוויטות שלנו כאן 🌊`,
+        lead: { name: 'דנה', ...LF, guests: 'זוג + 5 ילדים (3 עד 14)', nights: '4' }, route: 'friends', ready: true } ] },
+    { chip: 'הפתעה ליום הולדת', match: /יום הולדת|הפתיע|בלונים|יין/, steps: [
+      { guest: 'רוצה להפתיע את אשתי ליום הולדת ביום שלישי הבא, אפשר בלונים ויין?',
+        reply: `שלום 😊 איזו הפתעה מקסימה! בדירה בקומה 5 יש ג׳קוזי פרטי במרפסת מול הים, והיא פנויה ב-${dm(TUE2)} 🎈\nלילה ${nis(APTS[1].mid)} + בלונים ${nis(EXTRAS['בלונים'])} + יין ${nis(EXTRAS['יין'])} = ${nis(qb.total)}. להוסיף גם מסאז׳ זוגי (${nis(EXTRAS['מסאז׳ זוגי'])}) או ארוחת בוקר?`, photos: '1',
+        lead: { ...LB, extras: 'בלונים, יין', price: nis(qb.total) }, route: 'david' },
+      { guest: 'כן, תוסיף מסאז׳',
+        reply: `סגור! לילה + בלונים + יין + מסאז׳ זוגי = ${nis(qb2.total)}. היא תתאהב 😍 איך קוראים לך?`,
+        lead: { ...LB, extras: 'בלונים, יין, מסאז׳ זוגי', price: nis(qb2.total) }, route: 'david' },
+      { guest: 'אבי. סוגרים',
+        reply: `מעולה אבי! העברתי לדוד, הוא שולח לך עכשיו קישור לתשלום מקדמה. ואל דאגה, לא נגלה לה כלום 🤫`,
+        lead: { name: 'אבי', ...LB, extras: 'בלונים, יין, מסאז׳ זוגי', price: nis(qb2.total) }, route: 'david', ready: true } ] },
+  ];
+}
+let SCRIPTS = scripts(), script = null, step = 0;
+async function scripted(text) {
+  if (!script) script = SCRIPTS.find((s) => s.match.test(text)) || SCRIPTS[0];
+  const s = script.steps[Math.min(step, script.steps.length - 1)]; step++;
+  typing(true); await new Promise((r) => setTimeout(r, 1200)); typing(false);
+  let reply = s.reply, lead = s.lead;
+  if (memory) {
+    // לקוח חוזר: פונה בשם, לא שואל שוב איך קוראים לו
+    lead = { ...lead, name: memory.name };
+    if (step === 1) reply = reply.replace(/^שלום 😊/, `שלום ${memory.name} 😊 כיף לשמוע ממך שוב!${memory.apt ? ` מקווה שנהניתם ב${memory.apt.replace(/^דירת /, 'דירה ')} בפעם הקודמת.` : ''}`);
+    reply = reply.replace(/ ?איך קוראים לך\?/, '').replace(/(מעולה|תודה|בשמחה) (מיכל|יוסי|דנה|אבי)/, `$1 ${memory.name}`);
+  }
+  bubble('out', reply); if (s.photos) pics(s.photos); renderSum(lead, s.route, s.ready);
+  const next = script.steps[step];
+  if (next) { input.value = memory ? next.guest.replace(/^(יוסי\. |אבי\. )|(אני מיכל|דנה)$/g, '').trim() || 'תודה!' : next.guest; input.focus(); }
+  else bubble('sys', 'זו הייתה שיחה מוקלטת. בגרסה האמיתית אפשר לכתוב כל דבר. ללחוץ "לחזור כאותו לקוח" כדי לראות שהיא זוכרת.');
+}
+
+/* ================= מצב חי ================= */
+async function ask(text) {
+  turns.push({ role: 'user', content: text });
+  typing(true);
+  const build = () => [{ role: 'user', content: rules(useTools) + '\n\nמכאן מתחילה השיחה. ההודעה הבאה היא של הלקוח.' }, { role: 'assistant', content: 'הבנתי, אני מוכנה.' }, ...turns.slice(-20)];
+  try {
+    let res;
+    try {
+      res = await sample.json(build(), useTools ? { tools: [QUOTE_TOOL], modelTier: 'default' } : { modelTier: 'default', cache: false });
+    } catch (e) {
+      if (useTools && (e?.code === 'tools_unavailable' || e?.code === 'invalid_request')) { useTools = false; res = await sample.json(build(), { modelTier: 'default', cache: false }); }
+      else throw e;
+    }
+    typing(false);
+    const reply = String(res?.reply || '').trim() || 'שלום 😊 ספרו לי לאיזה תאריכים חשבתם וכמה אתם?';
+    bubble('out', reply); turns.push({ role: 'assistant', content: reply });
+    if (res?.photos != null && res.photos !== '') pics(res.photos);
+    renderSum(res?.lead || {}, res?.route || '', !!res?.ready);
+  } catch (e) {
+    typing(false); turns.pop();
+    if (['not_granted', 'sampling_disabled', 'capability_disabled'].includes(e?.code)) { live = false; setMode(); return scripted(text); }
+    bubble('sys', e?.code === 'rate_limited' ? 'יותר מדי הודעות בבת אחת. נסה שוב בעוד רגע.' : 'משהו השתבש בתשובה. נסה לשלוח שוב.');
+  }
+}
+async function onSend(text) {
+  text = text.trim(); if (!text || busy) return;
+  input.value = ''; bubble('in', text); setBusy(true);
+  try { live ? await ask(text) : await scripted(text); } finally { setBusy(false); input.focus(); }
+}
+form.addEventListener('submit', (e) => { e.preventDefault(); onSend(input.value); });
+
+const LIVE_CHIPS = ['יש משהו פנוי לזוג בסופ"ש הקרוב?', 'זוג + 2 ילדים ותינוק, 3 לילות באמצע השבוע הבא', 'אנחנו זוג עם 5 ילדים, יש מקום?', 'רוצה להפתיע את אשתי ליום הולדת', 'זה קצת יקר לי, אפשר הנחה?'];
+function buildChips() {
+  chipsEl.innerHTML = '';
+  const items = live ? LIVE_CHIPS.map((t) => [t, t]) : SCRIPTS.map((s) => [s.chip, s.steps[0].guest]);
+  items.forEach(([label, text]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', () => { if (!live && step > 0) clearChat(); onSend(text); }); chipsEl.append(b); });
+}
+function clearChat() { chat.innerHTML = ''; turns = []; sentPics = new Set(); script = null; step = 0; SCRIPTS = scripts(); renderSum({}, '', false); bubble('sys', 'היום'); input.value = ''; }
+document.getElementById('again').addEventListener('click', () => {
+  if (!memory) saveMemory(lastLead, lastRoute);
+  clearChat(); showMem();
+  bubble('sys', memory ? `${memory.name} חוזר לכתוב אחרי כמה חודשים. תכתוב כמוהו, או תלחץ על הצעה, ותראה שהיא זוכרת.` : 'עוד אין לקוח לזכור. תסיים קודם שיחה אחת שבה הלקוח אומר את השם שלו.');
+});
+document.getElementById('fresh').addEventListener('click', () => { memory = null; try { localStorage.removeItem('kav-memory'); } catch {} clearChat(); showMem(); });
+function setMode() {
+  modeEl.textContent = live ? 'מצב חי: עונה לך AI אמיתי. תכתוב כל מה שלקוח היה כותב.' : 'מצב הדגמה מוקלטת: לחץ על אחת ההצעות בטלפון. אחרי כל תשובה, ההודעה הבאה של הלקוח כבר מחכה בשורת הכתיבה, רק ללחוץ שליחה.';
+  buildChips();
+}
+
+/* כרטיסי הדירות */
+document.getElementById('apts').innerHTML = Object.entries(APTS).map(([id, a]) => `<div class="apt"><img src="${a.pics[0]}" alt="${a.name}" loading="lazy"><div><b>${a.name}</b><span>${id === '3' ? 'עד זוג + 2 ילדים + תינוק' : 'לזוג'}</span><span class="p">אמצע שבוע ${nis(a.mid)} · סופ"ש ${nis(a.wknd)} ללילה</span></div></div>`).join('');
+
+clearChat(); showMem(); setMode();
+(async () => {
+  try { sample = await window.claude?.use?.('sample'); } catch { sample = null; }
+  live = !!sample;
+  if (sample) { try { const lim = await sample.limits?.(); useTools = !!lim?.tools; } catch { useTools = false; } }
+  setMode();
+})();
+
+/* לייטבוקס */
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+function openLb(src) { lbimg.src = src; lb.hidden = false; document.getElementById('lbx').focus(); }
+document.getElementById('lbx').addEventListener('click', () => lb.hidden = true);
+lb.addEventListener('click', (e) => { if (e.target === lb) lb.hidden = true; });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.hidden = true; });
+
+/* מחשבון */
+const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
+const fmt = (n) => Math.round(n).toLocaleString('he-IL');
+function calc() { document.getElementById('o1').textContent = r1.value; document.getElementById('o2').textContent = r2.value + '%'; document.getElementById('o3').textContent = fmt(r3.value); document.getElementById('loss').textContent = '₪' + fmt(r1.value * 4.33 * r2.value / 100 * r3.value); }
+[r1, r2, r3].forEach((r) => r.addEventListener('input', calc)); calc();
+</script>
