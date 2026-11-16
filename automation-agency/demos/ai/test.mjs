@@ -30,4 +30,5 @@ const fd = freeDates('david', today, { nights: 2 }); t(fd.length === 3 && fd[0].
 const ql = quote('david', today, { apartment: '1', checkin: '2026-11-20', nights: 1 }, { live: true }); t(ql.available === undefined && /אין גישה ליומן/.test(ql.availability) && ql.total === 1500, 'live mode: price yes, calendar no');
 const pl = promptFor('david', today, { live: true }); t(pl.includes('אין לך גישה ליומן') && !pl.includes('free_dates ומציעים'), 'live prompt');
 t(!promptFor('david', today, {}).includes('אין לך גישה ליומן'), 'demo prompt unchanged');
+t(schemaFor('david').required.includes('buttons') && promptFor('lock', today, {}).includes('כפתורים'), 'buttons in schema and prompt');
 console.log(`ok ${ok}, failed ${bad}`); process.exit(bad ? 1 : 0);

@@ -370,6 +370,7 @@ function engineReply(text) {
   return say(`תודה ${S.name}! ${S.slot === 'מבקשת זמן אחר' ? `${OWNER} חוזרת אלייך היום עם זמנים` : `נתראה ב${S.slot}. ${OWNER} תשלח לך אישור, ותזכורת יום לפני`} ✨`, true);
 }
 function suggestions() {
+  if (!engineMode && aiButtons.length) return aiButtons;
   if (!turns.length) return ['היי מה נשמע?', 'כמה עולה לייזר לרגליים?', 'זה כואב?', 'רוצה לקבוע טיפול פנים', 'יש הנחה?'];
   if (S.agreed) return ['תודה!', 'איפה אתם נמצאים?'];
   if (!S.treatment) return ['לייזר להסרת שיער', 'טיפול פנים'];
@@ -381,7 +382,7 @@ function suggestions() {
 }
 
 /* ================= מצב חי (AI) עם גיבוי: אם ה-AI נופל, המוח של דוד ממשיך ======== */
-let engineMode = true;
+let engineMode = true, aiButtons = [];
 function engineTurn(text) {
   if (/(^|\s)(אתה |זה |את )?(בוט|רובוט|צ'אטבוט)(\s|\?|!|\.|$)|תשובה אוטומטית|מענה אוטומטי|אתה אוטומטי|מזכירה|בן אדם אמיתי|אתה אמיתי|אני מדבר עם מחשב|בינה מלאכותית/.test(text)) {
     if (S.stage === 'start') S.stage = 'collect';
@@ -407,6 +408,7 @@ async function ask(text, retried) {
     clearTimeout(timer);
     if (!r.ok) throw { code: 'http_' + r.status };
     const res = await r.json();
+    aiButtons = Array.isArray(res.buttons) ? res.buttons.map((b) => String(b).trim()).filter(Boolean).slice(0, 3) : [];
     const reply = String(res?.reply || '').trim();
     if (!reply) throw { code: 'empty' };
     turns.push({ role: 'assistant', content: reply });

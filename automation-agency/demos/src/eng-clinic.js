@@ -51,6 +51,7 @@ function engineReply(text) {
   return say(`תודה ${S.name}! ${S.slot === 'מבקשת זמן אחר' ? `${OWNER} חוזרת אלייך היום עם זמנים` : `נתראה ב${S.slot}. ${OWNER} תשלח לך אישור, ותזכורת יום לפני`} ✨`, true);
 }
 function suggestions() {
+  if (!engineMode && aiButtons.length) return aiButtons;
   if (!turns.length) return ['היי מה נשמע?', 'כמה עולה לייזר לרגליים?', 'זה כואב?', 'רוצה לקבוע טיפול פנים', 'יש הנחה?'];
   if (S.agreed) return ['תודה!', 'איפה אתם נמצאים?'];
   if (!S.treatment) return ['לייזר להסרת שיער', 'טיפול פנים'];

@@ -48,6 +48,7 @@ function engineReply(text) {
   return say(`תודה ${S.name}! רשמתי הכל, ו${OWNER} חוזר אליך היום לתאם שעה שנוחה לך 👍`, true);
 }
 function suggestions() {
+  if (!engineMode && aiButtons.length) return aiButtons;
   if (!turns.length) return ['היי מה נשמע?', 'ננעלתי מחוץ לבית', 'רוצה להחליף צילינדר', 'יש ילד נעול באוטו!', 'כמה עולה פריצה?'];
   if (S.agreed) return ['תודה!', 'כמה זה יעלה?'];
   if (!S.problem) return ['ננעלתי בחוץ', 'צריך להחליף מנעול', 'פתיחת רכב'];

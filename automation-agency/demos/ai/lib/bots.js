@@ -242,14 +242,18 @@ export function schemaFor(bot) {
       route: { type: 'string', enum: ['', 'david', 'friends'] },
       lead: { type: 'object', additionalProperties: false, properties: Object.fromEntries(keys.map((k) => [k, { type: 'string' }])), required: keys },
       ready: { type: 'boolean' },
+      buttons: { type: 'array', items: { type: 'string' }, description: 'עד 3 תשובות מהירות שהלקוח יכול ללחוץ (עד 20 תווים כל אחת), או []' },
     },
-    required: ['reply', 'photos', 'route', 'lead', 'ready'],
+    required: ['reply', 'photos', 'route', 'lead', 'ready', 'buttons'],
   };
 }
 export const BOTS = ['david', 'dirot', 'lock', 'clinic'];
+const BUTTONS_RULE = `
+כפתורים (buttons): כמו בוואטסאפ, עד 3 תשובות מהירות שהלקוח יכול ללחוץ במקום להקליד. כל כפתור עד 20 תווים, בגוף ראשון של הלקוח, ומתאים בדיוק לשאלה שבסוף ההודעה שלך.
+דוגמאות: אחרי "לכמה אתם?" → ["זוג", "זוג + ילדים", "משפחה גדולה"]. אחרי "שישי עד מוצ"ש או עד ראשון?" → ["שישי עד מוצ\"ש", "שישי עד ראשון"]. אחרי מחיר → ["סוגרים!", "יקר לי", "יש חניה?"]. אחרי "נכון?" → ["נכון", "לא, לתקן"].
+כשאין שאלה ברורה, כששואלים שם או תאריך חופשי, או בסוף השיחה: []. לא ממציאים כפתור שמבטיח משהו.`;
 export const isVacation = (bot) => bot === 'david' || bot === 'dirot';
 export function promptFor(bot, today, opts = {}) {
-  if (isVacation(bot)) return vacationPrompt(bot, today, opts);
-  if (bot === 'lock') return lockPrompt(today);
-  return clinicPrompt(today);
+  const base = isVacation(bot) ? vacationPrompt(bot, today, opts) : bot === 'lock' ? lockPrompt(today) : clinicPrompt(today);
+  return base + '\n' + BUTTONS_RULE;
 }

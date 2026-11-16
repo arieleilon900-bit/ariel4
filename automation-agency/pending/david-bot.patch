@@ -198,10 +198,10 @@ index f790cf5..401d8ba 100644
  };
 diff --git a/bots/agency-bot/src/vacation.js b/bots/agency-bot/src/vacation.js
 new file mode 100644
-index 0000000..6c663f3
+index 0000000..9150390
 --- /dev/null
 +++ b/bots/agency-bot/src/vacation.js
-@@ -0,0 +1,111 @@
+@@ -0,0 +1,114 @@
 +// בוט לדירות נופש (דוד, "קו המים"): עונה בוואטסאפ האמיתי בדיוק כמו בדמו.
 +// המוח (ההוראות, המחירון והסגנון של דוד) משותף עם הדמו: automation-agency/demos/ai/lib/*.js. מחירון אחד, בלי הבדלים.
 +// כאן אין גישה ליומן: הבוט לא אומר פנוי/תפוס. כשהלקוח רוצה לסגור, דוד מקבל סיכום בוואטסאפ ומאשר בעצמו.
@@ -303,7 +303,10 @@ index 0000000..6c663f3
 +  const pics = photoId && !sent.includes(photoId) ? (VACATION.photos?.[photoId] || []) : [];
 +  for (let i = 0; i < parts.length; i++) {
 +    if (i > 0) await sleep(gap());
-+    await wa.sendText(env, phone, parts[i]);
++    // הכפתורים (תשובות מהירות) על ההודעה האחרונה, שבה השאלה
++    const last = i === parts.length - 1, btns = last ? (out.buttons || []).filter((b) => String(b).trim()).slice(0, 3) : [];
++    const r = btns.length ? await wa.sendButtons(env, phone, parts[i], btns) : await wa.sendText(env, phone, parts[i]);
++    if (btns.length && !r?.ok) await wa.sendText(env, phone, parts[i]);
 +    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, parts[i], nowIso(now)).run();
 +    // התמונות אחרי ההודעה שממליצה על הדירה (כמו דוד: קודם הדירה, אחר כך השאלה)
 +    if (pics.length && i === Math.max(0, parts.length - 2)) {
@@ -314,13 +317,23 @@ index 0000000..6c663f3
 +  if (out.ready && conv.issue !== 'vacation_summary_sent') { await sleep(1500); await sendSummary(env, conv, phone, out, now); }
 +}
 diff --git a/bots/agency-bot/src/whatsapp.js b/bots/agency-bot/src/whatsapp.js
-index a80fe34..95790c6 100644
+index a80fe34..33db6bc 100644
 --- a/bots/agency-bot/src/whatsapp.js
 +++ b/bots/agency-bot/src/whatsapp.js
-@@ -96,6 +96,12 @@ export function sendDocument(env, to, doc, filename, caption) {
+@@ -96,6 +96,22 @@ export function sendDocument(env, to, doc, filename, caption) {
    });
  }
  
++// הודעה עם עד 3 כפתורי תשובה מהירה (בתוך 24 שעות מההודעה של הלקוח). הלקוח לוחץ, והטקסט של הכפתור מגיע אלינו כמו הודעה
++export function sendButtons(env, to, text, buttons) {
++  const list = (buttons || []).map((b) => String(b).trim()).filter(Boolean).slice(0, 3);
++  if (!list.length || isUltra(env)) return sendText(env, to, text);
++  return call(env, 'messages', {
++    messaging_product: 'whatsapp', to, type: 'interactive',
++    interactive: { type: 'button', body: { text: String(text).slice(0, 1024) }, action: { buttons: list.map((t, i) => ({ type: 'reply', reply: { id: `b${i + 1}`, title: t.slice(0, 20) } })) } },
++  });
++}
++
 +// תמונה לפי קישור ציבורי (התמונות של הדירות יושבות באתר)
 +export function sendImageByLink(env, to, link, caption) {
 +  if (isUltra(env)) return ultra(env, 'image', to, { image: link, caption: caption || '' }, caption);
@@ -331,7 +344,7 @@ index a80fe34..95790c6 100644
    if (isUltra(env)) return ultra(env, 'image', to, { image: mediaId, caption: caption || '' }, caption);
    return call(env, 'messages', {
 diff --git a/bots/agency-bot/test/flow.test.js b/bots/agency-bot/test/flow.test.js
-index f392f07..7bb0eab 100644
+index f392f07..48687c8 100644
 --- a/bots/agency-bot/test/flow.test.js
 +++ b/bots/agency-bot/test/flow.test.js
 @@ -39,6 +39,9 @@ globalThis.fetch = async (url, init = {}) => {
@@ -344,14 +357,14 @@ index f392f07..7bb0eab 100644
      return new Response(JSON.stringify({
        id: 'msg_test', type: 'message', role: 'assistant', model: 'claude-opus-5-5', stop_reason: 'end_turn',
        content: [{ type: 'text', text: JSON.stringify(out) }], usage: { input_tokens: 10, output_tokens: 10 },
-@@ -1687,3 +1690,81 @@ test('sales bot: the ad experiment: only people from a trial ad get the trial of
+@@ -1687,3 +1690,88 @@ test('sales bot: the ad experiment: only people from a trial ad get the trial of
      assert.match(mails.at(-1).text, /מקדמה 500: 1 פנו/);
    });
  });
 +
 +
 +// ---------- הבוט של דוד (דירות נופש, "קו המים") ----------
-+const vac = (o) => ({ reply: 'שלום! 😊', photos: '', route: '', ready: false, ...o, lead: { name: '', dates: '', nights: '', guests: '', apartment: '', occasion: '', extras: '', price: '', discount: '', arrival: '', budget: '', needs: '', questions: '', ...(o.lead || {}) } });
++const vac = (o) => ({ reply: 'שלום! 😊', photos: '', route: '', ready: false, buttons: [], ...o, lead: { name: '', dates: '', nights: '', guests: '', apartment: '', occasion: '', extras: '', price: '', discount: '', arrival: '', budget: '', needs: '', questions: '', ...(o.lead || {}) } });
 +async function withDavidClient(fn) {
 +  const cfg = await import('../src/config.js');
 +  const original = (await import('../src/client.js')).default;
@@ -367,9 +380,16 @@ index f392f07..7bb0eab 100644
 +    const env = davidEnv();
 +    const t0 = new Date('2026-11-16T10:00:00Z');
 +    // שיחת חולין
-+    aiQueue = [vac({ reply: 'שלום! הכל מעולה, תודה ששאלת 😊 איך אפשר לעזור?' })];
++    aiQueue = [vac({ reply: 'שלום! הכל מעולה, תודה ששאלת 😊 לכמה אתם?', buttons: ['זוג', 'זוג + ילדים', 'משפחה גדולה מאוד מאוד מאוד', 'רביעי מיותר'] })];
 +    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'היי מה נשמע?' } }, 'v1'), t0);
-+    assert.deepEqual(textsTo(DAVID), ['שלום! הכל מעולה, תודה ששאלת 😊 איך אפשר לעזור?']);
++    // תשובות מהירות: עד 3 כפתורים, עד 20 תווים כל אחד
++    const btnMsg = sent.find((m) => m.type === 'interactive');
++    assert.equal(btnMsg.interactive.body.text, 'שלום! הכל מעולה, תודה ששאלת 😊 לכמה אתם?');
++    assert.deepEqual(btnMsg.interactive.action.buttons.map((b) => b.reply.title), ['זוג', 'זוג + ילדים', 'משפחה גדולה מאוד מאו']);
++    // הלקוח לוחץ על כפתור: מגיע כמו הודעה רגילה
++    aiQueue = [vac({ reply: 'מעולה 😊 מתי חשבתם להגיע?' })];
++    await processWebhook(env, inbound(DAVID, { type: 'interactive', interactive: { type: 'button_reply', button_reply: { id: 'b1', title: 'זוג' } } }, 'v1b'), new Date(t0.getTime() + 10e3));
++    assert.ok(aiRequests.at(-1).messages.some((m) => typeof m.content === 'string' && m.content.includes('זוג')), 'button tap reaches the AI as text');
 +    const sys = aiRequests[0].system;
 +    assert.ok(sys.includes('אין לך גישה ליומן') && sys.includes('חמישי עד מוצ"ש 2,200') && sys.includes('תקף עד 1/3'), 'live prompt with the real price list');
 +    assert.equal(aiRequests[0].tools[0].name, 'quote');
@@ -397,7 +417,7 @@ index f392f07..7bb0eab 100644
 +    sent.length = 0;
 +    aiQueue = [vac({ reply: 'מעולה! אני בודק שהתאריכים פנויים ושולח לך עוד כמה דקות את הפרטים למקדמה 🙏', route: 'david', ready: true, lead: { name: 'אבי', dates: '27/11-28/11', nights: '1', guests: 'זוג', apartment: 'קו המים 2', price: '1,500 ₪', arrival: '16:00' } })];
 +    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'סגור, אבי, נגיע ב-4' } }, 'v4'), new Date(t0.getTime() + 180e3));
-+    const texts = textsTo(DAVID);
++    const texts = textsTo(DAVID).filter((x) => !x.startsWith('['));
 +    assert.equal(texts.length, 2);
 +    assert.match(texts[1], /מצב בדיקה/);
 +    assert.match(texts[1], /מחיר: 1,500 ₪/);
