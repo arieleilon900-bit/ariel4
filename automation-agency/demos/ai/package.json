@@ -1,0 +1,8 @@
+{
+  "name": "onerishon-demo-ai",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node test.mjs" },
+  "dependencies": { "@anthropic-ai/sdk": "^0.133.0" },
+  "devDependencies": { "wrangler": "^4.150.0" }
+}

@@ -1,11 +1,16 @@
-name: General demos page (public)
+name: Demo pages (public, with AI)
 
-# Publishes only the general demo pages (static, no bot, no messages). Nothing to do with Hanan's bot.
+# Publishes only the demo pages (David's demo + the general demos) and their small AI server (/api/chat).
+# Static pages + a Pages Function. No bot, no WhatsApp, no messages. Nothing to do with Hanan's bot.
+# The AI key for the demos is the GitHub secret DEMO_ANTHROPIC_API_KEY (separate from Hanan's key).
+# Without it the pages still work, with their built-in answers.
 on:
   push:
     branches: [claude/bold-knuth-scehxs]
     paths:
       - 'automation-agency/demos/public/**'
+      - 'automation-agency/demos/ai/**'
+      - 'automation-agency/clients/david-vacation/demo/public/**'
       - '.github/workflows/demos.yml'
   workflow_dispatch:
 
@@ -15,12 +20,33 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      DEMO_KEY: ${{ secrets.DEMO_ANTHROPIC_API_KEY }}
+    defaults:
+      run:
+        working-directory: automation-agency/demos/ai
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-      - name: Create the Pages project (once)
-        run: npx -y wrangler@3 pages project create onerishon-demo --production-branch main || echo "project already exists or cannot be created"
-      - name: Publish the pages
-        run: npx -y wrangler@3 pages deploy automation-agency/demos/public --project-name onerishon-demo --branch main --commit-dirty=true
+          node-version: 22
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Tests
+        run: npm test
+      - name: Create the Pages projects (once)
+        run: |
+          npx wrangler pages project create onerishon-demo --production-branch main || echo "exists"
+          npx wrangler pages project create onerishon-david --production-branch main || echo "exists"
+      - name: AI key for the demos
+        run: |
+          if [ -n "$DEMO_KEY" ]; then
+            printf '%s' "$DEMO_KEY" | npx wrangler pages secret put ANTHROPIC_API_KEY --project-name onerishon-demo
+            printf '%s' "$DEMO_KEY" | npx wrangler pages secret put ANTHROPIC_API_KEY --project-name onerishon-david
+            echo "::notice::AI key set for both demo sites"
+          else
+            echo "::warning::DEMO_ANTHROPIC_API_KEY is not set in GitHub Secrets. The demos work with their built-in answers until it is added."
+          fi
+      - name: Publish the general demos
+        run: npx wrangler pages deploy ../public --project-name onerishon-demo --branch main --commit-dirty=true
+      - name: Publish David's demo
+        run: npx wrangler pages deploy ../../clients/david-vacation/demo/public --project-name onerishon-david --branch main --commit-dirty=true

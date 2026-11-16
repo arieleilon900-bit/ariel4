@@ -282,6 +282,7 @@ form.send input{box-shadow:0 1px 2px rgba(0,0,0,.08)}
 
 <script>
 /* ================= נתוני העסק (לדוגמה) ================= */
+const BOT_ID = 'dirot';
 const APTS = {
   '1': { name: 'סוויטת השקיעה', mid: 950, wknd: 1250,
     pics: ['p/v1-1.jpg','p/v1-2.jpg','p/v1-3.jpg'],
@@ -987,16 +988,15 @@ async function ask(text) {
     await wait(900 + Math.random() * 700); await say(r.reply, r.photos, false);
     renderSum(leadNow(), S.route, r.ready || (S.agreed && S.stage === 'done')); buildChips(); return;
   }
-  typing(true);
-  const build = () => [{ role: 'user', content: rules(useTools) + '\n\nמכאן מתחילה השיחה. ההודעה הבאה היא של הלקוח.' }, { role: 'assistant', content: 'הבנתי, אני מוכן.' }, ...turns.slice(-20)];
+  await wait(600 + Math.random() * 500); typing(true);
   try {
-    let res;
-    try {
-      res = await sample.json(build(), useTools ? { tools: [QUOTE_TOOL], modelTier: 'default' } : { modelTier: 'default', cache: false });
-    } catch (e) {
-      if (useTools && ['tools_unavailable', 'invalid_request', 'invalid_json'].includes(e?.code)) { useTools = false; res = await sample.json(build(), { modelTier: 'default', cache: false }); }
-      else throw e;
-    }
+    // AI אמיתי: השרת של הדף (/api/chat) שואל את Claude. המפתח נשמר רק בשרת
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 30000);
+    const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
+      body: JSON.stringify({ bot: BOT_ID, messages: turns.slice(-40), memory: memory ? { name: memory.name, apt: memory.apt } : null, sent: [...sentPics] }) });
+    clearTimeout(timer);
+    if (!r.ok) throw { code: 'http_' + r.status };
+    const res = await r.json();
     const reply = String(res?.reply || '').trim();
     if (!reply) throw { code: 'empty' };
     turns.push({ role: 'assistant', content: reply });
@@ -1046,7 +1046,7 @@ document.getElementById('again').addEventListener('click', () => {
 });
 document.getElementById('fresh').addEventListener('click', () => { memory = null; try { localStorage.removeItem('kav-memory'); } catch {} clearChat(); showMem(); });
 function setMode(fellBack) {
-  modeEl.textContent = !engineMode ? 'מצב חי: עונה לך AI אמיתי. תכתוב כל מה שלקוח היה כותב.'
+  modeEl.textContent = !engineMode ? 'עונה לך AI אמיתי. תכתוב כל מה שלקוח היה כותב.'
     : 'תכתוב חופשי כמו לקוח, או תלחץ על התשובות המהירות מעל שורת הכתיבה.' + (fellBack ? ' (עברנו לגיבוי, השיחה ממשיכה רגיל)' : '');
 }
 
@@ -1055,9 +1055,7 @@ document.getElementById('apts').innerHTML = Object.entries(APTS).map(([id, a]) =
 
 clearChat(); showMem();
 (async () => {
-  try { sample = await window.claude?.use?.('sample'); } catch { sample = null; }
-  live = !!sample;
-  if (sample) { try { const lim = await sample.limits?.(); useTools = !!lim?.tools; } catch { useTools = false; } }
+  try { const r = await fetch('/api/chat', { cache: 'no-store' }); live = r.ok && !!(await r.json()).ai; } catch { live = false; }
   if (!turns.length) { engineMode = !live; setMode(); buildChips(); }
 })();
 

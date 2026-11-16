@@ -104,8 +104,9 @@ const nextDow = (dow, minAhead) => {{ let d = addD(TODAY, minAhead); while (d.ge
 const nis = (n) => Math.round(n).toLocaleString('he-IL') + ' ₪';
 const APTS = {{ clinic: {{ name: 'הקליניקה', pics: ['p/clinic.jpg'] }}, lock: {{ name: 'העבודה', pics: ['p/lock.jpg'] }} }};
 const READY_TEXT = {c['ready']!r};
+const BOT_ID = {('lock' if key=='lock' else 'clinic')!r};
 """
-    script = '<script>\n' + data + ui + common + open(c['engine']).read() + '\n' + glue + "clearChat(); showMem(); setMode(); buildChips();\n" + lightbox + calc + '</script>\n'
+    script = '<script>\n' + data + ui + common + open(c['engine']).read() + '\n' + glue + "clearChat(); showMem(); setMode(); buildChips();\n(async () => { try { const r = await fetch('/api/chat', { cache: 'no-store' }); live = r.ok && !!(await r.json()).ai; } catch { live = false; } if (!turns.length) { engineMode = !live; setMode(); buildChips(); } })();\n" + lightbox + calc + '</script>\n'
     out = head + body + script
     open('gen/'+c['file'].replace('.html','-src.html'),'w').write(out)
     print('built', c['file'], len(out))
