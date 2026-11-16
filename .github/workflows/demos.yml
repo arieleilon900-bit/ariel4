@@ -2,7 +2,7 @@ name: Demo pages (public, with AI)
 
 # Publishes only the demo pages (David's demo + the general demos) and their small AI server (/api/chat).
 # Static pages + a Pages Function. No bot, no WhatsApp, no messages. Nothing to do with Hanan's bot.
-# The AI key for the demos is the GitHub secret DEMO_ANTHROPIC_API_KEY (separate from Hanan's key).
+# The AI key: DEMO_ANTHROPIC_API_KEY if it exists, otherwise Hanan's ANTHROPIC_API_KEY (Ariel approved, 16/11).
 # Without it the pages still work, with their built-in answers.
 on:
   push:
@@ -20,7 +20,8 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      DEMO_KEY: ${{ secrets.DEMO_ANTHROPIC_API_KEY }}
+      # Ariel (16/11): use Hanan's existing key until a separate demo key is added
+      DEMO_KEY: ${{ secrets.DEMO_ANTHROPIC_API_KEY || secrets.ANTHROPIC_API_KEY }}
     defaults:
       run:
         working-directory: automation-agency/demos/ai
