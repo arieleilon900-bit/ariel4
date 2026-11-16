@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta property="og:title" content="מזכירה בוואטסאפ לקליניקה">
+<meta property="og:description" content="תכתבי כמו לקוחה ותראי איך היא קובעת תור">
+<meta property="og:image" content="https://onerishon-demo.pages.dev/p/clinic.jpg">
+<meta property="og:type" content="website">
+<title>המזכירה של קו המים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* מסך אחד מפוצל: מימין ההסבר והסיכום שדוד מקבל, משמאל הטלפון. מתחת: מה המזכירה יודעת ומה זה חוסך. מראה בהיר אחד מכוון (חול, ים, שקיעה). */
+:root{
+  --sand:#F3ECE2; --sea:#0D3B4A; --sea-2:#1F5C6E; --coral:#E36F4A; --mute:#6B6358; --line:#D6CBBB; --white:#FFFFFF;
+  --wa-head:#0F5B4E; --wa-bg:#ECE5DA; --wa-out:#DCF5E4; --gold:#B8862F;
+  --display:'Frank Ruhl Libre',Georgia,serif; --body:'IBM Plex Sans Hebrew',system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--sand);color:var(--sea);margin:0;overflow-x:clip}
+body{font-family:var(--body);font-size:17px;line-height:1.65;direction:rtl}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
+header.top{padding-block:22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:900;font-size:22px}
+.brand small{display:block;font-family:var(--body);font-weight:500;font-size:13px;color:var(--mute)}
+.tag{font-size:13.5px;font-weight:600;color:var(--sea-2);border:1px solid var(--line);border-radius:999px;padding:6px 14px;background:var(--white)}
+.stage{display:grid;grid-template-columns:1fr minmax(0,410px);gap:clamp(28px,5vw,72px);align-items:start;padding-block:10px 60px}
+.stage>*{min-width:0}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,5vw,60px);line-height:1.05;margin:6px 0 18px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--coral)}
+.lede{font-size:19px;color:#3E4A4F;max-width:54ch;margin:0}
+.how{margin:24px 0 0;padding:18px 20px;background:var(--white);border-radius:12px;border:1px solid var(--line)}
+.how b{display:block;font-size:15px;margin-bottom:6px}
+.how ul{margin:0;padding-inline-start:20px;font-size:15.5px;color:#3E4A4F}
+.mode{margin-top:10px;font-size:13.5px;color:var(--mute)}
+.sumcard{margin-top:24px;background:var(--sea);color:#F3ECE2;border-radius:14px;padding:22px 22px 18px}
+.sumcard h2{font-family:var(--display);font-size:24px;margin:0 0 4px}
+.sumcard p.sub{margin:0 0 14px;color:#AFC6CC;font-size:14.5px}
+.route{display:inline-block;font-weight:700;font-size:13.5px;padding:4px 11px;border-radius:6px;margin-bottom:12px}
+.route.david{background:#2E7D5B;color:#fff}
+.route.friends{background:var(--gold);color:#fff}
+.sumcard dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0;font-size:15.5px}
+.sumcard dt{color:#AFC6CC}
+.sumcard dd{margin:0;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.sumcard .empty{color:#AFC6CC;font-size:15px;margin:0}
+.sumcard .ready{display:inline-block;margin-top:14px;background:var(--coral);color:#fff;font-weight:700;font-size:14px;padding:5px 12px;border-radius:6px}
+.mem{margin-top:14px;font-size:13.5px;color:#AFC6CC;border-top:1px solid rgba(255,255,255,.15);padding-top:10px}
+.phone{background:#111;border-radius:42px;padding:10px;box-shadow:0 40px 70px -34px rgba(13,59,74,.55)}
+.screen{border-radius:33px;overflow:hidden;background:var(--wa-bg);display:flex;flex-direction:column;height:min(80vh,720px);min-height:540px}
+.bar{background:var(--wa-head);color:#fff;padding:30px 16px 12px;display:flex;gap:11px;align-items:center}
+.bar .av{width:40px;height:40px;border-radius:50%;background:#F3ECE2;color:var(--wa-head);display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:19px;flex:none}
+.bar b{display:block;font-size:16px;line-height:1.2}
+.bar small{font-size:12.5px;opacity:.85}
+.chat{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:7px}
+.m{max-width:85%;padding:8px 11px 18px;border-radius:12px;font-size:15px;line-height:1.45;position:relative;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.06);animation:pop .35s ease both}
+.m time{position:absolute;bottom:3px;left:9px;font-size:10.5px;color:#8B8378}
+.m.in{background:var(--white);align-self:flex-start;border-start-start-radius:3px}
+.m.out{background:var(--wa-out);align-self:flex-end;border-start-end-radius:3px}
+.m.sys{align-self:center;background:#FFF6D6;color:#6A5A1E;font-size:13px;padding:6px 12px;border-radius:8px;white-space:normal;text-align:center}
+.pics{align-self:flex-end;display:grid;grid-template-columns:1fr 1fr;gap:3px;width:78%;background:var(--wa-out);padding:3px;border-radius:12px;animation:pop .35s ease both}
+.pics img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;display:block;cursor:zoom-in}
+.pics.many{grid-template-columns:repeat(6,1fr);width:86%}
+.pics.many img{grid-column:span 3}
+.pics.many.c3 img{grid-column:span 2}
+.pics.many img:first-child,.pics.many img.wide{grid-column:1/-1;aspect-ratio:16/10}
+.pics .cap{grid-column:1/-1;font-size:12.5px;color:#4B5B52;padding:3px 6px 2px}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:0;border-radius:50%;width:46px;height:46px;font-size:22px;color:var(--sea)}
+.lb .prev{right:12px;left:auto}
+.lb .next{left:12px}
+.lb .cnt{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);color:#fff;font-size:14px;background:rgba(0,0,0,.35);padding:4px 12px;border-radius:999px}
+.typing{align-self:flex-end;background:var(--wa-out);border-radius:12px;padding:11px 14px;display:flex;gap:5px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#6E9C7E;animation:bob 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bob{0%,60%,100%{transform:none}30%{transform:translateY(-4px)}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 10px 0;background:var(--wa-bg)}
+.chips button{flex:none;border:1px solid #C9BFB0;background:var(--white);color:var(--sea);border-radius:999px;padding:7px 12px;font-size:13.5px;white-space:nowrap}
+.chips button:disabled{opacity:.5;cursor:default}
+form.send{display:flex;gap:8px;padding:10px;background:var(--wa-bg)}
+form.send input{flex:1;min-width:0;border:0;border-radius:22px;padding:12px 16px;font:inherit;font-size:16px;background:var(--white);color:var(--sea)}
+form.send button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:var(--wa-head);color:#fff;display:grid;place-items:center}
+form.send button svg{width:20px;height:20px;transform:scaleX(-1)}
+form.send button:disabled{opacity:.5}
+.resets{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:10px}
+.resets button{background:none;border:0;color:var(--mute);font-size:14px;text-decoration:underline;padding:4px}
+.prices{padding-block:clamp(48px,7vw,80px);border-top:1px solid var(--line)}
+.prices h2,.save h2{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.6vw,42px);line-height:1.1;margin:0 0 10px;text-wrap:balance}
+.prices .intro,.save .intro{color:#3E4A4F;max-width:62ch;margin:0 0 26px}
+.apts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.apt{background:var(--white);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.apt img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.apt div{padding:14px 16px 16px}
+.apt b{font-family:var(--display);font-size:20px;display:block}
+.apt span{display:block;font-size:14.5px;color:#3E4A4F}
+.apt .p{margin-top:8px;font-variant-numeric:tabular-nums;font-weight:600;color:var(--sea)}
+.rules{margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 28px;font-size:15px;color:#3E4A4F}
+.rules p{margin:0;border-inline-start:3px solid var(--coral);padding-inline-start:12px}
+.save{background:var(--white);border-top:1px solid var(--line);padding-block:clamp(56px,8vw,96px)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,56px);align-items:start}
+.grid2>*{min-width:0}
+.list{display:grid;gap:18px}
+.list div{border-inline-start:3px solid var(--coral);padding-inline-start:14px}
+.list b{display:block;font-family:var(--display);font-size:21px}
+.list span{color:#3E4A4F;font-size:16px}
+.calc{background:var(--sand);border-radius:14px;padding:24px;border:1px solid var(--line)}
+.calc label{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:15.5px;margin-bottom:6px}
+.calc output{font-variant-numeric:tabular-nums;color:var(--coral)}
+.calc input[type=range]{width:100%;accent-color:var(--coral);margin-bottom:18px}
+.calc .res{border-top:1px solid var(--line);padding-top:16px;margin-top:4px}
+.calc .big{font-family:var(--display);font-weight:900;font-size:clamp(40px,6vw,58px);line-height:1;color:var(--sea);font-variant-numeric:tabular-nums}
+.calc small{display:block;color:var(--mute);font-size:13.5px;margin-top:10px}
+.cta{margin-top:40px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.cta a{background:var(--coral);color:#fff;text-decoration:none;font-weight:700;padding:15px 24px;border-radius:8px}
+.cta .num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;font-weight:700;font-size:20px}
+footer{padding-block:28px;color:var(--mute);font-size:13.5px;text-align:center}
+.lb{position:fixed;inset:0;background:rgba(13,59,74,.92);display:grid;place-items:center;padding:20px;z-index:20}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:86vh;border-radius:10px}
+.lb button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:14px;background:var(--white);border:0;border-radius:50%;width:44px;height:44px;font-size:20px;color:var(--sea)}
+
+/* ---- עיצוב משודרג ---- */
+.hero{position:relative;min-height:min(86vh,760px);display:flex;color:#fff;overflow:hidden;background:var(--sea)}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{to{transform:scale(1.12) translateY(-2%)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,36,46,.55) 0%,rgba(9,36,46,.25) 38%,rgba(9,36,46,.88) 100%)}
+.hero-in{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;width:100%;padding-block:22px 48px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.hero .brand small{color:rgba(255,255,255,.75)}
+.hero .tag{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff;backdrop-filter:blur(6px)}
+.hero-txt{max-width:680px;margin-top:auto}
+.hero h1{color:#fff;font-size:clamp(38px,6vw,74px);text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.hero h1 em{color:#FFB38F}
+.hero .lede{color:rgba(255,255,255,.92);font-size:clamp(17px,2vw,20px)}
+.go{display:inline-flex;gap:10px;align-items:center;margin-top:24px;background:var(--coral);color:#fff;text-decoration:none;font-weight:700;padding:15px 26px;border-radius:999px;box-shadow:0 14px 30px -12px rgba(227,111,74,.8);transition:transform .2s}
+.go:hover{transform:translateY(-2px)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.facts span{font-size:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px;backdrop-filter:blur(6px)}
+.stage{padding-block:clamp(48px,7vw,84px) 70px}
+h2.sec{font-family:var(--display);font-weight:900;font-size:clamp(30px,4vw,46px);line-height:1.1;margin:0 0 8px}
+.lede.dark{color:#3E4A4F;font-size:18px}
+.tries{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.tries button{text-align:start;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:13px 15px;color:var(--sea);transition:transform .15s,border-color .15s,box-shadow .15s}
+.tries button:hover{transform:translateY(-2px);border-color:var(--coral);box-shadow:0 10px 24px -16px rgba(13,59,74,.5)}
+.tries b{display:block;font-size:16px}
+.tries span{display:block;font-size:13.5px;color:var(--mute);margin-top:2px}
+.tip{margin:14px 0 0;background:#FFF4E6;border:1px dashed #E9B98C;border-radius:12px;padding:10px 14px;font-size:15px;color:#7A4B21}
+.sumcard{background:linear-gradient(160deg,#0D3B4A,#12495B)}
+.sumhead{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.sumhead .dot{width:12px;height:12px;border-radius:50%;background:#4ADE80;margin-top:12px;box-shadow:0 0 0 6px rgba(74,222,128,.18);flex:none}
+.phone{border-radius:46px;padding:11px;background:linear-gradient(145deg,#2a2a2a,#0c0c0c);box-shadow:0 50px 80px -40px rgba(13,59,74,.7),inset 0 0 0 2px #3a3a3a}
+.screen{border-radius:36px;background-color:#EFE7DD;background-image:radial-gradient(rgba(15,91,78,.06) 1.2px,transparent 1.2px),radial-gradient(rgba(227,111,74,.05) 1.2px,transparent 1.2px);background-size:22px 22px,22px 22px;background-position:0 0,11px 11px}
+.bar{padding:34px 12px 10px}
+.bar .back{font-size:30px;line-height:1;opacity:.9;transform:scaleX(-1)}
+.bar img.av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;border:2px solid rgba(255,255,255,.5)}
+.bar small{transition:opacity .2s}
+.m.out .tick{color:#53BDEB;font-size:11px;margin-inline-start:4px;position:absolute;bottom:3px;left:44px}
+.m.out{padding-left:16px;min-width:92px}
+.m.in{min-width:64px}
+.m.out time{left:9px}
+.chips{background:transparent}
+.chips button{box-shadow:0 2px 6px -3px rgba(0,0,0,.2)}
+form.send{background:transparent}
+form.send input{box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.resets button{background:var(--white);border:1px solid var(--line);border-radius:999px;padding:7px 14px;text-decoration:none;color:var(--sea)}
+@media (max-width:880px){.tries{grid-template-columns:1fr}.hero{min-height:88vh}}
+@media (prefers-reduced-motion:reduce){.hero-bg{animation:none}}
+@media (max-width:880px){
+  .stage{grid-template-columns:1fr}
+  .phone-col{order:-1;max-width:430px;width:100%;margin:0 auto}
+  .grid2,.rules{grid-template-columns:1fr}
+  .apts{grid-template-columns:1fr}
+  .screen{height:74vh}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img class="hero-bg" src="p/clinic.jpg" alt="">
+  <div class="wrap hero-in">
+    <div class="topbar"><div class="brand"><a href="index.html" style="color:inherit;text-decoration:none">עונה ראשון</a><small>הדגמה: קליניקות לייזר ואסתטיקה</small></div><span class="tag">הדגמה. שום הודעה לא יוצאת לאף אחד</span></div>
+    <div class="hero-txt">
+      <h1>ככה לקוחה חדשה קובעת תור <em>בזמן שאת באמצע טיפול</em>.</h1>
+      <p class="lede">לקוחה שראתה את המודעה כותבת "כמה עולה?". המזכירה עונה מיד בשם הקליניקה, עונה על "זה כואב?" ו"כמה טיפולים צריך?", מציעה טיפול ניסיון, ומשריינת תור.</p>
+      <a class="go" href="#try">לנסות עכשיו כמו לקוח <span aria-hidden="true">↓</span></a>
+      <div class="facts"><span>⚡ עונה תוך שניות, גם בזמן טיפול</span><span>❓ עונה על כל השאלות</span><span>📅 משריינת תור לבד</span></div>
+    </div>
+  </div>
+</header>
+<main class="wrap stage" id="try">
+  <section>
+    <h2 class="sec">תהיה הלקוח. תכתוב לו.</h2>
+    <p class="lede dark">תכתוב בטלפון כל מה שלקוח היה כותב. או תלחץ על אחד מאלה:</p>
+    <div class="tries" id="tries"><button type="button" data-t="היי מה נשמע?"><b>👋 להגיד שלום</b><span>"היי מה נשמע?"</span></button><button type="button" data-t="כמה עולה לייזר לרגליים?"><b>🦵 לייזר לרגליים</b><span>מחיר, הנחה לסדרה, ותור</span></button><button type="button" data-t="זה כואב?"><b>😬 זה כואב?</b><span>עונה בחום ומחזירה לשיחה</span></button><button type="button" data-t="רוצה לקבוע טיפול פנים"><b>✨ טיפול פנים</b><span>שואלת, מציעה זמנים, משריינת</span></button><button type="button" data-t="יש הנחה? זה קצת יקר לי"><b>💸 יש הנחה?</b><span>טיפול ראשון בחצי מחיר</span></button></div>
+    <p class="tip">💡 נסי לשאול "כמה טיפולים צריך?", "איפה אתם?" או "צריך לגלח לפני?".</p>
+    <div class="sumcard" aria-live="polite">
+      <div class="sumhead"><span class="dot"></span><div><h2>מה שמגיע לבעל העסק</h2><p class="sub">כל מה שנאסף, בהודעה אחת.</p></div></div>
+      <div id="sum"><p class="empty">עוד לא נאסף כלום. תתחיל שיחה בטלפון.</p></div>
+      <div class="mem" id="mem" hidden></div>
+    </div>
+    <div class="mode" id="mode" hidden></div>
+  </section>
+  <section class="phone-col" aria-label="וואטסאפ להדגמה">
+    <div class="phone"><div class="screen">
+      <div class="bar"><span class="back" aria-hidden="true">›</span><img class="av" src="p/clinic.jpg" alt=""><div><b>שירן · קליניקת לייזר ✨</b><small id="status">מחובר/ת</small></div></div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <div class="chips" id="chips" aria-label="תשובות מהירות"></div>
+      <form class="send" id="send" autocomplete="off"><input id="msg" name="msg" placeholder="הודעה" aria-label="הודעה"><button id="sendBtn" aria-label="שליחה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></button></form>
+    </div></div>
+    <div class="resets"><button type="button" id="again" hidden>↻</button><button type="button" id="fresh">✚ לקוח חדש</button></div>
+  </section>
+</main>
+<section class="save">
+  <div class="wrap">
+    <h2>מה זה חוסך לך</h2>
+    <p class="intro">זו הדגמה עם עסק לדוגמה. אצלך המזכירה עונה בשם שלך, בסגנון שלך, ולפי הכללים שלך.</p>
+    <div class="grid2">
+      <div class="list"><div><b>אף לקוחה לא הולכת למכון אחר</b><span>לקוחה ששואלת "כמה עולה?" ולא מקבלת תשובה תוך דקות, קובעת במקום אחר.</span></div><div><b>עונה על השאלות שחוזרות כל יום</b><span>"זה כואב?", "כמה טיפולים?", "צריך לגלח?". את לא עונה על זה יותר.</span></div><div><b>משריינת תור לבד</b><span>מציעה זמנים פנויים, הלקוחה בוחרת, ואת רק מאשרת.</span></div><div><b>מגדילה את הסדרה</b><span>מציעה טיפול ניסיון והנחה על סדרה, וכך לקוחה אחת שווה 6-8 טיפולים.</span></div></div>
+      <div class="calc">
+        <label for="r1">פניות חדשות בשבוע <output id="o1">15</output></label>
+        <input type="range" id="r1" min="2" max="60" value="15">
+        <label for="r2">כמה מהן הולכות למתחרה כי לא ענו מהר <output id="o2">10%</output></label>
+        <input type="range" id="r2" min="0" max="40" value="10">
+        <label for="r3">לקוחה חדשה שווה (סדרה), בש״ח <output id="o3">1,500</output></label>
+        <input type="range" id="r3" min="200" max="6000" step="100" value="1500">
+        <div class="res"><div>הכנסה שהולכת למתחרה בחודש</div><div class="big" id="loss">₪0</div><small>חישוב לפי המספרים שהזנת, לא הבטחה.</small></div>
+      </div>
+    </div>
+    <div class="cta"><a href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%20%D7%90%D7%A8%D7%99%D7%90%D7%9C%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%93%D7%9E%D7%95" target="_blank" rel="noopener">רוצה את זה אצלי</a><span>או בטלפון: <span class="num">052-4666175</span>, אריאל</span></div>
+  </div>
+</section>
+<footer>עונה ראשון · מזכירה בוואטסאפ לעסקים · עסק, שמות ומחירים לדוגמה בלבד · <a href="index.html">לעוד הדגמות</a></footer>
+<div class="lb" id="lb" hidden><button type="button" id="lbx" aria-label="סגור">✕</button><button type="button" class="nav prev" id="lbp" aria-label="הקודמת">›</button><img id="lbimg" alt=""><button type="button" class="nav next" id="lbn" aria-label="הבאה">‹</button><span class="cnt" id="lbc"></span></div>
+<script>
+/* ================= בסיס ================= */
+const DAY = 864e5, TODAY = new Date(); TODAY.setHours(12, 0, 0, 0);
+const addD = (d, n) => new Date(d.getTime() + n * DAY);
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dm = (d) => `${d.getDate()}/${d.getMonth() + 1}`;
+const WD = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const nextDow = (dow, minAhead) => { let d = addD(TODAY, minAhead); while (d.getDay() !== dow) d = addD(d, 1); return d; };
+const nis = (n) => Math.round(n).toLocaleString('he-IL') + ' ₪';
+const APTS = { clinic: { name: 'הקליניקה', pics: ['p/clinic.jpg'] }, lock: { name: 'העבודה', pics: ['p/lock.jpg'] } };
+const READY_TEXT = 'תור שוריין: לאשר ללקוחה';
+/* ================= ממשק ================= */
+const chat = document.getElementById('chat'), form = document.getElementById('send'), input = document.getElementById('msg'), btn = document.getElementById('sendBtn');
+const chipsEl = document.getElementById('chips'), modeEl = document.getElementById('mode'), sumEl = document.getElementById('sum');
+let sample = null, live = false, useTools = false, turns = [], sentPics = new Set(), busy = false, lastLead = {}, lastRoute = '';
+const now = () => new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+const scroll = () => { chat.scrollTop = chat.scrollHeight; };
+function bubble(dir, text) { const d = document.createElement('div'); d.className = 'm ' + dir; d.textContent = text; if (dir !== 'sys') { const t = document.createElement('time'); t.textContent = now(); d.append(t); } if (dir === 'out') { const k = document.createElement('span'); k.className = 'tick'; k.textContent = '✓✓'; d.append(k); } chat.append(d); scroll(); return d; }
+function pics(id) {
+  id = String(id); if (!APTS[id] || sentPics.has(id)) return; sentPics.add(id);
+  const rest = APTS[id].pics.length - 1;
+  const g = document.createElement('div'); g.className = 'pics' + (APTS[id].pics.length > 4 ? ' many' + (rest % 3 === 0 ? ' c3' : '') : '');
+  APTS[id].pics.forEach((src) => { const im = document.createElement('img'); im.src = src; im.alt = 'תמונה מ' + APTS[id].name; im.addEventListener('click', () => openLb(src, APTS[id].pics)); im.addEventListener('load', scroll); g.append(im); });
+  if (APTS[id].pics.length > 4 && rest % 3 !== 0 && rest % 2 === 1) g.lastChild.classList.add('wide');
+  chat.append(g); scroll();
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+/* כמו בן אדם: מקליד לפי אורך ההודעה, ושולח עד 2 הודעות קצרות ברצף */
+async function say(reply, photos, typed) {
+  const parts = String(reply).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).slice(0, 3);
+  let shown = false;
+  for (let i = 0; i < parts.length; i++) {
+    if (!(typed && i === 0)) { typing(true); await wait(i === 0 ? Math.min(4500, 2300 + parts[i].length * 22) : Math.min(3000, 1300 + parts[i].length * 18)); }
+    typing(false); bubble('out', parts[i]);
+    if (photos && !shown && i === Math.max(0, parts.length - 2)) { shown = true; await wait(400); pics(photos); }
+  }
+}
+function typing(on) { const st = document.getElementById('status'); if (st) st.textContent = on ? 'מקליד/ה...' : 'מחובר/ת'; let t = chat.querySelector('.typing'); if (on && !t) { t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; chat.append(t); scroll(); } if (!on && t) t.remove(); }
+function renderSum(lead, route, ready) {
+  lastLead = lead || {}; lastRoute = route || '';
+  const rows = Object.entries(LABELS).filter(([k]) => lead && String(lead[k] ?? '').trim());
+  sumEl.innerHTML = '';
+  if (!rows.length && !route) { sumEl.innerHTML = '<p class="empty">עוד לא נאסף כלום. תתחיל שיחה בטלפון.</p>'; return; }
+  if (route === 'david' || route === 'friends') { const r = document.createElement('span'); r.className = 'route ' + route; r.textContent = route === 'friends' ? 'תיווך: גדול מדי לדירות, דוד מעביר לחברים' : 'לקוח לדוד'; sumEl.append(r); }
+  const dl = document.createElement('dl');
+  rows.forEach(([k, l]) => { const dt = document.createElement('dt'); dt.textContent = l; const dd = document.createElement('dd'); dd.textContent = lead[k]; dl.append(dt, dd); });
+  sumEl.append(dl);
+  if (ready) {
+    const r = document.createElement('span'); r.className = 'ready';
+    r.textContent = route === 'friends' ? 'כל הפרטים נאספו: להעביר לחבר' : READY_TEXT;
+    sumEl.append(r); saveMemory(lead, route); showMem();
+  }
+}
+function setBusy(b) { busy = b; btn.disabled = b; chipsEl.querySelectorAll('button').forEach((c) => c.disabled = b); }
+
+/* ================= מוח משותף לבוטים הפשוטים ================= */
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const NOT_NAMES = new Set(['רוצה', 'מחפש', 'מחפשת', 'צריך', 'צריכה', 'מעוניין', 'מעוניינת', 'כאן', 'פה', 'בסדר', 'עם', 'לא', 'כן', 'גם', 'רק', 'אשמח', 'אוקיי', 'אוקי', 'סגור', 'מעולה', 'תודה', 'היי', 'שלום', 'הי', 'יאללה', 'טוב', 'אבל', 'יש', 'אין', 'מה', 'איך', 'כמה', 'אפשר', 'למה', 'מתי', 'איפה', 'האם', 'רגע', 'נשמע', 'אחלה', 'יופי', 'ברור', 'בטח', 'סבבה', 'מושלם', 'דחוף', 'עכשיו', 'מחר', 'היום', 'בבוקר', 'בערב', 'לי', 'עוד', 'נו', 'וואו', 'זה', 'מצוין', 'סתם', 'פעם', 'ראשונה']);
+function smallTalk(t, first) {
+  const tt = t.trim().replace(/[!?.,🙂😊]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const howru = /מה נשמע|מה שלומך|מה קורה|מה המצב|מה העניינים|מה איתך|איך את|מה הולך|מה חדש/.test(tt);
+  const hello = /^(היי|הי|שלום|ערב טוב|בוקר טוב|צהריים טובים|לילה טוב|אהלן|הלו|הייי+)( (לך|לכם))?( (מה נשמע|מה שלומך|מה קורה|מה המצב|מה העניינים|מה איתך|מה הולך|מה חדש))?$/.test(tt) || (howru && tt.split(' ').length <= 4);
+  if (!hello) return null;
+  const open = /בוקר טוב/.test(tt) ? 'בוקר אור! ☀️' : /ערב טוב/.test(tt) ? 'ערב טוב! 🌙' : pick(['שלום! 😊', 'היי! 😊', 'אהלן! 😊']);
+  const how = howru ? pick([' הכל מעולה, תודה ששאלת! ואצלך?', ' הכל מצוין, ברוך השם, תודה!']) : '';
+  return first ? open + how + ' ' + pick(['איך אוכל לעזור?', 'במה אפשר לעזור?']) : pick(['כן? אני כאן 😊', 'היי 😊 במה אפשר לעזור?']);
+}
+function grabName(t, asked) {
+  let m;
+  if ((m = t.match(/(קוראים לי|שמי|השם שלי|מדבר|מדברת)\s+([א-ת]{2,12})/)) && !NOT_NAMES.has(m[2])) return m[2];
+  if (asked && !/\?/.test(t)) { const w = t.trim().replace(/[.,!]/g, '').replace(/^(אני|זה)\s+/, '').split(/\s+/).filter((x) => /^[א-ת]{2,12}$/.test(x) && !NOT_NAMES.has(x)); if (w.length && w.length <= 3) return w[0]; }
+  return '';
+}
+const isYes = (t) => /^ ?(כן|בטח|ברור|יאללה|סבבה|אוקיי|אוקי|מעולה|נשמע טוב|מתאים|אחלה|יופי|סגור|נכון|בדיוק|קדימה|מאשר|מאשרת)/.test(t);
+const isNo = (t) => /^ ?(לא|לא תודה|אין צורך)( |$|,)/.test(t);
+const isThanks = (t) => /^ ?(תודה|תודה רבה|תנקס)/.test(t);
+let memory = null;
+function saveMemory() {}
+function showMem() { const el = document.getElementById('mem'); if (el) el.hidden = true; }
+/* ================= קליניקת לייזר: שירן (עסק לדוגמה) ================= */
+const OWNER = 'שירן';
+const LABELS = { name: 'שם', treatment: 'טיפול', area: 'אזור', firstTime: 'פעם ראשונה', slot: 'תור מבוקש', offer: 'הצעה', questions: 'שאלה על' };
+const PRICES = { 'רגליים מלאות': 350, 'בית שחי': 120, 'מפשעה': 180, 'שפם': 90, 'פנים': 200, 'גב': 300, 'זרועות': 250, 'בטן': 150 };
+const CFAQ = [
+  { k: 'כאב', re: /כואב|כאב|נעים|צורב|שורף/, a: () => 'ממש לא נורא 😊 המכשיר שלנו עם קירור, ורוב הלקוחות מרגישות רק עקצוץ קל.' },
+  { k: 'כמה טיפולים', re: /כמה טיפולים|כמה פעמים|כמה מפגשים|אחרי כמה/, a: () => 'בדרך כלל 6-8 טיפולים, אחד כל 4-6 שבועות. כבר אחרי 2-3 רואים הבדל גדול ✨' },
+  { k: 'מחיר', re: /כמה (זה )?עול|מחיר|כמה זה|כמה יוצא|עלות/, a: () => S.area && PRICES[S.area] ? `טיפול ב${S.area} עולה ${PRICES[S.area]} ₪, ובסדרה של 6 יש 15% הנחה 😊` : 'המחיר תלוי באזור, למשל בית שחי 120 ₪ ורגליים מלאות 350 ₪. ובסדרה של 6 יש 15% הנחה 😊' },
+  { k: 'הנחה', re: /הנחה|יקר|מבצע|זול|להוריד/, a: () => { S.offer = 'טיפול ראשון ב-50% + 15% על סדרה'; return 'בשבילך: טיפול ראשון בחצי מחיר, ואם ממשיכים לסדרה של 6, עוד 15% הנחה על כולה 🎁'; } },
+  { k: 'עור כהה', re: /עור כהה|שיער בהיר|שיער לבן|שיער ג'ינג'י|שזוף/, a: () => 'המכשיר מתאים לרוב סוגי העור. בפגישת הייעוץ שירן בודקת ומתאימה את הטיפול בדיוק לך.' },
+  { k: 'הכנה', re: /לגלח|גילוח|להכין|לפני הטיפול|שמש/, a: () => 'יום לפני מגלחים את האזור, ושבועיים לפני לא נחשפים לשמש ישירה ☀️' },
+  { k: 'מיקום', re: /איפה|כתובת|מיקום|חניה/, a: () => 'אנחנו ברחוב הרצל 10, יש חניה ממש מול הקליניקה 🚗' },
+  { k: 'גברים', re: /גבר|גברים|לבעלי|בעלי/, a: () => 'בטח, מטפלים גם בגברים 💪' },
+];
+const SLOTS = () => { const d1 = nextDow(2, 1), d2 = nextDow(4, 1); return [`שלישי ${dm(d1)} ב-18:30`, `חמישי ${dm(d2)} ב-10:00`]; };
+function newState() { return { stage: 'start', treatment: '', area: '', firstTime: '', slot: '', name: '', offer: '', asked: {}, agreed: false, route: 'owner', questions: [] }; }
+let S = newState();
+function parse(text) {
+  const t = ' ' + text.replace(/[׳']/g, "'") + ' ', f = {};
+  if (/לייזר|הסרת שיער|שיער/.test(t)) { S.treatment = 'הסרת שיער בלייזר'; f.t = 1; }
+  else if (/טיפול פנים|ניקוי פנים|פילינג|אקנה|פיגמנט|כתמים/.test(t)) { S.treatment = 'טיפול פנים'; f.t = 1; }
+  const A = [[/רגליים|רגלים|רגל/, 'רגליים מלאות'], [/בית שחי|בתי שחי/, 'בית שחי'], [/מפשעה|ביקיני/, 'מפשעה'], [/שפם|שפה עליונה/, 'שפם'], [/פנים|לחיים|סנטר/, 'פנים'], [/גב/, 'גב'], [/זרוע|ידיים/, 'זרועות'], [/בטן/, 'בטן']];
+  for (const [re, v] of A) if (re.test(t)) { S.area = v; f.area = 1; if (!S.treatment && v !== 'פנים') S.treatment = 'הסרת שיער בלייזר'; break; }
+  if (/פעם ראשונה|אף פעם|לא עשיתי|מעולם|חדשה/.test(t)) { S.firstTime = 'כן'; f.ft = 1; }
+  else if (/כבר עשיתי|עשיתי בעבר|ממשיכה|המשך|התחלתי/.test(t)) { S.firstTime = 'לא, כבר עשתה טיפולים'; f.ft = 1; }
+  else if (S.stage === 'askFirst' && isYes(t)) { S.firstTime = 'כן'; f.ft = 1; } else if (S.stage === 'askFirst' && isNo(t)) { S.firstTime = 'לא, כבר עשתה טיפולים'; f.ft = 1; }
+  if (S.stage === 'askSlot') { const sl = SLOTS(); if (/שלישי|ראשון|הראשון|18/.test(t)) { S.slot = sl[0]; f.slot = 1; } else if (/חמישי|שני|השני|10/.test(t)) { S.slot = sl[1]; f.slot = 1; } else if (/ערב|אחרי העבודה/.test(t)) { S.slot = sl[0]; f.slot = 1; } else if (/בוקר/.test(t)) { S.slot = sl[1]; f.slot = 1; } else if (/אחר|לא מתאים|לא יכולה|לא יכול/.test(t)) { f.otherSlot = 1; } }
+  const n = grabName(text, S.stage === 'askName'); if (n) { S.name = n; f.name = 1; }
+  f.q = CFAQ.filter((x) => x.re.test(t)).map((x) => x.k);
+  return f;
+}
+function leadNow() { return { name: S.name, treatment: S.treatment, area: S.area, firstTime: S.firstTime, slot: S.slot, offer: S.offer, questions: S.questions.join(', ') }; }
+function engineReply(text) {
+  const first = S.stage === 'start'; if (first) S.stage = 'collect';
+  const st = smallTalk(text, first); if (st && !/לייזר|טיפול|שיער/.test(text)) { return { reply: st }; }
+  const f = parse(text), pre = [];
+  if (first) pre.push(f.q.length ? 'שלום!' : 'שלום 😊');
+  f.q.forEach((k) => { const it = CFAQ.find((x) => x.k === k); pre.push(it.a()); if (!S.questions.includes(k)) S.questions.push(k); });
+  const say = (main, ready, photos) => ({ reply: [pre.join(' '), main].filter(Boolean).join(pre.join(' ').length < 40 ? ' ' : '\n\n'), ready: !!ready, photos: photos || null });
+  if (S.agreed) { if (isThanks(text)) return say('בכיף! מחכות לך 💕'); if (f.q.length) return say(''); return say(`הכל רשום 😊 ${OWNER} תשלח לך אישור ותזכורת יום לפני.`); }
+  if (!S.treatment) { if (!S.asked.t) { S.asked.t = 1; return say('איזה טיפול מעניין אותך? לייזר להסרת שיער, או טיפול פנים?'); } return say('ספרי לי במילה, לייזר או טיפול פנים? 😊'); }
+  if (S.treatment === 'הסרת שיער בלייזר' && !S.area) { S.stage = 'askArea'; if (!S.asked.area) { S.asked.area = 1; return say(pick(['מעולה! לאיזה אזור? רגליים, בית שחי, מפשעה, פנים?', 'איזה כיף ✨ איזה אזור חשבת?'])); } return say('לאיזה אזור בגוף? 😊'); }
+  if (!S.firstTime) { S.stage = 'askFirst'; if (!S.asked.ft) { S.asked.ft = 1; return say(`${S.area ? S.area + ', מעולה. ' : ''}זו פעם ראשונה שאת עושה ${S.treatment === 'טיפול פנים' ? 'טיפול כזה' : 'לייזר'}?`); } S.firstTime = 'לא צוין'; }
+  if (!S.slot) {
+    S.stage = 'askSlot'; const sl = SLOTS();
+    if (!S.asked.slot) { S.asked.slot = 1; if (S.firstTime === 'כן') S.offer = S.offer || 'פגישת ייעוץ + טיפול ניסיון בחינם'; return say(`${S.firstTime === 'כן' ? 'אז מגיע לך פגישת ייעוץ וטיפול ניסיון בחינם 🎁 ' : ''}יש לי מקום ב${sl[0]} או ב${sl[1]}. מה מתאים לך?`); }
+    if (f.otherSlot) { S.slot = 'מבקשת זמן אחר'; } else return say(`מה יותר נוח, ${sl[0]} או ${sl[1]}? או שאבדוק זמן אחר?`);
+  }
+  if (!S.name) { S.stage = 'askName'; if (!S.asked.name) { S.asked.name = 1; return say(`${S.slot === 'מבקשת זמן אחר' ? `אין בעיה, ${OWNER} תחזור אלייך עם זמנים נוספים. ` : 'שריינתי לך 💕 '}על איזה שם לרשום?`); } return say('על איזה שם? 😊'); }
+  S.agreed = true; S.stage = 'done';
+  return say(`תודה ${S.name}! ${S.slot === 'מבקשת זמן אחר' ? `${OWNER} חוזרת אלייך היום עם זמנים` : `נתראה ב${S.slot}. ${OWNER} תשלח לך אישור, ותזכורת יום לפני`} ✨`, true);
+}
+function suggestions() {
+  if (!turns.length) return ['היי מה נשמע?', 'כמה עולה לייזר לרגליים?', 'זה כואב?', 'רוצה לקבוע טיפול פנים', 'יש הנחה?'];
+  if (S.agreed) return ['תודה!', 'איפה אתם נמצאים?'];
+  if (!S.treatment) return ['לייזר להסרת שיער', 'טיפול פנים'];
+  if (S.treatment === 'הסרת שיער בלייזר' && !S.area) return ['רגליים', 'בית שחי', 'מפשעה'];
+  if (!S.firstTime) return ['כן, פעם ראשונה', 'כבר עשיתי בעבר', 'זה כואב?'];
+  if (!S.slot) return ['שלישי בערב', 'חמישי בבוקר', 'כמה זה עולה?'];
+  if (!S.name) return ['מיכל', 'נועה'];
+  return [];
+}
+
+/* ================= מצב חי (AI) עם גיבוי: אם ה-AI נופל, המוח של דוד ממשיך ======== */
+let engineMode = true;
+function engineTurn(text) {
+  if (/(^|\s)(אתה |זה |את )?(בוט|רובוט|צ'אטבוט)(\s|\?|!|\.|$)|תשובה אוטומטית|מענה אוטומטי|אתה אוטומטי|מזכירה|בן אדם אמיתי|אתה אמיתי|אני מדבר עם מחשב|בינה מלאכותית/.test(text)) {
+    if (S.stage === 'start') S.stage = 'collect';
+    return { reply: 'זה הוואטסאפ של דוד 😊 אני עונה פה בשמו, ודוד עצמו רואה כל מה שאתם כותבים. אז, איך אפשר לעזור?', photos: null, ready: false };
+  }
+  return engineReply(text);
+}
+function replayEngine() { S = newState(); turns.filter((x) => x.role === 'user').slice(0, -1).forEach((x) => engineReply(x.content)); }
+async function ask(text) {
+  turns.push({ role: 'user', content: text });
+  if (engineMode) {
+    let r; try { r = engineTurn(text); } catch (e) { r = { reply: 'רגע, לא הבנתי עד הסוף 😊 אפשר לכתוב שוב במילים אחרות?' }; }
+    turns.push({ role: 'assistant', content: r.reply });
+    await wait(900 + Math.random() * 700); await say(r.reply, r.photos, false);
+    renderSum(leadNow(), S.route, r.ready || (S.agreed && S.stage === 'done')); buildChips(); return;
+  }
+  typing(true);
+  const build = () => [{ role: 'user', content: rules(useTools) + '\n\nמכאן מתחילה השיחה. ההודעה הבאה היא של הלקוח.' }, { role: 'assistant', content: 'הבנתי, אני מוכן.' }, ...turns.slice(-20)];
+  try {
+    let res;
+    try {
+      res = await sample.json(build(), useTools ? { tools: [QUOTE_TOOL], modelTier: 'default' } : { modelTier: 'default', cache: false });
+    } catch (e) {
+      if (useTools && ['tools_unavailable', 'invalid_request', 'invalid_json'].includes(e?.code)) { useTools = false; res = await sample.json(build(), { modelTier: 'default', cache: false }); }
+      else throw e;
+    }
+    const reply = String(res?.reply || '').trim();
+    if (!reply) throw { code: 'empty' };
+    turns.push({ role: 'assistant', content: reply });
+    await say(reply, res?.photos != null && res.photos !== '' ? String(res.photos) : null, true);
+    renderSum(res?.lead || {}, res?.route || '', !!res?.ready); buildChips();
+  } catch (e) {
+    // כל תקלה ב-AI: לא מראים שגיאה ללקוח. המוח של דוד ממשיך את אותה שיחה
+    typing(false); turns.pop();
+    engineMode = true; replayEngine(); setMode(true);
+    return ask(text);
+  }
+}
+async function onSend(text) {
+  text = String(text || '').trim(); if (!text || busy) return;
+  input.value = ''; bubble('in', text); setBusy(true);
+  try { await ask(text); } catch { typing(false); bubble('out', 'רגע, לא הבנתי עד הסוף 😊 אפשר לכתוב שוב?'); } finally { setBusy(false); input.focus(); }
+}
+form.addEventListener('submit', (e) => { e.preventDefault(); onSend(input.value); });
+document.querySelectorAll('#tries button').forEach((b) => b.addEventListener('click', () => { if (busy) return; if (turns.length) clearChat(); if (innerWidth < 880) document.querySelector('.phone-col').scrollIntoView({ behavior: 'smooth', block: 'start' }); onSend(b.dataset.t); }));
+
+/* תשובות מהירות לפי איפה שהשיחה נמצאת */
+function buildChips() {
+  chipsEl.innerHTML = '';
+  suggestions().forEach((t) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.addEventListener('click', () => onSend(t)); chipsEl.append(b); });
+}
+function clearChat() { chat.innerHTML = ''; turns = []; sentPics = new Set(); S = newState(); engineMode = !live; renderSum({}, '', false); bubble('sys', 'היום'); input.value = ''; buildChips(); setMode(); }
+document.getElementById('again').addEventListener('click', () => {
+  if (!memory) saveMemory(lastLead, lastRoute);
+  clearChat(); showMem();
+  bubble('sys', memory ? `${memory.name} חוזר לכתוב אחרי כמה חודשים. תכתוב כמוהו ותראה שהוא זוכר אותו.` : 'עוד אין לקוח לזכור. תסיים קודם שיחה אחת שבה הלקוח אומר את השם שלו.');
+});
+document.getElementById('fresh').addEventListener('click', () => { memory = null; try { localStorage.removeItem('kav-memory'); } catch {} clearChat(); showMem(); });
+function setMode(fellBack) {
+  modeEl.textContent = !engineMode ? 'מצב חי: עונה לך AI אמיתי. תכתוב כל מה שלקוח היה כותב.'
+    : 'תכתוב חופשי כמו לקוח, או תלחץ על התשובות המהירות מעל שורת הכתיבה.' + (fellBack ? ' (עברנו לגיבוי, השיחה ממשיכה רגיל)' : '');
+}
+
+clearChat(); showMem(); setMode(); buildChips();
+/* לייטבוקס */
+const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
+let lbList = [], lbI = 0;
+function lbShow() { lbimg.src = lbList[lbI]; document.getElementById('lbc').textContent = `${lbI + 1} / ${lbList.length}`; }
+function openLb(src, list) { lbList = list || [src]; lbI = Math.max(0, lbList.indexOf(src)); lbShow(); lb.hidden = false; document.getElementById('lbx').focus(); }
+document.getElementById('lbn').addEventListener('click', (e) => { e.stopPropagation(); lbI = (lbI + 1) % lbList.length; lbShow(); });
+document.getElementById('lbp').addEventListener('click', (e) => { e.stopPropagation(); lbI = (lbI - 1 + lbList.length) % lbList.length; lbShow(); });
+let tx = 0; lb.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) { lbI = (lbI + (dx > 0 ? 1 : -1) + lbList.length) % lbList.length; lbShow(); } });
+document.getElementById('lbx').addEventListener('click', () => lb.hidden = true);
+lb.addEventListener('click', (e) => { if (e.target === lb) lb.hidden = true; });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.hidden = true; if (!lb.hidden && e.key === 'ArrowLeft') document.getElementById('lbn').click(); if (!lb.hidden && e.key === 'ArrowRight') document.getElementById('lbp').click(); });
+
+/* מחשבון */
+const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
+const fmt = (n) => Math.round(n).toLocaleString('he-IL');
+function calc() { document.getElementById('o1').textContent = r1.value; document.getElementById('o2').textContent = r2.value + '%'; document.getElementById('o3').textContent = fmt(r3.value); document.getElementById('loss').textContent = '₪' + fmt(r1.value * 4.33 * r2.value / 100 * r3.value); }
+[r1, r2, r3].forEach((r) => r.addEventListener('input', calc)); calc();
+</script>
+
+</body>
+</html>

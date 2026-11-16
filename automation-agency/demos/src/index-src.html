@@ -1,0 +1,63 @@
+<title>עונה ראשון: הדגמות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@700;900&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#F3ECE2;--sea:#0D3B4A;--coral:#E36F4A;--mute:#6B6358;--line:#D6CBBB;--white:#fff;--display:'Frank Ruhl Libre',Georgia,serif;--body:'IBM Plex Sans Hebrew',system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--sand);color:var(--sea);overflow-x:clip}
+body{font-family:var(--body);font-size:17px;line-height:1.65;direction:rtl}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px))}
+header{background:radial-gradient(1200px 500px at 85% -10%,#1F5C6E 0,#0D3B4A 60%);color:#fff;padding-block:22px clamp(56px,9vw,110px)}
+.brand{font-family:var(--display);font-weight:900;font-size:22px}
+.brand small{display:block;font-family:var(--body);font-weight:500;font-size:13px;color:rgba(255,255,255,.7)}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(38px,6vw,72px);line-height:1.05;margin:clamp(40px,7vw,80px) 0 16px;max-width:15ch;text-wrap:balance}
+h1 em{font-style:normal;color:#FFB38F}
+.lede{font-size:clamp(17px,2vw,20px);max-width:56ch;color:rgba(255,255,255,.9);margin:0}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.pills span{font-size:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px}
+main{margin-top:clamp(-70px,-6vw,-40px)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:var(--white);border-radius:18px;overflow:hidden;text-decoration:none;color:var(--sea);box-shadow:0 30px 60px -36px rgba(13,59,74,.55);transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);box-shadow:0 40px 70px -36px rgba(13,59,74,.7)}
+.card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.card div{padding:18px 20px 22px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card b{font-family:var(--display);font-size:24px}
+.card span{color:#3E4A4F;font-size:15.5px;flex:1}
+.card i{font-style:normal;margin-top:10px;font-weight:700;color:var(--coral)}
+h2{font-family:var(--display);font-weight:900;font-size:clamp(28px,3.6vw,42px);margin:clamp(56px,8vw,90px) 0 18px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:s}
+.steps div{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px}
+.steps div::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--coral);color:#fff;font-weight:700;margin-bottom:10px}
+.steps b{display:block;font-size:18px}
+.steps span{color:#3E4A4F;font-size:15.5px}
+.cta{margin:clamp(48px,7vw,80px) 0;background:var(--sea);color:#fff;border-radius:18px;padding:clamp(24px,4vw,40px);display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between}
+.cta p{margin:0;font-size:19px;max-width:44ch}
+.cta a{background:var(--coral);color:#fff;text-decoration:none;font-weight:700;padding:15px 24px;border-radius:999px}
+.num{direction:ltr;unicode-bidi:isolate;font-weight:700}
+footer{padding-block:0 30px;color:var(--mute);font-size:13.5px;text-align:center}
+@media (max-width:880px){.cards,.steps{grid-template-columns:1fr}}
+</style>
+<header>
+  <div class="wrap">
+    <div class="brand">עונה ראשון<small>מזכירה בוואטסאפ לעסקים קטנים</small></div>
+    <h1>הלקוחות כותבים. <em>המזכירה עונה.</em> אתה סוגר.</h1>
+    <p class="lede">מזכירה בוואטסאפ שעונה לכל לקוח תוך שניות, בשם העסק ובסגנון שלך, אוספת את כל הפרטים ושולחת לך סיכום אחד. תבחר עסק ותנסה אותה בעצמך, כמו לקוח.</p>
+    <div class="pills"><span>⚡ עונה תוך שניות, גם בלילה ובשבת</span><span>🧠 מבינה מה הלקוח צריך</span><span>📩 סיכום אחד מסודר אליך</span></div>
+  </div>
+</header>
+<main class="wrap">
+  <div class="cards">
+    <a class="card" href="manulan.html"><img src="p/lock.jpg" alt="מנעול ודלת"><div><b>🔑 מנעולן</b><span>לקוח ננעל בחוץ. היא מזהה חירום, מפנה ל-100 כשיש סכנה, ואוספת כתובת ושם.</span><i>לנסות ←</i></div></a>
+    <a class="card" href="klinika.html"><img src="p/clinic.jpg" alt="חדר טיפולים בקליניקה"><div><b>✨ קליניקת לייזר</b><span>"כמה עולה?", "זה כואב?". היא עונה, מציעה טיפול ניסיון ומשריינת תור.</span><i>לנסות ←</i></div></a>
+    <a class="card" href="dirot.html"><img src="p/v1-1.jpg" alt="ג׳קוזי מול הים"><div><b>🏖️ דירות נופש</b><span>שולחת תמונות, בודקת ביומן, נותנת מחיר ומתמקחת עד הגבול שקבעת.</span><i>לנסות ←</i></div></a>
+  </div>
+  <h2>איך זה עובד אצלך</h2>
+  <div class="steps">
+    <div><b>שיחה של חצי שעה</b><span>מספרים לנו על העסק: שירותים, מחירים, שאלות שחוזרות, ואיך אתה מדבר עם לקוחות.</span></div>
+    <div><b>בונים את המזכירה שלך</b><span>בשם העסק ובסגנון שלך, עם הכללים שלך: מה מותר לה להגיד ומה נשאר אצלך.</span></div>
+    <div><b>מחברים לוואטסאפ של העסק</b><span>חיבור רשמי של Meta. מאותו רגע אף לקוח לא מחכה, ואתה מקבל סיכום על כל פנייה.</span></div>
+  </div>
+  <div class="cta"><p>רוצה לראות איך זה ייראה בעסק שלך? נבנה לך הדגמה אישית עם השם, השירותים והתמונות שלך.</p><a href="https://wa.me/972524666175?text=%D7%94%D7%99%D7%99%20%D7%90%D7%A8%D7%99%D7%90%D7%9C%2C%20%D7%A8%D7%90%D7%99%D7%AA%D7%99%20%D7%90%D7%AA%20%D7%94%D7%94%D7%93%D7%92%D7%9E%D7%95%D7%AA%20%D7%95%D7%90%D7%A0%D7%99%20%D7%A8%D7%95%D7%A6%D7%94%20%D7%9C%D7%A9%D7%9E%D7%95%D7%A2%20%D7%A2%D7%95%D7%93" target="_blank" rel="noopener">לדבר עם אריאל</a></div>
+</main>
+<footer>עונה ראשון · <span class="num">052-4666175</span> · כל העסקים, השמות והמחירים בהדגמות הם לדוגמה בלבד</footer>

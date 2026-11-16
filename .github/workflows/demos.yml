@@ -1,0 +1,26 @@
+name: General demos page (public)
+
+# Publishes only the general demo pages (static, no bot, no messages). Nothing to do with Hanan's bot.
+on:
+  push:
+    branches: [claude/bold-knuth-scehxs]
+    paths:
+      - 'automation-agency/demos/public/**'
+      - '.github/workflows/demos.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Create the Pages project (once)
+        run: npx -y wrangler@3 pages project create onerishon-demo --production-branch main || echo "project already exists or cannot be created"
+      - name: Publish the pages
+        run: npx -y wrangler@3 pages deploy automation-agency/demos/public --project-name onerishon-demo --branch main --commit-dirty=true
