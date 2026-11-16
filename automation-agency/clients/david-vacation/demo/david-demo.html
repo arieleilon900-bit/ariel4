@@ -369,6 +369,7 @@ ${booked}
 
 מחיר וזמינות:
 - ${withTools ? 'לפני שנותנים מחיר או אומרים שתאריך פנוי, חובה לקרוא לכלי quote. משתמשים רק במספרים שהוא מחזיר.' : 'מחשבים מחיר לפי המחירון למעלה, לילה-לילה, ובודקים את הלילות התפוסים.'}
+- חוק ברזל: אסור לומר שדירה תפוסה או פנויה, ואסור לתת מחיר, לפני שהלקוח כתב בעצמו מי מגיע, תאריך, ומספר לילות, ואישר אותם ('רק לוודא: זוג, שישי 27/11 עד ראשון 29/11, 2 לילות. נכון?'). לא מנחשים ולא משלימים פרטים לבד (גם 'סופ"ש' = שואלים אם שישי ושבת, 2 לילות).
 - תאריך תפוס: לא מבטיחים אותו. מציעים דירה אחרת שמתאימה או תאריך אחר.
 - סופ"ש (ליל שישי) מינימום 2 לילות.
 - נותנים מחיר מלא עם פירוט קצר (כמה לילות × מחיר, ותוספות).
@@ -491,7 +492,7 @@ const FAQ = [
   { k: 'מעלית', re: /מעלית|נגיש|כיסא גלגלים|מדרגות/, a: () => 'יש מעלית בבניין, ואין צורך לסחוב מזוודות במדרגות.' },
   { k: 'ים', re: /כמה מהים|רחוק מהים|קרוב לים|ליד הים|חוף|לרדת לים/, a: () => 'אנחנו ממש על קו המים, מעל חוף סירונית. יורדים מהבניין ואתם על החול 🏖️' },
   { k: 'מיקום', re: /איפה (זה|אתם|נמצא|הדירה)|כתובת|מיקום|באיזה רחוב|באיזה עיר/, a: () => 'אנחנו בקו ראשון לים במרכז נתניה, מעל חוף סירונית. את הכתובת המדויקת אני שולח עם אישור ההזמנה 📍' },
-  { k: 'כשרות', re: /כשר|שבת|בית כנסת|חב"?ד|מהדרין/, a: () => 'בלובי של הסוויטה המשפחתית יש בית חב״ד ומסעדות כשרות למהדרין, ממש נוח לשבת. המטבחים בדירות לא מוכשרים.' },
+  { k: 'כשרות', re: /כשר|שומרי שבת|שומר שבת|בית כנסת|חב"?ד|מהדרין/, a: () => 'בלובי של הסוויטה המשפחתית יש בית חב״ד ומסעדות כשרות למהדרין, ממש נוח לשבת. המטבחים בדירות לא מוכשרים.' },
   { k: 'ביטול', re: /ביטול|לבטל|מבטלים|החזר|אם משהו ישתנה/, a: () => 'ביטול עד 7 ימים לפני ההגעה: המקדמה חוזרת אליכם במלואה. אחרי זה המקדמה לא חוזרת, אבל תמיד אפשר לנסות להזיז תאריך 🙏' },
   { k: 'תשלום', re: /מקדמה|איך משלמים|תשלום|אשראי|ביט|פייבוקס|העברה בנקאית|מזומן|חשבונית/, a: () => 'שומרים את התאריך עם מקדמה של 30%, והיתרה ביום ההגעה. אפשר באשראי, ביט או העברה, ומקבלים קבלה 👍' },
   { k: 'מסיבות', re: /מסיב|אירוע|להזמין חברים|אורחים נוספים|רעש|מוזיקה/, a: () => 'הדירות לאירוח שקט, בלי מסיבות ובלי אורחים נוספים 🙏 אבל לחגוג זוגי עם בלונים ויין, בשמחה!' },
@@ -551,7 +552,7 @@ function parse(text) {
   // תאריכים
   const dowI = WD.findIndex((d) => new RegExp('(יום |ב|ל)' + d + '( |$)').test(t));
   if (/סופ"?ש|סוף שבוע|סופש|וויקנד|ויקנד/.test(t)) {
-    S.checkin = /הבא|בעוד שבוע/.test(t) ? addD(FRI, 7) : FRI; if (!S.nights) S.nights = 2; found.date = 1;
+    S.checkin = /הבא|בעוד שבוע/.test(t) ? addD(FRI, 7) : FRI; S.nightsGuess = 2; S.confirmed = 0; found.date = 1;
   } else if (/מחרתיים/.test(t)) { S.checkin = addD(TODAY, 2); found.date = 1; }
   else if (/מחר/.test(t)) { S.checkin = addD(TODAY, 1); found.date = 1; }
   else if (/(היום|הלילה|עכשיו)( |$)/.test(t) && !/לילות/.test(t)) { S.checkin = TODAY; found.date = 1; }
@@ -565,7 +566,7 @@ function parse(text) {
     let d = new Date(TODAY.getFullYear(), TODAY.getMonth(), parseInt(m[1]), 12); if (d < TODAY) d = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, parseInt(m[1]), 12);
     S.checkin = d; found.date = 1;
   } else if (dowI >= 0) { S.checkin = nextDow(dowI, /הבא|בעוד שבוע/.test(t) ? 6 : 1); found.date = 1; }
-  else if (/שבוע הבא|באמצע השבוע/.test(t)) { S.checkin = /הבא/.test(t) ? SUN2 : nextDow(0, 1); found.date = 1; if (!S.nights && /אמצע/.test(t)) S.nights = 2; }
+  else if (/שבוע הבא|באמצע השבוע/.test(t)) { S.checkin = /הבא/.test(t) ? SUN2 : nextDow(0, 1); found.date = 1; S.confirmed = 0; }
   else if (/חנוכה|פסח|סוכות|ראש השנה|שבועות|חג|חופש הגדול|קיץ|החופש/.test(t)) { S.datesRaw = (t.match(/חנוכה|פסח|סוכות|ראש השנה|שבועות|חג|החופש הגדול|קיץ|החופש/) || [''])[0]; found.vagueDate = 1; }
   // לילות
   if ((m = t.match(new RegExp(NUMW + '\\s*(לילות|ימים)')))) { S.nights = Math.max(1, num(m[1]) - (m[2] === 'ימים' ? 1 : 0)) || 1; found.nights = 1; }
@@ -590,6 +591,7 @@ function parse(text) {
     if ((m = t.match(/(\d{1,2})(:\d\d)?/))) { S.arrival = m[0].includes(':') ? m[0] : m[1] + ':00'; found.arrival = 1; }
     else if ((m = t.match(/בבוקר|בצהריים|צהריים|אחר הצהריים|אחה"צ|בערב|ערב|בלילה|מאוחר|מוקדם|לא יודע|לא בטוח/))) { S.arrival = m[0]; found.arrival = 1; }
   }
+  if (found.date || found.nights || found.guests) S.confirmed = 0;
   // כוונות
   found.price = /כמה (זה )?עול|מחיר|כמה זה|כמה יוצא|עלות|כמה לשלם/.test(t);
   if (found.price) S.wantsPrice = true;
@@ -670,7 +672,7 @@ function engineReply(text) {
   const first = S.stage === 'start';
   if (first) S.stage = 'collect';
   const CELEB = { 'הצעת נישואין': 'מזל טוב מראש! ❤️', 'יום הולדת': 'וואו איזה כיף! 🎈', 'יום נישואין': 'מזל טוב! 🥂', 'ירח דבש': 'מזל טוב! ❤️', 'הפתעה': 'איזה כיף, הפתעה! 🎈' };
-  if (f.occasion && CELEB[S.occasion] && S.apt && !S.celebrated) { S.celebrated = 1; pre.push(CELEB[S.occasion]); }
+  if (f.occasion && CELEB[S.occasion] && !S.celebrated) { S.celebrated = 1; pre.push(CELEB[S.occasion]); }
   if (f.haggle && !S.quoted && S.adults != null && !tooBig() && !S.saidLater++) pre.push('על המחיר נדבר תכף, אני בטוח שנסתדר 😉');
   // שיחת חולין, כמו בן אדם. לא קופצים ישר לשאלות
   if (f.hello && !f.guests && !f.date && !f.price && !f.q.length) {
@@ -797,7 +799,7 @@ function engineReply(text) {
   if (!S.checkin) {
     S.stage = 'collect';
     if (f.vagueDate) return say(`${S.datesRaw ? 'מעולה! ' : ''}איזה תאריכים בדיוק? ככה אני בודק לכם ביומן מה פנוי`);
-    const lead = f.guests ? (isFamily() ? pick(['איזה כיף, חופשה משפחתית 😊', 'מושלם, יש לי בדיוק מה שמתאים למשפחות ✨']) : pick(['מושלם 😊', 'יש לי בדיוק את מה שמתאים לזוג ✨'])) + ' ' : '';
+    const lead = f.guests && !first ? (isFamily() ? pick(['איזה כיף, חופשה משפחתית 😊', 'מושלם, יש לי בדיוק מה שמתאים למשפחות ✨']) : pick(['מושלם 😊', 'יש לי בדיוק את מה שמתאים לזוג ✨'])) + ' ' : '';
     if (S.offerDate && f.yes) { S.checkin = S.offerDate; S.offerDate = null; return engineReplyAgain(); }
     if (S.offerFri && f.yes) { S.checkin = FRI; S.nights = S.nights || 2; S.offerFri = 0; return engineReplyAgain(); }
     if (S.asked.date >= 2) { S.offerFri = 1; return say(`אם עוד לא סגרתם תאריך, רוצים שאבדוק לכם מה פנוי בסופ"ש הקרוב, ${dm(FRI)}? 😊`); }
@@ -806,13 +808,27 @@ function engineReply(text) {
   }
   if (!S.nights) {
     S.stage = 'collect';
-    if (S.asked.nights) return say(pick(['כמה לילות תרצו? לילה, שניים, שלושה? 😊', 'ולכמה לילות בערך? 😊']));
-    S.asked.nights = 1; return say(`${WD[S.checkin.getDay()]} ${dm(S.checkin)}, רשמתי. לכמה לילות?`);
+    if (S.nightsGuess && S.asked.nights && (f.yes || /שישי.*שבת|שני לילות|2 לילות/.test(text))) { S.nights = S.nightsGuess; }
+    else {
+      if (S.nightsGuess && !S.asked.nights) { S.asked.nights = 1; return say(`סופ"ש, מעולה! שישי ושבת, 2 לילות (${dm(S.checkin)}-${dm(addD(S.checkin, 2))})? או שחשבתם על יותר?`); }
+      if (S.asked.nights) return say(pick(['כמה לילות תרצו? לילה, שניים, שלושה? 😊', 'ולכמה לילות בערך? 😊']));
+      S.asked.nights = 1; return say(`${WD[S.checkin.getDay()]} ${dm(S.checkin)}, רשמתי. לכמה לילות?`);
+    }
   }
   if ((S.checkin.getDay() === 5) && S.nights < 2) { S.nights = 2; pre.push('בסופ"ש אני משכיר מינימום 2 לילות, שישי ושבת.'); }
   if (!S.occasion && (S.adults === 2 && !isFamily()) && !S.asked.occasion) {
     S.asked.occasion = 1; S.stage = 'collect';
     return say(pick(['ויש סיבה למסיבה? יום הולדת, יום נישואין? 🥂', 'חוגגים משהו מיוחד, או סתם בורחים לנשום קצת ים? 😊']));
+  }
+  // לפני שבודקים ביומן: מוודאים עם הלקוח את כל הפרטים. בלי אישור אין "תפוס" ואין "פנוי"
+  if (!S.confirmed && (!S.apt || S.stage === 'collect' || S.stage === 'confirm')) {
+    if (S.stage === 'confirm' && (f.yes || /נכון|בדיוק|כן/.test(text)) && !f.no && !f.date && !f.nights && !f.guests) { S.confirmed = 1; S.stage = 'collect'; }
+    else {
+      const wasConfirm = S.stage === 'confirm';
+      S.stage = 'confirm';
+      if (wasConfirm && f.no && !f.date && !f.nights && !f.guests) return say('אין בעיה 😊 מה לתקן? התאריך, מספר הלילות או מי מגיע?');
+      return say(`${wasConfirm ? 'עדכנתי 👍 ' : 'רק לוודא שהבנתי: '}${guestsText()}, ${WD[S.checkin.getDay()]} ${dm(S.checkin)} עד ${WD[addD(S.checkin, S.nights).getDay()]} ${dm(addD(S.checkin, S.nights))}, ${S.nights === 1 ? 'לילה אחד' : S.nights + ' לילות'}. נכון?`);
+    }
   }
   // המלצה עם תמונות (הודעה נפרדת לפני המחיר)
   if (!S.apt || S.stage === 'collect') {
@@ -826,11 +842,11 @@ function engineReply(text) {
       return say(`בדקתי ביומן, ובתאריכים האלה (${keepD}) הכל כבר תפוס אצלי 😕 יש לכם גמישות? אולי סופ"ש אחרי או אמצע שבוע?`);
     }
     const otherBooked = !isFamily() && id === '2' && S.checkin && !quote({ apartment: '1', checkin: iso(S.checkin), nights: S.nights }).available;
-    S.apt = id; S.stage = 'recommended'; S.celebrated = S.occasion && S.occasion !== '-' ? 1 : 0;
-    const celebrate = S.occasion && S.occasion !== '-' ? ({ 'הצעת נישואין': 'מזל טוב מראש! ❤️ ', 'יום הולדת': 'וואו איזה כיף! 🎈 ', 'יום נישואין': 'מזל טוב! 🥂 ', 'ירח דבש': 'מזל טוב! ❤️ ' }[S.occasion] || 'איזה כיף! ') : '';
+    const celebrateNow = S.occasion && S.occasion !== '-' && !S.celebrated; S.apt = id; S.stage = 'recommended'; S.celebrated = 1;
+    const celebrate = celebrateNow ? ({ 'הצעת נישואין': 'מזל טוב מראש! ❤️ ', 'יום הולדת': 'וואו איזה כיף! 🎈 ', 'יום נישואין': 'מזל טוב! 🥂 ', 'ירח דבש': 'מזל טוב! ❤️ ' }[S.occasion] || 'איזה כיף! ') : '';
     const pitch = {
       '1': 'יש לי בדיוק את הדירה בקומה 5, קו ראשון לים. ג׳קוזי פרטי במרפסת מול נוף עוצר נשימה, פינוק אמיתי 🛁',
-      '2': `${otherBooked ? 'הדירה בקומה 5 כבר תפוסה בתאריכים האלה, אבל ' : ''}יש לי את סוויטת הבוטיק פנויה. ג׳קוזי זוגי עם 14 זרמים ומקלחת חיצונית מול חוף סירונית ✨`,
+      '2': `${otherBooked ? `בדקתי ביומן: ב-${datesText()} הדירה בקומה 5 כבר תפוסה, אבל ` : ''}יש לי את סוויטת הבוטיק פנויה. ג׳קוזי זוגי עם 14 זרמים ומקלחת חיצונית מול חוף סירונית ✨`,
       '3': 'יש לי סוויטה שהיא בול בשבילכם. 2 חדרי שינה, מרפסת ענקית עם ג׳קוזי מול הים, ובלובי בית חב״ד ומסעדות כשרות 🏖️',
     }[id];
     if (S.wantsPrice) { S.stage = 'quote-now'; }
