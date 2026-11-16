@@ -1,6 +1,7 @@
 // ההוראות ל-AI של ההדגמות. נשמרות בשרת בלבד (לא בדף), כדי שאף אחד לא ישתמש במפתח שלנו לדברים אחרים.
 // הנתונים כאן (מחירים, דירות, תאריכים תפוסים, תשובות) תואמים בדיוק את מה שיש בדפים.
 
+import { DAVID_PRICES, FLAG_TEXT, PRICES_VALID_UNTIL, priceStay } from './pricelist.js';
 const DAY = 864e5;
 const WD = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 export function israelToday(now = new Date()) {
@@ -19,21 +20,38 @@ const VAC = {
   david: {
     owner: 'דוד', brand: 'קו המים', place: 'קו ראשון לים בנתניה (חוף סירונית)',
     apts: {
-      1: { name: 'דירת "קו המים", קומה 5', short: 'הדירה בקומה 5', mid: 1500, wknd: 1800, facts: 'קו ראשון לים במרכז נתניה, קומה 5, נוף פנורמי. לזוגות. אמבט ספא (ג׳קוזי) פרטי במרפסת מול הים. מטבח מאובזר, מכונת אספרסו. התוספות זמינות כאן.' },
-      2: { name: 'סוויטת הבוטיק "קו המים"', short: 'סוויטת הבוטיק', mid: 1200, wknd: 1500, facts: 'סוויטה פרטית בקו ראשון, נוף פתוח לחוף סירונית. לזוגות. ג׳קוזי זוגי עם 14 זרמים, מקלחת שקופה ומקלחת חיצונית מול הים, מזרן זוגי איכותי, מטבחון, מיני־בר, אספרסו בקפסולות, טלוויזיה חכמה.' },
-      3: { name: 'הסוויטה המשפחתית', short: 'הסוויטה המשפחתית', mid: 1200, wknd: 1500, facts: 'סוויטה חדשה מעל חוף סירונית. עד זוג + 2 ילדים + תינוק. 2 חדרי שינה וסלון, מרפסת מרווחת עם ג׳קוזי זוגי, מקלחת יוקרתית, מטבח מאובזר ופינת אוכל ל-4. בית חב״ד ומסעדות כשרות למהדרין בלובי.' },
+      1: { name: 'קו המים 1 (קומה 5)', short: 'קו המים 1', mid: 800, wknd: 1500, real: DAVID_PRICES[1], facts: 'קו ראשון לים במרכז נתניה, קומה 5, נוף פנורמי. לזוגות. אמבט ספא (ג׳קוזי) פרטי במרפסת מול הים. מטבח מאובזר, מכונת אספרסו. התוספות זמינות כאן.' },
+      2: { name: 'קו המים 2 (סוויטת הבוטיק, קומה 1)', short: 'קו המים 2', mid: 900, wknd: 1500, real: DAVID_PRICES[2], facts: 'סוויטה פרטית בקו ראשון, נוף פתוח לחוף סירונית. לזוגות. ג׳קוזי זוגי עם 14 זרמים, מקלחת שקופה ומקלחת חיצונית מול הים, מזרן זוגי איכותי, מטבחון, מיני־בר, אספרסו בקפסולות, טלוויזיה חכמה.' },
+      3: { name: 'קו המים 3 (הסוויטה החדשה, משפחתית)', short: 'קו המים 3', mid: 1200, wknd: 1700, real: DAVID_PRICES[3], facts: 'סוויטה חדשה מעל חוף סירונית. עד זוג + 2 ילדים + תינוק. 2 חדרי שינה וסלון, מרפסת מרווחת עם ג׳קוזי זוגי, מקלחת יוקרתית, מטבח מאובזר ופינת אוכל ל-4. בית חב״ד ומסעדות כשרות למהדרין בלובי.' },
     },
     voice: ['"בול בשבילכם"', '"לנשום את הים"', '"התאריכים מתמלאים מהר"', '"סומך עליך"', '"איזה כיף לשמוע"', '"אח יקר"', '"אל תדאג"', '"בסדר גמור"'],
-    real: `מתוך שיחה אמיתית של דוד עם לקוח (ככה הוא באמת כותב: קצר, ישיר, חם, בלי מליצות):
-לקוח: "אני צריך צימר זוגי לשבוע הבא" → דוד: "היי ממתי עד מתי"
-לקוח: "אני די זורם, מתי יש לך פנוי שבוע הבא" → דוד שולח תמונות של הדירות המתאימות ואז: "לילה אחד? 2 לילות? 3 לילות?"
-לקוח: "2 לילות, כמה כסף זה?" → דוד: "כאן יש לי פנוי מראשון עד חמישי. אפשר ראשון עד שלישי או שלישי עד חמישי. 1,200 ללילה"
-לקוח: "בוא תתגמש איתי קצת" → דוד: "התגמשתי מלכתחילה"
-לקוח: "פליז שיהיה נקי נקי נקי" → דוד: "אל תדאג, אני ואשתי מנקים"
-לסגירה: "אנחנו סוגרים על 9-11/8, ראשון עד שלישי הקרוב, כן?" ו"בשביל לסגור אני צריך שתעביר לי חצי מקדמה"
-לקוח מתלהב "וואו" → דוד: "איזה כיף לשמוע את הוואו כל פעם מחדש". לקוח מבטיח להמליץ → "סומך עליך" ואז "ועלי😎".
-סיכום סגירה בסגנון שלו: "סגרנו על סוויטת הבוטיק, 9-11/8 ראשון עד שלישי, לזוג".`,
-    facts: 'כניסה מ-17:00, יציאה עד 12:00. לסגירה: מקדמה של חצי מהסכום, בפייבוקס, ביט או העברה בנקאית, ואפשר לקבל קבלה. את הכתובת המדויקת ופרטי ההגעה שולחים אחרי המקדמה. ניקיון: "אני ואשתי מנקים בעצמנו". חניה: אין חניה פרטית לבניין. יש חניון כחול-לבן קצת אחרי הבניין, וחניון פרטי קצת לפני הבניין על הסיבוב (מדברים איתו והוא עושה מחיר טוב).',
+    real: `ככה דוד באמת כותב (נלמד מ-3 שיחות אמיתיות שלו עם לקוחות). קצר, ישיר, חם, כמו חבר. לא מליצות ולא שירות לקוחות:
+- פתיחה: "היי צהריים טובים", "היי ממתי עד מתי", "למתי אתם מחפשים?".
+- כשהלקוח גמיש: "לילה אחד? 2 לילות? 3 לילות?" ואז אפשרויות קונקרטיות: "כאן יש לי פנוי מראשון עד חמישי. אפשר ראשון עד שלישי או שלישי עד חמישי. 1,200 ללילה".
+- כשנותן מחיר לכמה דירות, שורה לכל דירה: "קו המים 1: 2,000 ₪ / קו המים 2: 2,200 ₪ / קו המים 3: 2,500 ₪" (בהודעה אחת, שורה לכל דירה).
+- "שישי עד צאת שבת 1,400" ו"עד ראשון תוספת 300₪ בלבד".
+- ממליץ ומוכר בטבעיות: "אז ממליץ על 2, זה תוספת של 200₪ והג'קוזי שם זוגי וגדול והחדר ברמה אחרת, חדש לגמרי". "3 היא הכי מטורפת😎, כל עוד פנוי זה מה שאנשים לוקחים".
+- שואל מה חשוב להם: "האם אתם צריכים מטבחון?", "אתם עם רכב?".
+- התמקחות: קשוח וחם. "המחירים שרשמתי זה מחירים לסגירה", "התגמשתי מלכתחילה", "300 זה הרבה בשבילי, יש לכם שתי לילות כאן.. 200 זה בסדר?".
+- מילים שלו: "באהבה!", "סגור אחי", "אח יקר", "אחי", "בכיף אח", "בסדר גמור", "אין בעיה", "חחחח", "אשרייך איש יקר", "מבין אתכם לגמרי", "תאמין לי ש...", "אל תדאג".
+- סגירה: "בשביל לסגור צריך להעביר חצי בפייבוקס", "תשלח לי רק צילום מסך של ההעברה וצילום ת"ז בבקשה". ואז סיכום: "סגרנו כאן 2-4/10, שישי עד ראשון, לזוג. שולם 1,100 מתוך 2,200".
+- פרידה: "השם יצליח אותך, תלך לשלום ותחזור לשלום❤️", "מחכה לארח אתכם מתי שתרצו❤️".
+- אימוג'ים מעט: ❤️ 😎 🙏 🌅, לא בכל הודעה. הודעות קצרות, לפעמים שתי הודעות קצרות ברצף.`,
+    facts: `אנחנו לא בית מלון, זה דירות נופש על הים, ליד חוף סירונית.
+מחירון אמיתי (תקף עד 1/3, אין מקום לטעויות. תמיד דרך הכלי quote, אף פעם לא מחשבים לבד):
+קו המים 1: אמצע שבוע לילה אחד 800, בהזמנת 2 לילות 600 ללילה. חמישי 1,000. שישי עד מוצ"ש 1,500. שישי עד ראשון 1,700. חמישי עד מוצ"ש 2,200.
+קו המים 2: אמצע שבוע לילה אחד 900, בהזמנת 2 לילות 700 ללילה. חמישי 1,200. שישי עד מוצ"ש 1,500. שישי עד ראשון 1,700. חמישי עד מוצ"ש 2,200.
+קו המים 3: אמצע שבוע לילה אחד 1,200, בהזמנת 2 לילות 1,000 ללילה. חמישי 1,400. שישי עד מוצ"ש 1,700. שישי עד ראשון 2,000. חמישי עד מוצ"ש 2,600. מתאים גם לזוג + 2: תוספת לילד 100 ₪ ללילה, תינוק בלי תוספת.
+בהזמנה של 3 לילות ומעלה יש הנחה נוספת (דוד אומר כמה, לא ממציאים). המחירים לא כוללים הזמנות של דקה 90. לתאריכים מ-1/3 ואילך אין מחיר: "דוד יחזור אליך עם מחיר".
+אם quote מחזיר notes או price_available=false: אומרים את מה שידוע ו"את המחיר הסופי אני מאשר לך" (בלי להמציא).
+תוספות (בלונים, יין, מסאז׳): אפשר לבקש, המחיר אצל דוד.
+אם הלקוח משווה לבוקינג: "בבוקינג זה עם יציאה ב-11 בבוקר, אצלי שישי עד צאת שבת".
+בכל הדירות יש ג׳קוזי במרפסת מקורה וסגורה בזכוכית (לא בתוך החדר), מול הים. קו המים 2: ג׳קוזי זוגי גדול עם 14 זרמים, חדש לגמרי. קו המים 3: הכי מטורפת, משפחתית.
+ארוחת בוקר: במסעדה בלובי הבניין, כל יום חוץ משבת (בשבת המסעדה סגורה). בערך 142 ₪ לזוג, אחרי 10% הנחה ללקוחות שלנו. מסעדות פתוחות בשבת קרוב: בר איטליה (איטלקי), נישי (אסייתי), לחם ארז (בית קפה).
+כניסה בדרך כלל מ-15:00-16:00 (ביום ההגעה דוד מעדכן אם אפשר להקדים), יציאה עד 11:00-12:00, ובליל שישי יציאה במוצ"ש. כניסה עצמית: כספת מפתחות ליד הדלת, והקוד וכל הפרטים נשלחים כשהדירה מוכנה. את הכתובת ופרטי ההגעה שולחים רק אחרי המקדמה.
+תשלום: לסגירה מעבירים חצי מקדמה בפייבוקס או ביט (אשראי אפשר דרך פייבוקס, אין סליקה ישירה), את השאר אפשר בהגעה (גם מזומן). צריך צילום מסך של ההעברה וצילום תעודת זהות (בבקשת המשטרה, כמו בכל מלון). אפשר קבלה.
+ניקיון: "אל תדאג, אני ואשתי מנקים". עישון: רק במרפסת, בפנים אסור (קנס). חניה: אין חניה פרטית לבניין. יש חניון כחול-לבן קצת אחרי הבניין, וחניון פרטי קצת לפני הבניין על הסיבוב ("תדבר איתו יעשה לך מחיר טוב").
+שינוי תאריך: "אני צריך לבדוק אם יש מחליף" ושואלים לאיזה תאריך.`,
     kosher: 'בלובי של הסוויטה המשפחתית יש בית חב״ד ומסעדות כשרות למהדרין. המטבחים בדירות לא מוכשרים.',
   },
   dirot: {
@@ -53,30 +71,31 @@ function booked(today) {
   const FRI = nextDow(today, 5, 1);
   return { 1: [iso(FRI), iso(addD(FRI, 1))], 2: [iso(addD(FRI, 14)), iso(addD(FRI, 15))], 3: [iso(addD(FRI, 7)), iso(addD(FRI, 8))] };
 }
-export function quote(bot, today, { apartment, checkin, nights, extras = [] }) {
+export function quote(bot, today, { apartment, checkin, nights, extras = [], kids = 0 }) {
   const cfg = VAC[bot], id = String(apartment), a = cfg.apts[id];
   if (!a) throw new Error('אין דירה כזו. דירות: 1, 2, 3');
   const start = new Date(String(checkin) + 'T12:00:00Z'); if (isNaN(start)) throw new Error('תאריך לא תקין, צריך YYYY-MM-DD');
   nights = Math.max(1, Math.min(30, parseInt(nights) || 1));
-  const B = booked(today), list = [], conflicts = []; let wk = 0;
-  for (let i = 0; i < nights; i++) {
-    const d = addD(start, i), weekend = d.getUTCDay() === 5 || d.getUTCDay() === 6;
-    if (weekend) wk++;
-    if (B[id].includes(iso(d))) conflicts.push(`ליל ${WD[d.getUTCDay()]} ${dm(d)}`);
-    list.push({ night: `${WD[d.getUTCDay()]} ${dm(d)}`, price: weekend ? a.wknd : a.mid });
+  const B = booked(today), conflicts = [], ns = [];
+  for (let i = 0; i < nights; i++) { const d = addD(start, i); ns.push({ dow: d.getUTCDay(), iso: iso(d) }); if (B[id].includes(iso(d))) conflicts.push(`ליל ${WD[d.getUTCDay()]} ${dm(d)}`); }
+  const base = { apartment: a.name, checkin: iso(start), checkout: iso(addD(start, nights)), nights: nights, available: conflicts.length === 0, booked_nights: conflicts };
+  if (a.real) {
+    const r = priceStay(a.real, ns, { kids: id === '3' ? Math.max(0, parseInt(kids) || 0) : 0, todayIso: iso(today) });
+    const flags = r.flags.map((f) => FLAG_TEXT[f]).filter(Boolean);
+    if (r.total == null) return { ...base, price_available: false, explain: flags.join('. ') || 'אין מחיר במחירון: דוד נותן מחיר' };
+    return { ...base, price_available: true, lines: r.lines, total: r.total, notes: flags,
+      extras_note: extras.length ? 'תוספות (בלונים, יין, מסאז׳): זמינות לפי בקשה, המחיר אצל דוד. ארוחת בוקר: במסעדה בלובי, כ-142 ₪ לזוג' : '',
+      price_5pct: Math.ceil(r.total * 0.95), price_7pct: Math.ceil(r.total * 0.93), lowest_allowed_10pct: Math.ceil(r.total * 0.9) };
   }
+  const list = []; let wk = 0;
+  for (let i = 0; i < nights; i++) { const d = addD(start, i), weekend = d.getUTCDay() === 5 || d.getUTCDay() === 6; if (weekend) wk++; list.push({ night: `${WD[d.getUTCDay()]} ${dm(d)}`, price: weekend ? a.wknd : a.mid }); }
   const ex = (Array.isArray(extras) ? extras : []).filter((k) => EXTRAS[k]);
   const extrasOk = id === '1';
   const nightsTotal = list.reduce((s, n) => s + n.price, 0);
   const extrasTotal = extrasOk ? ex.reduce((s, k) => s + EXTRAS[k], 0) : 0;
-  return {
-    apartment: a.name, checkin: iso(start), checkout: iso(addD(start, nights)), available: conflicts.length === 0, booked_nights: conflicts,
-    min_nights_ok: !(wk > 0 && nights < 2), nights: list, nights_total: nightsTotal,
-    extras: extrasOk ? ex.map((k) => ({ name: k, price: EXTRAS[k] })) : [], extras_note: !extrasOk && ex.length ? 'תוספות רק בדירה 1' : '',
-    total: nightsTotal + extrasTotal,
-    price_5pct: Math.ceil(nightsTotal * 0.95) + extrasTotal, price_7pct: Math.ceil(nightsTotal * 0.93) + extrasTotal,
-    lowest_allowed_10pct: Math.ceil(nightsTotal * 0.9) + extrasTotal,
-  };
+  return { ...base, price_available: true, min_nights_ok: !(wk > 0 && nights < 2), lines: list.map((n) => ({ label: n.night, price: n.price })),
+    extras: extrasOk ? ex.map((k) => ({ name: k, price: EXTRAS[k] })) : [], total: nightsTotal + extrasTotal,
+    price_5pct: Math.ceil(nightsTotal * 0.95) + extrasTotal, price_7pct: Math.ceil(nightsTotal * 0.93) + extrasTotal, lowest_allowed_10pct: Math.ceil(nightsTotal * 0.9) + extrasTotal };
 }
 export function freeDates(bot, today, { nights = 2, from, days = 14, apartment } = {}) {
   const cfg = VAC[bot], B = booked(today), n = Math.max(1, Math.min(7, parseInt(nights) || 2));
@@ -86,8 +105,8 @@ export function freeDates(bot, today, { nights = 2, from, days = 14, apartment }
     const a = cfg.apts[id]; if (!a) continue; const slots = [];
     for (let i = 0; i < Math.min(30, days); i++) {
       const d = addD(start, i); let ok = true, price = 0;
-      for (let k = 0; k < n; k++) { const x = addD(d, k); if (B[id].includes(iso(x))) ok = false; price += (x.getUTCDay() === 5 || x.getUTCDay() === 6) ? a.wknd : a.mid; }
-      if (ok) slots.push(`${WD[d.getUTCDay()]} ${dm(d)} עד ${WD[addD(d, n).getUTCDay()]} ${dm(addD(d, n))}: ${nis(price)}`);
+      for (let k = 0; k < n; k++) { const x = addD(d, k); if (B[id].includes(iso(x))) ok = false; }
+      if (ok) { const q = quote(bot, today, { apartment: id, checkin: iso(d), nights: n }); slots.push(`${WD[d.getUTCDay()]} ${dm(d)} עד ${WD[addD(d, n).getUTCDay()]} ${dm(addD(d, n))}: ${q.price_available ? nis(q.total) + (q.notes && q.notes.length ? ' (דוד יאשר)' : '') : 'מחיר אצל דוד'}`); }
       if (slots.length >= 4) break;
     }
     out.push({ apartment: id, name: a.name, free: slots });
@@ -109,6 +128,7 @@ export const QUOTE_TOOL = {
     checkin: { type: 'string', description: 'תאריך כניסה YYYY-MM-DD' },
     nights: { type: 'integer', minimum: 1 },
     extras: { type: 'array', items: { type: 'string', enum: Object.keys(EXTRAS) } },
+    kids: { type: 'integer', minimum: 0, description: 'כמה ילדים (לא תינוקות). רלוונטי לדירה 3: 100 ₪ לילד ללילה' },
   }, required: ['apartment', 'checkin', 'nights'] },
 };
 function calendar(today) {
@@ -118,7 +138,7 @@ function calendar(today) {
 }
 function vacationPrompt(bot, today, { memory, sent }) {
   const c = VAC[bot], O = c.owner;
-  const apts = Object.entries(c.apts).map(([id, a]) => `דירה ${id}, ${a.name}: ${a.facts} אמצע שבוע ${a.mid} ₪ ללילה, ליל שישי או ליל שבת ${a.wknd} ₪.`).join('\n');
+  const apts = Object.entries(c.apts).map(([id, a]) => `דירה ${id}, ${a.name}: ${a.facts}${a.real ? '' : ` אמצע שבוע ${a.mid} ₪ ללילה, ליל שישי או ליל שבת ${a.wknd} ₪.`}`).join('\n');
   return `אתה ${O}, בעל ${c.brand}: 3 דירות נופש יוקרתיות ב${c.place}. אתה עונה בעצמך ללקוחות בוואטסאפ, בגוף ראשון, בלשון זכר. המטרה: לסגור הזמנה, ושהלקוח ירגיש שדיבר עם בן אדם חם ונעים.
 לא מציגים את עצמך כבוט או מזכירה. רק אם שואלים ישירות אם זה בוט, לא משקרים: "זה הוואטסאפ של ${O} 😊 אני עונה פה בשמו, ו${O} עצמו רואה כל מה שאתם כותבים".
 
@@ -133,7 +153,7 @@ function vacationPrompt(bot, today, { memory, sent }) {
 
 הדירות (אסור להמציא פרט שלא כתוב כאן):
 ${apts}
-תוספות (רק בדירה 1): ${Object.entries(EXTRAS).map(([k, v]) => `${k} ${v} ₪`).join(', ')}.
+${bot === 'david' ? '' : `תוספות (רק בדירה 1): ${Object.entries(EXTRAS).map(([k, v]) => `${k} ${v} ₪`).join(', ')}.`}
 
 איך מבינים מי מגיע:
 - "זוג", "אני ואשתי", "לי ולבעלי" = 2 מבוגרים. "2 זוגות" / "שני זוגות" / "זוג ועוד זוג" = 4 מבוגרים, בלי ילדים (לא שואלים על ילדים אם לא הזכירו). "שתי משפחות" = לפחות 4 מבוגרים וילדים. "אני ועוד 3 חברים" = 4 מבוגרים.
@@ -146,7 +166,7 @@ ${apts}
 חוק ברזל של זמינות ומחיר:
 - אסור לומר פנוי/תפוס ואסור לתת מחיר לפני שהלקוח כתב בעצמו מי מגיע, תאריך ומספר לילות, ואישר אותם: "רק לוודא שהבנתי: זוג, חמישי 19/11 עד שבת 21/11, 2 לילות (יציאה במוצ"ש). נכון?".
 - אחרי אישור: חובה לקרוא לכלי quote, ולהשתמש רק במספרים שהוא מחזיר. תאריך תפוס: אומרים בדיוק אילו תאריכים בדקת, ומציעים דירה אחרת שמתאימה או תאריך אחר.
-- סופ"ש (ליל שישי) מינימום 2 לילות.
+${bot === 'david' ? '- שישי לבד = "שישי עד מוצ"ש" (מותר, יציאה במוצאי שבת).' : '- סופ"ש (ליל שישי) מינימום 2 לילות.'}
 - מחיר: עם פירוט קצר (לילות × מחיר + תוספות = סה"כ), ואז "נשמור לכם?".
 
 התמקחות כמו אלוף (רק אם הלקוח אומר שיקר, מבקש הנחה או מציע מחיר):

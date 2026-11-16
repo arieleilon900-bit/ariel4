@@ -241,7 +241,7 @@ form.send input{box-shadow:0 1px 2px rgba(0,0,0,.08)}
     <div class="rules">
       <p>זוג: אחת משתי הסוויטות. משפחה עד זוג, 2 ילדים ותינוק: הדירה המשפחתית.</p>
       <p>יותר אנשים מזה, או קבוצת חברים: אוספת את כל הפרטים (תאריכים, הרכב, גילאים, מה חשוב להם, תקציב, שם) ומעבירה לרון. לא מבטיחה כלום מעבר.</p>
-      <p>סופ"ש (שישי-שבת): מינימום 2 לילות. תאריך תפוס: מציעה דירה אחרת או תאריך אחר.</p>
+      <p>שישי = "שישי עד צאת שבת" (יציאה במוצ"ש). עד ראשון: תוספת 300 ₪ בלבד. תאריך תפוס: מציעה דירה אחרת או תאריך אחר.</p>
       <p>התמקחות: מתחילה ב-5%, עולה בהדרגה עם מתנה קטנה, ולא יותר מ-10% בשום מקרה.</p>
     </div>
   </div>
@@ -281,16 +281,63 @@ form.send input{box-shadow:0 1px 2px rgba(0,0,0,.08)}
 <div class="lb" id="lb" hidden><button type="button" id="lbx" aria-label="סגור">✕</button><button type="button" class="nav prev" id="lbp" aria-label="הקודמת">›</button><img id="lbimg" alt=""><button type="button" class="nav next" id="lbn" aria-label="הבאה">‹</button><span class="cnt" id="lbc"></span></div>
 
 <script>
+/* ================= המחירון האמיתי של רון (אותו קוד בדיוק כמו בשרת) ================= */
+// המחירון האמיתי של רון ("חוף הזהב - מחירון"), תקף עד 1/3/2027. אסור לטעות כאן.
+// הפונקציה הזו משמשת גם את השרת (AI) וגם את הדף (תוכנית ב'), כדי ששני המוחות ייתנו אותו מחיר בדיוק.
+const DAVID_PRICES = {
+  1: { one: 800, two: 600, thu: 1000, fm: 1500, fs: 1700, tm: 2200, kid: 0 },
+  2: { one: 900, two: 700, thu: 1200, fm: 1500, fs: 1700, tm: 2200, kid: 0 },
+  3: { one: 1200, two: 1000, thu: 1400, fm: 1700, fs: 2000, tm: 2600, kid: 100 },
+};
+const PRICES_VALID_UNTIL = '2027-03-01'; // לילה בתאריך הזה ואילך: אין מחיר, רון נותן בעצמו
+// nights: מערך של { dow: 0-6 (0=ראשון), iso: 'YYYY-MM-DD' } לפי הסדר. kids: ילדים (לא תינוק) מעבר לזוג
+function priceStay(p, nights, { kids = 0, todayIso = '' } = {}) {
+  const flags = [], lines = [];
+  if (!nights.length) return { total: 0, lines, flags: ['no_nights'] };
+  if (nights.some((n) => n.iso >= PRICES_VALID_UNTIL)) return { total: null, lines, flags: ['after_valid'] };
+  if (nights.length > 6) return { total: null, lines, flags: ['long_stay'] };
+  const mid = nights.filter((n) => n.dow <= 3), has = (d) => nights.some((n) => n.dow === d);
+  const thu = has(4), fri = has(5), sat = has(6);
+  let total = 0;
+  // בלוק סוף שבוע
+  if (thu && fri && sat) { const v = p.tm + (p.fs - p.fm); lines.push({ label: 'חמישי עד ראשון', price: v }); total += v; flags.push('thu_to_sun'); }
+  else if (thu && fri) { lines.push({ label: 'חמישי עד מוצ"ש', price: p.tm }); total += p.tm; }
+  else if (fri && sat) { lines.push({ label: 'שישי עד ראשון', price: p.fs }); total += p.fs; }
+  else if (fri) { lines.push({ label: 'שישי עד מוצ"ש', price: p.fm }); total += p.fm; }
+  else if (thu) { lines.push({ label: 'חמישי', price: p.thu }); total += p.thu; }
+  else if (sat) { flags.push('sat_only'); return { total: null, lines, flags }; }
+  // אמצע שבוע
+  if (mid.length) {
+    const rate = nights.length >= 2 ? p.two : p.one;
+    lines.push({ label: mid.length === 1 ? (nights.length >= 2 ? 'לילה באמצע שבוע (במחיר של הזמנת 2 לילות)' : 'לילה אחד באמצע שבוע') : `${mid.length} לילות באמצע שבוע × ${rate.toLocaleString('he-IL')} ₪`, price: rate * mid.length });
+    total += rate * mid.length;
+    if (thu || fri || sat) flags.push('mixed');
+  }
+  if (p.kid && kids > 0) { const v = p.kid * kids * nights.length; lines.push({ label: `תוספת ${kids === 1 ? 'ילד' : kids + ' ילדים'} (100 ₪ לילד ללילה)`, price: v }); total += v; }
+  if (nights.length >= 3) flags.push('extra_discount_3plus');
+  if (todayIso && nights[0].iso <= todayIso) flags.push('last_minute');
+  return { total, lines, flags };
+}
+const FLAG_TEXT = {
+  thu_to_sun: 'חמישי עד ראשון לא מופיע במחירון: המחיר מחושב (חמישי עד מוצ"ש + ההפרש עד ראשון), רון יאשר',
+  mixed: 'שילוב של אמצע שבוע וסוף שבוע: רון יאשר את המחיר הסופי',
+  extra_discount_3plus: 'בהזמנה של 3 לילות ומעלה יש הנחה נוספת: רון יחזור עם המחיר הסופי (לא ממציאים סכום)',
+  last_minute: 'הזמנה של דקה 90 (היום/מחר): המחירון לא כולל אותה, רון נותן מחיר',
+  after_valid: 'המחירון תקף עד 1/3. לתאריכים אחרי זה אין מחיר: רון יחזור עם מחיר',
+  sat_only: 'ליל שבת לבד לא מופיע במחירון: רון נותן מחיר',
+  long_stay: 'שהות ארוכה: רון נותן מחיר',
+};
+
 /* ================= נתוני העסק (לדוגמה) ================= */
 const BOT_ID = 'dirot';
 const APTS = {
-  '1': { name: 'סוויטת השקיעה', mid: 950, wknd: 1250,
+  '1': { name: 'סוויטת השקיעה', mid: 950, fm: 1250, wknd: 1250,
     pics: ['p/v1-1.jpg','p/v1-2.jpg','p/v1-3.jpg'],
     facts: 'קו ראשון לים, קומה גבוהה. לזוגות. ג׳קוזי פרטי במרפסת מול השקיעה, חדר שינה עם מיטה זוגית ונוף לים, מקלחת גשם ואמבטיה. התוספות זמינות כאן.' },
-  '2': { name: 'סוויטת הספא', mid: 850, wknd: 1100,
+  '2': { name: 'סוויטת הספא', mid: 850, fm: 1100, wknd: 1100,
     pics: ['p/v2-1.jpg','p/v2-2.jpg','p/v2-3.jpg'],
     facts: 'סוויטה רומנטית לזוגות. ג׳קוזי עגול בתוך החדר ליד חלון ענק לים, מטבחון עם מכונת אספרסו ומיני־בר, מקלחת גשם.' },
-  '3': { name: 'הדירה המשפחתית', mid: 1100, wknd: 1450,
+  '3': { name: 'הדירה המשפחתית', mid: 1100, fm: 1450, wknd: 1450,
     pics: ['p/v3-1.jpg','p/v3-2.jpg','p/v3-3.jpg','p/v3-4.jpg'],
     facts: 'דירה משפחתית מול הים. עד זוג + 2 ילדים + תינוק. סלון ופינת אוכל ל-4, חדר הורים, חדר ילדים עם 2 מיטות, מרפסת ענקית עם ג׳קוזי ושולחן אוכל.' },
 };
@@ -314,16 +361,27 @@ const BOOKED = {                            // לילות תפוסים ביומ�
 const nis = (n) => Math.round(n).toLocaleString('he-IL') + ' ₪';
 
 /* מחשבון הצעת מחיר: אותו חישוב ל-AI ולהדגמה המוקלטת */
-function quote({ apartment, checkin, nights, extras = [] }) {
+function quote({ apartment, checkin, nights, extras = [], kids = 0 }) {
   const id = String(apartment), a = APTS[id]; if (!a) throw new Error('אין דירה כזו. דירות: 1, 2, 3');
   const start = new Date(checkin + 'T12:00:00'); if (isNaN(start)) throw new Error('תאריך לא תקין, צריך YYYY-MM-DD');
   nights = Math.max(1, Math.min(14, parseInt(nights) || 1));
+  if (a.real) {
+    const ns = [], conflicts = [];
+    for (let i = 0; i < nights; i++) { const d = addD(start, i); ns.push({ dow: d.getDay(), iso: iso(d) }); if (BOOKED[id].includes(iso(d))) conflicts.push(`ליל ${WD[d.getDay()]} ${dm(d)}`); }
+    const r = priceStay(a.real, ns, { kids: id === '3' ? Math.max(0, kids || 0) : 0, todayIso: iso(TODAY) });
+    const notes = r.flags.map((x) => FLAG_TEXT[x]).filter(Boolean);
+    return { apartment: a.name, available: conflicts.length === 0, booked_nights: conflicts, price_available: r.total != null, lines: r.lines, notes,
+      nights: ns.map((n) => ({ night: WD[n.dow] })), nights_total: r.total, extras: [], total: r.total, max_discount_pct: 10,
+      lowest_allowed_total: r.total == null ? null : Math.ceil(r.total * 0.9) };
+  }
   const list = [], conflicts = []; let wkndNights = 0;
   for (let i = 0; i < nights; i++) {
-    const d = addD(start, i), weekend = d.getDay() === 5 || d.getDay() === 6;
+    const d = addD(start, i), day = d.getDay(), weekend = day === 5 || day === 6;
     if (weekend) wkndNights++;
-    if (BOOKED[id].includes(iso(d))) conflicts.push(`ליל ${WD[d.getDay()]} ${dm(d)}`);
-    list.push({ night: `${WD[d.getDay()]} ${dm(d)}`, price: weekend ? a.wknd : a.mid });
+    if (BOOKED[id].includes(iso(d))) conflicts.push(`ליל ${WD[day]} ${dm(d)}`);
+    // המודל של רון: שישי = "שישי עד צאת שבת", ההמשך עד ראשון = תוספת 300 בלבד
+    const price = day === 5 ? a.fm : (day === 6 && i > 0 ? 300 : a.mid);
+    list.push({ night: `${WD[day]} ${dm(d)}`, price });
   }
   const ex = (Array.isArray(extras) ? extras : []).map((e) => Object.keys(EXTRAS).find((k) => k === e || k.startsWith(String(e).slice(0, 3)))).filter(Boolean);
   const extrasOk = id === '1';
@@ -332,7 +390,7 @@ function quote({ apartment, checkin, nights, extras = [] }) {
   const maxDiscountPct = 10;
   return {
     apartment: a.name, available: conflicts.length === 0, booked_nights: conflicts,
-    min_nights_ok: !(wkndNights > 0 && nights < 2), nights: list, nights_total: nightsTotal,
+    min_nights_ok: true, nights: list, nights_total: nightsTotal,
     extras: extrasOk ? ex.map((k) => ({ name: k, price: EXTRAS[k] })) : [],
     extras_note: !extrasOk && ex.length ? 'תוספות רק בדירה 1. בדירות אחרות: לבדוק עם רון' : '',
     total: nightsTotal + extrasTotal, max_discount_pct: maxDiscountPct,
@@ -744,15 +802,22 @@ function chooseApt() {
 function leadNow() {
   return { name: S.name, dates: datesText(), nights: S.nights ? String(S.nights) : '', guests: guestsText() + (S.kidsAges ? ` (${S.kidsAges})` : ''), arrival: S.arrival, budget: S.budget, needs: S.needs && S.needs !== '-' ? S.needs : '',
     apartment: S.apt ? APTS[S.apt].name : '', occasion: S.occasion && S.occasion !== '-' ? S.occasion : '', extras: S.apt === '1' ? S.extras.join(', ') : '',
-    price: S.quoted ? (S.quoted.final < S.quoted.total ? `${nis(S.quoted.final)} (מחירון ${nis(S.quoted.total)})` : nis(S.quoted.total)) : '', discount: S.discountNote || '', answered: S.answered.join(', '), questions: S.questions.join(', ') };
+    price: S.quoted && S.quoted.total == null ? 'לא במחירון: רון יאשר' : S.quoted ? (S.quoted.final < S.quoted.total ? `${nis(S.quoted.final)} (מחירון ${nis(S.quoted.total)})` : nis(S.quoted.total)) : '', discount: S.discountNote || '', answered: S.answered.join(', '), questions: S.questions.join(', ') };
+}
+function priceText(q, breakdown) {
+  if (q.total == null) return 'את המחיר לתאריכים האלה אני נותן לך בעצמי, אחזור אליך עם מחיר מדויק 🙏';
+  const note = q.notes && q.notes.length ? ` (${q.notes.map((n) => n.split(':')[0]).join(', ')}: את המחיר הסופי אני מאשר לך)` : '';
+  return `${priceText(q, breakdown)}${note}`;
 }
 function priceQuote() {
-  const q = quote({ apartment: S.apt, checkin: iso(S.checkin), nights: S.nights, extras: S.apt === '1' ? S.extras : [] });
+  const q = quote({ apartment: S.apt, checkin: iso(S.checkin), nights: S.nights, extras: S.apt === '1' ? S.extras : [], kids: S.kids || 0 });
   S.quoted = { ...q, final: q.total }; S.discount = 0; S.discountNote = '';
-  const wk = q.nights.filter((n) => /שישי|שבת/.test(n.night)).length, mid = q.nights.length - wk;
+  if (q.lines) return { q, breakdown: q.lines.length > 1 ? q.lines.map((l) => `${l.label} ${nis(l.price)}`).join(' + ') + ' =' : (q.lines[0] ? q.lines[0].label + ':' : '') };
+  const wk = q.nights.filter((n) => /שישי|שבת/.test(n.night)).length, mid = q.nights.filter((n) => !/שישי|שבת/.test(n.night)).length;
   const parts = [];
   if (mid) parts.push(`${mid === 1 ? 'לילה' : mid + ' לילות'} באמצע שבוע ${nis(APTS[S.apt].mid)}`);
-  if (wk) parts.push(`${wk === 1 ? 'לילה' : wk + ' לילות'} סופ"ש ${nis(APTS[S.apt].wknd)}`);
+  if (q.nights.some((n) => /^שישי/.test(n.night))) parts.push(`שישי עד צאת שבת ${nis(APTS[S.apt].fm)}`);
+  if (q.nights.some((n, i) => /^שבת/.test(n.night) && i > 0)) parts.push('עד ראשון תוספת 300 ₪');
   q.extras.forEach((e) => parts.push(`${e.name} ${nis(e.price)}`));
   return { q, breakdown: parts.length > 1 ? parts.join(' + ') + ' =' : parts[0].replace(/ [\d,]+ ₪$/, ':') };
 }
@@ -835,7 +900,8 @@ function engineReply(text) {
 
   // התמקחות חכמה: לא נותנים הכל מיד, שואלים תקציב, נענים להצעה הגיונית, מציעים חלופה זולה
   const offer = (() => { const mm = text.replace(/,/g, '').match(/(\d{3,5})/); const n = mm ? parseInt(mm[1]) : 0; return n >= 200 && n < 50000 ? n : 0; })();
-  if (S.quoted && (f.haggle || (offer && S.stage === 'quoted' && !f.date && !f.nights))) {
+  if (S.quoted && S.quoted.total == null && f.haggle) return say('את המחיר לתאריכים האלה אני מאשר לך בעצמי, ונעשה לך מחיר טוב 🙏 נשמור לכם את התאריכים בינתיים?');
+  if (S.quoted && S.quoted.total != null && (f.haggle || (offer && S.stage === 'quoted' && !f.date && !f.nights))) {
     const max = S.quoted.max_discount_pct, base = S.quoted.nights_total, ex = S.quoted.total - base;
     const floor = Math.ceil(base * (1 - max / 100)) + ex, half = Math.ceil(base * (1 - max / 200)) + ex;
     const gift = S.apt === '3' || S.extras.includes('יין') ? 'יציאה מאוחרת עד 13:00 (אם אין אורחים אחריכם)' : 'בקבוק יין מחכה לכם בדירה 🍷';
@@ -864,13 +930,13 @@ function engineReply(text) {
 
   // הסכמה אחרי הצעת מחיר
   if (S.quoted && (f.yes || f.name) && !f.no && S.stage === 'quoted') {
-    if (f.extras && S.apt === '1' && !S.agreed) { const fin = S.quoted.final, base0 = S.quoted.total; const { q, breakdown } = priceQuote(); return say(`בכיף! ${breakdown} ${nis(q.total)} 🥂 סוגרים?`); }
+    if (f.extras && S.apt === '1' && !S.agreed) { const fin = S.quoted.final, base0 = S.quoted.total; const { q, breakdown } = priceQuote(); return say(`בכיף! ${priceText(q, breakdown)} 🥂 סוגרים?`); }
     if (S.alt) { const a = S.alt; S.alt = null; S.apt = a.apt; S.checkin = a.checkin; const { q } = priceQuote(); S.discountNote = (S.discountNote ? S.discountNote + '. ' : '') + 'עבר לאפשרות זולה יותר'; }
     S.agreed = true;
     if (!S.name) { S.stage = 'askName'; return say((S.quoted && S.quoted.final < S.quoted.total ? 'עשית עסקה מצוינת 😉 ' : '') + pick(['מעולה! 😊 על איזה שם לרשום?', 'יאללה, סגרנו 🙌 על איזה שם לרשום?'])); }
     S.stage = 'askArrival'; return say(`${S.quoted && S.quoted.final < S.quoted.total ? 'עשית עסקה מצוינת 😉 ' : ''}מעולה ${S.name}! 🙌 ובאיזו שעה בערך תגיעו? ככה אדאג שהכל יהיה מוכן ומחכה לכם`);
   }
-  if (S.stage === 'quoted' && f.extras && S.apt === '1') { const { q, breakdown } = priceQuote(); return say(`סגור, הוספתי! ${breakdown} ${nis(q.total)} 🎈 נשמור לכם?`); }
+  if (S.stage === 'quoted' && f.extras && S.apt === '1') { const { q, breakdown } = priceQuote(); return say(`סגור, הוספתי! ${priceText(q, breakdown)} 🎈 נשמור לכם?`); }
   if (S.stage === 'quoted' && f.no && S.alt) { S.alt = null; return say('בסדר גמור 😊 אז נשארים עם מה שהצעתי קודם. סוגרים?'); }
   if (S.stage === 'quoted' && f.no) return say(pick(['בסדר גמור 😊 יש משהו אחר שיעזור לכם להחליט? אולי תאריך אחר?', 'אין בעיה 😊 רוצים שאבדוק תאריכים אחרים?']));
 
@@ -902,14 +968,14 @@ function engineReply(text) {
   }
   if (!S.nights) {
     S.stage = 'collect';
-    if (S.nightsGuess && S.asked.nights && (f.yes || /שישי.*שבת|שני לילות|2 לילות/.test(text))) { S.nights = S.nightsGuess; }
+    if (S.nightsGuess && S.asked.nights && /מוצ|צאת שבת|עד שבת/.test(text)) { S.nights = 1; S.motzash = true; }
+    else if (S.nightsGuess && S.asked.nights && (f.yes || /ראשון|שני לילות|2 לילות/.test(text))) { S.nights = S.nightsGuess; }
     else {
-      if (S.nightsGuess && !S.asked.nights) { S.asked.nights = 1; return say(`סופ"ש, מעולה! שישי ושבת, 2 לילות (${dm(S.checkin)}-${dm(addD(S.checkin, 2))})? או שחשבתם על יותר?`); }
+      if (S.nightsGuess && !S.asked.nights) { S.asked.nights = 1; return say(`סופ"ש, מעולה! שישי עד צאת שבת, או עד ראשון?`); }
       if (S.asked.nights) return say(pick(['כמה לילות תרצו? לילה, שניים, שלושה? 😊', 'ולכמה לילות בערך? 😊']));
       S.asked.nights = 1; return say(`${WD[S.checkin.getDay()]} ${dm(S.checkin)}, רשמתי. לכמה לילות?`);
     }
   }
-  if ((S.checkin.getDay() === 5) && S.nights < 2) { S.nights = 2; pre.push('בסופ"ש אני משכיר מינימום 2 לילות, שישי ושבת.'); }
   if (!S.occasion && (S.adults === 2 && !isFamily()) && !S.asked.occasion) {
     S.asked.occasion = 1; S.stage = 'collect';
     return say(pick(['ויש סיבה למסיבה? יום הולדת, יום נישואין? 🥂', 'חוגגים משהו מיוחד, או סתם בורחים לנשום קצת ים? 😊']));
@@ -950,19 +1016,19 @@ function engineReply(text) {
     const { q, breakdown } = priceQuote(); S.stage = 'quoted';
     const extrasOffer = S.apt === '1' && S.occasion && S.occasion !== '-' && !S.extras.length ? `\nאפשר להוסיף בלונים, יין, מסאז׳ זוגי או ארוחת בוקר, שיהיה מושלם 🎈` : '';
     S.offeredExtras = !!extrasOffer;
-    return say(`${celebrate}${pitch}\n\n${datesText()}: ${breakdown} ${nis(q.total)}.${extrasOffer} נשמח לשמור לכם מקום?`, { photos: id });
+    return say(`${celebrate}${pitch}\n\n${datesText()}: ${priceText(q, breakdown)}.${extrasOffer} נשמח לשמור לכם מקום?`, { photos: id });
   }
   if (S.stage === 'recommended') {
     if (f.q.length && !f.yes && !f.price && !f.haggle && !f.date && !f.nights) return say(pick(['ולבדוק לכם מחיר לתאריכים? 😊', 'אז מה אומרים, לבדוק לכם מחיר?']));
     if (f.no) return say('בסדר 😊 מה הייתם רוצים אחרת? אולי דירה אחרת או תאריכים אחרים?');
     if (!quote({ apartment: S.apt, checkin: iso(S.checkin), nights: S.nights }).available || ((f.guests) && chooseApt() !== S.apt)) { S.apt = null; S.stage = 'collect'; return engineReplyAgain(); }
     const { q, breakdown } = priceQuote(); S.stage = 'quoted';
-    const extrasOffer = S.apt === '1' && S.occasion && S.occasion !== '-' && !S.extras.length ? `\nואפשר להוסיף בלונים (${nis(EXTRAS['בלונים'])}), יין (${nis(EXTRAS['יין'])}), מסאז׳ זוגי (${nis(EXTRAS['מסאז׳ זוגי'])}) או ארוחת בוקר (${nis(EXTRAS['ארוחת בוקר'])}) 🎈` : '';
+    const extrasOffer = S.apt === '1' && S.occasion && S.occasion !== '-' && !S.extras.length ? (APTS['1'].real ? `\nואפשר להוסיף בלונים, יין או מסאז׳ זוגי, את המחיר של התוספות אני אגיד לך 🎈` : `\nואפשר להוסיף בלונים (${nis(EXTRAS['בלונים'])}), יין (${nis(EXTRAS['יין'])}), מסאז׳ זוגי (${nis(EXTRAS['מסאז׳ זוגי'])}) או ארוחת בוקר (${nis(EXTRAS['ארוחת בוקר'])}) 🎈`) : '';
     S.offeredExtras = !!extrasOffer;
-    return say(`${datesText()}, ${S.nights === 1 ? 'לילה אחד' : S.nights + ' לילות'}: ${breakdown} ${nis(q.total)}.${extrasOffer}\n\nנשמור לכם? התאריכים מתמלאים מהר 😊`);
+    return say(`${datesText()}, ${S.nights === 1 ? 'לילה אחד' : S.nights + ' לילות'}: ${priceText(q, breakdown)}.${extrasOffer}\n\nנשמור לכם? התאריכים מתמלאים מהר 😊`);
   }
   if (S.stage === 'quoted') {
-    if (f.date || f.nights) { const id = chooseApt(); if (id && id !== S.apt) { S.apt = id; } const qq = quote({ apartment: S.apt, checkin: iso(S.checkin), nights: S.nights }); if (!qq.available) { S.stage = 'collect'; S.apt = null; return engineReplyAgain(); } const { q, breakdown } = priceQuote(); return say(`עדכנתי: ${datesText()}, ${breakdown} ${nis(q.total)}. נשמור?`); }
+    if (f.date || f.nights) { const id = chooseApt(); if (id && id !== S.apt) { S.apt = id; } const qq = quote({ apartment: S.apt, checkin: iso(S.checkin), nights: S.nights }); if (!qq.available) { S.stage = 'collect'; S.apt = null; return engineReplyAgain(); } const { q, breakdown } = priceQuote(); return say(`עדכנתי: ${datesText()}, ${priceText(q, breakdown)}. נשמור?`); }
     if (f.q.length) return say('ומה אומרים, נשמור לכם? 😊');
     return say(pick(['נו, מה אומרים? לשמור לכם? 😊', 'רוצים שאשמור לכם את התאריכים?']));
   }
@@ -1055,7 +1121,7 @@ function setMode(fellBack) {
 }
 
 /* כרטיסי הדירות */
-document.getElementById('apts').innerHTML = Object.entries(APTS).map(([id, a]) => `<div class="apt"><img src="${a.pics[0]}" alt="${a.name}" loading="lazy"><div><b>${a.name}</b><span>${id === '3' ? 'עד זוג + 2 ילדים + תינוק' : 'לזוג'}</span><span class="p">אמצע שבוע ${nis(a.mid)} · סופ"ש ${nis(a.wknd)} ללילה</span></div></div>`).join('');
+document.getElementById('apts').innerHTML = Object.entries(APTS).map(([id, a]) => `<div class="apt"><img src="${a.pics[0]}" alt="${a.name}" loading="lazy"><div><b>${a.name}</b><span>${id === '3' ? 'עד זוג + 2 ילדים + תינוק' : 'לזוג'}</span><span class="p">אמצע שבוע ${nis(a.mid)} ללילה · שישי עד צאת שבת ${nis(a.fm)}</span></div></div>`).join('');
 
 clearChat(); showMem();
 (async () => {
