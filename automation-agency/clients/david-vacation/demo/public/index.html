@@ -454,7 +454,7 @@ async function say(reply, photos, typed) {
   const parts = String(reply).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).slice(0, 3);
   let shown = false;
   for (let i = 0; i < parts.length; i++) {
-    if (!(typed && i === 0)) { typing(true); await wait(Math.min(2600, 700 + parts[i].length * 18)); }
+    if (!(typed && i === 0)) { typing(true); await wait(i === 0 ? Math.min(4500, 2300 + parts[i].length * 22) : Math.min(3000, 1300 + parts[i].length * 18)); }
     typing(false); bubble('out', parts[i]);
     if (photos && !shown && i === Math.max(0, parts.length - 2)) { shown = true; await wait(400); pics(photos); }
   }
@@ -873,7 +873,7 @@ async function ask(text) {
   if (engineMode) {
     let r; try { r = engineTurn(text); } catch (e) { r = { reply: 'רגע, לא הבנתי עד הסוף 😊 אפשר לכתוב שוב במילים אחרות?' }; }
     turns.push({ role: 'assistant', content: r.reply });
-    typing(true); await say(r.reply, r.photos, true);
+    await wait(900 + Math.random() * 700); await say(r.reply, r.photos, false);
     renderSum(leadNow(), S.route, r.ready || (S.agreed && S.stage === 'done')); buildChips(); return;
   }
   typing(true);
