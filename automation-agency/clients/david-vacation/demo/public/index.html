@@ -64,6 +64,15 @@ h1 em{font-style:normal;color:var(--coral)}
 .m.sys{align-self:center;background:#FFF6D6;color:#6A5A1E;font-size:13px;padding:6px 12px;border-radius:8px;white-space:normal;text-align:center}
 .pics{align-self:flex-end;display:grid;grid-template-columns:1fr 1fr;gap:3px;width:78%;background:var(--wa-out);padding:3px;border-radius:12px;animation:pop .35s ease both}
 .pics img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;display:block;cursor:zoom-in}
+.pics.many{grid-template-columns:repeat(6,1fr);width:86%}
+.pics.many img{grid-column:span 3}
+.pics.many.c3 img{grid-column:span 2}
+.pics.many img:first-child,.pics.many img.wide{grid-column:1/-1;aspect-ratio:16/10}
+.pics .cap{grid-column:1/-1;font-size:12.5px;color:#4B5B52;padding:3px 6px 2px}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:0;border-radius:50%;width:46px;height:46px;font-size:22px;color:var(--sea)}
+.lb .prev{right:12px;left:auto}
+.lb .next{left:12px}
+.lb .cnt{position:absolute;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);color:#fff;font-size:14px;background:rgba(0,0,0,.35);padding:4px 12px;border-radius:999px}
 .typing{align-self:flex-end;background:var(--wa-out);border-radius:12px;padding:11px 14px;display:flex;gap:5px}
 .typing i{width:7px;height:7px;border-radius:50%;background:#6E9C7E;animation:bob 1s infinite}
 .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
@@ -269,19 +278,19 @@ form.send input{box-shadow:0 1px 2px rgba(0,0,0,.08)}
 </section>
 <footer>עונה ראשון · מזכירה בוואטסאפ לעסקים · ההדגמה משתמשת בתמונות ובטקסטים של הדירות של דוד</footer>
 
-<div class="lb" id="lb" hidden><button type="button" id="lbx" aria-label="סגור">✕</button><img id="lbimg" alt=""></div>
+<div class="lb" id="lb" hidden><button type="button" id="lbx" aria-label="סגור">✕</button><button type="button" class="nav prev" id="lbp" aria-label="הקודמת">›</button><img id="lbimg" alt=""><button type="button" class="nav next" id="lbn" aria-label="הבאה">‹</button><span class="cnt" id="lbc"></span></div>
 
 <script>
 /* ================= נתוני העסק (לדוגמה) ================= */
 const APTS = {
   '1': { name: 'דירת "קו המים", קומה 5', mid: 950, wknd: 1250,
-    pics: ['p/a1-1.jpg','p/a1-2.jpg','p/a1-3.jpg','p/a1-4.jpg'],
+    pics: ['p/all1-1.jpg','p/all1-2.jpg','p/all1-3.jpg','p/all1-4.jpg','p/all1-5.jpg','p/all1-6.jpg'],
     facts: 'קו ראשון לים במרכז נתניה, קומה 5, נוף פנורמי. לזוגות. אמבט ספא (ג׳קוזי) פרטי במרפסת מול הים. מטבח מאובזר, מכונת אספרסו. התוספות זמינות כאן.' },
   '2': { name: 'סוויטת הבוטיק "קו המים"', mid: 850, wknd: 1100,
-    pics: ['p/a2-1.jpg','p/a2-2.jpg','p/a2-3.jpg','p/a2-4.jpg'],
+    pics: ['p/all2-1.jpg','p/all2-2.jpg','p/all2-3.jpg','p/all2-4.jpg','p/all2-5.jpg','p/all2-6.jpg','p/all2-7.jpg','p/all2-8.jpg','p/all2-9.jpg'],
     facts: 'סוויטה פרטית בקו ראשון, נוף פתוח לחוף סירונית. לזוגות. ג׳קוזי זוגי עם 14 זרמים, מקלחת שקופה ומקלחת חיצונית מול הים, מזרן זוגי איכותי, מטבחון, מיני־בר, אספרסו בקפסולות, טלוויזיה חכמה.' },
   '3': { name: 'הסוויטה המשפחתית', mid: 1100, wknd: 1450,
-    pics: ['p/a3-1.jpg','p/a3-2.jpg','p/a3-3.jpg','p/a3-4.jpg'],
+    pics: ['p/all3-1.jpg','p/all3-2.jpg','p/all3-3.jpg','p/all3-4.jpg','p/all3-5.jpg','p/all3-6.jpg','p/all3-7.jpg'],
     facts: 'סוויטה חדשה מעל חוף סירונית. עד זוג + 2 ילדים + תינוק. 2 חדרי שינה וסלון, מרפסת מרווחת עם ג׳קוזי זוגי, מקלחת יוקרתית, מטבח מאובזר ופינת אוכל ל-4. בית חב״ד ומסעדות כשרות למהדרין בלובי.' },
 };
 const EXTRAS = { 'בלונים': 250, 'מסאז׳ זוגי': 600, 'יין': 150, 'ארוחת בוקר': 180 };
@@ -444,8 +453,10 @@ const scroll = () => { chat.scrollTop = chat.scrollHeight; };
 function bubble(dir, text) { const d = document.createElement('div'); d.className = 'm ' + dir; d.textContent = text; if (dir !== 'sys') { const t = document.createElement('time'); t.textContent = now(); d.append(t); } if (dir === 'out') { const k = document.createElement('span'); k.className = 'tick'; k.textContent = '✓✓'; d.append(k); } chat.append(d); scroll(); return d; }
 function pics(id) {
   id = String(id); if (!APTS[id] || sentPics.has(id)) return; sentPics.add(id);
-  const g = document.createElement('div'); g.className = 'pics';
-  APTS[id].pics.forEach((src) => { const im = document.createElement('img'); im.src = src; im.alt = 'תמונה מ' + APTS[id].name; im.addEventListener('click', () => openLb(src)); im.addEventListener('load', scroll); g.append(im); });
+  const rest = APTS[id].pics.length - 1;
+  const g = document.createElement('div'); g.className = 'pics' + (APTS[id].pics.length > 4 ? ' many' + (rest % 3 === 0 ? ' c3' : '') : '');
+  APTS[id].pics.forEach((src) => { const im = document.createElement('img'); im.src = src; im.alt = 'תמונה מ' + APTS[id].name; im.addEventListener('click', () => openLb(src, APTS[id].pics)); im.addEventListener('load', scroll); g.append(im); });
+  if (APTS[id].pics.length > 4 && rest % 3 !== 0 && rest % 2 === 1) g.lastChild.classList.add('wide');
   chat.append(g); scroll();
 }
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -952,10 +963,16 @@ clearChat(); showMem();
 
 /* לייטבוקס */
 const lb = document.getElementById('lb'), lbimg = document.getElementById('lbimg');
-function openLb(src) { lbimg.src = src; lb.hidden = false; document.getElementById('lbx').focus(); }
+let lbList = [], lbI = 0;
+function lbShow() { lbimg.src = lbList[lbI]; document.getElementById('lbc').textContent = `${lbI + 1} / ${lbList.length}`; }
+function openLb(src, list) { lbList = list || [src]; lbI = Math.max(0, lbList.indexOf(src)); lbShow(); lb.hidden = false; document.getElementById('lbx').focus(); }
+document.getElementById('lbn').addEventListener('click', (e) => { e.stopPropagation(); lbI = (lbI + 1) % lbList.length; lbShow(); });
+document.getElementById('lbp').addEventListener('click', (e) => { e.stopPropagation(); lbI = (lbI - 1 + lbList.length) % lbList.length; lbShow(); });
+let tx = 0; lb.addEventListener('touchstart', (e) => { tx = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) { lbI = (lbI + (dx > 0 ? 1 : -1) + lbList.length) % lbList.length; lbShow(); } });
 document.getElementById('lbx').addEventListener('click', () => lb.hidden = true);
 lb.addEventListener('click', (e) => { if (e.target === lb) lb.hidden = true; });
-addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.hidden = true; });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') lb.hidden = true; if (!lb.hidden && e.key === 'ArrowLeft') document.getElementById('lbn').click(); if (!lb.hidden && e.key === 'ArrowRight') document.getElementById('lbp').click(); });
 
 /* מחשבון */
 const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3');
