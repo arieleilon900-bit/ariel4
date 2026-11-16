@@ -1,7 +1,7 @@
 // /api/chat: השרת של ההדגמות. מקבל את השיחה מהדף, שואל את Claude, ומחזיר תשובה של "בעל העסק".
 // המפתח (ANTHROPIC_API_KEY) נשמר רק כאן בשרת. בלי מפתח, או בכל תקלה, הדף ממשיך עם המוח המובנה שלו.
 import Anthropic from '@anthropic-ai/sdk';
-import { BOTS, QUOTE_TOOL, isVacation, israelToday, promptFor, quote, schemaFor } from '../../lib/bots.js';
+import { BOTS, FREE_TOOL, QUOTE_TOOL, freeDates, isVacation, israelToday, promptFor, quote, schemaFor } from '../../lib/bots.js';
 
 const MODEL = 'claude-sonnet-5-5';
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } });
@@ -41,18 +41,18 @@ export async function onRequestPost({ request, env }) {
   const memory = body.memory && typeof body.memory === 'object' ? { name: String(body.memory.name || '').slice(0, 30), apt: String(body.memory.apt || '').slice(0, 40) } : null;
   const sent = Array.isArray(body.sent) ? body.sent.map(String).filter((x) => /^[123]$/.test(x)) : [];
   const system = promptFor(bot, today, { memory, sent });
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 25000, maxRetries: 1 });
-  const tools = isVacation(bot) ? [QUOTE_TOOL] : undefined;
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: 40000, maxRetries: 1 });
+  const tools = isVacation(bot) ? [QUOTE_TOOL, FREE_TOOL] : undefined;
   try {
     for (let round = 0; round < 5; round++) {
       const res = await client.beta.messages.create({
         model: env.CLAUDE_MODEL || MODEL, max_tokens: 4000, system, messages, ...(tools ? { tools } : {}),
-        output_config: { effort: 'low', format: { type: 'json_schema', schema: schemaFor(bot) } },
+        output_config: { effort: env.CLAUDE_EFFORT || 'medium', format: { type: 'json_schema', schema: schemaFor(bot) } },
       });
       if (res.stop_reason === 'tool_use') {
         messages.push({ role: 'assistant', content: res.content });
         const results = res.content.filter((b) => b.type === 'tool_use').map((b) => {
-          let out; try { out = JSON.stringify(quote(bot, today, b.input || {})); } catch (e) { return { type: 'tool_result', tool_use_id: b.id, content: String(e.message || e), is_error: true }; }
+          let out; try { out = JSON.stringify(b.name === 'free_dates' ? freeDates(bot, today, b.input || {}) : quote(bot, today, b.input || {})); } catch (e) { return { type: 'tool_result', tool_use_id: b.id, content: String(e.message || e), is_error: true }; }
           return { type: 'tool_result', tool_use_id: b.id, content: out };
         });
         messages.push({ role: 'user', content: results });

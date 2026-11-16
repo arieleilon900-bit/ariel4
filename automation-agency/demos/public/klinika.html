@@ -390,18 +390,18 @@ function engineTurn(text) {
   return engineReply(text);
 }
 function replayEngine() { S = newState(); turns.filter((x) => x.role === 'user').slice(0, -1).forEach((x) => engineReply(x.content)); }
-async function ask(text) {
-  turns.push({ role: 'user', content: text });
+async function ask(text, retried) {
+  if (!retried) turns.push({ role: 'user', content: text });
   if (engineMode) {
     let r; try { r = engineTurn(text); } catch (e) { r = { reply: 'רגע, לא הבנתי עד הסוף 😊 אפשר לכתוב שוב במילים אחרות?' }; }
     turns.push({ role: 'assistant', content: r.reply });
     await wait(900 + Math.random() * 700); await say(r.reply, r.photos, false);
     renderSum(leadNow(), S.route, r.ready || (S.agreed && S.stage === 'done')); buildChips(); return;
   }
-  await wait(600 + Math.random() * 500); typing(true);
+  if (!retried) await wait(600 + Math.random() * 500); typing(true);
   try {
     // AI אמיתי: השרת של הדף (/api/chat) שואל את Claude. המפתח נשמר רק בשרת
-    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 30000);
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 50000);
     const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctl.signal,
       body: JSON.stringify({ bot: BOT_ID, messages: turns.slice(-40), memory: memory ? { name: memory.name, apt: memory.apt } : null, sent: [...sentPics] }) });
     clearTimeout(timer);
@@ -413,10 +413,14 @@ async function ask(text) {
     await say(reply, res?.photos != null && res.photos !== '' ? String(res.photos) : null, true);
     renderSum(res?.lead || {}, res?.route || '', !!res?.ready); buildChips();
   } catch (e) {
-    // כל תקלה ב-AI: לא מראים שגיאה ללקוח. המוח של דוד ממשיך את אותה שיחה
-    typing(false); turns.pop();
-    engineMode = true; replayEngine(); setMode(true);
-    return ask(text);
+    // תוכנית ב': ניסיון נוסף אחד, ואם גם הוא נכשל, המוח המובנה עונה על ההודעה הזו (הלקוח לא רואה תקלה).
+    // בהודעה הבאה חוזרים לנסות את ה-AI.
+    if (!retried) { await wait(800); return ask(text, true); }
+    typing(false);
+    let r; try { replayEngine(); r = engineTurn(text); } catch { r = { reply: 'רגע, לא הבנתי עד הסוף 😊 אפשר לכתוב שוב במילים אחרות?' }; }
+    turns.push({ role: 'assistant', content: r.reply });
+    await say(r.reply, r.photos, false);
+    renderSum(leadNow(), S.route, r.ready || (S.agreed && S.stage === 'done')); buildChips();
   }
 }
 async function onSend(text) {
