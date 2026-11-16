@@ -27,4 +27,7 @@ t(pd.includes('חמישי עד מוצ"ש 2,200') && pd.includes('תקף עד 1/3
 t(!/בלונים 250/.test(pd), 'no invented extras prices for David');
 t(promptFor('dirot', today, {}).includes('רון') && !promptFor('dirot', today, {}).includes('דוד'), 'generic has no David');
 const fd = freeDates('david', today, { nights: 2 }); t(fd.length === 3 && fd[0].free.length > 0, 'free dates');
+const ql = quote('david', today, { apartment: '1', checkin: '2026-11-20', nights: 1 }, { live: true }); t(ql.available === undefined && /אין גישה ליומן/.test(ql.availability) && ql.total === 1500, 'live mode: price yes, calendar no');
+const pl = promptFor('david', today, { live: true }); t(pl.includes('אין לך גישה ליומן') && !pl.includes('free_dates ומציעים'), 'live prompt');
+t(!promptFor('david', today, {}).includes('אין לך גישה ליומן'), 'demo prompt unchanged');
 console.log(`ok ${ok}, failed ${bad}`); process.exit(bad ? 1 : 0);

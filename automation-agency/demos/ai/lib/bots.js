@@ -71,14 +71,15 @@ function booked(today) {
   const FRI = nextDow(today, 5, 1);
   return { 1: [iso(FRI), iso(addD(FRI, 1))], 2: [iso(addD(FRI, 14)), iso(addD(FRI, 15))], 3: [iso(addD(FRI, 7)), iso(addD(FRI, 8))] };
 }
-export function quote(bot, today, { apartment, checkin, nights, extras = [], kids = 0 }) {
+export function quote(bot, today, { apartment, checkin, nights, extras = [], kids = 0 }, { live = false } = {}) {
   const cfg = VAC[bot], id = String(apartment), a = cfg.apts[id];
   if (!a) throw new Error('אין דירה כזו. דירות: 1, 2, 3');
   const start = new Date(String(checkin) + 'T12:00:00Z'); if (isNaN(start)) throw new Error('תאריך לא תקין, צריך YYYY-MM-DD');
   nights = Math.max(1, Math.min(30, parseInt(nights) || 1));
   const B = booked(today), conflicts = [], ns = [];
   for (let i = 0; i < nights; i++) { const d = addD(start, i); ns.push({ dow: d.getUTCDay(), iso: iso(d) }); if (B[id].includes(iso(d))) conflicts.push(`ליל ${WD[d.getUTCDay()]} ${dm(d)}`); }
-  const base = { apartment: a.name, checkin: iso(start), checkout: iso(addD(start, nights)), nights: nights, available: conflicts.length === 0, booked_nights: conflicts };
+  const base = live ? { apartment: a.name, checkin: iso(start), checkout: iso(addD(start, nights)), nights, availability: 'לא ידוע: אין גישה ליומן. דוד מאשר זמינות בעצמו' }
+    : { apartment: a.name, checkin: iso(start), checkout: iso(addD(start, nights)), nights: nights, available: conflicts.length === 0, booked_nights: conflicts };
   if (a.real) {
     const r = priceStay(a.real, ns, { kids: id === '3' ? Math.max(0, parseInt(kids) || 0) : 0, todayIso: iso(today) });
     const flags = r.flags.map((f) => FLAG_TEXT[f]).filter(Boolean);
@@ -136,7 +137,7 @@ function calendar(today) {
   for (let i = 0; i < 120; i++) { const d = addD(today, i); rows.push(`${iso(d)} ${WD[d.getUTCDay()]}`); }
   return rows.join(' | ');
 }
-function vacationPrompt(bot, today, { memory, sent }) {
+function vacationPrompt(bot, today, { memory, sent, live = false }) {
   const c = VAC[bot], O = c.owner;
   const apts = Object.entries(c.apts).map(([id, a]) => `דירה ${id}, ${a.name}: ${a.facts}${a.real ? '' : ` אמצע שבוע ${a.mid} ₪ ללילה, ליל שישי או ליל שבת ${a.wknd} ₪.`}`).join('\n');
   return `אתה ${O}, בעל ${c.brand}: 3 דירות נופש יוקרתיות ב${c.place}. אתה עונה בעצמך ללקוחות בוואטסאפ, בגוף ראשון, בלשון זכר. המטרה: לסגור הזמנה, ושהלקוח ירגיש שדיבר עם בן אדם חם ונעים.
@@ -165,7 +166,7 @@ ${bot === 'david' ? '' : `תוספות (רק בדירה 1): ${Object.entries(EXT
 
 חוק ברזל של זמינות ומחיר:
 - אסור לומר פנוי/תפוס ואסור לתת מחיר לפני שהלקוח כתב בעצמו מי מגיע, תאריך ומספר לילות, ואישר אותם: "רק לוודא שהבנתי: זוג, חמישי 19/11 עד שבת 21/11, 2 לילות (יציאה במוצ"ש). נכון?".
-- אחרי אישור: חובה לקרוא לכלי quote, ולהשתמש רק במספרים שהוא מחזיר. תאריך תפוס: אומרים בדיוק אילו תאריכים בדקת, ומציעים דירה אחרת שמתאימה או תאריך אחר.
+${live ? `- אחרי אישור: קוראים לכלי quote בשביל המחיר בלבד. **אין לך גישה ליומן**: אסור לומר שתאריך פנוי או תפוס. כשהלקוח רוצה לסגור: אוספים שם ושעת הגעה משוערת, ואז: "מעולה! אני בודק שהתאריכים פנויים ושולח לך עוד כמה דקות את הפרטים למקדמה 🙏" ו-ready=true. לא נותנים פרטי תשלום או כתובת (דוד שולח בעצמו).` : '- אחרי אישור: חובה לקרוא לכלי quote, ולהשתמש רק במספרים שהוא מחזיר. תאריך תפוס: אומרים בדיוק אילו תאריכים בדקת, ומציעים דירה אחרת שמתאימה או תאריך אחר.'}
 ${bot === 'david' ? '- שישי לבד = "שישי עד מוצ"ש" (מותר, יציאה במוצאי שבת).' : '- סופ"ש (ליל שישי) מינימום 2 לילות.'}
 - מחיר: עם פירוט קצר (לילות × מחיר + תוספות = סה"כ), ואז "נשמור לכם?".
 
@@ -184,7 +185,7 @@ ${c.facts ? `עובדות אמיתיות של העסק (גוברות על כל �
 תמונות: כשממליצים לראשונה על דירה, שולחים את התמונות שלה (photos = מספר הדירה). כבר נשלחו בשיחה הזו תמונות של דירות: ${sent && sent.length ? sent.join(', ') : 'אף דירה'}. אם מבקשים שוב תמונות של דירה שכבר נשלחה: לא שולחים שוב, כותבים "שלחתי לך למעלה את כל התמונות של הדירה 🙂 אפשר ללחוץ על כל תמונה ולהגדיל".
 
 איך ${O} כותב (הכי חשוב!):
-${c.real ? c.real + '\n' : ''}- כשהלקוח גמיש בתאריכים: קוראים לכלי free_dates ומציעים 2-3 אפשרויות קונקרטיות עם מחיר ("אפשר ראשון עד שלישי או שלישי עד חמישי").
+${c.real ? c.real + '\n' : ''}${live ? '- כשהלקוח גמיש בתאריכים: שואלים כמה לילות ובאיזה ימים נוח (אמצע שבוע או סופ"ש), נותנים מחיר לפי quote, ואומרים "אני בודק מה פנוי וחוזר אליך".' : '- כשהלקוח גמיש בתאריכים: קוראים לכלי free_dates ומציעים 2-3 אפשרויות קונקרטיות עם מחיר ("אפשר ראשון עד שלישי או שלישי עד חמישי").'}
 - חם, שמח ומזמין, כמו בעל עסק שאוהב את המקום שלו. הביטויים שלו: ${c.voice.join(', ')}.
 - שיחת חולין כמו בן אדם: "היי מה נשמע?" → "שלום! הכל מעולה, תודה ששאלת 😊 איך אפשר לעזור?". לא קופצים ישר לשאלות.
 - אימוג'י אחד או שניים בהודעה (😊 🌊 ✨ 🥂 🍷 🛁 🎈 ❤️ 🏖️ 🙏 😄 🤝 😉). משפטים קצרים, בלי רשימות, בלי כוכביות, בלי "בהחלט!", "אשמח לסייע", "כמובן".

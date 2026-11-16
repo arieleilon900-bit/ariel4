@@ -1,0 +1,428 @@
+diff --git a/bots/agency-bot/clients/david-vacation/client.js b/bots/agency-bot/clients/david-vacation/client.js
+new file mode 100644
+index 0000000..1381c5a
+--- /dev/null
++++ b/bots/agency-bot/clients/david-vacation/client.js
+@@ -0,0 +1,45 @@
++// דוד, "קו המים": 3 דירות נופש בקו ראשון לים בנתניה (חוף סירונית).
++// הבוט כותב כמו דוד ועובד לפי המחירון האמיתי שלו (תקף עד 1/3/2027). המוח משותף עם הדמו:
++// automation-agency/demos/ai/lib/bots.js (ההוראות והסגנון) ו-pricelist.js (המחירון).
++// התיק של הלקוח: automation-agency/clients/david-vacation/client-summary.md
++export default {
++  business: {
++    name: 'קו המים נתניה - סוויטות אירוח מול הים', shortName: 'קו המים', ownerName: 'דוד', trade: 'דירות נופש',
++    voiceHint: 'הודעה קולית לדירות נופש בנתניה: תאריכים, שישי עד מוצאי שבת, זוג, ילדים, ג׳קוזי, מחיר, קו המים.',
++  },
++  vacation: {
++    bot: 'david',
++    // התמונות של כל דירה, בסדר שהן נשלחות (התמונה הראשונה גדולה באלבום)
++    photos: {
++          "1": [
++                "https://onerishon-david.pages.dev/p/all1-1.jpg",
++                "https://onerishon-david.pages.dev/p/all1-2.jpg",
++                "https://onerishon-david.pages.dev/p/all1-3.jpg",
++                "https://onerishon-david.pages.dev/p/all1-4.jpg",
++                "https://onerishon-david.pages.dev/p/all1-5.jpg",
++                "https://onerishon-david.pages.dev/p/all1-6.jpg"
++          ],
++          "2": [
++                "https://onerishon-david.pages.dev/p/all2-1.jpg",
++                "https://onerishon-david.pages.dev/p/all2-2.jpg",
++                "https://onerishon-david.pages.dev/p/all2-3.jpg",
++                "https://onerishon-david.pages.dev/p/all2-4.jpg",
++                "https://onerishon-david.pages.dev/p/all2-5.jpg",
++                "https://onerishon-david.pages.dev/p/all2-6.jpg",
++                "https://onerishon-david.pages.dev/p/all2-7.jpg",
++                "https://onerishon-david.pages.dev/p/all2-8.jpg",
++                "https://onerishon-david.pages.dev/p/all2-9.jpg"
++          ],
++          "3": [
++                "https://onerishon-david.pages.dev/p/all3-1.jpg",
++                "https://onerishon-david.pages.dev/p/all3-2.jpg",
++                "https://onerishon-david.pages.dev/p/all3-3.jpg",
++                "https://onerishon-david.pages.dev/p/all3-4.jpg",
++                "https://onerishon-david.pages.dev/p/all3-5.jpg",
++                "https://onerishon-david.pages.dev/p/all3-6.jpg",
++                "https://onerishon-david.pages.dev/p/all3-7.jpg"
++          ]
++    },
++    names: { 1: 'קו המים 1', 2: 'קו המים 2', 3: 'קו המים 3' },
++  },
++};
+diff --git a/bots/agency-bot/clients/david-vacation/wrangler.toml b/bots/agency-bot/clients/david-vacation/wrangler.toml
+new file mode 100644
+index 0000000..4a96736
+--- /dev/null
++++ b/bots/agency-bot/clients/david-vacation/wrangler.toml
+@@ -0,0 +1,44 @@
++# הבוט של דוד ("קו המים"). ממלאים את מה שמסומן ב-REPLACE. עד שיש database_id אמיתי, ההעלאה מדלגת עליו.
++name = "david-vacation-bot"
++main = "../../src/index.js"
++compatibility_date = "2026-09-01"
++compatibility_flags = ["nodejs_compat"]
++
++[triggers]
++crons = ["* * * * *", "*/15 * * * *", "0 6 * * SUN"]
++
++[[d1_databases]]
++binding = "DB"
++database_name = "david-vacation-bot"
++database_id = "REPLACE_WITH_DATABASE_ID"
++migrations_dir = "../../migrations"
++
++[ai]
++binding = "AI"
++
++[vars]
++# החיבור הרשמי (Dualhook), כמו אצל חנן
++WA_PROVIDER = "dualhook"
++ULTRAMSG_INSTANCE = ""
++# מצב בדיקה: הבוט עונה רק למספרים האלה. הלקוחות האמיתיים של דוד לא מקבלים מהבוט כלום.
++# בפורמט 9725XXXXXXXX, מופרדים בפסיק: המספר הפרטי של דוד, ואריאל. ריק = עונה לכולם (רק אחרי שדוד סוגר!)
++TEST_PHONES = "REPLACE_WITH_DAVID_PRIVATE_PHONE,972524666175"
++WORKER_URL = "https://david-vacation-bot.eliyabuis12.workers.dev"
++# מזהה המספר העסקי של דוד ב-Dualhook (מתקבל בחיבור)
++WA_PHONE_NUMBER_ID = "REPLACE_WITH_PHONE_NUMBER_ID"
++WABA_ID = ""
++META_APP_ID = ""
++# ריק בכוונה: אם המספר הפרטי של דוד יהיה OWNER_PHONE, הבוט יתייחס אליו כבעל העסק ולא כלקוח, ואז הוא לא יוכל לבדוק.
++OWNER_PHONE = ""
++# לאן הולך הסיכום של כל פנייה (וואטסאפ). במצב בדיקה: המספר הפרטי של דוד
++SUMMARY_PHONE = "REPLACE_WITH_DAVID_PRIVATE_PHONE"
++ADMIN_PHONE = ""
++SHEET_ID = ""
++REVIEW_LINK = ""
++TEMPLATE_LANG = "he"
++CLAUDE_MODEL = "claude-sonnet-5-5"
++CLAUDE_EFFORT = "medium"
++
++# סודות (GitHub Secrets, עם הקידומת DAVID_VACATION_):
++# DUALHOOK_API_KEY, DUALHOOK_WEBHOOK_KEY, WA_VERIFY_TOKEN
++# ANTHROPIC_API_KEY: אם אין ללקוח מפתח משלו, משתמשים במשותף (ANTHROPIC_API_KEY בלי קידומת)
+diff --git a/bots/agency-bot/src/config.js b/bots/agency-bot/src/config.js
+index b3b7264..a95131a 100644
+--- a/bots/agency-bot/src/config.js
++++ b/bots/agency-bot/src/config.js
+@@ -11,6 +11,8 @@ const DEFAULT_FEATURES = { ...FEATURES };
+ // בוט מכירות (רק ללקוח שמגדיר sales ב-client.js, כמו oneh-rishon-sales): במקום קבלת פנייה של לקוח,
+ // שיחת מכירה לבעלי מקצוע לפי הנחיה קבועה. ריק = בוט רגיל
+ export const SALES = {};
++// דירות נופש (דוד): בוט עם מוח משלו (src/vacation.js), מחירון ותמונות
++export const VACATION = {};
+ 
+ // תזמונים
+ export const TIMING = {
+@@ -181,8 +183,11 @@ export function applyClient(client = {}) {
+   Object.assign(FEATURES, DEFAULT_FEATURES, client.features || {});
+   for (const k of Object.keys(SALES)) delete SALES[k];
+   Object.assign(SALES, client.sales || {});
++  for (const k of Object.keys(VACATION)) delete VACATION[k];
++  Object.assign(VACATION, client.vacation || {});
+   // בוט מכירות: רק התבניות שלו (בלי תזכורות תור, ביקורות וכו' של בעל מקצוע)
+   const defs = client.sales ? (client.sales.templates || [])
++    : client.vacation ? defaultTemplates(BUSINESS).filter((d) => d.name === 'owner_alert_v1')
+     : defaultTemplates(BUSINESS).map((d) => (client.templates?.[d.name] ? { ...d, body: client.templates[d.name] } : d));
+   TEMPLATE_DEFS.splice(0, TEMPLATE_DEFS.length, ...defs);
+ }
+diff --git a/bots/agency-bot/src/cron.js b/bots/agency-bot/src/cron.js
+index 8ae7a0f..03e09f6 100644
+--- a/bots/agency-bot/src/cron.js
++++ b/bots/agency-bot/src/cron.js
+@@ -1,5 +1,5 @@
+ // משימות מתוזמנות: כל 15 דקות (תזכורות, מעקבים, ביקורות, קבלות), וכל יום ראשון (דוח שבועי).
+-import { BUSINESS, FEATURES, MESSAGES, SALES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
++import { BUSINESS, FEATURES, MESSAGES, SALES, TEMPLATES, TIMING, VACATION, msg as tmsg } from './config.js';
+ import { salesFollowups } from './sales.js';
+ import { ilParts, ilTime, nowIso, whenLabel, displayPhone, wazeLink } from './util.js';
+ import { customerLang, flushDueSummaries, logEvent, sendToCustomer, sendToOwner } from './handler.js';
+@@ -26,6 +26,8 @@ export async function runEvery15(env, now = new Date()) {
+   // כל שלב בנפרד: תקלה באחד (למשל רשת) לא עוצרת את השאר
+   const step = async (name, fn) => { try { await fn(env, now); } catch (err) { console.error(`cron ${name} failed`, err); } };
+   // בוט המכירות: רק המעקבים שלו והמיילים שלא יצאו (בלי תזכורות תור, ביקורות ומעקבים של בעל מקצוע)
++  // דירות נופש: בלי תזכורות תור, ביקורות ומעקבים של בעל מקצוע
++  if (VACATION.bot) { await step('owner retry', retryOwnerOutbox); await step('cleanup', cleanup); return; }
+   if (SALES.prompt) {
+     await step('sales followups', salesFollowups);
+     await step('owner retry', retryOwnerOutbox);
+diff --git a/bots/agency-bot/src/handler.js b/bots/agency-bot/src/handler.js
+index 37b63cd..a580a71 100644
+--- a/bots/agency-bot/src/handler.js
++++ b/bots/agency-bot/src/handler.js
+@@ -1,6 +1,7 @@
+ // טיפול בהודעה נכנסת מלקוח, ובהודעות שחנן שולח מהאפליקציה (Coexistence).
+ import { runTurn } from './ai.js';
+-import { BUSINESS, MESSAGES, SALES, TEMPLATES, TIMING, msg as tmsg } from './config.js';
++import { BUSINESS, MESSAGES, SALES, TEMPLATES, TIMING, VACATION, msg as tmsg } from './config.js';
++import { vacationRespond } from './vacation.js';
+ import { salesRespond } from './sales.js';
+ import { upsertLead } from './sheets.js';
+ import { displayPhone, ilDateTimeLabel, inServiceWindow, nowIso, wazeLink, addHours } from './util.js';
+@@ -317,7 +318,7 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
+   // הגנה מלולאה (למשל מענה אוטומטי של הלקוח שעונה לבוט שוב ושוב): יותר מ-12 תשובות של הבוט בשעה → עוצרים ומעבירים לחנן
+   const botReplies = (await env.DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE conv_id = ? AND role = 'assistant' AND created_at >= ?").bind(conv.id, new Date(now.getTime() - 3600000).toISOString()).first())?.n || 0;
+   // בבוט המכירות תשובה אחת היא עד 3 הודעות, והשיחה ארוכה יותר
+-  if (botReplies >= (SALES.prompt ? 36 : 12)) {
++  if (botReplies >= (SALES.prompt || VACATION.bot ? 40 : 12)) {
+     const moved = await env.DB.prepare("UPDATE conversations SET state = 'handoff', handed_off_at = COALESCE(handed_off_at, ?), owner_replied_at = COALESCE(owner_replied_at, ?) WHERE id = ? AND state IN ('bot','handoff')").bind(nowIso(now), nowIso(now), conv.id).run();
+     if (moved.meta?.changes) await sendToOwner(env, `⚠️ השיחה עם ${displayPhone(phone)} ארוכה מדי (אולי מענה אוטומטי). הבוט הפסיק לענות לו. אם זה לקוח אמיתי, כדאי לחזור אליו. וואטסאפ: https://wa.me/${phone}`, now, phone);
+     return;
+@@ -331,6 +332,7 @@ export async function handleInbound(env, msg, contactName, now = new Date()) {
+     if (latest?.id !== myId) return;
+   }
+ 
++  if (VACATION.bot) { await vacationRespond(env, { conv, phone, now }); return; }
+   if (SALES.prompt) { await salesRespond(env, { conv, phone, content, msg, now }); return; }
+   await aiRespond(env, { conv, phone, customer, contactName, myId, content, now });
+ }
+diff --git a/bots/agency-bot/src/index.js b/bots/agency-bot/src/index.js
+index f790cf5..401d8ba 100644
+--- a/bots/agency-bot/src/index.js
++++ b/bots/agency-bot/src/index.js
+@@ -11,7 +11,7 @@ import { renderTable, tableAction, tableKey } from './table.js';
+ import { handleOwnerCommand } from './owner.js';
+ import { runTurn } from './ai.js';
+ import { setWindowAlwaysOpen } from './util.js';
+-import { BUSINESS, SALES } from './config.js';
++import { BUSINESS, SALES, VACATION } from './config.js';
+ import { markLead, salesWeeklyReport } from './sales.js';
+ import { actionPage, ownerByEmail, serveMedia } from './email.js';
+ 
+@@ -160,7 +160,7 @@ export default {
+     // כל דקה: רק הסיכומים לבעל העסק שהגיע הזמן שלהם (הלקוח סיים לכתוב)
+     if (event.cron === '* * * * *') { ctx.waitUntil(flushDueSummaries(env, now)); return; }
+     if (env.WORKER_URL) ctx.waitUntil(ensureUltraWebhook(env, env.WORKER_URL).catch((e) => console.error('ultramsg wiring', e)));
+-    if (event.cron === '0 6 * * SUN') ctx.waitUntil(SALES.prompt ? salesWeeklyReport(env, now) : weeklyReport(env, now));
++    if (event.cron === '0 6 * * SUN' && !VACATION.bot) ctx.waitUntil(SALES.prompt ? salesWeeklyReport(env, now) : weeklyReport(env, now));
+     else ctx.waitUntil(runEvery15(env, now));
+   },
+ };
+diff --git a/bots/agency-bot/src/vacation.js b/bots/agency-bot/src/vacation.js
+new file mode 100644
+index 0000000..6c663f3
+--- /dev/null
++++ b/bots/agency-bot/src/vacation.js
+@@ -0,0 +1,111 @@
++// בוט לדירות נופש (דוד, "קו המים"): עונה בוואטסאפ האמיתי בדיוק כמו בדמו.
++// המוח (ההוראות, המחירון והסגנון של דוד) משותף עם הדמו: automation-agency/demos/ai/lib/*.js. מחירון אחד, בלי הבדלים.
++// כאן אין גישה ליומן: הבוט לא אומר פנוי/תפוס. כשהלקוח רוצה לסגור, דוד מקבל סיכום בוואטסאפ ומאשר בעצמו.
++import Anthropic from '@anthropic-ai/sdk';
++import { VACATION } from './config.js';
++import { QUOTE_TOOL, israelToday, promptFor, quote, schemaFor } from '../../../automation-agency/demos/ai/lib/bots.js';
++import { displayPhone, ilDateTimeLabel, nowIso } from './util.js';
++import * as wa from './whatsapp.js';
++
++const AI_TIMEOUT_MS = 22000;
++const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
++const PHOTO_MARK = '[נשלחו תמונות של דירה ';
++
++const LABELS = { name: 'שם', dates: 'תאריכים', nights: 'לילות', guests: 'אורחים', apartment: 'דירה', occasion: 'אירוע', extras: 'תוספות', price: 'מחיר', discount: 'התמקחות', arrival: 'שעת הגעה', budget: 'תקציב', needs: 'חשוב להם', questions: 'שאלות לבדוק' };
++
++// שיחה אחת עם Claude, כולל הכלי quote (מחיר מדויק מהמחירון). מחזיר את ה-JSON של הדמו: reply, photos, route, lead, ready
++export async function runVacationTurn(env, { history, sent = [], now = new Date() }) {
++  const bot = VACATION.bot || 'david';
++  const today = israelToday(now);
++  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, timeout: AI_TIMEOUT_MS, maxRetries: 1 });
++  const messages = [];
++  for (const m of history) {
++    const role = m.role === 'assistant' ? 'assistant' : 'user';
++    const last = messages[messages.length - 1];
++    if (last && last.role === role && typeof last.content === 'string') last.content += `\n${m.text}`;
++    else messages.push({ role, content: String(m.text) });
++  }
++  if (!messages.length || messages[0].role !== 'user') messages.unshift({ role: 'user', content: '(פנייה חדשה)' });
++  const system = promptFor(bot, today, { sent, live: true });
++  for (let round = 0; round < 5; round++) {
++    const res = await client.beta.messages.create({
++      model: env.CLAUDE_MODEL || 'claude-sonnet-5-5', max_tokens: 4000, system, messages, tools: [QUOTE_TOOL],
++      output_config: { effort: env.CLAUDE_EFFORT || 'medium', format: { type: 'json_schema', schema: schemaFor(bot) } },
++    });
++    if (res.stop_reason === 'tool_use') {
++      messages.push({ role: 'assistant', content: res.content });
++      messages.push({ role: 'user', content: res.content.filter((b) => b.type === 'tool_use').map((b) => {
++        try { return { type: 'tool_result', tool_use_id: b.id, content: JSON.stringify(quote(bot, today, b.input || {}, { live: true })) }; }
++        catch (e) { return { type: 'tool_result', tool_use_id: b.id, content: String(e.message || e), is_error: true }; }
++      }) });
++      continue;
++    }
++    if (res.stop_reason === 'refusal' || res.stop_reason === 'max_tokens') throw new Error(res.stop_reason);
++    const out = JSON.parse(res.content.filter((b) => b.type === 'text').map((b) => b.text).join(''));
++    if (!String(out.reply || '').trim()) throw new Error('empty');
++    return out;
++  }
++  throw new Error('too_many_rounds');
++}
++
++export function summaryText(lead = {}, phone, now, route, test) {
++  const rows = Object.entries(LABELS).filter(([k]) => String(lead[k] || '').trim()).map(([k, l]) => `${l}: ${lead[k]}`);
++  return [
++    test ? '🧪 מצב בדיקה: ככה ייראה הסיכום שמגיע אליך על כל פנייה' : '',
++    route === 'friends' ? '🏡 תיווך: גדול מדי לדירות. כל הפרטים להעברה לחברים' : '📋 פנייה חדשה: הלקוח רוצה לסגור',
++    ...rows,
++    route === 'friends' ? '' : 'לבדוק זמינות ולשלוח לו פרטים למקדמה',
++    `וואטסאפ ללקוח: https://wa.me/${phone} (${displayPhone(phone)})`,
++    `התקבל: ${ilDateTimeLabel(now)}`,
++  ].filter(Boolean).join('\n');
++}
++
++// הסיכום לדוד בוואטסאפ. במצב בדיקה (דוד הוא גם "הלקוח") הוא מקבל אותו באותה שיחה
++async function sendSummary(env, conv, phone, out, now) {
++  const to = env.SUMMARY_PHONE || env.OWNER_PHONE;
++  if (!to) return;
++  const test = to === phone;
++  const text = summaryText(out.lead || {}, phone, now, out.route, test);
++  const r = await wa.sendText(env, to, text);
++  // מחוץ לחלון של 24 שעות וואטסאפ דוחה הודעה רגילה: שולחים בתבנית המאושרת
++  if (!r?.ok && !test) await wa.sendTemplate(env, to, 'owner_alert_v1', [text.replace(/\n+/g, ' | ').slice(0, 900)]);
++  await env.DB.prepare("UPDATE conversations SET issue = 'vacation_summary_sent', updated_at = ? WHERE id = ?").bind(nowIso(now), conv.id).run();
++}
++
++// תשובה ללקוח שכתב למספר של העסק
++export async function vacationRespond(env, { conv, phone, now = new Date() }) {
++  const rows = (await env.DB.prepare("SELECT role, text FROM messages WHERE conv_id = ? AND role IN ('user','assistant') ORDER BY id").bind(conv.id).all()).results;
++  const sent = [...new Set(rows.filter((m) => m.role === 'assistant' && m.text.startsWith(PHOTO_MARK)).map((m) => m.text.slice(PHOTO_MARK.length, PHOTO_MARK.length + 1)))];
++  const history = rows.filter((m) => !m.text.startsWith(PHOTO_MARK));
++  let out;
++  try { out = await runVacationTurn(env, { history, sent, now }); }
++  catch (err) {
++    console.error('vacation turn failed', err?.status || '', err?.message || err);
++    try { await sleep(800); out = await runVacationTurn(env, { history, sent, now }); }
++    catch (err2) {
++      // תוכנית ב' בוואטסאפ האמיתי: הלקוח מקבל תשובה אנושית, ודוד מקבל התראה להמשיך בעצמו
++      console.error('vacation turn failed twice', err2?.message || err2);
++      const msg = 'רגע אחי, אני בודק ומחזיר לך תשובה עוד כמה דקות 🙏';
++      await wa.sendText(env, phone, msg);
++      await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, msg, nowIso(now)).run();
++      const to = env.SUMMARY_PHONE || env.OWNER_PHONE;
++      if (to) await wa.sendText(env, to, `⚠️ הבוט לא הצליח לענות ל-${displayPhone(phone)}. כדאי לענות לו בעצמך: https://wa.me/${phone}`);
++      return;
++    }
++  }
++  const parts = String(out.reply).split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean).slice(0, 3);
++  const gap = () => (env.VACATION_GAP_MS != null ? +env.VACATION_GAP_MS : 1200 + Math.floor(Math.random() * 1500));
++  const photoId = /^[123]$/.test(String(out.photos || '')) ? String(out.photos) : '';
++  const pics = photoId && !sent.includes(photoId) ? (VACATION.photos?.[photoId] || []) : [];
++  for (let i = 0; i < parts.length; i++) {
++    if (i > 0) await sleep(gap());
++    await wa.sendText(env, phone, parts[i]);
++    await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, parts[i], nowIso(now)).run();
++    // התמונות אחרי ההודעה שממליצה על הדירה (כמו דוד: קודם הדירה, אחר כך השאלה)
++    if (pics.length && i === Math.max(0, parts.length - 2)) {
++      for (let k = 0; k < pics.length; k++) await wa.sendImageByLink(env, phone, pics[k], k === 0 ? (VACATION.names?.[photoId] || '') : '');
++      await env.DB.prepare("INSERT INTO messages (conv_id, role, text, created_at) VALUES (?, 'assistant', ?, ?)").bind(conv.id, `${PHOTO_MARK}${photoId}]`, nowIso(now)).run();
++    }
++  }
++  if (out.ready && conv.issue !== 'vacation_summary_sent') { await sleep(1500); await sendSummary(env, conv, phone, out, now); }
++}
+diff --git a/bots/agency-bot/src/whatsapp.js b/bots/agency-bot/src/whatsapp.js
+index a80fe34..95790c6 100644
+--- a/bots/agency-bot/src/whatsapp.js
++++ b/bots/agency-bot/src/whatsapp.js
+@@ -96,6 +96,12 @@ export function sendDocument(env, to, doc, filename, caption) {
+   });
+ }
+ 
++// תמונה לפי קישור ציבורי (התמונות של הדירות יושבות באתר)
++export function sendImageByLink(env, to, link, caption) {
++  if (isUltra(env)) return ultra(env, 'image', to, { image: link, caption: caption || '' }, caption);
++  return call(env, 'messages', { messaging_product: 'whatsapp', to, type: 'image', image: { link, ...(caption ? { caption } : {}) } });
++}
++
+ export function sendImageById(env, to, mediaId, caption) {
+   if (isUltra(env)) return ultra(env, 'image', to, { image: mediaId, caption: caption || '' }, caption);
+   return call(env, 'messages', {
+diff --git a/bots/agency-bot/test/flow.test.js b/bots/agency-bot/test/flow.test.js
+index f392f07..7bb0eab 100644
+--- a/bots/agency-bot/test/flow.test.js
++++ b/bots/agency-bot/test/flow.test.js
+@@ -39,6 +39,9 @@ globalThis.fetch = async (url, init = {}) => {
+   if (url.includes('api.anthropic.com')) {
+     aiRequests.push(JSON.parse(init.body));
+     const out = aiQueue.shift();
++    // בוט דירות הנופש: סימולציה של קריאה לכלי quote, ושל תקלה ב-AI
++    if (out === '__fail') return new Response(JSON.stringify({ type: 'error', error: { type: 'overloaded_error', message: 'busy' } }), { status: 529, headers: { 'content-type': 'application/json' } });
++    if (out && out.__tool) return new Response(JSON.stringify({ id: 'msg_tool', type: 'message', role: 'assistant', model: 'claude-sonnet-5-5', stop_reason: 'tool_use', content: [{ type: 'tool_use', id: 'tu1', name: 'quote', input: out.__tool }], usage: { input_tokens: 10, output_tokens: 10 } }), { status: 200, headers: { 'content-type': 'application/json', 'request-id': 'req_test' } });
+     return new Response(JSON.stringify({
+       id: 'msg_test', type: 'message', role: 'assistant', model: 'claude-opus-5-5', stop_reason: 'end_turn',
+       content: [{ type: 'text', text: JSON.stringify(out) }], usage: { input_tokens: 10, output_tokens: 10 },
+@@ -1687,3 +1690,81 @@ test('sales bot: the ad experiment: only people from a trial ad get the trial of
+     assert.match(mails.at(-1).text, /מקדמה 500: 1 פנו/);
+   });
+ });
++
++
++// ---------- הבוט של דוד (דירות נופש, "קו המים") ----------
++const vac = (o) => ({ reply: 'שלום! 😊', photos: '', route: '', ready: false, ...o, lead: { name: '', dates: '', nights: '', guests: '', apartment: '', occasion: '', extras: '', price: '', discount: '', arrival: '', budget: '', needs: '', questions: '', ...(o.lead || {}) } });
++async function withDavidClient(fn) {
++  const cfg = await import('../src/config.js');
++  const original = (await import('../src/client.js')).default;
++  cfg.applyClient((await import('../clients/david-vacation/client.js')).default);
++  try { await fn(cfg); } finally { cfg.applyClient(original); }
++}
++const DAVID = '972501112222', STRANGER = '972547778888';
++const davidEnv = () => ({ ...makeEnv(), OWNER_PHONE: '', WA_PROVIDER: 'dualhook', DUALHOOK_API_KEY: 'dk', TEST_PHONES: `${DAVID},972524666175`, SUMMARY_PHONE: DAVID, VACATION_GAP_MS: '0', ADMIN_PHONE: '' });
++
++test('david bot: answers like the demo, real price list via quote, all photos once, test mode, WhatsApp summary', async () => {
++  await withDavidClient(async () => {
++    sent.length = 0; aiRequests = []; outSeq = 0;
++    const env = davidEnv();
++    const t0 = new Date('2026-11-16T10:00:00Z');
++    // שיחת חולין
++    aiQueue = [vac({ reply: 'שלום! הכל מעולה, תודה ששאלת 😊 איך אפשר לעזור?' })];
++    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'היי מה נשמע?' } }, 'v1'), t0);
++    assert.deepEqual(textsTo(DAVID), ['שלום! הכל מעולה, תודה ששאלת 😊 איך אפשר לעזור?']);
++    const sys = aiRequests[0].system;
++    assert.ok(sys.includes('אין לך גישה ליומן') && sys.includes('חמישי עד מוצ"ש 2,200') && sys.includes('תקף עד 1/3'), 'live prompt with the real price list');
++    assert.equal(aiRequests[0].tools[0].name, 'quote');
++    // המלצה + כל 9 התמונות של קו המים 2, אחרי ההודעה שממליצה ולפני השאלה
++    sent.length = 0;
++    aiQueue = [{ __tool: { apartment: '2', checkin: '2026-11-27', nights: 1 } }, vac({ reply: 'ממליץ על קו המים 2, ג׳קוזי זוגי ענק 😎\n\nשישי עד מוצ"ש 1,500 ₪. נשמור לכם?', photos: '2' })];
++    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'זוג, שישי עד מוצש הבא' } }, 'v2'), new Date(t0.getTime() + 60e3));
++    const toolResult = aiRequests.at(-1).messages.at(-1).content[0];
++    assert.equal(toolResult.type, 'tool_result');
++    const q = JSON.parse(toolResult.content);
++    assert.equal(q.total, 1500, 'exact price from the price list');
++    assert.ok(!('available' in q) && /אין גישה ליומן/.test(q.availability), 'never claims availability');
++    const imgs = sent.filter((m) => m.type === 'image');
++    assert.equal(imgs.length, 9);
++    assert.equal(imgs[0].image.link, 'https://onerishon-david.pages.dev/p/all2-1.jpg');
++    assert.equal(imgs[0].image.caption, 'קו המים 2');
++    assert.deepEqual(sent.filter((m) => m.type).map((m) => m.type), ['text', ...Array(9).fill('image'), 'text']); // (בלי אישור הקריאה, הווי הכחול)
++    // בקשה נוספת לאותה דירה: לא שולחים שוב
++    sent.length = 0;
++    aiQueue = [vac({ reply: 'שלחתי לך למעלה את כל התמונות של הדירה 🙂', photos: '2' })];
++    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'אפשר עוד תמונות?' } }, 'v3'), new Date(t0.getTime() + 120e3));
++    assert.equal(sent.filter((m) => m.type === 'image').length, 0);
++    assert.ok(aiRequests.at(-1).system.includes('כבר נשלחו בשיחה הזו תמונות של דירות: 2'));
++    // סגירה: הסיכום מגיע לדוד בוואטסאפ (במצב בדיקה: באותה שיחה, מסומן)
++    sent.length = 0;
++    aiQueue = [vac({ reply: 'מעולה! אני בודק שהתאריכים פנויים ושולח לך עוד כמה דקות את הפרטים למקדמה 🙏', route: 'david', ready: true, lead: { name: 'אבי', dates: '27/11-28/11', nights: '1', guests: 'זוג', apartment: 'קו המים 2', price: '1,500 ₪', arrival: '16:00' } })];
++    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'סגור, אבי, נגיע ב-4' } }, 'v4'), new Date(t0.getTime() + 180e3));
++    const texts = textsTo(DAVID);
++    assert.equal(texts.length, 2);
++    assert.match(texts[1], /מצב בדיקה/);
++    assert.match(texts[1], /מחיר: 1,500 ₪/);
++    assert.match(texts[1], /wa\.me\/972501112222/);
++    // סיכום אחד בלבד לכל פנייה
++    sent.length = 0;
++    aiQueue = [vac({ reply: 'בכיף אח 🙏', ready: true, route: 'david' })];
++    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'תודה' } }, 'v5'), new Date(t0.getTime() + 240e3));
++    assert.deepEqual(textsTo(DAVID), ['בכיף אח 🙏']);
++    // מצב בדיקה: לקוח אמיתי לא מקבל כלום
++    sent.length = 0;
++    await processWebhook(env, inbound(STRANGER, { type: 'text', text: { body: 'היי יש פנוי?' } }, 'v6'), new Date(t0.getTime() + 300e3));
++    assert.equal(sent.length, 0);
++    // ההודעות עוברות דרך Dualhook (החיבור הרשמי)
++    assert.ok(dualRequests.length > 0);
++  });
++});
++
++test('david bot: AI fails twice -> human reply to the customer and an alert to David (no error shown)', async () => {
++  await withDavidClient(async () => {
++    sent.length = 0; aiRequests = [];
++    const env = davidEnv(); env.SUMMARY_PHONE = '972509990000'; env.TEST_PHONES = `${DAVID},972509990000`;
++    aiQueue = ['__fail', '__fail', '__fail', '__fail'];
++    await processWebhook(env, inbound(DAVID, { type: 'text', text: { body: 'היי' } }, 'f1'), new Date('2026-11-16T10:00:00Z'));
++    assert.deepEqual(textsTo(DAVID), ['רגע אחי, אני בודק ומחזיר לך תשובה עוד כמה דקות 🙏']);
++    assert.match(textsTo('972509990000')[0], /הבוט לא הצליח לענות/);
++  });
++});
