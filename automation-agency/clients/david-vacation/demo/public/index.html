@@ -605,13 +605,14 @@ function parse(text) {
     else if ((m = t.match(/בבוקר|בצהריים|צהריים|אחר הצהריים|אחה"צ|בערב|ערב|בלילה|מאוחר|מוקדם|לא יודע|לא בטוח/))) { S.arrival = m[0]; found.arrival = 1; }
   }
   if (found.date || found.nights || found.guests) S.confirmed = 0;
+  if (S.lastPhotos) S.lastPhotos--;
   // כוונות
   found.price = /כמה (זה )?עול|מחיר|כמה זה|כמה יוצא|עלות|כמה לשלם/.test(t);
   if (found.price) S.wantsPrice = true;
   found.haggle = /יקר|הנחה|להוריד|תוריד|מחיר טוב|יותר זול|זול יותר|פחות|תעשה לי|מחיר חבר|מחיר מיוחד|לגמיש|גמיש/.test(t);
   found.yes = /^ ?(כן|כן כן|בטח|ברור|יאללה|סבבה|אוקיי|אוקי|מעולה|נשמע טוב|נשמע מעולה|מתאים|אחלה|יופי|סגור|סוגרים|קדימה|בוא|תשמור|נסגור)/.test(t) || /סוגרים|סגרנו|נסגור|תשמור|שמור לנו|תשריין|מאשר|מאשרת|בוא נסגור|אנחנו בפנים|אני לוקח|אני לוקחת|הולכים על זה/.test(t);
   found.no = /^ ?(לא|לא תודה|אין צורך|לא צריך)( |$)/.test(t);
-  found.photos = /תמונ|לראות|סרטון/.test(t);
+  found.photos = /תמונ|לראות|סרטון|תראה לי|תשלח לי (את )?ה(דירה|סוויטה)/.test(t) || (S.lastPhotos && /^ ?ו?(גם |עוד )?(של |את )?(ה)?(בוטיק|סוויטה|דירה|קומה 5|משפחתית)|שוב|עוד פעם/.test(t) && t.trim().length < 30);
   found.thanks = /^ ?(תודה|תודה רבה|תנקס)/.test(t);
   const tt = t.trim().replace(/[!?.,🙂😊]+/g, ' ').replace(/\s+/g, ' ').trim();
   found.howru = /מה נשמע|מה שלומך|מה קורה|מה המצב|מה העניינים|מה איתך|איך אתה|מה הולך|מה חדש|מה שלומכם/.test(tt);
@@ -641,6 +642,20 @@ function answerQuestions(q, raw) {
     else if (k === 'אחר') { const qq = String(raw || '').trim().slice(0, 50); if (!S.questions.includes(qq)) S.questions.push(qq); out.push('שאלה טובה, אני בודק ומעדכן אותך בהמשך היום 👍'); }
   });
   return out.join(' ');
+}
+/* בקשת תמונות: מה שכבר נשלח לא שולחים שוב, אומרים שזה למעלה */
+function photoReply(text) {
+  S.lastPhotos = 2;
+  const t = String(text);
+  const want = /קומה 5|הדירה הראשונה/.test(t) ? '1' : /בוטיק|סוויטה הזוגית/.test(t) ? '2' : /משפחתי/.test(t) ? '3' : /כל הדירות|שאר הדירות|דירות אחרות|עוד דירות/.test(t) ? 'all' : S.apt;
+  if (want === 'all') {
+    const ids = ['1', '2', '3'].filter((id) => !sentPics.has(id) && (id !== '3' || isFamily() || !S.adults) && (id === '3' || !isFamily()));
+    if (!ids.length) return { text: 'שלחתי לך למעלה את התמונות של כל הדירות שמתאימות לכם 🙂' };
+    return { text: 'בטח! הנה 😍', photos: ids[0] };
+  }
+  if (!want) return { text: 'בשמחה! ברגע שנבין מה מתאים לכם, אשלח את כל התמונות של הדירה. ' + (S.adults == null ? 'לכמה אנשים אתם מחפשים?' : !S.checkin ? 'מתי חשבתם להגיע?' : 'רגע אחד ואני מתאים לכם דירה.') };
+  if (sentPics.has(want)) return { text: pick(['שלחתי לך למעלה את כל התמונות של הדירה 🙂 אפשר ללחוץ על כל תמונה ולהגדיל', 'כל התמונות של הדירה כבר נמצאות למעלה בשיחה 🙂 לוחצים על תמונה והיא נפתחת בגדול']) };
+  return { text: 'בטח, הנה 😍', photos: want };
 }
 /* חלופה זולה יותר: סוויטה אחרת, או אמצע שבוע במקום סופ"ש */
 function altOffer() {
@@ -718,6 +733,7 @@ function engineReply(text) {
       S.stage = 'done';
       return say(`מעולה! שמרתי לכם ${datesText()} ${S.apt ? (S.apt === '3' ? 'בסוויטה המשפחתית' : S.apt === '2' ? 'בסוויטת הבוטיק' : 'בדירה בקומה 5') : ''} 😊 אני שולח לך עכשיו קישור למקדמה ואת כל הפרטים להגעה.\n\n${S.occasion && S.occasion !== '-' ? 'יהיה מושלם, מבטיח ❤️' : 'תתכוננו לנשום את הים 🌊'}`, { ready: true });
     }
+    if (f.photos) { const r = photoReply(text); if (r) return say(r.text, { photos: r.photos }); }
     if (f.thanks) return say('בכיף! מחכים לכם 😊');
     if (f.q.length) return say('');
     return say('הכל רשום אצלי 😊 אם צריך עוד משהו, אני כאן.');
@@ -795,7 +811,7 @@ function engineReply(text) {
   if (S.stage === 'quoted' && f.no) return say(pick(['בסדר גמור 😊 יש משהו אחר שיעזור לכם להחליט? אולי תאריך אחר?', 'אין בעיה 😊 רוצים שאבדוק תאריכים אחרים?']));
 
   // בקשת תמונות
-  if (f.photos && S.apt) { const id = S.apt; sentPics.delete(id); return say('בטח, הנה 😍', { photos: id }); }
+  if (f.photos) { const r = photoReply(text); if (r) return say(r.text, { photos: r.photos }); }
 
   // איסוף פרטים, אחד-אחד
   if (S.adults == null && S.totalPeople) { S.stage = 'collect'; return say(f.total ? `${S.totalPeople}, מעולה 😊 כמה מתוכם ילדים?` : 'וכמה מתוכם ילדים? 😊'); }
@@ -890,7 +906,7 @@ function engineReplyAgain() { S.stage = 'collect'; return engineReply(''); }
 /* ================= מצב חי (AI) עם גיבוי: אם ה-AI נופל, המוח של דוד ממשיך ======== */
 let engineMode = true;
 function engineTurn(text) {
-  if (/בוט|רובוט|אוטומטי|מזכירה|בן אדם אמיתי|אתה אמיתי/.test(text)) {
+  if (/(^|\s)(אתה |זה |את )?(בוט|רובוט|צ'אטבוט)(\s|\?|!|\.|$)|תשובה אוטומטית|מענה אוטומטי|אתה אוטומטי|מזכירה|בן אדם אמיתי|אתה אמיתי|אני מדבר עם מחשב|בינה מלאכותית/.test(text)) {
     if (S.stage === 'start') S.stage = 'collect';
     return { reply: 'זה הוואטסאפ של דוד 😊 אני עונה פה בשמו, ודוד עצמו רואה כל מה שאתם כותבים. אז, איך אפשר לעזור?', photos: null, ready: false };
   }
