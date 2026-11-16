@@ -1,0 +1,27 @@
+name: David demo page (public)
+
+# Publishes only the demo page for David (a static page, no bot, no messages).
+# Runs when the public demo files change. Has nothing to do with Hanan's bot.
+on:
+  push:
+    branches: [claude/bold-knuth-scehxs]
+    paths:
+      - 'automation-agency/clients/david-vacation/demo/public/**'
+      - '.github/workflows/david-demo.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Create the Pages project (once)
+        run: npx -y wrangler@3 pages project create onerishon-david --production-branch main || echo "project already exists or cannot be created"
+      - name: Publish the page
+        run: npx -y wrangler@3 pages deploy automation-agency/clients/david-vacation/demo/public --project-name onerishon-david --branch main --commit-dirty=true

@@ -104,6 +104,53 @@ footer{padding-block:28px;color:var(--mute);font-size:13.5px;text-align:center}
 .lb[hidden]{display:none}
 .lb img{max-width:100%;max-height:86vh;border-radius:10px}
 .lb button{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));left:14px;background:var(--white);border:0;border-radius:50%;width:44px;height:44px;font-size:20px;color:var(--sea)}
+
+/* ---- עיצוב משודרג ---- */
+.hero{position:relative;min-height:min(86vh,760px);display:flex;color:#fff;overflow:hidden;background:var(--sea)}
+.hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{to{transform:scale(1.12) translateY(-2%)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(9,36,46,.55) 0%,rgba(9,36,46,.25) 38%,rgba(9,36,46,.88) 100%)}
+.hero-in{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;width:100%;padding-block:22px 48px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.hero .brand small{color:rgba(255,255,255,.75)}
+.hero .tag{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff;backdrop-filter:blur(6px)}
+.hero-txt{max-width:680px;margin-top:auto}
+.hero h1{color:#fff;font-size:clamp(38px,6vw,74px);text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.hero h1 em{color:#FFB38F}
+.hero .lede{color:rgba(255,255,255,.92);font-size:clamp(17px,2vw,20px)}
+.go{display:inline-flex;gap:10px;align-items:center;margin-top:24px;background:var(--coral);color:#fff;text-decoration:none;font-weight:700;padding:15px 26px;border-radius:999px;box-shadow:0 14px 30px -12px rgba(227,111,74,.8);transition:transform .2s}
+.go:hover{transform:translateY(-2px)}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.facts span{font-size:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);padding:6px 12px;border-radius:999px;backdrop-filter:blur(6px)}
+.stage{padding-block:clamp(48px,7vw,84px) 70px}
+h2.sec{font-family:var(--display);font-weight:900;font-size:clamp(30px,4vw,46px);line-height:1.1;margin:0 0 8px}
+.lede.dark{color:#3E4A4F;font-size:18px}
+.tries{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.tries button{text-align:start;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:13px 15px;color:var(--sea);transition:transform .15s,border-color .15s,box-shadow .15s}
+.tries button:hover{transform:translateY(-2px);border-color:var(--coral);box-shadow:0 10px 24px -16px rgba(13,59,74,.5)}
+.tries b{display:block;font-size:16px}
+.tries span{display:block;font-size:13.5px;color:var(--mute);margin-top:2px}
+.tip{margin:14px 0 0;background:#FFF4E6;border:1px dashed #E9B98C;border-radius:12px;padding:10px 14px;font-size:15px;color:#7A4B21}
+.sumcard{background:linear-gradient(160deg,#0D3B4A,#12495B)}
+.sumhead{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.sumhead .dot{width:12px;height:12px;border-radius:50%;background:#4ADE80;margin-top:12px;box-shadow:0 0 0 6px rgba(74,222,128,.18);flex:none}
+.phone{border-radius:46px;padding:11px;background:linear-gradient(145deg,#2a2a2a,#0c0c0c);box-shadow:0 50px 80px -40px rgba(13,59,74,.7),inset 0 0 0 2px #3a3a3a}
+.screen{border-radius:36px;background-color:#EFE7DD;background-image:radial-gradient(rgba(15,91,78,.06) 1.2px,transparent 1.2px),radial-gradient(rgba(227,111,74,.05) 1.2px,transparent 1.2px);background-size:22px 22px,22px 22px;background-position:0 0,11px 11px}
+.bar{padding:34px 12px 10px}
+.bar .back{font-size:30px;line-height:1;opacity:.9;transform:scaleX(-1)}
+.bar img.av{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:none;border:2px solid rgba(255,255,255,.5)}
+.bar small{transition:opacity .2s}
+.m.out .tick{color:#53BDEB;font-size:11px;margin-inline-start:4px;position:absolute;bottom:3px;left:44px}
+.m.out{padding-left:16px;min-width:92px}
+.m.in{min-width:64px}
+.m.out time{left:9px}
+.chips{background:transparent}
+.chips button{box-shadow:0 2px 6px -3px rgba(0,0,0,.2)}
+form.send{background:transparent}
+form.send input{box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.resets button{background:var(--white);border:1px solid var(--line);border-radius:999px;padding:7px 14px;text-decoration:none;color:var(--sea)}
+@media (max-width:880px){.tries{grid-template-columns:1fr}.hero{min-height:88vh}}
+@media (prefers-reduced-motion:reduce){.hero-bg{animation:none}}
 @media (max-width:880px){
   .stage{grid-template-columns:1fr}
   .phone-col{order:-1;max-width:430px;width:100%;margin:0 auto}
@@ -114,50 +161,54 @@ footer{padding-block:28px;color:var(--mute);font-size:13.5px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 
-<header class="wrap top">
-  <div class="brand">עונה ראשון<small>הדגמה עבור דוד, דירות נופש בנתניה</small></div>
-  <span class="tag">זו הדגמה. שום הודעה לא יוצאת לאף אחד</span>
+<header class="hero">
+  <img class="hero-bg" src="p/a1-1.jpg" alt="ג׳קוזי במרפסת מול הים בשקיעה, דירת קו המים">
+  <div class="wrap hero-in">
+    <div class="topbar"><div class="brand">עונה ראשון<small>הדגמה אישית עבור דוד</small></div><span class="tag">הדגמה. שום הודעה לא יוצאת לאף אחד</span></div>
+    <div class="hero-txt">
+      <h1>דוד, ככה נסגרת הזמנה <em>בזמן שאתה ישן</em>.</h1>
+      <p class="lede">לקוח כותב בוואטסאפ, והוא מקבל תשובה תוך שניות, כאילו אתה כתבת: חם, עם תמונות של הדירה המתאימה, מחיר מדויק לפי היומן, והתמקחות חכמה שלא יורדת מתחת לגבול שלך.</p>
+      <a class="go" href="#try">לנסות עכשיו כמו לקוח <span aria-hidden="true">↓</span></a>
+      <div class="facts"><span>⚡ עונה תוך שניות, גם בשבת בלילה</span><span>🤝 מתמקח עד 10%, לא יותר</span><span>🧠 זוכר כל לקוח</span></div>
+    </div>
+  </div>
 </header>
 
-<main class="wrap stage">
+<main class="wrap stage" id="try">
   <section>
-    <h1>דוד, ככה נסגרת הזמנה <em>כשאתה לא ליד הטלפון</em>.</h1>
-    <p class="lede">לקוח כותב, והמזכירה עונה תוך שניות בסגנון שלך: מבינה מה הוא צריך, בודקת ביומן מה פנוי, שולחת תמונות של הדירה המתאימה, נותנת מחיר, ויודעת להתמקח עד הגבול שאתה קבעת. משפחה גדולה מדי? היא מעבירה אותה לחברים שלך.</p>
-    <div class="how">
-      <b>מה כדאי לנסות</b>
-      <ul>
-        <li>תשים לב איך היא כותבת: בגוף ראשון, כמו דוד, עם הביטויים והאימוג'ים שלך. הלקוח לא יודע שזו לא אתה.</li>
-        <li>זוג שרוצה סופ"ש. הדירה בקומה 5 תפוסה ביומן, אז היא מציעה את הסוויטה.</li>
-        <li>להגיד "יקר לי", או להציע מחיר משלך. היא מתמקחת בחוכמה, ולא יורדת מתחת למה שמותר.</li>
-        <li>לשאול על עישון, חניה, וויפיי, שעת כניסה, ביטול, חיות. היא עונה מיד.</li>
-        <li>זוג עם 5 ילדים. היא מבינה שזה גדול מדי, אוספת את כל הפרטים ומעבירה לדוד.</li>
-        <li>אחרי שיחה, ללחוץ "לחזור כאותו לקוח". היא זוכרת אותו.</li>
-      </ul>
-      <div class="mode" id="mode">טוען...</div>
+    <h2 class="sec">תהיה הלקוח. תכתוב לו.</h2>
+    <p class="lede dark">תכתוב בטלפון כל מה שלקוח היה כותב לך. או תלחץ על אחד מאלה:</p>
+    <div class="tries" id="tries">
+      <button type="button" data-t="היי מה נשמע?"><b>👋 להגיד שלום</b><span>"היי מה נשמע?"</span></button>
+      <button type="button" data-t="היי, אנחנו זוג, מחפשים משהו לסופ&quot;ש הקרוב"><b>💑 זוג לסופ"ש</b><span>הדירה בקומה 5 תפוסה, תראה מה הוא מציע</span></button>
+      <button type="button" data-t="אנחנו זוג עם 2 ילדים בני 4 ו-7, רוצים 3 לילות מיום ראשון הבא"><b>👨‍👩‍👧‍👦 משפחה</b><span>הוא מתאים להם את הסוויטה המשפחתית</span></button>
+      <button type="button" data-t="היי, אנחנו זוג עם 5 ילדים, יש מקום לחנוכה?"><b>🏡 משפחה גדולה</b><span>אוסף פרטים ומעביר אליך, בלי להבטיח</span></button>
+      <button type="button" data-t="אפשר לעשן? יש חניה? יש וויפיי?"><b>❓ שאלות</b><span>עישון, חניה, וויפיי, ביטול, חיות</span></button>
     </div>
+    <p class="tip">💡 כשתגיע למחיר, תגיד "יקר לי" כמה פעמים, או תציע מחיר משלך. תראה איך הוא מתמקח.</p>
     <div class="sumcard" aria-live="polite">
-      <h2>הסיכום שמגיע אליך</h2>
-      <p class="sub">כל מה שנאסף בשיחה, בהודעה אחת. אתה רק שולח קישור לתשלום.</p>
+      <div class="sumhead"><span class="dot"></span><div><h2>מה שמגיע אליך</h2><p class="sub">כל מה שנאסף, בהודעה אחת. אתה רק שולח קישור לתשלום.</p></div></div>
       <div id="sum"><p class="empty">עוד לא נאסף כלום. תתחיל שיחה בטלפון.</p></div>
       <div class="mem" id="mem" hidden></div>
     </div>
+    <div class="mode" id="mode" hidden></div>
   </section>
 
   <section class="phone-col" aria-label="וואטסאפ להדגמה">
     <div class="phone">
       <div class="screen">
-        <div class="bar"><div class="av">ק</div><div><b>קו המים, דירות נופש</b><small>חשבון עסקי</small></div></div>
+        <div class="bar"><span class="back" aria-hidden="true">›</span><img class="av" src="p/a1-1.jpg" alt=""><div><b>דוד · קו המים 🌊</b><small id="status">מחובר/ת</small></div></div>
         <div class="chat" id="chat" aria-live="polite"></div>
-        <div class="chips" id="chips" aria-label="הצעות לכתיבה"></div>
+        <div class="chips" id="chips" aria-label="תשובות מהירות"></div>
         <form class="send" id="send" autocomplete="off">
-          <input id="msg" name="msg" placeholder="כתוב הודעה כמו לקוח..." aria-label="הודעה">
+          <input id="msg" name="msg" placeholder="הודעה" aria-label="הודעה">
           <button id="sendBtn" aria-label="שליחה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg></button>
         </form>
       </div>
     </div>
     <div class="resets">
-      <button type="button" id="again">לחזור כאותו לקוח</button>
-      <button type="button" id="fresh">לקוח חדש</button>
+      <button type="button" id="again">↻ לחזור כאותו לקוח</button>
+      <button type="button" id="fresh">✚ לקוח חדש</button>
     </div>
   </section>
 </main>
@@ -171,7 +222,7 @@ footer{padding-block:28px;color:var(--mute);font-size:13.5px;text-align:center}
       <p>זוג: אחת משתי הסוויטות. משפחה עד זוג, 2 ילדים ותינוק: הסוויטה המשפחתית.</p>
       <p>יותר אנשים מזה, או קבוצת חברים: אוספת את כל הפרטים (תאריכים, הרכב, גילאים, מה חשוב להם, תקציב, שם) ומעבירה לדוד. לא מבטיחה כלום מעבר.</p>
       <p>סופ"ש (שישי-שבת): מינימום 2 לילות. תאריך תפוס: מציעה דירה אחרת או תאריך אחר.</p>
-      <p>הנחה: עד 5% בסופ"ש, עד 10% ל-3 לילות ומעלה או באמצע שבוע. או בקבוק יין מתנה. לא יותר.</p>
+      <p>התמקחות: מתחילה ב-5%, עולה בהדרגה עם מתנה קטנה, ולא יותר מ-10% בשום מקרה.</p>
     </div>
   </div>
 </section>
@@ -257,7 +308,7 @@ function quote({ apartment, checkin, nights, extras = [] }) {
   const extrasOk = id === '1';
   const nightsTotal = list.reduce((s, n) => s + n.price, 0);
   const extrasTotal = extrasOk ? ex.reduce((s, k) => s + EXTRAS[k], 0) : 0;
-  const maxDiscountPct = nights >= 3 || wkndNights === 0 ? 10 : 5;
+  const maxDiscountPct = 10;
   return {
     apartment: a.name, available: conflicts.length === 0, booked_nights: conflicts,
     min_nights_ok: !(wkndNights > 0 && nights < 2), nights: list, nights_total: nightsTotal,
@@ -291,7 +342,7 @@ function calendarText() {
 function rules(withTools) {
   const apts = Object.entries(APTS).map(([id, a]) => `דירה ${id}, ${a.name}: ${a.facts} מחיר ללילה: אמצע שבוע ${a.mid} ₪, ליל שישי או ליל שבת ${a.wknd} ₪.`).join('\n');
   const booked = Object.entries(BOOKED).map(([id, ns]) => `דירה ${id}: הלילות של ${ns.join(', ')}`).join('\n');
-  return `אתה דוד. אתה משכיר 3 דירות נופש יוקרתיות בקו ראשון לים בנתניה (חוף סירונית), ועונה בעצמך ללקוחות שכותבים לך בוואטסאפ. כותב בגוף ראשון, בלשון זכר ("אני בודק", "שמרתי לכם"). לא מציג את עצמך כמזכירה או כבוט, אתה פשוט דוד. רק אם שואלים ישירות אם זה בוט: לא משקרים. עונים "זה הוואטסאפ של דוד 😊 אני עונה פה בשמו, ודוד עצמו רואה כל מה שאתם כותבים" וממשיכים. המטרה: לסגור הזמנה.
+  return `אתה דוד. אתה משכיר 3 דירות נופש יוקרתיות בקו ראשון לים בנתניה (חוף סירונית), ועונה בעצמך ללקוחות שכותבים לך בוואטסאפ. כותב בגוף ראשון, בלשון זכר ("אני בודק", "שמרתי לכם"). לא מציג את עצמך כמזכירה או כבוט, אתה פשוט דוד. שיחת חולין עונים כמו בן אדם: "היי מה נשמע?" → "שלום! הכל מעולה, תודה ששאלת 😊 איך אפשר לעזור?". רק אם שואלים ישירות אם זה בוט: לא משקרים. עונים "זה הוואטסאפ של דוד 😊 אני עונה פה בשמו, ודוד עצמו רואה כל מה שאתם כותבים" וממשיכים. המטרה: לסגור הזמנה.
 
 היום: ${iso(TODAY)} יום ${WD[TODAY.getDay()]}. לוח ימים לעזרה בתאריכים:
 ${calendarText()}
@@ -315,12 +366,13 @@ ${booked}
 
 התמקחות חכמה (רק אם הלקוח אומר שיקר, מבקש הנחה או מציע מחיר):
 - אף פעם לא נותנים הכל בבת אחת. סולם:
-  1. פעם ראשונה: לא מורידים. מזכירים מה כלול (ג׳קוזי פרטי מול הים, מצעים, מגבות, קפה), נותנים מתנה קטנה (בקבוק יין, ובסוויטה המשפחתית יציאה מאוחרת), ושואלים "כמה חשבתם בערך?".
-  2. פעם שנייה: חצי מההנחה המקסימלית.
-  3. פעם שלישית: ההנחה המקסימלית, רק "אם סוגרים עכשיו".
+  1. פעם ראשונה: 5% הנחה, בחום ("בשבילכם אני מוריד 5%").
+  2. פעם שנייה: 7% ומתנה קטנה (בקבוק יין, ובסוויטה המשפחתית יציאה מאוחרת).
+  3. פעם שלישית: 10%, רק "אם סוגרים עכשיו". זה הגבול.
   4. אחרי זה: לא יורדים. אם יש, מציעים חלופה זולה: סוויטת הבוטיק במקום הדירה בקומה 5, או אמצע שבוע במקום סופ"ש.
-- הלקוח מציע מחיר: אם הוא מעל המחיר הנמוך המותר, מסכימים בתנאי שסוגרים עכשיו ("אתה קשוח 😄"). קצת מתחת: נפגשים בגבול. רחוק מתחת: מציעים חלופה זולה.
-- ההנחה המקסימלית: 5% כשיש לילות סופ"ש ופחות מ-3 לילות, 10% ל-3 לילות ומעלה או באמצע שבוע. רק על הלילות, לא על התוספות. מעגלים לטובת דוד. לא מציעים הנחה ביוזמתך.
+- הלקוח מציע מחיר: מעל 10% הנחה (כלומר מחיר גבוה מהגבול): מסכימים בתנאי שסוגרים עכשיו ("אתה קשוח 😄"). קצת מתחת לגבול: נפגשים בגבול. רחוק מתחת: מציעים חלופה זולה.
+- ההנחה רק על הלילות, לא על התוספות. אף פעם לא יותר מ-10%. מעגלים לטובת דוד. לא מציעים הנחה ביוזמתך.
+- מתמקחים כמו אלוף: חם, עם הומור ואימוג'ים (🙏 😄 🤝 😉 🍷), גורמים ללקוח להרגיש שקיבל עסקה מצוינת.
 
 שאלות נפוצות (עונים בדיוק לפי זה, במילים שלך):
 ${FAQ.map((x) => `- ${x.k}: ${x.a()}`).join('\n')}
@@ -378,7 +430,7 @@ const chipsEl = document.getElementById('chips'), modeEl = document.getElementBy
 let sample = null, live = false, useTools = false, turns = [], sentPics = new Set(), busy = false, lastLead = {}, lastRoute = '';
 const now = () => new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 const scroll = () => { chat.scrollTop = chat.scrollHeight; };
-function bubble(dir, text) { const d = document.createElement('div'); d.className = 'm ' + dir; d.textContent = text; if (dir !== 'sys') { const t = document.createElement('time'); t.textContent = now(); d.append(t); } chat.append(d); scroll(); return d; }
+function bubble(dir, text) { const d = document.createElement('div'); d.className = 'm ' + dir; d.textContent = text; if (dir !== 'sys') { const t = document.createElement('time'); t.textContent = now(); d.append(t); } if (dir === 'out') { const k = document.createElement('span'); k.className = 'tick'; k.textContent = '✓✓'; d.append(k); } chat.append(d); scroll(); return d; }
 function pics(id) {
   id = String(id); if (!APTS[id] || sentPics.has(id)) return; sentPics.add(id);
   const g = document.createElement('div'); g.className = 'pics';
@@ -396,7 +448,7 @@ async function say(reply, photos, typed) {
     if (photos && !shown && i === Math.max(0, parts.length - 2)) { shown = true; await wait(400); pics(photos); }
   }
 }
-function typing(on) { let t = chat.querySelector('.typing'); if (on && !t) { t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; chat.append(t); scroll(); } if (!on && t) t.remove(); }
+function typing(on) { const st = document.getElementById('status'); if (st) st.textContent = on ? 'מקליד/ה...' : 'מחובר/ת'; let t = chat.querySelector('.typing'); if (on && !t) { t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; chat.append(t); scroll(); } if (!on && t) t.remove(); }
 const LABELS = { name: 'שם', dates: 'תאריכים', nights: 'לילות', guests: 'אורחים', apartment: 'דירה', occasion: 'אירוע', extras: 'תוספות', price: 'מחיר', discount: 'התמקחות', arrival: 'שעת הגעה', budget: 'תקציב', needs: 'חשוב להם', answered: 'שאל על', questions: 'לבדוק' };
 function renderSum(lead, route, ready) {
   lastLead = lead || {}; lastRoute = route || '';
@@ -518,7 +570,7 @@ function parse(text) {
   // שם
   const isQ = /\?|^ ?(יש|אין|מה|איך|כמה|אפשר|למה|מתי|איפה|האם)( |$)/.test(t);
   if ((m = t.match(/(קוראים לי|שמי|השם שלי|מדבר|מדברת|אני)\s+([א-ת]{2,12})( |$|[.,!])/)) && !NOT_NAMES.has(m[2]) && !/^ו/.test(m[2]) && (m[1] !== 'אני' || t.trim().split(/\s+/).length <= 3 || /^[.,!]/.test(m[3] || '')) && !/^(ה|ב|ל|מ)?(זוג|ילד|מחפש|רוצה|צריך)/.test(m[2])) { S.name = m[2]; found.name = 1; }
-  else if (S.stage === 'askName' && !isQ && !/יקר|הנחה|זול/.test(t)) {
+  else if (S.stage === 'askName' && !isQ && !/יקר|הנחה|זול|מחיר|תעשה|תוריד|להוריד|פחות/.test(t)) {
     const w = t.trim().replace(/[.,!]/g, '').split(/\s+/).filter((x) => /^[א-ת]{2,12}$/.test(x) && !NOT_NAMES.has(x));
     if (w.length && w.length <= 3) { S.name = w[0]; found.name = 1; }
   }
@@ -535,10 +587,14 @@ function parse(text) {
   found.no = /^ ?(לא|לא תודה|אין צורך|לא צריך)( |$)/.test(t);
   found.photos = /תמונ|לראות|סרטון/.test(t);
   found.thanks = /^ ?(תודה|תודה רבה|תנקס)/.test(t);
-  found.hello = /^ ?(היי|הי|שלום|ערב טוב|בוקר טוב|צהריים טובים|אהלן|מה נשמע|הלו)[ !,.?]*$/.test(t.trim() ? ' ' + t.trim() + ' ' : t);
+  const tt = t.trim().replace(/[!?.,🙂😊]+/g, ' ').replace(/\s+/g, ' ').trim();
+  found.howru = /מה נשמע|מה שלומך|מה קורה|מה המצב|מה העניינים|מה איתך|איך אתה|מה הולך|מה חדש|מה שלומכם/.test(tt);
+  found.hello = /^(היי|הי|שלום|ערב טוב|בוקר טוב|צהריים טובים|לילה טוב|אהלן|הלו|יו|שלום שלום|היי היי|הייי+)( (דוד|לך|לכם))?( (מה נשמע|מה שלומך|מה קורה|מה המצב|מה העניינים|מה איתך|איך אתה|מה הולך|מה חדש))?$/.test(tt) || (found.howru && tt.split(' ').length <= 4);
+  found.morning = /בוקר טוב/.test(tt); found.evening = /ערב טוב/.test(tt);
+  found.fine = /^(גם|הכל|ברוך השם|ב"ה|בסדר|מצוין|מעולה|טוב|סבבה|אחלה)( טוב| בסדר| מעולה| סבבה| תודה| ברוך השם)*( תודה)?$/.test(tt);
   const q = FAQ.filter((x) => x.re.test(t)).map((x) => x.k);
   if (!q.length && /\?/.test(t) && t.trim().length >= 9 && !found.price && !found.haggle && !found.guests && !found.date && !found.nights && !found.photos && !found.extras) q.push('אחר');
-  found.q = q;
+  found.q = (found.hello || found.howru) ? q.filter((x) => x !== 'אחר') : q;
   return found;
 }
 
@@ -605,7 +661,20 @@ function engineReply(text) {
   const CELEB = { 'הצעת נישואין': 'מזל טוב מראש! ❤️', 'יום הולדת': 'וואו איזה כיף! 🎈', 'יום נישואין': 'מזל טוב! 🥂', 'ירח דבש': 'מזל טוב! ❤️', 'הפתעה': 'איזה כיף, הפתעה! 🎈' };
   if (f.occasion && CELEB[S.occasion] && S.apt && !S.celebrated) { S.celebrated = 1; pre.push(CELEB[S.occasion]); }
   if (f.haggle && !S.quoted && S.adults != null && !tooBig() && !S.saidLater++) pre.push('על המחיר נדבר תכף, אני בטוח שנסתדר 😉');
-  const hi = first ? (memory ? `שלום ${memory.name} 😊 איזה כיף לשמוע ממך שוב!` : 'שלום 😊') : '';
+  // שיחת חולין, כמו בן אדם. לא קופצים ישר לשאלות
+  if (f.hello && !f.guests && !f.date && !f.price && !f.q.length) {
+    if (first || S.stage === 'collect' && S.adults == null) {
+      S.smalltalk = 1;
+      const open = f.morning ? 'בוקר אור! ☀️' : f.evening ? 'ערב טוב! 🌙' : (memory ? `שלום ${memory.name}! 😊` : pick(['שלום! 😊', 'היי! 😊', 'אהלן! 😊']));
+      const how = f.howru ? pick([' הכל מעולה, תודה ששאלת! ואצלך?', ' הכל מצוין, ברוך השם, תודה! מה איתך?', ' מעולה, הים יפה היום 🌊 ואצלך?']) : '';
+      const ask = memory ? ' איזה כיף לשמוע ממך שוב! במה אפשר לעזור הפעם?' : f.howru ? ' איך אוכל לעזור?' : pick([' איך אוכל לעזור?', ' במה אפשר לעזור?', ' כיף שכתבת, איך אפשר לעזור?']);
+      return { reply: open + how + ask, photos: null, ready: false };
+    }
+    return { reply: pick(['כן? אני כאן 😊', 'היי 😊 במה אפשר לעזור?']), photos: null, ready: false };
+  }
+  if (f.fine && S.smalltalk === 1 && S.adults == null && !f.guests) { S.smalltalk = 2; return { reply: pick(['איזה כיף לשמוע 😊 מחפשים חופשה על הים?', 'יופי! 😊 אז מה, מתכננים לברוח קצת לים?']), photos: null, ready: false }; }
+  if (f.thanks && !S.agreed && !f.guests && !f.date && !f.q.length && S.stage !== 'quoted') pre.push('בכיף 😊');
+  const hi = first ? (memory ? `שלום ${memory.name} 😊 איזה כיף לשמוע ממך שוב!` : (f.howru ? 'שלום! הכל מעולה, תודה 😊' : 'שלום 😊')) : (S.smalltalk && !S.greetDone ? '' : '');
   if (hi) pre.push(hi);
   if (f.q.length) pre.push(answerQuestions(f.q, text));
   const say = (main, extra = {}) => ({ reply: [pre.join(' '), main].filter(Boolean).join(pre.join(' ').length < 40 ? ' ' : '\n\n'), photos: extra.photos || null, ready: !!extra.ready });
@@ -668,7 +737,7 @@ function engineReply(text) {
     if (offer) {
       S.offered = offer;
       if (offer >= S.quoted.final) { S.discountNote = `הלקוח הציע ${nis(offer)}, מעל המחיר שניתן`; return say(`אין צורך אפילו 😊 המחיר כבר ${nis(S.quoted.final)}. סוגרים?`); }
-      if (offer >= floor) { S.quoted.final = offer; S.discount = Math.max(S.discount, 2); S.discountNote = `הלקוח הציע ${nis(offer)} והתקבל (מחירון ${nis(S.quoted.total)})`; return say(pick([`אתה קשוח 😄 טוב, ${nis(offer)}, אבל רק אם סוגרים עכשיו. סגרנו?`, `אוקיי, בשבילכם ${nis(offer)} 🤝 סוגרים עכשיו ואני שומר לכם?`])); }
+      if (offer >= floor) { S.quoted.final = offer; S.discount = Math.max(S.discount, 2); S.discountNote = `הלקוח הציע ${nis(offer)} והתקבל (מחירון ${nis(S.quoted.total)})`; return say(pick([`אתה קשוח 😄 טוב, ${nis(offer)}, אבל רק אם סוגרים עכשיו. סגרנו? 🤝`, `אוקיי, יש לך כישרון 😉 ${nis(offer)} וסוגרים עכשיו?`])); }
       if (offer >= floor * 0.85) { S.quoted.final = floor; S.discount = 3; S.discountNote = `הלקוח הציע ${nis(offer)}, הוצע נגדי ${nis(floor)} (הגבול)`; return say(`${nis(offer)} אני באמת לא יכול 🙏 אבל בוא ניפגש: ${nis(floor)}, ${gift.replace(' 🍷', '')} וזה הסוף שלי. סוגרים?`); }
       const alt = altOffer();
       S.discountNote = `הלקוח הציע ${nis(offer)}, רחוק מהגבול (${nis(floor)})`;
@@ -676,13 +745,14 @@ function engineReply(text) {
       S.quoted.final = floor; S.discount = 3; return say(`${nis(offer)} זה רחוק ממה שאני יכול 🙏 הכי נמוך שאני מגיע זה ${nis(floor)}, וזה כבר מחיר חבר. סוגרים?`);
     }
     S.discount++;
-    if (S.discount === 1) { S.discountNote = `ביקשו הנחה: הוצע ${gift.replace(' 🍷', '')}, בלי הורדה`; S.gift = gift; return say(`אני מבין אותך 🙏 רק שתדעו שזה כולל ג׳קוזי פרטי מול הים, מצעים, מגבות וקפה, בלי תוספות. ובשבילכם: ${gift}\n\nכמה חשבתם בערך?`); }
-    if (S.discount === 2) { S.quoted.final = half; S.discountNote = `ביקשו שוב: ירדנו ל-${nis(half)} + מתנה (מחירון ${nis(S.quoted.total)})`; return say(`בואו נעשה ככה: ${nis(half)} במקום ${nis(S.quoted.total)}, והמתנה נשארת 😊 סוגרים?`); }
-    if (S.discount === 3) { S.quoted.final = floor; S.discountNote = `לחצו עוד: ירדנו לגבול ${nis(floor)} (מחירון ${nis(S.quoted.total)})`; return say(`טוב, רק כי אתם נשמעים אנשים טובים, ורק אם סוגרים עכשיו: ${nis(floor)}. זה באמת המחיר הכי נמוך שאני יכול 🙏`); }
+    const p5 = Math.ceil(base * 0.95) + ex, p7 = Math.ceil(base * 0.93) + ex;
+    if (S.discount === 1) { S.quoted.final = Math.min(S.quoted.final, p5); S.discountNote = `ביקשו הנחה: ירדנו 5% ל-${nis(p5)} (מחירון ${nis(S.quoted.total)})`; return say(pick([`אני מבין אותך 🙏 בשבילכם אני מוריד 5%: ${nis(p5)} במקום ${nis(S.quoted.total)} 😊 סוגרים?`, `חחח ידעתי שתשאל 😄 בשבילך ${nis(p5)} במקום ${nis(S.quoted.total)}, 5% הנחה. נשמור?`])); }
+    if (S.discount === 2) { S.quoted.final = Math.min(S.quoted.final, p7); S.gift = gift; S.discountNote = `ביקשו שוב: ${nis(p7)} (7%) + ${gift.replace(' 🍷', '')}`; return say(`אוקיי, אתה מתמקח כמו אלוף 😄 בוא נעשה ככה: ${nis(p7)}, ו${gift} סוגרים? 🤝`); }
+    if (S.discount === 3) { S.quoted.final = floor; S.discountNote = `לחצו עוד: הגבול, ${nis(floor)} (10%) + מתנה (מחירון ${nis(S.quoted.total)})`; return say(`טוב, אתם נשמעים אנשים טובים ❤️ רק אם סוגרים עכשיו: ${nis(floor)}, וזה כולל את המתנה. זה המחיר הכי נמוך שיש, תאמינו לי 🙏`); }
     const alt = altOffer();
     S.discountNote = (S.discountNote || '') + '. ביקשו עוד: נשאר על הגבול';
     if (alt) { S.alt = alt; return say(`יותר מזה אני באמת לא יכול 🙏 אבל אם התקציב לוחץ: ${alt.text}. מתאים?`); }
-    return say('תאמין לי שזה כבר מחיר חבר, יותר מזה אני לא יכול 🙏 ובשביל מה שמחכה לכם שם, זה שווה כל שקל ✨');
+    return say(pick(['תאמין לי שזה כבר מחיר חבר, יותר מזה אני באמת לא יכול 🙏 ובשביל מה שמחכה לכם שם, זה שווה כל שקל ✨', 'אם אוריד עוד, אשתי תזרוק אותי מהבית 😅 זה באמת המחיר הכי טוב. סוגרים?']));
   }
   if (f.haggle && !S.quoted) S.wantsPrice = true;
 
@@ -691,8 +761,8 @@ function engineReply(text) {
     if (f.extras && S.apt === '1' && !S.agreed) { const fin = S.quoted.final, base0 = S.quoted.total; const { q, breakdown } = priceQuote(); return say(`בכיף! ${breakdown} ${nis(q.total)} 🥂 סוגרים?`); }
     if (S.alt) { const a = S.alt; S.alt = null; S.apt = a.apt; S.checkin = a.checkin; const { q } = priceQuote(); S.discountNote = (S.discountNote ? S.discountNote + '. ' : '') + 'עבר לאפשרות זולה יותר'; }
     S.agreed = true;
-    if (!S.name) { S.stage = 'askName'; return say(pick(['מעולה! 😊 על איזה שם לרשום?', 'יאללה, סגרנו 🙌 על איזה שם לרשום?'])); }
-    S.stage = 'askArrival'; return say(`מעולה ${S.name}! 🙌 ובאיזו שעה בערך תגיעו? ככה אדאג שהכל יהיה מוכן ומחכה לכם`);
+    if (!S.name) { S.stage = 'askName'; return say((S.quoted && S.quoted.final < S.quoted.total ? 'עשית עסקה מצוינת 😉 ' : '') + pick(['מעולה! 😊 על איזה שם לרשום?', 'יאללה, סגרנו 🙌 על איזה שם לרשום?'])); }
+    S.stage = 'askArrival'; return say(`${S.quoted && S.quoted.final < S.quoted.total ? 'עשית עסקה מצוינת 😉 ' : ''}מעולה ${S.name}! 🙌 ובאיזו שעה בערך תגיעו? ככה אדאג שהכל יהיה מוכן ומחכה לכם`);
   }
   if (S.stage === 'quoted' && f.extras && S.apt === '1') { const { q, breakdown } = priceQuote(); return say(`סגור, הוספתי! ${breakdown} ${nis(q.total)} 🎈 נשמור לכם?`); }
   if (S.stage === 'quoted' && f.no && S.alt) { S.alt = null; return say('בסדר גמור 😊 אז נשארים עם מה שהצעתי קודם. סוגרים?'); }
@@ -706,6 +776,7 @@ function engineReply(text) {
   if (S.adults == null) {
     S.stage = 'collect';
     if (memory && first) { S.asked.guests = 1; const short = { [APTS[1].name]: 'בקומה 5', [APTS[2].name]: 'בסוויטה', [APTS[3].name]: 'בסוויטה המשפחתית' }[memory.apt]; return say(`${short ? `מקווה שנהניתם ${short} בפעם הקודמת. ` : ''}מי מגיע הפעם? 😊`); }
+    if (S.smalltalk && !S.asked.guests) { S.asked.guests = 1; return say(f.price ? 'המחיר תלוי בדירה ובתאריכים, אז בוא נמצא לכם את המושלם 😊 לכמה אנשים אתם מחפשים?' : pick(['איזה כיף! לכמה אנשים אתם מחפשים?', 'מעולה 😊 אתם זוג או עם ילדים?'])); }
     if (f.hello || first) { S.asked.guests = 1; return say(f.price ? 'המחיר תלוי בדירה ובתאריכים, אז בוא נמצא לכם את המושלם. לכמה אנשים אתם מחפשים?' : pick(['כיף שפניתם! לכמה אנשים אתם מחפשים?', 'איזה כיף שכתבתם! אתם זוג או עם ילדים?'])); }
     if (S.asked.guests >= 2) return say(pick(['כדי שאדע איזו דירה להציע: כמה אנשים תהיו בסך הכל? 😊', 'תכתבו לי רק כמה מבוגרים וכמה ילדים, ואני כבר מוצא לכם 😊']));
     if (S.asked.guests) { S.asked.guests = 2; return say('ומי מגיע? זוג, משפחה? 😊'); }
@@ -822,6 +893,7 @@ async function onSend(text) {
   try { await ask(text); } catch { typing(false); bubble('out', 'רגע, לא הבנתי עד הסוף 😊 אפשר לכתוב שוב?'); } finally { setBusy(false); input.focus(); }
 }
 form.addEventListener('submit', (e) => { e.preventDefault(); onSend(input.value); });
+document.querySelectorAll('#tries button').forEach((b) => b.addEventListener('click', () => { if (busy) return; if (turns.length) clearChat(); if (innerWidth < 880) document.querySelector('.phone-col').scrollIntoView({ behavior: 'smooth', block: 'start' }); onSend(b.dataset.t); }));
 
 /* תשובות מהירות לפי איפה שהשיחה נמצאת */
 function suggestions() {
