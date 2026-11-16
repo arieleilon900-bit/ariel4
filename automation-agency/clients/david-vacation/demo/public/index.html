@@ -536,6 +536,44 @@ function newState() {
 }
 let S = newState();
 
+/* קורא תאריכים כמו שאנשים כותבים: "3-5 למרץ", "3 עד 5 במרץ", "ה-12 בדצמבר", "מה-3 עד ה-5", "בין ה-3 ל-5 לחודש", "3.3-5.3", "3/3 עד 5/3" */
+const MONTHS = [['ינואר'], ['פברואר', 'פבואר'], ['מרץ', 'מרס', 'מארס'], ['אפריל'], ['מאי'], ['יוני'], ['יולי'], ['אוגוסט'], ['ספטמבר', 'ספטמבר'], ['אוקטובר'], ['נובמבר'], ['דצמבר']];
+const MONTH_RE = MONTHS.flat().join('|');
+const monthIdx = (w) => MONTHS.findIndex((a) => a.includes(w));
+function mkDate(day, month) {
+  if (!(day >= 1 && day <= 31) || month < 0 || month > 11) return null;
+  let d = new Date(TODAY.getFullYear(), month, day, 12);
+  if (d.getMonth() !== month) return null;
+  if (d < TODAY) d = new Date(TODAY.getFullYear() + 1, month, day, 12);
+  return d;
+}
+function nextDay(day) { let d = new Date(TODAY.getFullYear(), TODAY.getMonth(), day, 12); if (d < TODAY || d.getDate() !== day) d = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, day, 12); return d.getDate() === day ? d : null; }
+function parseDates(t) {
+  let m; const D = '(\\d{1,2})', SEP = '\\s*(?:-|–|עד|ל|ועד|ול)\\s*(?:ה)?-?\\s*', PRE = '(?:ב|ל|של|ב-|ל-)?\\s*';
+  // טווח עם חודש: 3-5 למרץ / 28 בפברואר עד 2 במרץ
+  if ((m = t.match(new RegExp(D + '\\s*' + PRE + '(' + MONTH_RE + ')' + SEP + D + '\\s*' + PRE + '(' + MONTH_RE + ')')))) {
+    const a = mkDate(+m[1], monthIdx(m[2])); let b = a && mkDate(+m[3], monthIdx(m[4])); if (a && b) { if (b <= a) b = new Date(b.getFullYear() + 1, b.getMonth(), b.getDate(), 12); return { start: a, nights: Math.round((b - a) / DAY) }; }
+  }
+  if ((m = t.match(new RegExp('(?:מה?-?|בין ה?-?|ה-?)?' + D + SEP + D + '\\s*' + PRE + '(' + MONTH_RE + ')')))) {
+    const mo = monthIdx(m[3]), a = mkDate(+m[1], mo); if (a) { const b = new Date(a.getFullYear(), mo, +m[2], 12); if (b > a) return { start: a, nights: Math.round((b - a) / DAY) }; return { start: a }; }
+  }
+  // יום אחד עם חודש: ה-12 בדצמבר / 3 למרץ
+  if ((m = t.match(new RegExp('(?:ה-?)?' + D + '\\s*' + PRE + '(' + MONTH_RE + ')')))) { const a = mkDate(+m[1], monthIdx(m[2])); if (a) return { start: a }; }
+  // טווח מספרי: 3/3-5/3, 3.3 עד 5.3
+  if ((m = t.match(/(\d{1,2})[\/.](\d{1,2})\s*(?:-|–|עד|ל)\s*(\d{1,2})[\/.](\d{1,2})/))) {
+    const a = mkDate(+m[1], +m[2] - 1); let b = a && mkDate(+m[3], +m[4] - 1); if (a && b) { if (b <= a) b = new Date(b.getFullYear() + 1, b.getMonth(), b.getDate(), 12); return { start: a, nights: Math.round((b - a) / DAY) }; }
+  }
+  // טווח בלי חודש: מה-3 עד ה-5 / בין ה-3 ל-5 (לחודש) / 3-5 לחודש
+  if ((m = t.match(/(?:מה?-?\s?|בין ה?-?\s?)(\d{1,2})\s*(?:-|–|עד|ל|ועד)\s*(?:ה)?-?\s*(\d{1,2})(?!\s*(?:ילד|אנש|לילות|ימים|מבוגר|חבר))/)) || (m = t.match(/(\d{1,2})\s*(?:-|–|עד)\s*(\d{1,2})\s*(?:לחודש|בחודש)/))) {
+    const a = nextDay(+m[1]); if (a) { let b = new Date(a.getFullYear(), a.getMonth(), +m[2], 12); if (b <= a) b = new Date(a.getFullYear(), a.getMonth() + 1, +m[2], 12); return { start: a, nights: Math.round((b - a) / DAY) }; }
+  }
+  if ((m = t.match(/(\d{1,2})[\/.](\d{1,2})(?![\/.]?\d)/))) { const a = mkDate(+m[1], +m[2] - 1); if (a) return { start: a }; }
+  if ((m = t.match(/(?:^|\s)(?:ב|ל)?(?:ה)?-?(\d{1,2})\s*(?:לחודש|בחודש)/))) { const a = nextDay(+m[1]); if (a) return { start: a }; }
+  // רק חודש: "במרץ"
+  if ((m = t.match(new RegExp('(?:^|\\s)(?:ב|ל|של|בתחילת|באמצע|בסוף)\\s?(' + MONTH_RE + ')')))) return { month: m[1] };
+  return null;
+}
+
 function parse(text) {
   const t = ' ' + text.replace(/[״"]/g, '"').replace(/[׳']/g, "'") + ' ';
   const found = {};
@@ -549,7 +587,7 @@ function parse(text) {
     if (/אנשים|נפשות/.test(m[2]) && S.kids) S.adults = Math.max(1, n - S.kids - S.baby); else S.adults = n;
     found.guests = 1;
   }
-  if (/זוג|אשתי|בעלי|חבר שלי|חברה שלי|לשנינו|בת הזוג|בן הזוג|רומנטי|ירח דבש|הצעת נישואין/.test(t) && S.adults == null) { S.adults = 2; found.guests = 1; }
+  if (/זוג|אשתי|בעלי|אישה שלי|האשה שלי|האישה|הבעל שלי|בן זוגי|בת זוגי|חבר שלי|חברה שלי|לשנינו|בת הזוג|בן הזוג|רומנטי|ירח דבש|הצעת נישואין/.test(t) && S.adults == null) { S.adults = 2; found.guests = 1; }
   if (/משפחה|הילדים/.test(t) && S.adults == null) { S.adults = 2; found.guests = 1; if (S.kids == null) S.asked.kidsCount = false; }
   if (/(^| )לבד( |$)|רק אני/.test(t) && S.adults == null) { S.adults = 1; found.guests = 1; }
   if (/קבוצה|חבר'ה|מסיבת רווקות|רווקים/.test(t) && S.adults == null) { S.adults = 6; S.guestsRaw = 'קבוצה'; found.guests = 1; }
@@ -563,8 +601,18 @@ function parse(text) {
     else if (/^ ?(כן|נכון|בדיוק|רק אנחנו|שנינו)/.test(t)) { S.adults = 2; found.guests = 1; }
   }
   // תאריכים
-  const dowI = WD.findIndex((d) => new RegExp('(יום |ב|ל)' + d + '( |$)').test(t));
-  if (/סופ"?ש|סוף שבוע|סופש|וויקנד|ויקנד/.test(t)) {
+  const dowI = WD.findIndex((d) => new RegExp('(יום |ב)' + d + '( |$)').test(t) && !/ראשון לציון/.test(t));
+  let pd = parseDates(t);
+  // תשובה לשאלת תאריך בלי חודש ("10 עד 12"), כשהחודש כבר נאמר קודם או כששאלנו על תאריך
+  if (!pd && !/ילד|אנש|לילות|ימים|מבוגר|חבר|בני|גיל|₪|שקל|\d{3}/.test(t) && (S.monthHint != null || S.asked.date) && (m = t.trim().match(/^(?:ב|מ|מה|בין ה)?-?\s*(\d{1,2})(?:\s*(?:-|–|עד|ל|ועד)\s*(?:ה)?-?\s*(\d{1,2}))?(?:\s*(?:לחודש|בחודש))?$/))) {
+    const a = S.monthHint != null ? mkDate(+m[1], S.monthHint) : nextDay(+m[1]);
+    if (a) { let n = 0; if (m[2]) { let b = new Date(a.getFullYear(), a.getMonth(), +m[2], 12); if (b <= a) b = new Date(a.getFullYear(), a.getMonth() + 1, +m[2], 12); n = Math.round((b - a) / DAY); } pd = { start: a, nights: n }; }
+  }
+  if (pd && pd.start) {
+    S.checkin = pd.start; found.date = 1; S.confirmed = 0; S.nightsGuess = 0; S.datesRaw = '';
+    if (pd.nights > 0 && pd.nights <= 30) { S.nights = pd.nights; found.nights = 1; }
+  } else if (pd && pd.month) { S.datesRaw = pd.month; S.monthHint = monthIdx(pd.month); found.vagueDate = 1; found.monthOnly = 1; }
+  else if (/סופ"?ש|סוף שבוע|סופש|וויקנד|ויקנד/.test(t)) {
     S.checkin = /הבא|בעוד שבוע/.test(t) ? addD(FRI, 7) : FRI; S.nightsGuess = 2; S.confirmed = 0; found.date = 1;
   } else if (/מחרתיים/.test(t)) { S.checkin = addD(TODAY, 2); found.date = 1; }
   else if (/מחר/.test(t)) { S.checkin = addD(TODAY, 1); found.date = 1; }
@@ -580,7 +628,7 @@ function parse(text) {
     S.checkin = d; found.date = 1;
   } else if (dowI >= 0) { S.checkin = nextDow(dowI, /הבא|בעוד שבוע/.test(t) ? 6 : 1); found.date = 1; }
   else if (/שבוע הבא|באמצע השבוע/.test(t)) { S.checkin = /הבא/.test(t) ? SUN2 : nextDow(0, 1); found.date = 1; S.confirmed = 0; }
-  else if (/חנוכה|פסח|סוכות|ראש השנה|שבועות|חג|חופש הגדול|קיץ|החופש/.test(t)) { S.datesRaw = (t.match(/חנוכה|פסח|סוכות|ראש השנה|שבועות|חג|החופש הגדול|קיץ|החופש/) || [''])[0]; found.vagueDate = 1; }
+  else if (/חנוכה|פסח|סוכות|ראש השנה|שבועות|(^| |ב|ל)חג( |$|ים)|חופש הגדול|קיץ|החופש/.test(t)) { S.datesRaw = (t.match(/חנוכה|פסח|סוכות|ראש השנה|שבועות|חג|החופש הגדול|קיץ|החופש/) || [''])[0]; found.vagueDate = 1; }
   // לילות
   if ((m = t.match(new RegExp(NUMW + '\\s*(לילות|ימים)')))) { S.nights = Math.max(1, num(m[1]) - (m[2] === 'ימים' ? 1 : 0)) || 1; found.nights = 1; }
   else if (/לילה אחד|רק לילה|ללילה אחד|רק ללילה|^ ?לילה ?$/.test(t)) { S.nights = 1; found.nights = 1; }
@@ -827,12 +875,13 @@ function engineReply(text) {
   if (S.adults === 2 && S.kids == null && S.asked.kidsCount === false) { S.asked.kidsCount = true; S.stage = 'collect'; return say('כיף! כמה ילדים, ובני כמה בערך?'); }
   if (!S.checkin) {
     S.stage = 'collect';
+    if (f.monthOnly) return say(`${S.datesRaw}, מעולה 😊 באיזה תאריכים בדיוק? למשל 3-5 ל${S.datesRaw}`);
     if (f.vagueDate) return say(`${S.datesRaw ? 'מעולה! ' : ''}איזה תאריכים בדיוק? ככה אני בודק לכם ביומן מה פנוי`);
     const lead = f.guests && !first ? (isFamily() ? pick(['איזה כיף, חופשה משפחתית 😊', 'מושלם, יש לי בדיוק מה שמתאים למשפחות ✨']) : pick(['מושלם 😊', 'יש לי בדיוק את מה שמתאים לזוג ✨'])) + ' ' : '';
     if (S.offerDate && f.yes) { S.checkin = S.offerDate; S.offerDate = null; return engineReplyAgain(); }
     if (S.offerFri && f.yes) { S.checkin = FRI; S.nights = S.nights || 2; S.offerFri = 0; return engineReplyAgain(); }
     if (S.asked.date >= 2) { S.offerFri = 1; return say(`אם עוד לא סגרתם תאריך, רוצים שאבדוק לכם מה פנוי בסופ"ש הקרוב, ${dm(FRI)}? 😊`); }
-    if (S.asked.date) { S.asked.date = 2; return say(lead + 'מתי בערך חשבתם להגיע? תאריך או "סופ"ש הקרוב" זה מספיק'); }
+    if (S.asked.date) { S.asked.date = 2; return say(lead + 'מתי בערך חשבתם להגיע? אפשר לכתוב תאריך (למשל 3-5 למרץ) או "סופ"ש הקרוב"'); }
     S.asked.date = 1; return say(lead + 'מתי חשבתם להגיע?');
   }
   if (!S.nights) {
