@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>קו המים: בוט עם תפריטים</title>
+<meta property="og:title" content="קו המים: הבוט עם התפריטים">
+<meta property="og:description" content="לוחצים, בוחרים, ותוך דקה דוד מקבל הזמנה מסודרת">
+<meta property="og:image" content="https://onerishon-david.pages.dev/p/a1-1.jpg">
+<style>
+:root{--wall:#efeae2;--in:#fff;--out:#dcf8c6;--ink:#0b141a;--mut:#667781;--bar:rgba(246,246,246,.94);--line:rgba(60,60,67,.18);--link:#007aff;--btn:#027eb5;--tick:#53bdeb;--green:#25d366;--sheet:#f2f2f7;--cell:#fff;--chip:#fff;--chipink:#54656f;--doodle:.06}
+@media (prefers-color-scheme:dark){:root{--wall:#0b141a;--in:#1f2c34;--out:#005c4b;--ink:#e9edef;--mut:#8696a0;--bar:rgba(22,22,24,.94);--line:rgba(84,84,88,.6);--link:#0a84ff;--btn:#53bdeb;--sheet:#1c1c1e;--cell:#2c2c2e;--chip:#1f2c34;--chipink:#8696a0;--doodle:.05}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Noto Sans Hebrew",Arial,sans-serif;background:#e9ecef;color:var(--ink);display:flex;justify-content:center;align-items:center;-webkit-font-smoothing:antialiased}
+@media (prefers-color-scheme:dark){body{background:#000}}
+.app{width:100%;height:100dvh;display:flex;flex-direction:column;background:var(--wall);position:relative;overflow:hidden;overflow:clip}
+.wall{position:absolute;inset:0;opacity:var(--doodle);pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='24' cy='26' r='9'/%3E%3Cpath d='M70 18l8 14h-16z'/%3E%3Cpath d='M118 20c6-8 16 0 8 8l-8 8-8-8c-8-8 2-16 8-8z'/%3E%3Cpath d='M20 80h22M31 69v22'/%3E%3Crect x='64' y='70' width='22' height='16' rx='4'/%3E%3Cpath d='M112 72q10 18 20 0'/%3E%3Ccircle cx='30' cy='134' r='4'/%3E%3Cpath d='M66 128l10 10 14-18'/%3E%3Cpath d='M114 126h20v14h-20z M118 126v-4h12v4'/%3E%3C/svg%3E")}
+.status{display:none}
+.top{position:relative;z-index:2;background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);display:flex;align-items:center;gap:8px;padding:8px 10px 8px 12px;border-bottom:.5px solid var(--line);padding-top:max(8px,env(safe-area-inset-top))}
+.back{display:flex;align-items:center;gap:2px;color:var(--link);font-size:17px;flex:none}.back svg{width:12px;height:21px}
+.av{width:38px;height:38px;border-radius:50%;background:center/cover;flex:none}
+.who{min-width:0;flex:1}.who b{display:flex;align-items:center;gap:4px;font-size:16.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.who b svg{width:15px;height:15px;flex:none}
+.who small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}.who small.typ{color:var(--green)}
+.icons{display:flex;gap:20px;color:var(--link);flex:none}.icons svg{width:24px;height:24px}
+.reset{position:absolute;z-index:3;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top));border:0;background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:4px 10px;border-radius:12px;cursor:pointer;backdrop-filter:blur(8px);opacity:.8}
+.chat{position:relative;z-index:1;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 8px 10px;display:flex;flex-direction:column;gap:2px}
+.chip{align-self:center;background:var(--chip);color:var(--chipink);font-size:12.5px;border-radius:8px;padding:5px 12px;margin:6px 0 8px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+.tip{align-self:center;background:#fdf4c5;color:#54656f;font-size:12.5px;border-radius:8px;padding:7px 12px;text-align:center;max-width:88%;line-height:1.45;margin-bottom:10px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+@media (prefers-color-scheme:dark){.tip{background:#182229;color:#ffd279}}
+.b{position:relative;max-width:min(80%,420px);padding:6px 8px 7px 9px;border-radius:12px;font-size:16px;line-height:1.36;box-shadow:0 1px .5px rgba(11,20,26,.13);white-space:pre-line;word-wrap:break-word;margin-top:2px;animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
+.chat>*{flex-shrink:0}
+.b.first{margin-top:8px}
+@keyframes pop{from{transform:scale(.92) translateY(8px);opacity:0}}
+.in{background:var(--in);align-self:flex-start}.out{background:var(--out);align-self:flex-end}
+.in.first{border-top-right-radius:4px}.out.first{border-top-left-radius:4px}
+.in.first::before,.out.first::before{content:"";position:absolute;top:0;width:10px;height:13px;background:inherit}
+.in.first::before{right:-7px;clip-path:polygon(0 0,100% 0,0 100%);border-top-right-radius:3px}
+.out.first::before{left:-7px;clip-path:polygon(0 0,100% 0,100% 100%);border-top-left-radius:3px}
+.ts{float:left;margin:8px 10px -5px 0;font-size:11px;color:var(--mut);display:inline-flex;align-items:center;gap:3px;direction:ltr;position:relative;top:4px}
+.ts svg{width:16px;height:11px;color:var(--tick)}
+.b.btnwrap{padding:0;overflow:hidden}.b.btnwrap .body{padding:6px 8px 7px 9px}
+.acts{border-top:.5px solid var(--line)}
+.lb,.bt{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;background:none;color:var(--btn);font:500 15.5px/1.2 inherit;font-family:inherit;padding:11px 8px;cursor:pointer}
+.bt+.bt{border-top:.5px solid var(--line)}.lb svg,.bt svg{width:17px;height:17px;flex:none}
+.lb:active,.bt:active{background:rgba(0,0,0,.05)}
+.lb:disabled,.bt:disabled{color:var(--mut);opacity:.55;cursor:default}
+.btns{display:contents}
+.pics{padding:3px;max-width:min(76%,330px)}.album{display:grid;grid-template-columns:1fr 1fr;gap:3px;border-radius:9px;overflow:hidden}
+.album div{position:relative;aspect-ratio:1;cursor:zoom-in}.album img{width:100%;height:100%;object-fit:cover;display:block}
+.album .more{position:absolute;inset:0;background:rgba(0,0,0,.45);color:#fff;font-size:30px;font-weight:300;display:flex;align-items:center;justify-content:center}
+.pics .ts{position:absolute;left:8px;bottom:8px;margin:0;top:auto;color:#fff;text-shadow:0 1px 2px #0008;float:none}
+.typing{align-self:flex-start;background:var(--in);border-radius:18px;padding:12px 14px;display:flex;gap:4px;margin-top:8px;box-shadow:0 1px .5px rgba(11,20,26,.13)}.typing i{width:7px;height:7px;border-radius:50%;background:#9aa4ab;animation:blink 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+.inp{position:relative;z-index:2;display:flex;align-items:flex-end;gap:10px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line)}
+.ic{color:var(--link);display:flex;align-items:center;height:36px;flex:none;background:none;border:0;padding:0}.ic svg{width:26px;height:26px}
+.field{flex:1;display:flex;align-items:center;background:var(--cell);border:.5px solid var(--line);border-radius:18px;min-height:36px;padding:0 6px 0 12px}
+.field input{flex:1;border:0;background:none;font:16px inherit;font-family:inherit;color:var(--ink);outline:none;padding:7px 0;min-width:0}
+.field svg{width:22px;height:22px;color:var(--link);flex:none}
+.send{width:34px;height:34px;border-radius:50%;border:0;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;margin-bottom:1px}.send svg{width:17px;height:17px}
+.inp .mic{display:none}
+.dim{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s}.dim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;z-index:6;left:0;right:0;bottom:0;background:var(--sheet);border-radius:14px 14px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:86%;overflow-y:auto;padding:0 0 calc(14px + env(safe-area-inset-bottom))}
+.sheet.on{transform:none}
+.grab{width:36px;height:5px;border-radius:3px;background:#c7c7cc;margin:7px auto 0}
+.sh-h{position:sticky;top:0;background:var(--sheet);text-align:center;font-weight:600;font-size:17px;padding:12px 50px 12px}
+.sh-x{position:absolute;left:14px;top:9px;border:0;background:rgba(118,118,128,.16);border-radius:50%;width:30px;height:30px;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center}.sh-x svg{width:12px;height:12px}
+.rows{margin:4px 14px 0;background:var(--cell);border-radius:12px;overflow:hidden}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;position:relative}
+.row+.row::before{content:"";position:absolute;top:0;right:16px;left:0;height:.5px;background:var(--line)}
+.row:active{background:rgba(0,0,0,.05)}.row b{display:block;font-size:16.5px;font-weight:400}.row small{display:block;color:var(--mut);font-size:13.5px;margin-top:2px}
+.rad{width:22px;height:22px;border:1.5px solid #c7c7cc;border-radius:50%;flex:none;transition:.15s;display:flex;align-items:center;justify-content:center}
+.row.sel .rad{background:var(--green);border-color:var(--green)}.row.sel .rad::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.hint{text-align:center;color:var(--mut);font-size:13px;padding:12px 16px 0}
+.done{display:block;width:calc(100% - 28px);margin:14px auto 0;border:0;background:var(--green);color:#fff;border-radius:12px;padding:13px;font:600 16.5px inherit;font-family:inherit;cursor:pointer}
+.owner{align-self:stretch;margin:14px 2px 6px;border-radius:18px;padding:12px;background:linear-gradient(135deg,#1d2b36,#0f171d);color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.owner h4{margin:0 0 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#d1d7db}
+.owner h4 i{width:22px;height:22px;border-radius:6px;background:var(--green);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:12px}
+.owner .b{max-width:100%;animation:none;background:#fff;color:#0b141a;margin:0}
+@media (prefers-color-scheme:dark){.owner .b{background:#1f2c34;color:#e9edef}}
+.owner .b::before{display:none}
+.lbx{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:20}.lbx.on{display:flex}
+.lbx-top{display:flex;justify-content:space-between;align-items:center;color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;font-size:16px}
+.lbx-top button{border:0;background:none;color:#fff;font-size:17px;cursor:pointer}
+.lbx-img{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.lbx-img img{max-width:100%;max-height:100%;object-fit:contain}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:24px;cursor:pointer}.nav.p{right:10px}.nav.n{left:10px}
+.thumbs{display:flex;gap:4px;padding:10px;overflow-x:auto;justify-content:center;padding-bottom:calc(10px + env(safe-area-inset-bottom))}.thumbs img{width:44px;height:44px;object-fit:cover;border-radius:4px;opacity:.5;cursor:pointer}.thumbs img.on{opacity:1;outline:2px solid #fff}
+@media (min-width:700px){
+  body{background:radial-gradient(circle at 30% 20%,#dfe7ee,#c9d3dc)}
+  @media (prefers-color-scheme:dark){body{background:#0d0f12}}
+  .frame{width:400px;height:min(860px,94vh);border-radius:56px;padding:12px;background:#1a1a1c;box-shadow:0 0 0 2px #3a3a3c,0 30px 80px rgba(0,0,0,.35);position:relative}
+  .app{height:100%;border-radius:44px}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:14px 30px 2px;font-weight:600;font-size:15px;background:var(--bar);position:relative;z-index:2}
+  .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px}
+  .status .r{display:flex;gap:5px;align-items:center}.status svg{height:12px}
+  .reset{top:118px}
+  .side{position:absolute;left:calc(50% + 230px);top:50%;transform:translateY(-50%);width:220px;color:#3a4651;font-size:14px;line-height:1.55}
+  @media (prefers-color-scheme:dark){.side{color:#aab4bd}}
+  .side h3{margin:0 0 8px;font-size:18px}
+}
+@media (max-width:699px){.side{display:none}.frame{width:100%;height:100dvh}}
+@media (max-width:1180px) and (min-width:700px){.side{display:none}}
+</style>
+</head>
+<body>
+<noscript><div style="position:fixed;inset:0;z-index:99;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;font:18px Arial;line-height:1.6">הקובץ נפתח בתצוגה מקדימה שלא מריצה את הבוט.<br>פתחו אותו בדפדפן (Chrome או Safari).</div></noscript><div class="frame">
+<div class="app">
+  <div class="status"><span>9:41</span><div class="island"></div><span class="r"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.4 8.6a3.6 3.6 0 0 1 5.2 0zM2.7 5.9a7.5 7.5 0 0 1 10.6 0l-1.4 1.4a5.6 5.6 0 0 0-7.8 0zM0 3.2a11.3 11.3 0 0 1 16 0l-1.4 1.4a9.4 9.4 0 0 0-13.2 0z" fill="currentColor"/></svg><svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="8" rx="2" fill="currentColor"/><path d="M25 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg></span></div>
+  <div class="top"><span class="back"><svg viewBox="0 0 12 21"><path d="M10.5 1.5 1.5 10.5l9 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>12</span></span><div class="av" id="av"></div><div class="who"><b>קו המים 🌊 <svg viewBox="0 0 24 24"><path fill="#25d366" d="m12 1.5 2.4 1.8 3-.1.9 2.8 2.5 1.7-.9 2.9.9 2.9-2.5 1.7-.9 2.8-3-.1L12 22.5l-2.4-1.8-3 .1-.9-2.8-2.5-1.7.9-2.9-.9-2.9 2.5-1.7.9-2.8 3 .1z"/><path d="m7.8 12.2 2.8 2.8 5.6-5.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></b><small id="st">עסק · דירות נופש בקו ראשון לים</small></div><div class="icons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="M15.5 10.5 21 7.5v9l-5.5-3"/></svg> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.7 2 2 0 0 1 5 3.5z"/></svg></div></div>
+  <button class="reset" id="reset" type="button">↺ להתחיל מחדש</button>
+  <div class="wall"></div>
+  <div class="chat" id="chat"></div>
+  <form class="inp" id="f"><button type="button" class="ic" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg></button><div class="field"><input id="t" autocomplete="off" enterkeyhint="send" placeholder=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 12.5V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h5.5z"/><path d="M12.5 20c0-4.1 3.4-7.5 7.5-7.5"/></svg></div><button type="button" class="ic cam" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.5-2h6l1.5 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.6"/></svg></button><button type="button" class="ic mic" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button><button type="submit" class="send" aria-label="שליחה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z" transform="scale(-1,1) translate(-24,0)"/></svg></button></form>
+  <div class="dim" id="dim"></div>
+  <div class="sheet" id="sheet"></div>
+</div>
+</div>
+<div class="side"><h3>זה דמו 👋</h3>ככה ייראה הבוט של קו המים בוואטסאפ של הלקוחות.<br><br>• לוחצים על <b>הכפתורים הכחולים</b><br>• "☰" פותח תפריט מלמטה<br>• אפשר גם לכתוב חופשי, כמו לקוח<br>• בסוף רואים את מה ש<b>דוד</b> מקבל</div>
+<div class="lbx" id="lbx"><div class="lbx-top"><button type="button" id="lbclose">סגירה</button><span id="lbcount"></span><span style="width:50px"></span></div><div class="lbx-img"><img id="lbimg" alt=""><button class="nav p" id="lbp" type="button">›</button><button class="nav n" id="lbn" type="button">‹</button></div><div class="thumbs" id="thumbs"></div></div>
+<script>
+/* ===== המחירון האמיתי של דוד (אותו קוד כמו בבוט), תקף עד 1/3/2027 ===== */
+const DAVID_PRICES = {
+  1: { one: 800, two: 600, thu: 1000, fm: 1500, fs: 1700, tm: 2200, kid: 0 },
+  2: { one: 900, two: 700, thu: 1200, fm: 1500, fs: 1700, tm: 2200, kid: 0 },
+  3: { one: 1200, two: 1000, thu: 1400, fm: 1700, fs: 2000, tm: 2600, kid: 100 },
+};
+const PRICES_VALID_UNTIL = '2027-03-01';
+function priceStay(p, nights, { kids = 0, todayIso = '' } = {}) {
+  const flags = [], lines = [];
+  if (!nights.length) return { total: 0, lines, flags: ['no_nights'] };
+  if (nights.some((n) => n.iso >= PRICES_VALID_UNTIL)) return { total: null, lines, flags: ['after_valid'] };
+  if (nights.length > 6) return { total: null, lines, flags: ['long_stay'] };
+  const mid = nights.filter((n) => n.dow <= 3), has = (d) => nights.some((n) => n.dow === d);
+  const thu = has(4), fri = has(5), sat = has(6);
+  let total = 0;
+  if (thu && fri && sat) { const v = p.tm + (p.fs - p.fm); lines.push({ label: 'חמישי עד ראשון', price: v }); total += v; flags.push('thu_to_sun'); }
+  else if (thu && fri) { lines.push({ label: 'חמישי עד מוצ"ש', price: p.tm }); total += p.tm; }
+  else if (fri && sat) { lines.push({ label: 'שישי עד ראשון', price: p.fs }); total += p.fs; }
+  else if (fri) { lines.push({ label: 'שישי עד מוצ"ש', price: p.fm }); total += p.fm; }
+  else if (thu) { lines.push({ label: 'חמישי', price: p.thu }); total += p.thu; }
+  else if (sat) { flags.push('sat_only'); return { total: null, lines, flags }; }
+  if (mid.length) {
+    const rate = nights.length >= 2 ? p.two : p.one;
+    lines.push({ label: mid.length === 1 ? 'לילה באמצע שבוע' : `${mid.length} לילות באמצע שבוע`, price: rate * mid.length });
+    total += rate * mid.length;
+    if (thu || fri || sat) flags.push('mixed');
+  }
+  if (p.kid && kids > 0) { const v = p.kid * kids * nights.length; lines.push({ label: `תוספת ${kids === 1 ? 'ילד' : kids + ' ילדים'}`, price: v }); total += v; }
+  if (nights.length >= 3) flags.push('extra_discount_3plus');
+  if (todayIso && nights[0].iso <= todayIso) flags.push('last_minute');
+  return { total, lines, flags };
+}
+const FLAG_TEXT = {
+  thu_to_sun: 'חמישי עד ראשון: דוד יאשר את המחיר הסופי',
+  mixed: 'שילוב של אמצע שבוע וסופ"ש: דוד יאשר את המחיר הסופי',
+  extra_discount_3plus: 'ב-3 לילות ומעלה יש הנחה נוספת, דוד יחזור עם המחיר הסופי',
+  last_minute: 'הזמנה של הרגע האחרון: דוד נותן מחיר',
+  after_valid: 'לתאריכים אחרי 1 במרץ דוד יחזור אליך עם מחיר',
+  sat_only: 'ליל שבת לבד: דוד נותן מחיר',
+  long_stay: 'שהות ארוכה: דוד נותן מחיר',
+};
+
+/* ===== הדירות והעובדות (מהשיחות האמיתיות של דוד) ===== */
+const APTS = {
+  '1': { name: 'קו המים 1', sub: 'זוגית · קומה 5 · ג׳קוזי במרפסת', pics: [1,2,3,4,5,6].map((i) => '../p/all1-' + i + '.jpg'),
+    about: '<b>קו המים 1</b>\nקומה 5 בקו ראשון לים, נוף פנורמי. ג׳קוזי פרטי במרפסת מול הים, מטבח מאובזר ומכונת אספרסו. מושלם לזוג.' },
+  '2': { name: 'קו המים 2', sub: 'סוויטת בוטיק · ג׳קוזי 14 זרמים', pics: [1,2,3,4,5,6,7,8,9].map((i) => '../p/all2-' + i + '.jpg'),
+    about: '<b>קו המים 2</b>\nסוויטת בוטיק מול חוף סירונית. ג׳קוזי זוגי חדש עם 14 זרמים, מקלחת שקופה ומקלחת חיצונית מול הים.' },
+  '3': { name: 'קו המים 3', sub: 'משפחתית · עד זוג + 2 ילדים + תינוק', pics: [1,2,3,4,5,6,7].map((i) => '../p/all3-' + i + '.jpg'),
+    about: '<b>קו המים 3</b>\nהסוויטה המשפחתית: 2 חדרי שינה וסלון, מרפסת ענקית עם ג׳קוזי מול הים, מטבח מאובזר ופינת אוכל ל-4.' },
+};
+const FAQ = [
+  ['חנייה', 'אין חנייה פרטית לבניין. יש חניון כחול-לבן קצת אחרי הבניין, וחניון פרטי קצת לפני הבניין על הסיבוב (תגידו שאתם אצל דוד, הוא יעשה מחיר טוב).', /חני|לחנות|רכב|אוטו/],
+  ['כניסה ויציאה', 'כניסה בדרך כלל מ-15:00-16:00 (ביום ההגעה דוד מעדכן אם אפשר להקדים). יציאה עד 11:00-12:00, ובסופ"ש יוצאים במוצ"ש.\nהכניסה עצמית, עם כספת מפתחות ליד הדלת.', /כניסה|יציאה|צ'?ק|מתי נכנסים|מפתח/],
+  ['עישון', 'בתוך הדירה אסור לעשן. במרפסת מול הים מותר.', /עישון|לעשן|סיגר|נרגיל|אייקוס/],
+  ['ארוחת בוקר', 'ארוחת בוקר במסעדה בלובי הבניין, כל יום חוץ משבת. בערך 142 ₪ לזוג, אחרי 10% הנחה ללקוחות שלנו.', /ארוחת בוקר|בוקר/],
+  ['תשלום ומקדמה', 'לסגירה מעבירים חצי מקדמה בפייבוקס או ביט, ואת השאר אפשר בהגעה. צריך צילום תעודת זהות (בבקשת המשטרה, כמו בכל מלון). אפשר קבלה.', /מקדמה|תשלום|לשלם|ביט|פייבוקס|אשראי|קבלה/],
+  ['כשרות ובית חב״ד', 'בלובי של קו המים 3 יש בית חב״ד ומסעדות כשרות למהדרין. המטבחים בדירות לא מוכשרים.', /כשר|שבת|חב"?ד|בית כנסת/],
+  ['ניקיון', 'דוד ואשתו מנקים בעצמם לפני כל אורח.', /ניקיון|נקי|מצעים|מגבות/],
+  ['איפה זה?', 'קו ראשון לים במרכז נתניה, ליד חוף סירונית. הכתובת המדויקת נשלחת עם אישור ההזמנה.', /איפה|כתובת|מיקום|חוף/],
+];
+const EXTRAS = ['סידור בלונים', 'מסאז׳ זוגי', 'בקבוק יין', 'ארוחת בוקר'];
+
+/* ===== תאריכים ===== */
+const DAY = 864e5, TODAY = new Date(); TODAY.setHours(12, 0, 0, 0);
+const DOWN = { 'ראשון': 0, 'שני': 1, 'שלישי': 2, 'רביעי': 3, 'חמישי': 4, 'שישי': 5, 'שבת': 6 };
+const DN = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const dm = (d) => d.getDate() + '/' + (d.getMonth() + 1);
+function nextDow(dow, minAhead = 1) { const d = new Date(TODAY); d.setDate(d.getDate() + minAhead); while (d.getDay() !== dow) d.setDate(d.getDate() + 1); return d; }
+const MONTHS = [['ינואר'], ['פברואר'], ['מרץ', 'מרס'], ['אפריל'], ['מאי'], ['יוני'], ['יולי'], ['אוגוסט'], ['ספטמבר'], ['אוקטובר'], ['נובמבר'], ['דצמבר']];
+const MONTH_RE = MONTHS.flat().join('|'), monthIdx = (w) => MONTHS.findIndex((a) => a.includes(w));
+function mkDate(day, month) { if (!(day >= 1 && day <= 31) || month < 0 || month > 11) return null; let d = new Date(TODAY.getFullYear(), month, day, 12); if (d.getMonth() !== month) return null; if (d < TODAY) d = new Date(TODAY.getFullYear() + 1, month, day, 12); return d; }
+const DOW_RE = 'ראשון|שני|שלישי|רביעי|חמישי|שישי|שבת', END_RE = DOW_RE + '|מוצ"?ש|מוצאי שבת|מוצאש';
+function parseDates(raw) {
+  const t = ' ' + raw.replace(/[״]/g, '"').replace(/[׳]/g, "'") + ' ';
+  let m;
+  if ((m = t.match(new RegExp('(?:^|\\s)(?:מ|מיום |יום |ב)?(' + DOW_RE + ')(?:\\s+(?:הזה|הקרוב|הבא))?\\s*(?:-|–|עד|ל|ועד)\\s*(?:יום |ה|ל)?(' + END_RE + ')')))) {
+    const sd = DOWN[m[1]], ed = /מוצ/.test(m[2]) ? 6 : DOWN[m[2]];
+    const start = nextDow(sd, /הבא|בעוד שבוע/.test(t) ? 6 : (TODAY.getDay() === sd ? 0 : 1));
+    return { start, nights: ((ed - sd) + 7) % 7 || 7 };
+  }
+  const D = '(\\d{1,2})', SEP = '\\s*(?:-|–|עד|ל|ועד)\\s*(?:ה)?-?\\s*', PRE = '(?:ב|ל|של)?-?\\s*';
+  if ((m = t.match(new RegExp(D + SEP + D + '\\s*' + PRE + '(' + MONTH_RE + ')')))) { const mo = monthIdx(m[3]), a = mkDate(+m[1], mo); if (a) { const b = new Date(a.getFullYear(), mo, +m[2], 12); if (b > a) return { start: a, nights: Math.round((b - a) / DAY) }; } }
+  if ((m = t.match(/(\d{1,2})[\/.](\d{1,2})\s*(?:-|–|עד|ל)\s*(\d{1,2})[\/.](\d{1,2})/))) { const a = mkDate(+m[1], +m[2] - 1); let b = a && mkDate(+m[3], +m[4] - 1); if (a && b) { if (b <= a) b = new Date(b.getFullYear() + 1, b.getMonth(), b.getDate(), 12); return { start: a, nights: Math.round((b - a) / DAY) }; } }
+  if ((m = t.match(new RegExp('(?:ה-?)?' + D + '\\s*' + PRE + '(' + MONTH_RE + ')')))) { const a = mkDate(+m[1], monthIdx(m[2])); if (a) return { start: a }; }
+  if ((m = t.match(/(\d{1,2})[\/.](\d{1,2})(?![\/.]?\d)/))) { const a = mkDate(+m[1], +m[2] - 1); if (a) return { start: a }; }
+  if ((m = t.match(new RegExp('(?:^|\\s)(?:ב|מ)?(' + DOW_RE + ')(?:\\s|$)')))) return { start: nextDow(DOWN[m[1]], TODAY.getDay() === DOWN[m[1]] ? 0 : 1) };
+  return null;
+}
+function nightsOf(start, n) { const a = []; for (let i = 0; i < n; i++) { const d = new Date(start.getTime() + i * DAY); a.push({ dow: d.getDay(), iso: iso(d) }); } return a; }
+function datesText() {
+  const s = S.start, e = new Date(s.getTime() + S.nights * DAY);
+  const end = e.getDay() === 6 ? 'מוצ"ש ' + dm(e) : DN[e.getDay()] + ' ' + dm(e);
+  return `${DN[s.getDay()]} ${dm(s)} עד ${end} (${S.nights === 1 ? 'לילה אחד' : S.nights + ' לילות'})`;
+}
+
+/* ===== ממשק וואטסאפ (סגנון אייפון) ===== */
+const chat = document.getElementById('chat'), sheet = document.getElementById('sheet'), dim = document.getElementById('dim'), st = document.getElementById('st');
+const SUB = 'עסק · דירות נופש בקו ראשון לים';
+const now = () => new Date().toTimeString().slice(0, 5);
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const scroll = () => requestAnimationFrame(() => chat.scrollTop = chat.scrollHeight);
+const TICK = '<svg viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6-7.5M6 8.5l.8.8 6-7.5"/></svg>';
+const LIST_I = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg>';
+const REPLY_I = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9 5 14l5 5" transform="scale(-1,1) translate(-24,0)"/><path d="M5 14h9a5 5 0 0 0 5-5V5" transform="scale(-1,1) translate(-24,0)"/></svg>';
+let lastSide = '';
+function addBubble(el, side) { if (side !== lastSide) el.classList.add('first'); lastSide = side; chat.appendChild(el); }
+function lockOld() { /* כמו בוואטסאפ: כפתורים ותפריטים ישנים נשארים לחיצים תמיד */ }
+function me(text) { lockOld(); const d = document.createElement('div'); d.className = 'b out'; d.innerHTML = esc(text) + `<span class="ts">${now()} ${TICK}</span>`; addBubble(d, 'out'); scroll(); }
+let busy = false; const queue = [];
+function bot(text, opt = {}) { queue.push([text, opt]); if (!busy) pump(); }
+function pump() {
+  if (!queue.length) { busy = false; st.textContent = SUB; st.classList.remove('typ'); return; }
+  busy = true; const [text, opt] = queue.shift();
+  const ty = document.createElement('div'); ty.className = 'typing'; ty.innerHTML = '<i></i><i></i><i></i>'; chat.appendChild(ty); st.textContent = 'מקליד/ה...'; st.classList.add('typ'); scroll();
+  setTimeout(() => { ty.remove(); render(text, opt); setTimeout(pump, 280); }, Math.min(1700, 650 + (text || '').length * 9));
+}
+let ALB = [], ALI = 0;
+function album(pics) {
+  const d = document.createElement('div'); d.className = 'b in pics';
+  const show = pics.slice(0, 4), extra = pics.length - 4;
+  d.innerHTML = '<div class="album">' + show.map((p, i) => `<div data-i="${i}"><img src="${p}" alt="" loading="lazy">${i === 3 && extra > 0 ? `<span class="more">+${extra}</span>` : ''}</div>`).join('') + `</div><span class="ts">${now()}</span>`;
+  d.querySelectorAll('.album div').forEach((c) => c.onclick = () => openLb(pics, +c.dataset.i));
+  addBubble(d, 'in');
+}
+function render(text, opt) {
+  if (opt.pics) album(opt.pics);
+  if (opt.owner) {
+    const w = document.createElement('div'); w.className = 'owner'; w.innerHTML = '<h4><i>💬</i>ככה דוד מקבל את זה בוואטסאפ שלו</h4>';
+    const d = document.createElement('div'); d.className = 'b in'; d.innerHTML = text + `<span class="ts">${now()}</span>`;
+    if (opt.buttons) attach(d, opt.buttons, null); w.appendChild(d); chat.appendChild(w); lastSide = ''; scroll(); return;
+  }
+  if (text) {
+    const d = document.createElement('div'); d.className = 'b in';
+    if (opt.list || opt.buttons) { d.classList.add('btnwrap'); d.innerHTML = `<div class="body">${text}<span class="ts">${now()}</span></div>`; attach(d, opt.buttons, opt.list); }
+    else d.innerHTML = text + `<span class="ts">${now()}</span>`;
+    addBubble(d, 'in');
+  } else if (opt.buttons) { const d = document.createElement('div'); d.className = 'b in btnwrap'; attach(d, opt.buttons, null); addBubble(d, 'in'); }
+  scroll();
+}
+function attach(d, btns, list) {
+  d.classList.add('btnwrap'); if (!d.querySelector('.body')) { const inner = d.innerHTML; d.innerHTML = inner ? `<div class="body">${inner}</div>` : ''; }
+  const a = document.createElement('div'); a.className = 'acts';
+  if (list) { const b = document.createElement('button'); b.type = 'button'; b.className = 'lb'; b.innerHTML = LIST_I + '<span>' + list.title + '</span>'; b.onclick = () => openList(list); a.appendChild(b); }
+  (btns || []).forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'bt'; b.innerHTML = REPLY_I + '<span>' + esc(label) + '</span>'; b.onclick = () => { me(label); fn(); }; a.appendChild(b); });
+  d.appendChild(a);
+}
+function addButtons(btns, parent) { const d = document.createElement('div'); d.className = 'b in btnwrap'; attach(d, btns, null); parent === chat ? addBubble(d, 'in') : parent.appendChild(d); }
+function openList(list) {
+  const sel = new Set();
+  sheet.innerHTML = `<div class="grab"></div><div class="sh-h">${list.title}<button class="sh-x" type="button" aria-label="סגור"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="rows">` +
+    list.rows.map((r, i) => `<div class="row" data-i="${i}"><div><b>${r[0]}</b>${r[1] ? `<small>${r[1]}</small>` : ''}</div><span class="rad"></span></div>`).join('') + '</div>' +
+    (list.multi ? '<button class="done" type="button">שליחה</button>' : '') + `<div class="hint">${list.multi ? 'אפשר לבחור כמה, ואז "שליחה"' : 'צריך להקיש על פריט כדי לבחור אותו'}</div>`;
+  const close = () => { sheet.classList.remove('on'); dim.classList.remove('on'); };
+  sheet.querySelector('.sh-x').onclick = close; dim.onclick = close;
+  sheet.querySelectorAll('.row').forEach((row) => row.onclick = () => {
+    const i = +row.dataset.i;
+    if (list.multi) { sel.has(i) ? sel.delete(i) : sel.add(i); row.classList.toggle('sel'); return; }
+    row.classList.add('sel'); setTimeout(() => { close(); me(list.rows[i][0]); list.rows[i][2](); }, 220);
+  });
+  if (list.multi) sheet.querySelector('.done').onclick = () => { close(); const picked = [...sel].sort().map((i) => list.rows[i][0]); me(picked.length ? picked.join(' + ') : 'בלי תוספות'); list.onDone(picked); };
+  sheet.scrollTop = 0; sheet.classList.add('on'); dim.classList.add('on');
+}
+function openLb(pics, i) { ALB = pics; ALI = i; document.getElementById('thumbs').innerHTML = pics.map((p, k) => `<img src="${p}" data-k="${k}" alt="">`).join(''); document.querySelectorAll('#thumbs img').forEach((t) => t.onclick = () => showLb(+t.dataset.k)); showLb(i); document.getElementById('lbx').classList.add('on'); }
+function showLb(i) { ALI = (i + ALB.length) % ALB.length; document.getElementById('lbimg').src = ALB[ALI]; document.getElementById('lbcount').textContent = `${ALI + 1} מתוך ${ALB.length}`; document.querySelectorAll('#thumbs img').forEach((t, k) => t.classList.toggle('on', k === ALI)); }
+
+/* ===== המסלול (לפי מפת השיחה המאושרת) ===== */
+let S;
+const REF = 1000 + Math.floor(Math.random() * 9000);
+function reset() { S = { stage: 'start', apt: null, start: null, nights: null, kids: 0, baby: 0, guests: '', occasion: '', extras: [], name: '', after: null, cur: null }; chat.innerHTML = '<div class="chip">היום</div><div class="tip">זה דמו של הבוט של קו המים. לוחצים על הכפתורים הכחולים ובוחרים, ואפשר גם לכתוב חופשי כמו לקוח.</div>'; lastSide = ''; queue.length = 0; busy = false; }
+const ask = (fn) => { S.cur = fn; fn(); };
+const lateNight = () => { const h = new Date().getHours(); return h >= 22 || h < 7; };
+const replyTime = () => (lateNight() ? 'בבוקר' : 'תוך שעה');
+function owner(title, lines) { bot('<b>' + title + '</b>\n' + lines.filter(Boolean).join('\n') + '\nטלפון: 052-1234567', { owner: true }); }
+
+/* תפריט ראשי: 4 אפשרויות */
+const mainList = () => ({ title: 'תפריט', rows: [
+  ['להזמין חופשה', 'בוחרים דירה, תאריך ואורחים', () => ask(pickApt)],
+  ['יש לי הזמנה קיימת', 'שינוי, ביטול, תוספת, פרטי הגעה', existing],
+  ['להשאיר ביקורת', 'איך היה אצלנו?', review],
+  ['איפה זה?', 'מיקום וחוף', where],
+  ['משהו אחר', 'כותבים, ודוד יענה', () => { S.stage = 'freeQ'; S.cur = menu; bot('במה אפשר לעזור? כתבו, ואעביר לדוד:'); }],
+] });
+function welcome() { S.stage = 'menu'; S.cur = menu; bot('היי, כאן קו המים 👋\nדירות נופש על הים בנתניה. במה אפשר לעזור?', { list: mainList() }); }
+function menu() { S.stage = 'menu'; S.cur = menu; bot('במה עוד אפשר לעזור?', { list: mainList() }); }
+
+/* 1. דירה */
+function pickApt() { S.stage = 'apt'; bot('איזו דירה מתאימה לכם?', { list: { title: 'בחירת דירה', rows: [
+  ...['1', '2', '3'].map((k) => [APTS[k].name, APTS[k].sub, () => showApt(k)]),
+  ['לראות את כולן', 'תמונות של כל הדירות', showAll],
+] } }); }
+function showAll() { ['1', '2', '3'].forEach((k) => bot(`<b>${APTS[k].name}</b> · ${APTS[k].sub}`, { pics: APTS[k].pics })); S.cur = showAllAsk; showAllAsk(); }
+function showAllAsk() { bot('איזו דירה מתאימה לכם?', { buttons: ['1', '2', '3'].map((k) => [APTS[k].name, () => showApt(k)]) }); }
+/* 2. תמונות */
+function showApt(k) { S.apt = k; S.stage = 'aptShown'; bot('', { pics: APTS[k].pics }); S.cur = aptAsk; aptAsk(); }
+function aptAsk() { bot(APTS[S.apt].about, { buttons: [['להזמין', () => {
+  if (S.after === 'summary' && S.guests) { if (S.kids && S.apt !== '3') return fitKids(); return goOn(); }
+  ask(askDates); }], ['דירה אחרת', () => ask(pickApt)], ['יש לי שאלה', faq]] }); }
+function goOn(fn) { if (S.after === 'summary' && S.apt && S.start && S.nights && S.guests) { S.after = null; return ask(summary); } fn ? ask(fn) : ask(summary); }
+/* 3. תאריך */
+function weekendOf(offset) { const th = nextDow(4, TODAY.getDay() <= 3 ? 1 : 7); return new Date(th.getTime() + offset * 7 * DAY); }
+const rng = (th) => `${th.getDate()} עד ${new Date(th.getTime() + 2 * DAY).getDate()}.${new Date(th.getTime() + 2 * DAY).getMonth() + 1}`;
+function askDates() { S.stage = 'dates'; const w1 = weekendOf(0), w2 = weekendOf(1);
+  bot('מתי תרצו להגיע?', { list: { title: 'בחירת תאריך', rows: [
+    ['הסופ״ש הקרוב', 'חמישי עד מוצ״ש, ' + rng(w1), () => ask(() => weekendDays(w1))],
+    ['הסופ״ש הבא', 'חמישי עד מוצ״ש, ' + rng(w2), () => ask(() => weekendDays(w2))],
+    ['תאריך אחר', 'כותבים במילים, למשל "3 עד 5 בינואר"', () => { S.stage = 'datesText'; S.cur = () => bot('מאיזה תאריך עד איזה תאריך? למשל: <i>3 עד 5 בינואר</i> או <i>ראשון עד שלישי</i>'); S.cur(); }],
+  ] } }); }
+function weekendDays(th) { S.stage = 'wkDays'; const fr = new Date(th.getTime() + DAY), set = (d, n) => () => { S.start = d; S.nights = n; ask(confirmDates); };
+  bot('אילו ימים?', { list: { title: 'בחירת ימים', rows: [['חמישי עד מוצ״ש', '2 לילות', set(th, 2)], ['שישי עד מוצ״ש', 'לילה אחד', set(fr, 1)], ['שישי עד ראשון', '2 לילות', set(fr, 2)], ['אחר', 'כותבים, למשל "חמישי עד ראשון"', () => { S.stage = 'datesText'; S.cur = () => bot('אילו ימים? למשל <i>חמישי עד ראשון</i> או <i>רביעי עד מוצ"ש</i>'); S.cur(); }]] } }); }
+function confirmDates() { S.stage = 'confirmDates'; bot(datesText() + '.\nנכון?', { buttons: [['נכון', () => goOn(askGuests)], ['לשנות תאריך', () => ask(askDates)]] }); }
+function askNights() { S.stage = 'nights'; bot(`הגעה ב${DN[S.start.getDay()]} ${dm(S.start)}. לכמה לילות?`, { buttons: [1, 2, 3].map((n) => [n === 1 ? 'לילה אחד' : n + ' לילות', () => { S.nights = n; ask(confirmDates); }]) }); }
+/* 4. אורחים */
+function askGuests() { S.stage = 'guests';
+  bot('כמה אורחים תהיו?', { list: { title: 'בחירת אורחים', rows: [
+    ['זוג', '', () => setGuests('זוג', 0, 0)], ['זוג + תינוק', 'תינוק בלי תוספת מחיר', () => setGuests('זוג + תינוק', 0, 1)],
+    ['זוג + ילדים', 'עד 2 ילדים + תינוק', () => ask(askKids)], ['קבוצה גדולה', 'יותר מזוג + 2 ילדים', bigGroup],
+    ['אחר', 'כותבים כמה מבוגרים וכמה ילדים', () => { S.stage = 'guests'; S.cur = () => bot('כמה מבוגרים וכמה ילדים? למשל <i>2 מבוגרים וילד</i>'); S.cur(); }],
+  ] } }); }
+function askKids() { S.stage = 'kids'; bot('כמה ילדים?', { buttons: [['ילד אחד', () => setGuests('זוג + ילד', 1, 0)], ['2 ילדים', () => setGuests('זוג + 2 ילדים', 2, 0)], ['אחר', () => { S.stage = 'kids'; S.cur = () => bot('כמה ילדים, ויש גם תינוק? למשל <i>2 ילדים ותינוק</i>'); S.cur(); }]] }); }
+function setGuests(label, kids, baby) { S.guests = label; S.kids = kids; S.baby = baby; if (kids && S.apt !== '3') return ask(fitKids); goOn(askExtras); }
+function fitKids() { bot(`${APTS[S.apt].name} זוגית. למשפחה עם ילדים מתאימה קו המים 3, עם 2 חדרי שינה. לעבור אליה?`, { buttons: [['לעבור לקו המים 3', () => { S.apt = '3'; bot('', { pics: APTS['3'].pics }); goOn(askExtras); }], ['לבחור דירה אחרת', () => ask(pickApt)]] }); }
+function bigGroup() { S.stage = 'bigCount'; S.cur = () => bot('כמה אתם בסך הכל, מבוגרים וילדים?'); bot('הדירות שלנו מתאימות עד זוג + 2 ילדים + תינוק. אבל לדוד יש חברים עם וילות ודירות גדולות בנתניה, והוא ישמח לעזור.'); S.cur(); }
+/* 5. תוספות + אירוע */
+function askExtras() { S.stage = 'extras'; bot('רוצים להוסיף משהו לשהייה? אפשר לבחור כמה', { list: { title: 'בחירת תוספות', multi: true, rows: [
+  ...EXTRAS.map((e) => [e, e.includes('ארוחת') ? 'במסעדה בלובי, כ-142 ₪ לזוג, חוץ משבת' : 'בתיאום עם דוד', null]),
+  ['לכבוד אירוע מיוחד', 'יום הולדת, יום נישואין ועוד', null],
+  ['משהו אחר', 'כותבים מה תרצו', null],
+], onDone: (picked) => { S.extras = picked.filter((p) => !['לכבוד אירוע מיוחד', 'משהו אחר'].includes(p)); const ev = picked.includes('לכבוד אירוע מיוחד'); if (!ev) S.occasion = '';
+  const next = () => (ev ? ask(askOccasion) : goOn());
+  if (picked.includes('משהו אחר')) { S.stage = 'textFor'; S.textCb = (t) => { S.note = t; next(); }; return bot('מה עוד תרצו להוסיף?'); }
+  next(); } } }); }
+function askOccasion() { S.stage = 'occasion'; const o = (x) => () => { S.occasion = x; bot('מזל טוב! דוד ידאג שיהיה מושלם.'); goOn(); };
+  bot('איזה אירוע חוגגים?', { buttons: [['יום הולדת', o('יום הולדת')], ['יום נישואין', o('יום נישואין')], ['משהו אחר', () => { S.stage = 'occasionText'; S.cur = () => bot('מה חוגגים?'); S.cur(); }]] }); }
+/* 6. סיכום */
+function quote() { return priceStay(DAVID_PRICES[S.apt], nightsOf(S.start, S.nights), { kids: S.apt === '3' ? S.kids : 0, todayIso: iso(TODAY) }); }
+const nis = (n) => n.toLocaleString('he-IL') + ' ₪';
+function summaryLines() {
+  const q = quote();
+  return [`<b>${APTS[S.apt].name}</b>`, datesText(), S.guests, S.extras.length ? 'תוספות: ' + S.extras.join(', ') + ' (בתיאום עם דוד)' : '', S.occasion ? 'אירוע: ' + esc(S.occasion) : '', S.note ? 'בקשה: ' + esc(S.note) : '',
+    q.total != null ? `<b>מחיר: ${nis(q.total)}</b>\nמקדמה לשמירת התאריך: ${nis(Math.round(q.total / 2))} (חצי)` : '<b>מחיר: דוד יחזור אליך עם מחיר</b>',
+    ...q.flags.filter((f) => FLAG_TEXT[f]).map((f) => FLAG_TEXT[f])].filter(Boolean).join('\n');
+}
+function summary() { S.stage = 'summary'; bot('<b>סיכום ההזמנה</b>\n\n' + summaryLines(), { buttons: [['להעביר לדוד', () => ask(askName)], ['לשנות פרטים', change], ['יש לי שאלה', faq]] }); }
+function change() { const c = (fn) => () => { S.after = 'summary'; ask(fn); }; bot('מה לשנות?', { list: { title: 'שינוי פרטים', rows: [['דירה', '', c(pickApt)], ['תאריך', '', c(askDates)], ['אורחים', '', c(askGuests)], ['תוספות', '', c(askExtras)], ['משהו אחר', 'כותבים מה לשנות', () => { S.stage = 'textFor'; S.textCb = (t) => { S.note = (S.note ? S.note + ' · ' : '') + t; ask(summary); }; bot('מה תרצו לשנות או להוסיף?'); }]] } }); }
+/* 7. שם + סיום */
+function askName() { S.stage = 'name'; bot('על איזה שם לרשום?'); }
+function finish() {
+  S.stage = 'done'; S.cur = menu; const first = esc(S.name.split(' ')[0]);
+  bot(`תודה ${first}! בקשת הזמנה <b>${REF}</b> נשלחה לדוד ✅\n\n` + summaryLines() + `\n\n<b>סטטוס:</b> ממתינה לאישור של דוד. התאריך נשמר אחרי המקדמה.\n<b>מה הלאה:</b> דוד חוזר אליך ${replyTime()} עם אישור ופרטי מקדמה.\n\nתודה שבחרתם בקו המים`, { buttons: [['תפריט ראשי', menu]] });
+  bot(`<b>הזמנה חדשה ${REF}</b>\n${esc(S.name)} · 052-1234567\n\n` + summaryLines() + '\n\nזמינות: לבדוק ביומן', { owner: true, buttons: [['לאשר ולשלוח מקדמה', () => bot(`(בבוט האמיתי ${first} מקבל מיד אישור וקישור למקדמה)`)], ['לפתוח צ׳אט', () => bot('(כאן דוד ממשיך בעצמו, והבוט שותק בשיחה הזו)')], ['להתחיל מחדש', () => { reset(); welcome(); }]] });
+}
+
+/* הזמנה קיימת */
+function askNameThen(cb, q) { if (S.name) return cb(); S.stage = 'nameFor'; S.nameCb = cb; bot(q || 'על איזה שם?'); }
+function askText(q, cb) { S.stage = 'textFor'; S.textCb = cb; bot(q); }
+const doneMsg = () => bot(`קיבלתי, העברתי לדוד. הוא חוזר אליך ${replyTime()}.`, { buttons: [['תפריט ראשי', menu]] });
+function existing() { S.cur = existing; const go = (type) => () => askNameThen(() => exStep(type), 'על איזה שם ההזמנה?');
+  bot('במה אפשר לעזור עם ההזמנה?', { list: { title: 'הזמנה קיימת', rows: [
+    ['לשנות תאריך', '', go('date')], ['לבטל', '', go('cancel')], ['להוסיף תוספת', 'בלונים, מסאז׳, יין, ארוחת בוקר', go('extras')],
+    ['פרטי הגעה', 'קוד כניסה, חנייה', go('arrive')], ['כניסה או יציאה', 'כניסה מוקדמת / יציאה מאוחרת', go('early')], ['משהו אחר', '', go('other')],
+  ] } }); }
+function exStep(type) {
+  const n = esc(S.name); S.stage = 'menu'; S.cur = menu;
+  if (type === 'date') return askText('לאיזה תאריך תרצו לעבור? אפשר במילים, למשל <i>שישי עד מוצ"ש הבא</i>', (t) => { const d = parseDates(t); owner('בקשה לשינוי תאריך', [n, 'תאריך חדש: ' + esc(t) + (d && d.start ? ` (${DN[d.start.getDay()]} ${dm(d.start)})` : '')]); bot('רשמתי. דוד בודק אם התאריך החדש פנוי.'); doneMsg(); });
+  if (type === 'cancel') return bot('חבל. אפשר להזיז לתאריך אחר במקום לבטל. מה תעדיפו?', { buttons: [['להזיז תאריך', () => exStep('date')], ['לבטל בכל זאת', () => { owner('בקשה לביטול הזמנה', [n]); doneMsg(); }]] });
+  if (type === 'extras') return bot('מה להוסיף?', { list: { title: 'תוספות להזמנה', multi: true, rows: EXTRAS.map((e) => [e, '', null]), onDone: (picked) => { if (!picked.length) return menu(); owner('תוספות להזמנה קיימת', [n, picked.join(', ')]); doneMsg(); } } });
+  if (type === 'arrive') return bot('את הכתובת, קוד הכספת וכל פרטי ההגעה דוד שולח ביום ההגעה, כשהדירה מוכנה. הכניסה עצמית, עם כספת מפתחות ליד הדלת.', { buttons: [['תודה', menu], ['יש לי שאלה', faq]] });
+  if (type === 'early') return bot('מה תרצו?', { buttons: [['כניסה מוקדמת', () => { owner('בקשה לכניסה מוקדמת', [n]); bot('רשמתי. ביום ההגעה דוד מעדכן אם אפשר להקדים.', { buttons: [['תפריט ראשי', menu]] }); }], ['יציאה מאוחרת', () => { owner('בקשה ליציאה מאוחרת', [n]); bot('רשמתי. דוד בודק אם יש אורחים אחריכם ומעדכן.', { buttons: [['תפריט ראשי', menu]] }); }], ['אחר', () => exStep('other')]] });
+  return askText('מה צריך?', (t) => { owner('בקשה על הזמנה קיימת', [n, '"' + esc(t) + '"']); doneMsg(); });
+}
+/* ביקורת */
+function review() { S.cur = review; const r = (s) => () => {
+    if (s >= 4) { owner('ביקורת חדשה: ' + s + ' כוכבים', []); return bot('איזה כיף לשמוע, תודה!\nנשמח מאוד לביקורת קצרה בגוגל, זה עוזר לנו המון 🙏\n<u>כאן יופיע הקישור לביקורת בגוגל של קו המים</u>', { buttons: [['להזמין שוב', () => ask(pickApt)], ['תפריט ראשי', menu]] }); }
+    askText('מצטערים לשמוע. מה היה לא בסדר? דוד רוצה לדעת ולתקן:', (t) => { owner('משוב מלקוח: ' + s + ' כוכבים', ['"' + esc(t) + '"']); bot('תודה שסיפרת. העברתי לדוד, והוא יחזור אליך אישית.', { buttons: [['תפריט ראשי', menu]] }); }); };
+  bot('איך היה אצלנו?', { list: { title: 'דירוג', rows: [['מושלם ★★★★★', '', r(5)], ['טוב מאוד ★★★★', '', r(4)], ['בסדר ★★★', '', r(3)], ['לא משהו ★★', '', r(2)], ['לא טוב ★', '', r(1)]] } }); }
+function where() { S.cur = menu; bot('קו ראשון לים במרכז נתניה, ליד חוף סירונית 🌊\nהכתובת המדויקת נשלחת עם אישור ההזמנה.', { buttons: [['להזמין חופשה', () => ask(pickApt)], ['תפריט ראשי', menu]] }); }
+/* שאלות */
+function faq() { const back = S.cur; bot('על מה השאלה?', { list: { title: 'שאלות', rows: [...FAQ.map((f, i) => [f[0], '', () => { bot(f[1]); back ? back() : menu(); }]), ['שאלה אחרת', 'דוד יענה', () => { S.stage = 'freeQ'; S.cur = back; bot('כתבו את השאלה, ואעביר לדוד:'); }]] } }); }
+function resume(prefix) { if (prefix) bot(prefix); (S.cur || menu)(); }
+
+/* טקסט חופשי */
+document.getElementById('f').onsubmit = (e) => {
+  e.preventDefault(); const inp = document.getElementById('t'), t = inp.value.trim(); if (!t) return; inp.value = ''; me(t);
+  if (S.stage === 'start') return welcome();
+  if (S.stage === 'name' && !/\?/.test(t) && !FAQ.some((f) => f[2].test(t))) { if (t.length < 2 || /\d{3}/.test(t)) return bot('על איזה שם לרשום? שם פרטי ושם משפחה'); S.name = t.slice(0, 40); return finish(); }
+  if (S.stage === 'nameFor') { if (t.length < 2 || /\d{3}|\?/.test(t)) return bot('איך קוראים לך? שם פרטי ושם משפחה'); S.name = t.slice(0, 40); S.stage = 'menu'; return S.nameCb(); }
+  if (S.stage === 'textFor') { S.stage = 'menu'; return S.textCb(t.slice(0, 200)); }
+  if (S.stage === 'occasionText') { S.occasion = t.slice(0, 40); bot('מזל טוב! דוד ידאג שיהיה מושלם.'); return goOn(); }
+  if (S.stage === 'freeQ') { owner('שאלה מלקוח', [S.name ? esc(S.name) : '', '"' + esc(t.slice(0, 200)) + '"']); return resume(`העברתי לדוד, והוא יענה לך ${replyTime()}. בינתיים נמשיך:`); }
+  if (S.stage === 'bigCount') { S.big = t.slice(0, 60); return askNameThen(() => { owner('קבוצה גדולה (להעביר לחברים)', [esc(S.name), esc(S.big), S.start ? datesText() : '']); S.stage = 'menu'; S.cur = menu; bot(`רשמתי הכל. דוד בודק עם החברים וחוזר אליך ${replyTime()} עם המלצה.`, { buttons: [['תפריט ראשי', menu]] }); }, 'ועל איזה שם לרשום?'); }
+  // שאלה עם תשובה מוכנה: עונים וחוזרים לאותה שאלה
+  const f = FAQ.findIndex((x) => x[2].test(t)); if (f >= 0) { bot(FAQ[f][1]); return resume(S.stage === 'menu' ? '' : 'ובינתיים, נמשיך:'); }
+  // אורחים במילים
+  if (['guests', 'kids'].includes(S.stage) || /מבוגר|ילד|זוג/.test(t) && S.apt && S.start) {
+    const nums = (t.match(/\d+/g) || []).map(Number), words = { 'ילד': 1, 'ילדה': 1, 'שני ילדים': 2, 'שתי ילדות': 2 };
+    let adults = /זוג/.test(t) ? 2 : (nums[0] || 2), kids = nums.length > 1 ? nums[1] : (/שני ילדים|2 ילדים|שתי/.test(t) ? 2 : /ילד/.test(t) ? 1 : 0); const baby = /תינוק/.test(t) ? 1 : 0;
+    if (/מבוגר|ילד|זוג|תינוק/.test(t)) { if (adults > 2 || kids > 2) return bigGroup(); return setGuests(kids ? `זוג + ${kids === 1 ? 'ילד' : '2 ילדים'}${baby ? ' + תינוק' : ''}` : baby ? 'זוג + תינוק' : 'זוג', kids, baby); }
+  }
+  // תאריך במילים
+  if (['dates', 'datesText', 'wkDays', 'confirmDates', 'nights', 'aptShown'].includes(S.stage) || /עד|מוצ|\d{1,2}[\/.]\d/.test(t)) {
+    const d = parseDates(t);
+    if (d && d.start) { S.start = d.start; S.nights = d.nights || null; if (!S.apt) { bot('רשמתי את התאריך. איזו דירה?'); return ask(pickApt); } return ask(S.nights ? confirmDates : askNights); }
+    if (S.stage === 'datesText') return bot('לא הצלחתי להבין את התאריך. אפשר לכתוב למשל: <i>3 עד 5 בינואר</i> או <i>חמישי עד מוצ"ש</i>');
+  }
+  const apt = t.match(/(?:קו המים|דירה)\s*([123])/); if (apt) return showApt(apt[1]);
+  if (/^(היי|הי|שלום|אהלן|בוקר טוב|ערב טוב)\b/.test(t)) return S.stage === 'menu' ? menu() : resume('היי! נמשיך מאיפה שעצרנו:');
+  if (/^(תודה|אוקיי|אוקי|סבבה|יופי|מעולה|אחלה|מה נשמע|מה קורה|👍|🙏|😊|❤️)/.test(t)) return resume(/מה נשמע|מה קורה/.test(t) ? 'הכל טוב, תודה! נמשיך:' : 'בכיף 😊');
+  if (/להזמין|הזמנה|פנוי|סופ"?ש/.test(t) && ['menu', 'start'].includes(S.stage)) return ask(pickApt);
+  if (/מחיר|כמה עולה|עלות/.test(t) && !(S.apt && S.start)) { bot('המחיר תלוי בדירה ובימים. בוחרים דירה ותאריך, ומקבלים מחיר מדויק לפי המחירון.'); return S.stage === 'menu' ? ask(pickApt) : resume(''); }
+  // משהו שהבוט לא מכיר: עובר לדוד, וממשיכים
+  owner('הודעה מלקוח', [S.name ? esc(S.name) : '', '"' + esc(t.slice(0, 200)) + '"']);
+  resume(`על זה עדיף שדוד יענה בעצמו. העברתי לו, והוא יחזור אליך ${replyTime()}.\nבינתיים נמשיך:`);
+};
+document.getElementById('reset').onclick = () => { reset(); welcome(); };
+
+document.getElementById('lbclose').onclick = () => document.getElementById('lbx').classList.remove('on');
+document.getElementById('lbp').onclick = () => showLb(ALI - 1); document.getElementById('lbn').onclick = () => showLb(ALI + 1);
+let tx = null; const lbi = document.querySelector('.lbx-img'); lbi.addEventListener('touchstart', (e) => tx = e.touches[0].clientX); lbi.addEventListener('touchend', (e) => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) showLb(ALI + (dx > 0 ? 1 : -1)); tx = null; });
+const inpEl = document.getElementById('t'), formEl = document.getElementById('f'); inpEl.addEventListener('input', () => formEl.classList.toggle('typingnow', !!inpEl.value.trim()));
+formEl.addEventListener('submit', () => setTimeout(() => formEl.classList.remove('typingnow'), 0));
+document.getElementById('av').style.backgroundImage = 'url(' + APTS['1'].pics[1] + ')';
+reset();
+setTimeout(() => { me('היי, רציתי לשאול על הדירה'); welcome(); }, 500);
+</script>
+</body>
+</html>
