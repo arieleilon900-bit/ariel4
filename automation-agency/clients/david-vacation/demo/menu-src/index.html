@@ -9,57 +9,114 @@
 <meta property="og:description" content="לוחצים, בוחרים, ותוך דקה דוד מקבל הזמנה מסודרת">
 <meta property="og:image" content="https://onerishon-david.pages.dev/p/a1-1.jpg">
 <style>
-:root{--g:#0b8f5a;--bg:#efe7de;--in:#fff;--out:#d9fdd3;--ink:#111;--mut:#667;--bar:#f6f6f6;--line:#e6e6e6}
-@media (prefers-color-scheme:dark){:root{--bg:#0b141a;--in:#202c33;--out:#005c4b;--ink:#e9edef;--mut:#8696a0;--bar:#202c33;--line:#2a3942;--g:#00a884}}
-*{box-sizing:border-box}html,body{margin:0;height:100%}
-body{font-family:-apple-system,"Segoe UI",Arial,sans-serif;background:#d6dbdf;color:var(--ink);display:flex;justify-content:center}
+:root{--wall:#efeae2;--in:#fff;--out:#dcf8c6;--ink:#0b141a;--mut:#667781;--bar:rgba(246,246,246,.94);--line:rgba(60,60,67,.18);--link:#007aff;--btn:#027eb5;--tick:#53bdeb;--green:#25d366;--sheet:#f2f2f7;--cell:#fff;--chip:#fff;--chipink:#54656f;--doodle:.06}
+@media (prefers-color-scheme:dark){:root{--wall:#0b141a;--in:#1f2c34;--out:#005c4b;--ink:#e9edef;--mut:#8696a0;--bar:rgba(22,22,24,.94);--line:rgba(84,84,88,.6);--link:#0a84ff;--btn:#53bdeb;--sheet:#1c1c1e;--cell:#2c2c2e;--chip:#1f2c34;--chipink:#8696a0;--doodle:.05}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Noto Sans Hebrew",Arial,sans-serif;background:#e9ecef;color:var(--ink);display:flex;justify-content:center;align-items:center;-webkit-font-smoothing:antialiased}
 @media (prefers-color-scheme:dark){body{background:#000}}
-.app{width:100%;max-width:480px;height:100dvh;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
-.top{background:var(--bar);display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
-.av{width:40px;height:40px;border-radius:50%;background:url(../p/a1-1.jpg) center/cover;flex:none}
-.top b{display:block;font-size:16px}.top small{color:var(--mut);font-size:12px}
-.reset{margin-inline-start:auto;border:0;background:transparent;color:var(--g);font-size:13px;font-weight:700;cursor:pointer}
-.chat{flex:1;overflow-y:auto;padding:12px 10px 8px;display:flex;flex-direction:column;gap:6px}
-.tip{align-self:center;background:#fff5c4;color:#5a4a00;font-size:12.5px;border-radius:8px;padding:6px 10px;text-align:center;max-width:92%;line-height:1.4}
-@media (prefers-color-scheme:dark){.tip{background:#3b3412;color:#f3e3a0}}
-.b{max-width:84%;padding:7px 9px 4px;border-radius:10px;font-size:14.5px;line-height:1.42;box-shadow:0 1px 1px #0001;white-space:pre-line;word-wrap:break-word;animation:pop .18s ease-out}
-@keyframes pop{from{transform:translateY(6px);opacity:0}}
-.in{background:var(--in);align-self:flex-start;border-top-right-radius:2px}.out{background:var(--out);align-self:flex-end;border-top-left-radius:2px}
-.ts{font-size:10.5px;color:var(--mut);text-align:left;margin-top:2px}
-.lb{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:6px;padding:8px 0 4px;background:none;color:var(--g);font-weight:700;font-size:14.5px;cursor:pointer}
-.btns{align-self:flex-start;width:84%;display:flex;flex-direction:column;gap:4px}
-.bt{border:0;background:var(--in);border-radius:9px;color:var(--g);font-weight:700;font-size:14.5px;padding:9px;cursor:pointer;box-shadow:0 1px 1px #0001}
-.bt:disabled,.lb:disabled{opacity:.45;cursor:default}
-.pics{padding:3px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;width:min(270px,70vw)}.grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:zoom-in}
-.typing{align-self:flex-start;background:var(--in);border-radius:10px;padding:9px 12px;display:flex;gap:4px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:blink 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
-@keyframes blink{50%{opacity:.25}}
-.inp{display:flex;gap:6px;padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:var(--bar)}
-.inp input{flex:1;border:0;border-radius:20px;padding:10px 14px;font-size:15px;background:var(--in);color:var(--ink);outline:none}
-.inp button{width:42px;height:42px;border-radius:50%;border:0;background:var(--g);color:#fff;font-size:18px;cursor:pointer}
-.dim{position:absolute;inset:0;background:#0007;opacity:0;pointer-events:none;transition:.2s}.dim.on{opacity:1;pointer-events:auto}
-.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--in);border-radius:16px 16px 0 0;transform:translateY(105%);transition:.25s ease;max-height:82%;overflow-y:auto;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.app{width:100%;height:100dvh;display:flex;flex-direction:column;background:var(--wall);position:relative;overflow:hidden;overflow:clip}
+.wall{position:absolute;inset:0;opacity:var(--doodle);pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round'%3E%3Ccircle cx='24' cy='26' r='9'/%3E%3Cpath d='M70 18l8 14h-16z'/%3E%3Cpath d='M118 20c6-8 16 0 8 8l-8 8-8-8c-8-8 2-16 8-8z'/%3E%3Cpath d='M20 80h22M31 69v22'/%3E%3Crect x='64' y='70' width='22' height='16' rx='4'/%3E%3Cpath d='M112 72q10 18 20 0'/%3E%3Ccircle cx='30' cy='134' r='4'/%3E%3Cpath d='M66 128l10 10 14-18'/%3E%3Cpath d='M114 126h20v14h-20z M118 126v-4h12v4'/%3E%3C/svg%3E")}
+.status{display:none}
+.top{position:relative;z-index:2;background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);display:flex;align-items:center;gap:8px;padding:8px 10px 8px 12px;border-bottom:.5px solid var(--line);padding-top:max(8px,env(safe-area-inset-top))}
+.back{display:flex;align-items:center;gap:2px;color:var(--link);font-size:17px;flex:none}.back svg{width:12px;height:21px}
+.av{width:38px;height:38px;border-radius:50%;background:center/cover;flex:none}
+.who{min-width:0;flex:1}.who b{display:flex;align-items:center;gap:4px;font-size:16.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.who b svg{width:15px;height:15px;flex:none}
+.who small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .2s}.who small.typ{color:var(--green)}
+.icons{display:flex;gap:20px;color:var(--link);flex:none}.icons svg{width:24px;height:24px}
+.reset{position:absolute;z-index:3;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top));border:0;background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:4px 10px;border-radius:12px;cursor:pointer;backdrop-filter:blur(8px);opacity:.8}
+.chat{position:relative;z-index:1;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:10px 8px 10px;display:flex;flex-direction:column;gap:2px}
+.chip{align-self:center;background:var(--chip);color:var(--chipink);font-size:12.5px;border-radius:8px;padding:5px 12px;margin:6px 0 8px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+.tip{align-self:center;background:#fdf4c5;color:#54656f;font-size:12.5px;border-radius:8px;padding:7px 12px;text-align:center;max-width:88%;line-height:1.45;margin-bottom:10px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+@media (prefers-color-scheme:dark){.tip{background:#182229;color:#ffd279}}
+.b{position:relative;max-width:min(80%,420px);padding:6px 8px 7px 9px;border-radius:12px;font-size:16px;line-height:1.36;box-shadow:0 1px .5px rgba(11,20,26,.13);white-space:pre-line;word-wrap:break-word;margin-top:2px;animation:pop .22s cubic-bezier(.2,.9,.3,1.2)}
+.chat>*{flex-shrink:0}
+.b.first{margin-top:8px}
+@keyframes pop{from{transform:scale(.92) translateY(8px);opacity:0}}
+.in{background:var(--in);align-self:flex-start}.out{background:var(--out);align-self:flex-end}
+.in.first{border-top-right-radius:4px}.out.first{border-top-left-radius:4px}
+.in.first::before,.out.first::before{content:"";position:absolute;top:0;width:10px;height:13px;background:inherit}
+.in.first::before{right:-7px;clip-path:polygon(0 0,100% 0,0 100%);border-top-right-radius:3px}
+.out.first::before{left:-7px;clip-path:polygon(0 0,100% 0,100% 100%);border-top-left-radius:3px}
+.ts{float:left;margin:8px 10px -5px 0;font-size:11px;color:var(--mut);display:inline-flex;align-items:center;gap:3px;direction:ltr;position:relative;top:4px}
+.ts svg{width:16px;height:11px;color:var(--tick)}
+.b.btnwrap{padding:0;overflow:hidden}.b.btnwrap .body{padding:6px 8px 7px 9px}
+.acts{border-top:.5px solid var(--line)}
+.lb,.bt{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;background:none;color:var(--btn);font:500 15.5px/1.2 inherit;font-family:inherit;padding:11px 8px;cursor:pointer}
+.bt+.bt{border-top:.5px solid var(--line)}.lb svg,.bt svg{width:17px;height:17px;flex:none}
+.lb:active,.bt:active{background:rgba(0,0,0,.05)}
+.lb:disabled,.bt:disabled{color:var(--mut);opacity:.55;cursor:default}
+.btns{display:contents}
+.pics{padding:3px;max-width:min(76%,330px)}.album{display:grid;grid-template-columns:1fr 1fr;gap:3px;border-radius:9px;overflow:hidden}
+.album div{position:relative;aspect-ratio:1;cursor:zoom-in}.album img{width:100%;height:100%;object-fit:cover;display:block}
+.album .more{position:absolute;inset:0;background:rgba(0,0,0,.45);color:#fff;font-size:30px;font-weight:300;display:flex;align-items:center;justify-content:center}
+.pics .ts{position:absolute;left:8px;bottom:8px;margin:0;top:auto;color:#fff;text-shadow:0 1px 2px #0008;float:none}
+.typing{align-self:flex-start;background:var(--in);border-radius:18px;padding:12px 14px;display:flex;gap:4px;margin-top:8px;box-shadow:0 1px .5px rgba(11,20,26,.13)}.typing i{width:7px;height:7px;border-radius:50%;background:#9aa4ab;animation:blink 1.2s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+.inp{position:relative;z-index:2;display:flex;align-items:flex-end;gap:10px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));background:var(--bar);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.5px solid var(--line)}
+.ic{color:var(--link);display:flex;align-items:center;height:36px;flex:none;background:none;border:0;padding:0}.ic svg{width:26px;height:26px}
+.field{flex:1;display:flex;align-items:center;background:var(--cell);border:.5px solid var(--line);border-radius:18px;min-height:36px;padding:0 6px 0 12px}
+.field input{flex:1;border:0;background:none;font:16px inherit;font-family:inherit;color:var(--ink);outline:none;padding:7px 0;min-width:0}
+.field svg{width:22px;height:22px;color:var(--link);flex:none}
+.send{width:34px;height:34px;border-radius:50%;border:0;background:var(--green);color:#fff;display:none;align-items:center;justify-content:center;cursor:pointer;flex:none;margin-bottom:1px}.send svg{width:17px;height:17px}
+.inp.typingnow .send{display:flex}.inp.typingnow .cam,.inp.typingnow .mic{display:none}
+.dim{position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .25s}.dim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;z-index:6;left:0;right:0;bottom:0;background:var(--sheet);border-radius:14px 14px 0 0;transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:86%;overflow-y:auto;padding:0 0 calc(14px + env(safe-area-inset-bottom))}
 .sheet.on{transform:none}
-.sh-h{text-align:center;font-weight:700;padding:14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--in)}
-.sh-x{position:absolute;left:12px;top:9px;border:0;background:#8882;border-radius:50%;width:30px;height:30px;color:var(--mut);cursor:pointer;font-size:15px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer}
-.row:active{background:#8881}.row b{display:block;font-size:15px;font-weight:600}.row small{color:var(--mut);font-size:12.5px}
-.rad{width:20px;height:20px;border:2px solid var(--g);border-radius:50%;flex:none}.chk .rad{border-radius:5px}.row.sel .rad{background:var(--g);box-shadow:inset 0 0 0 3px var(--in)}
-.hint{text-align:center;color:var(--mut);font-size:12px;padding-top:9px}
-.done{display:block;margin:10px auto 0;border:0;background:var(--g);color:#fff;border-radius:20px;padding:10px 26px;font-weight:700;font-size:15px;cursor:pointer}
-.owner{align-self:stretch;margin:8px 0;border:2px dashed var(--g);border-radius:12px;padding:10px;background:#0b8f5a12}
-.owner h4{margin:0 0 6px;font-size:13px;color:var(--g)}.owner .b{max-width:100%;animation:none}
-.lbx{position:fixed;inset:0;background:#000e;display:none;align-items:center;justify-content:center;z-index:9}.lbx.on{display:flex}.lbx img{max-width:96vw;max-height:88vh;border-radius:6px}
+.grab{width:36px;height:5px;border-radius:3px;background:#c7c7cc;margin:7px auto 0}
+.sh-h{position:sticky;top:0;background:var(--sheet);text-align:center;font-weight:600;font-size:17px;padding:12px 50px 12px}
+.sh-x{position:absolute;left:14px;top:9px;border:0;background:rgba(118,118,128,.16);border-radius:50%;width:30px;height:30px;color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center}.sh-x svg{width:12px;height:12px}
+.rows{margin:4px 14px 0;background:var(--cell);border-radius:12px;overflow:hidden}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;position:relative}
+.row+.row::before{content:"";position:absolute;top:0;right:16px;left:0;height:.5px;background:var(--line)}
+.row:active{background:rgba(0,0,0,.05)}.row b{display:block;font-size:16.5px;font-weight:400}.row small{display:block;color:var(--mut);font-size:13.5px;margin-top:2px}
+.rad{width:22px;height:22px;border:1.5px solid #c7c7cc;border-radius:50%;flex:none;transition:.15s;display:flex;align-items:center;justify-content:center}
+.row.sel .rad{background:var(--green);border-color:var(--green)}.row.sel .rad::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.hint{text-align:center;color:var(--mut);font-size:13px;padding:12px 16px 0}
+.done{display:block;width:calc(100% - 28px);margin:14px auto 0;border:0;background:var(--green);color:#fff;border-radius:12px;padding:13px;font:600 16.5px inherit;font-family:inherit;cursor:pointer}
+.owner{align-self:stretch;margin:14px 2px 6px;border-radius:18px;padding:12px;background:linear-gradient(135deg,#1d2b36,#0f171d);color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.owner h4{margin:0 0 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#d1d7db}
+.owner h4 i{width:22px;height:22px;border-radius:6px;background:var(--green);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:12px}
+.owner .b{max-width:100%;animation:none;background:#fff;color:#0b141a;margin:0}
+@media (prefers-color-scheme:dark){.owner .b{background:#1f2c34;color:#e9edef}}
+.owner .b::before{display:none}
+.lbx{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:20}.lbx.on{display:flex}
+.lbx-top{display:flex;justify-content:space-between;align-items:center;color:#fff;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;font-size:16px}
+.lbx-top button{border:0;background:none;color:#fff;font-size:17px;cursor:pointer}
+.lbx-img{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}.lbx-img img{max-width:100%;max-height:100%;object-fit:contain}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:24px;cursor:pointer}.nav.p{right:10px}.nav.n{left:10px}
+.thumbs{display:flex;gap:4px;padding:10px;overflow-x:auto;justify-content:center;padding-bottom:calc(10px + env(safe-area-inset-bottom))}.thumbs img{width:44px;height:44px;object-fit:cover;border-radius:4px;opacity:.5;cursor:pointer}.thumbs img.on{opacity:1;outline:2px solid #fff}
+@media (min-width:700px){
+  body{background:radial-gradient(circle at 30% 20%,#dfe7ee,#c9d3dc)}
+  @media (prefers-color-scheme:dark){body{background:#0d0f12}}
+  .frame{width:400px;height:min(860px,94vh);border-radius:56px;padding:12px;background:#1a1a1c;box-shadow:0 0 0 2px #3a3a3c,0 30px 80px rgba(0,0,0,.35);position:relative}
+  .app{height:100%;border-radius:44px}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:14px 30px 2px;font-weight:600;font-size:15px;background:var(--bar);position:relative;z-index:2}
+  .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px}
+  .status .r{display:flex;gap:5px;align-items:center}.status svg{height:12px}
+  .reset{top:118px}
+  .side{position:absolute;left:calc(50% + 230px);top:50%;transform:translateY(-50%);width:220px;color:#3a4651;font-size:14px;line-height:1.55}
+  @media (prefers-color-scheme:dark){.side{color:#aab4bd}}
+  .side h3{margin:0 0 8px;font-size:18px}
+}
+@media (max-width:699px){.side{display:none}.frame{width:100%;height:100dvh}}
+@media (max-width:1180px) and (min-width:700px){.side{display:none}}
 </style>
 </head>
 <body>
+<div class="frame">
 <div class="app">
-  <div class="top"><div class="av"></div><div><b>קו המים 🌊</b><small id="st">דירות נופש בקו ראשון לים, נתניה</small></div><button class="reset" id="reset" type="button">↺ מההתחלה</button></div>
+  <div class="status"><span>9:41</span><div class="island"></div><span class="r"><svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></svg><svg viewBox="0 0 16 12"><path d="M8 11.5 5.4 8.6a3.6 3.6 0 0 1 5.2 0zM2.7 5.9a7.5 7.5 0 0 1 10.6 0l-1.4 1.4a5.6 5.6 0 0 0-7.8 0zM0 3.2a11.3 11.3 0 0 1 16 0l-1.4 1.4a9.4 9.4 0 0 0-13.2 0z" fill="currentColor"/></svg><svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="8" rx="2" fill="currentColor"/><path d="M25 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg></span></div>
+  <div class="top"><span class="back"><svg viewBox="0 0 12 21"><path d="M10.5 1.5 1.5 10.5l9 9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>12</span></span><div class="av" id="av"></div><div class="who"><b>קו המים 🌊 <svg viewBox="0 0 24 24"><path fill="#25d366" d="m12 1.5 2.4 1.8 3-.1.9 2.8 2.5 1.7-.9 2.9.9 2.9-2.5 1.7-.9 2.8-3-.1L12 22.5l-2.4-1.8-3 .1-.9-2.8-2.5-1.7.9-2.9-.9-2.9 2.5-1.7.9-2.8 3 .1z"/><path d="m7.8 12.2 2.8 2.8 5.6-5.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></b><small id="st">עסק · דירות נופש בקו ראשון לים</small></div><div class="icons"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="M15.5 10.5 21 7.5v9l-5.5-3"/></svg> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 3.5h3.2l1.6 4.2-2.1 1.4a11 11 0 0 0 7.2 7.2l1.4-2.1 4.2 1.6V19a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.7 2 2 0 0 1 5 3.5z"/></svg></div></div>
+  <button class="reset" id="reset" type="button">↺ להתחיל מחדש</button>
+  <div class="wall"></div>
   <div class="chat" id="chat"></div>
-  <form class="inp" id="f"><input id="t" autocomplete="off" placeholder="הודעה"><button type="submit" aria-label="שליחה">➤</button></form>
+  <form class="inp" id="f"><button type="button" class="ic" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg></button><div class="field"><input id="t" autocomplete="off" enterkeyhint="send" placeholder=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 12.5V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h5.5z"/><path d="M12.5 20c0-4.1 3.4-7.5 7.5-7.5"/></svg></div><button type="button" class="ic cam" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h2l1.5-2h6l1.5 2h2A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.6"/></svg></button><button type="button" class="ic mic" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button><button type="submit" class="send" aria-label="שליחה"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21 12 3.4 3.6l.1 6.5L15 12 3.5 13.9z" transform="scale(-1,1) translate(-24,0)"/></svg></button></form>
   <div class="dim" id="dim"></div>
   <div class="sheet" id="sheet"></div>
 </div>
-<div class="lbx" id="lbx"><img id="lbimg" alt=""></div>
+</div>
+<div class="side"><h3>זה דמו 👋</h3>ככה ייראה הבוט של קו המים בוואטסאפ של הלקוחות.<br><br>• לוחצים על <b>הכפתורים הכחולים</b><br>• "☰" פותח תפריט מלמטה<br>• אפשר גם לכתוב חופשי, כמו לקוח<br>• בסוף רואים את מה ש<b>דוד</b> מקבל</div>
+<div class="lbx" id="lbx"><div class="lbx-top"><button type="button" id="lbclose">סגירה</button><span id="lbcount"></span><span style="width:50px"></span></div><div class="lbx-img"><img id="lbimg" alt=""><button class="nav p" id="lbp" type="button">›</button><button class="nav n" id="lbn" type="button">‹</button></div><div class="thumbs" id="thumbs"></div></div>
 <script>
 /* ===== המחירון האמיתי של דוד (אותו קוד כמו בבוט), תקף עד 1/3/2027 ===== */
 const DAVID_PRICES = {
@@ -158,52 +215,79 @@ function datesText() {
   return `${DN[s.getDay()]} ${dm(s)} עד ${end} (${S.nights === 1 ? 'לילה אחד' : S.nights + ' לילות'})`;
 }
 
-/* ===== ממשק וואטסאפ ===== */
+/* ===== ממשק וואטסאפ (סגנון אייפון) ===== */
 const chat = document.getElementById('chat'), sheet = document.getElementById('sheet'), dim = document.getElementById('dim'), st = document.getElementById('st');
+const SUB = 'עסק · דירות נופש בקו ראשון לים';
 const now = () => new Date().toTimeString().slice(0, 5);
 const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 const scroll = () => requestAnimationFrame(() => chat.scrollTop = chat.scrollHeight);
+const TICK = '<svg viewBox="0 0 16 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6l3 3 6-7.5M6 8.5l.8.8 6-7.5"/></svg>';
+const LIST_I = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></svg>';
+const REPLY_I = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9 5 14l5 5" transform="scale(-1,1) translate(-24,0)"/><path d="M5 14h9a5 5 0 0 0 5-5V5" transform="scale(-1,1) translate(-24,0)"/></svg>';
+let lastSide = '';
+function addBubble(el, side) { if (side !== lastSide) el.classList.add('first'); lastSide = side; chat.appendChild(el); }
 function lockOld() { chat.querySelectorAll('.bt,.lb').forEach((b) => b.disabled = true); }
-function me(text) { lockOld(); const d = document.createElement('div'); d.className = 'b out'; d.innerHTML = esc(text) + `<div class="ts">${now()} ✓✓</div>`; chat.appendChild(d); scroll(); }
+function me(text) { lockOld(); const d = document.createElement('div'); d.className = 'b out'; d.innerHTML = esc(text) + `<span class="ts">${now()} ${TICK}</span>`; addBubble(d, 'out'); scroll(); }
 let busy = false; const queue = [];
 function bot(text, opt = {}) { queue.push([text, opt]); if (!busy) pump(); }
 function pump() {
-  if (!queue.length) { busy = false; st.textContent = 'דירות נופש בקו ראשון לים, נתניה'; return; }
+  if (!queue.length) { busy = false; st.textContent = SUB; st.classList.remove('typ'); return; }
   busy = true; const [text, opt] = queue.shift();
-  const ty = document.createElement('div'); ty.className = 'typing'; ty.innerHTML = '<i></i><i></i><i></i>'; chat.appendChild(ty); st.textContent = 'מקליד/ה...'; scroll();
-  setTimeout(() => { ty.remove(); render(text, opt); setTimeout(pump, 250); }, Math.min(1700, 650 + (text || '').length * 9));
+  const ty = document.createElement('div'); ty.className = 'typing'; ty.innerHTML = '<i></i><i></i><i></i>'; chat.appendChild(ty); st.textContent = 'מקליד/ה...'; st.classList.add('typ'); scroll();
+  setTimeout(() => { ty.remove(); render(text, opt); setTimeout(pump, 280); }, Math.min(1700, 650 + (text || '').length * 9));
+}
+let ALB = [], ALI = 0;
+function album(pics) {
+  const d = document.createElement('div'); d.className = 'b in pics';
+  const show = pics.slice(0, 4), extra = pics.length - 4;
+  d.innerHTML = '<div class="album">' + show.map((p, i) => `<div data-i="${i}"><img src="${p}" alt="" loading="lazy">${i === 3 && extra > 0 ? `<span class="more">+${extra}</span>` : ''}</div>`).join('') + `</div><span class="ts">${now()}</span>`;
+  d.querySelectorAll('.album div').forEach((c) => c.onclick = () => openLb(pics, +c.dataset.i));
+  addBubble(d, 'in');
 }
 function render(text, opt) {
-  if (opt.pics) { const d = document.createElement('div'); d.className = 'b in pics'; d.innerHTML = '<div class="grid">' + opt.pics.map((p) => `<img src="${p}" alt="" loading="lazy">`).join('') + `</div><div class="ts">${now()}</div>`; chat.appendChild(d); }
-  if (opt.owner) { const w = document.createElement('div'); w.className = 'owner'; w.innerHTML = '<h4>📲 ככה דוד מקבל את זה בוואטסאפ שלו:</h4>'; const d = document.createElement('div'); d.className = 'b in'; d.innerHTML = text + `<div class="ts">${now()}</div>`; w.appendChild(d); chat.appendChild(w); if (opt.buttons) addButtons(opt.buttons, w); scroll(); return; }
-  if (text) {
-    const d = document.createElement('div'); d.className = 'b in'; d.innerHTML = text + `<div class="ts">${now()}</div>`;
-    if (opt.list) { const b = document.createElement('button'); b.type = 'button'; b.className = 'lb'; b.textContent = '☰ ' + opt.list.title; b.onclick = () => openList(opt.list); d.appendChild(b); }
-    chat.appendChild(d);
+  if (opt.pics) album(opt.pics);
+  if (opt.owner) {
+    const w = document.createElement('div'); w.className = 'owner'; w.innerHTML = '<h4><i>💬</i>ככה דוד מקבל את זה בוואטסאפ שלו · עכשיו</h4>';
+    const d = document.createElement('div'); d.className = 'b in'; d.innerHTML = text + `<span class="ts">${now()}</span>`;
+    if (opt.buttons) attach(d, opt.buttons, null); w.appendChild(d); chat.appendChild(w); lastSide = ''; scroll(); return;
   }
-  if (opt.buttons) addButtons(opt.buttons, chat);
+  if (text) {
+    const d = document.createElement('div'); d.className = 'b in';
+    if (opt.list || opt.buttons) { d.classList.add('btnwrap'); d.innerHTML = `<div class="body">${text}<span class="ts">${now()}</span></div>`; attach(d, opt.buttons, opt.list); }
+    else d.innerHTML = text + `<span class="ts">${now()}</span>`;
+    addBubble(d, 'in');
+  } else if (opt.buttons) { const d = document.createElement('div'); d.className = 'b in btnwrap'; attach(d, opt.buttons, null); addBubble(d, 'in'); }
   scroll();
 }
-function addButtons(btns, parent) { const w = document.createElement('div'); w.className = 'btns'; btns.forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'bt'; b.textContent = label; b.onclick = () => { me(label); fn(); }; w.appendChild(b); }); parent.appendChild(w); }
+function attach(d, btns, list) {
+  d.classList.add('btnwrap'); if (!d.querySelector('.body')) { const inner = d.innerHTML; d.innerHTML = inner ? `<div class="body">${inner}</div>` : ''; }
+  const a = document.createElement('div'); a.className = 'acts';
+  if (list) { const b = document.createElement('button'); b.type = 'button'; b.className = 'lb'; b.innerHTML = LIST_I + '<span>' + list.title + '</span>'; b.onclick = () => openList(list); a.appendChild(b); }
+  (btns || []).forEach(([label, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'bt'; b.innerHTML = REPLY_I + '<span>' + esc(label) + '</span>'; b.onclick = () => { me(label); fn(); }; a.appendChild(b); });
+  d.appendChild(a);
+}
+function addButtons(btns, parent) { const d = document.createElement('div'); d.className = 'b in btnwrap'; attach(d, btns, null); parent === chat ? addBubble(d, 'in') : parent.appendChild(d); }
 function openList(list) {
   const sel = new Set();
-  sheet.innerHTML = `<div class="sh-h">${list.title}<button class="sh-x" type="button" aria-label="סגור">✕</button></div>` +
-    list.rows.map((r, i) => `<div class="row ${list.multi ? 'chk' : ''}" data-i="${i}"><div><b>${r[0]}</b>${r[1] ? `<small>${r[1]}</small>` : ''}</div><span class="rad"></span></div>`).join('') +
-    (list.multi ? '<button class="done" type="button">✅ סיימתי לבחור</button>' : '') + `<div class="hint">${list.multi ? 'אפשר לבחור כמה' : 'צריך להקיש על פריט כדי לבחור אותו'}</div>`;
+  sheet.innerHTML = `<div class="grab"></div><div class="sh-h">${list.title}<button class="sh-x" type="button" aria-label="סגור"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="rows">` +
+    list.rows.map((r, i) => `<div class="row" data-i="${i}"><div><b>${r[0]}</b>${r[1] ? `<small>${r[1]}</small>` : ''}</div><span class="rad"></span></div>`).join('') + '</div>' +
+    (list.multi ? '<button class="done" type="button">שליחה</button>' : '') + `<div class="hint">${list.multi ? 'אפשר לבחור כמה, ואז "שליחה"' : 'צריך להקיש על פריט כדי לבחור אותו'}</div>`;
   const close = () => { sheet.classList.remove('on'); dim.classList.remove('on'); };
   sheet.querySelector('.sh-x').onclick = close; dim.onclick = close;
   sheet.querySelectorAll('.row').forEach((row) => row.onclick = () => {
     const i = +row.dataset.i;
     if (list.multi) { sel.has(i) ? sel.delete(i) : sel.add(i); row.classList.toggle('sel'); return; }
-    row.classList.add('sel'); setTimeout(() => { close(); me(list.rows[i][0]); list.rows[i][2](); }, 160);
+    row.classList.add('sel'); setTimeout(() => { close(); me(list.rows[i][0]); list.rows[i][2](); }, 220);
   });
   if (list.multi) sheet.querySelector('.done').onclick = () => { close(); const picked = [...sel].sort().map((i) => list.rows[i][0]); me(picked.length ? picked.join(' + ') : 'בלי תוספות'); list.onDone(picked); };
-  sheet.classList.add('on'); dim.classList.add('on');
+  sheet.scrollTop = 0; sheet.classList.add('on'); dim.classList.add('on');
 }
+function openLb(pics, i) { ALB = pics; ALI = i; document.getElementById('thumbs').innerHTML = pics.map((p, k) => `<img src="${p}" data-k="${k}" alt="">`).join(''); document.querySelectorAll('#thumbs img').forEach((t) => t.onclick = () => showLb(+t.dataset.k)); showLb(i); document.getElementById('lbx').classList.add('on'); }
+function showLb(i) { ALI = (i + ALB.length) % ALB.length; document.getElementById('lbimg').src = ALB[ALI]; document.getElementById('lbcount').textContent = `${ALI + 1} מתוך ${ALB.length}`; document.querySelectorAll('#thumbs img').forEach((t, k) => t.classList.toggle('on', k === ALI)); }
 
 /* ===== המסלול ===== */
 let S;
-function reset() { S = { stage: 'start', apt: null, start: null, nights: null, adults: 2, kids: 0, baby: 0, guests: '', occasion: '', extras: [], arrival: '', name: '', pay: '', resume: null, big: '', freeQ: [] }; chat.innerHTML = '<div class="tip">זה דמו של הבוט של קו המים עם תפריטים 👆 תכתבו "היי" כמו לקוח, ואז פשוט תלחצו ותבחרו. אפשר גם לכתוב חופשי.</div>'; queue.length = 0; busy = false; }
+function reset() { S = { stage: 'start', apt: null, start: null, nights: null, adults: 2, kids: 0, baby: 0, guests: '', occasion: '', extras: [], arrival: '', name: '', pay: '', resume: null, big: '', freeQ: [] }; chat.innerHTML = '<div class="chip">היום</div><div class="tip">🔒 זה דמו של הבוט של קו המים. לוחצים על הכפתורים הכחולים ובוחרים, ואפשר גם לכתוב חופשי כמו לקוח.</div>'; lastSide = ''; queue.length = 0; busy = false; }
 const mainList = () => ({ title: 'לתפריט', rows: [
   ['🏖️ להזמין חופשה', 'בוחרים דירה, תאריך ואורחים', pickApt],
   ['📸 לראות את הדירות', 'תמונות ופרטים על כל דירה', pickApt],
@@ -280,9 +364,12 @@ function askPay() { S.stage = 'pay'; const p = (x) => () => { S.pay = x; finish(
   bot(`תודה ${S.name.split(' ')[0]}! 🙏 לשמירת התאריך יש מקדמה של חצי. איך נוח לך?`, { buttons: [['📲 פייבוקס', p('פייבוקס')], ['📲 ביט', p('ביט')], ['👤 שדוד יתקשר', p('שדוד יתקשר')]] }); }
 function finish() {
   S.stage = 'done';
-  bot(`מעולה 🙏 דוד בודק ביומן שהתאריך פנוי, וחוזר אליך עם אישור ${S.pay === 'שדוד יתקשר' ? 'בטלפון' : 'וקישור למקדמה'}.\n${S.occasion && S.occasion !== 'חופשה' ? 'יהיה מושלם ❤️' : 'תתכוננו לנשום את הים 🌊'}`);
-  bot('📥 <b>הזמנה חדשה מהבוט</b>\n👤 ' + esc(S.name) + ' · 052-1234567\n' + summaryLines() + `\n📲 מקדמה: ${S.pay}` + (S.freeQ.length ? '\n❓ שאלות: ' + esc(S.freeQ.join(' | ')) : '') + '\n🗓️ זמינות: לבדוק ביומן', { owner: true, buttons: [['💬 לפתוח צ׳אט', () => bot('(כאן דוד ממשיך בעצמו, והבוט שותק בשיחה הזו)')], ['🔄 לנסות שוב מההתחלה', () => { reset(); welcome(); }]] });
+  const first = esc(S.name.split(' ')[0]);
+  const det = '👤 ' + esc(S.name) + '\n' + summaryLines() + `\n📲 מקדמה: ${S.pay}`;
+  bot(`✅ <b>${first}, ההזמנה נשלחה לדוד!</b>\n\n` + det + `\n\n<b>מה עכשיו?</b>\n1️⃣ דוד בודק ביומן שהתאריך פנוי\n2️⃣ ${S.pay === 'שדוד יתקשר' ? 'דוד מתקשר אליך לאשר ולסגור' : 'דוד שולח לך אישור וקישור למקדמה (חצי מהסכום) ב' + S.pay}\n3️⃣ ביום ההגעה מקבלים את קוד הכספת ואת כל הפרטים 🔑\n\nתודה שבחרתם בקו המים 🌊${S.occasion && S.occasion !== 'חופשה' ? ' יהיה מושלם ❤️' : ''}`, { buttons: [['🏠 לתפריט הראשי', menu]] });
+  bot('📥 <b>הזמנה חדשה מהבוט</b>\n' + det.replace('👤 ' + esc(S.name), '👤 ' + esc(S.name) + ' · 052-1234567') + (S.freeQ.length ? '\n❓ שאלות: ' + esc(S.freeQ.join(' | ')) : '') + '\n🗓️ זמינות: לבדוק ביומן', { owner: true, buttons: [['✅ לאשר ולשלוח קישור למקדמה', () => bot(`(בבוט האמיתי: ${first} מקבל מיד אישור וקישור למקדמה ב${S.pay === 'שדוד יתקשר' ? 'פייבוקס' : S.pay} 🎉)`)], ['💬 לפתוח צ׳אט עם ' + first, () => bot('(כאן דוד ממשיך בעצמו, והבוט שותק בשיחה הזו)')], ['🔄 לנסות שוב מההתחלה', () => { reset(); welcome(); }]] });
 }
+
 function prices() { bot('💰 <b>המחירון</b> (תקף עד 1 במרץ)\n\n<b>קו המים 1</b>: אמצע שבוע 800 (2 לילות: 600 ללילה) · שישי עד מוצ"ש 1,500 · חמישי עד מוצ"ש 2,200\n<b>קו המים 2</b>: אמצע שבוע 900 (2 לילות: 700 ללילה) · שישי עד מוצ"ש 1,500 · חמישי עד מוצ"ש 2,200\n<b>קו המים 3</b>: אמצע שבוע 1,200 (2 לילות: 1,000 ללילה) · שישי עד מוצ"ש 1,700 · חמישי עד מוצ"ש 2,600\n\nבסופ"ש יוצאים במוצ"ש, לא ב-11 בבוקר 😉', { buttons: [['🏖️ להזמין חופשה', pickApt], ['🏠 לתפריט הראשי', menu]] }); }
 function extrasInfo() { bot('🎁 אפשר להוסיף להזמנה:\n🎈 סידור בלונים\n💆 מסאז׳ זוגי\n🍷 בקבוק יין\n🍳 ארוחת בוקר במסעדה בלובי (כ-142 ₪ לזוג, חוץ משבת)\n\nאת המחיר של התוספות דוד נותן 🙏', { buttons: [['🏖️ להזמין חופשה', pickApt], ['🏠 לתפריט הראשי', menu]] }); }
 function faq(from) { if (from) S.resume = from; bot('על מה השאלה? 🙂', { list: { title: 'שאלות נפוצות', rows: [...FAQ.map((f, i) => [f[0], '', () => answer(i)]), ['✍️ שאלה אחרת', 'דוד יענה', () => { S.stage = 'freeQ'; bot('תכתבו את השאלה ואעביר לדוד ✍️'); }]] } }); }
@@ -348,8 +435,12 @@ document.getElementById('f').onsubmit = (e) => {
   notUnderstood(t.slice(0, 200));
 };
 document.getElementById('reset').onclick = () => { reset(); welcome(); };
-chat.addEventListener('click', (e) => { if (e.target.tagName === 'IMG') { document.getElementById('lbimg').src = e.target.src; document.getElementById('lbx').classList.add('on'); } });
-document.getElementById('lbx').onclick = () => document.getElementById('lbx').classList.remove('on');
+document.getElementById('lbclose').onclick = () => document.getElementById('lbx').classList.remove('on');
+document.getElementById('lbp').onclick = () => showLb(ALI - 1); document.getElementById('lbn').onclick = () => showLb(ALI + 1);
+let tx = null; const lbi = document.querySelector('.lbx-img'); lbi.addEventListener('touchstart', (e) => tx = e.touches[0].clientX); lbi.addEventListener('touchend', (e) => { if (tx == null) return; const dx = e.changedTouches[0].clientX - tx; if (Math.abs(dx) > 40) showLb(ALI + (dx > 0 ? 1 : -1)); tx = null; });
+const inpEl = document.getElementById('t'), formEl = document.getElementById('f'); inpEl.addEventListener('input', () => formEl.classList.toggle('typingnow', !!inpEl.value.trim()));
+formEl.addEventListener('submit', () => setTimeout(() => formEl.classList.remove('typingnow'), 0));
+document.getElementById('av').style.backgroundImage = 'url(' + APTS['1'].pics[1] + ')';
 reset();
 setTimeout(() => { me('היי, רציתי לשאול על הדירה'); welcome(); }, 500);
 </script>
