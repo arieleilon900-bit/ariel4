@@ -226,7 +226,7 @@ const LIST_I = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 const REPLY_I = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9 5 14l5 5" transform="scale(-1,1) translate(-24,0)"/><path d="M5 14h9a5 5 0 0 0 5-5V5" transform="scale(-1,1) translate(-24,0)"/></svg>';
 let lastSide = '';
 function addBubble(el, side) { if (side !== lastSide) el.classList.add('first'); lastSide = side; chat.appendChild(el); }
-function lockOld() { chat.querySelectorAll('.bt,.lb').forEach((b) => b.disabled = true); }
+function lockOld() { /* כמו בוואטסאפ: כפתורים ותפריטים ישנים נשארים לחיצים תמיד */ }
 function me(text) { lockOld(); const d = document.createElement('div'); d.className = 'b out'; d.innerHTML = esc(text) + `<span class="ts">${now()} ${TICK}</span>`; addBubble(d, 'out'); scroll(); }
 let busy = false; const queue = [];
 function bot(text, opt = {}) { queue.push([text, opt]); if (!busy) pump(); }
@@ -300,6 +300,7 @@ const mainList = () => ({ title: 'תפריט', rows: [
   ['יש לי הזמנה קיימת', 'שינוי, ביטול, תוספת, פרטי הגעה', existing],
   ['להשאיר ביקורת', 'איך היה אצלנו?', review],
   ['איפה זה?', 'מיקום וחוף', where],
+  ['משהו אחר', 'כותבים, ודוד יענה', () => { S.stage = 'freeQ'; S.cur = menu; bot('במה אפשר לעזור? כתבו, ואעביר לדוד:'); }],
 ] });
 function welcome() { S.stage = 'menu'; S.cur = menu; bot('היי, כאן קו המים 👋\nדירות נופש על הים בנתניה. במה אפשר לעזור?', { list: mainList() }); }
 function menu() { S.stage = 'menu'; S.cur = menu; bot('במה עוד אפשר לעזור?', { list: mainList() }); }
@@ -327,7 +328,7 @@ function askDates() { S.stage = 'dates'; const w1 = weekendOf(0), w2 = weekendOf
     ['תאריך אחר', 'כותבים במילים, למשל "3 עד 5 בינואר"', () => { S.stage = 'datesText'; S.cur = () => bot('מאיזה תאריך עד איזה תאריך? למשל: <i>3 עד 5 בינואר</i> או <i>ראשון עד שלישי</i>'); S.cur(); }],
   ] } }); }
 function weekendDays(th) { S.stage = 'wkDays'; const fr = new Date(th.getTime() + DAY), set = (d, n) => () => { S.start = d; S.nights = n; ask(confirmDates); };
-  bot('אילו ימים?', { buttons: [['חמישי עד מוצ״ש', set(th, 2)], ['שישי עד מוצ״ש', set(fr, 1)], ['שישי עד ראשון', set(fr, 2)]] }); }
+  bot('אילו ימים?', { list: { title: 'בחירת ימים', rows: [['חמישי עד מוצ״ש', '2 לילות', set(th, 2)], ['שישי עד מוצ״ש', 'לילה אחד', set(fr, 1)], ['שישי עד ראשון', '2 לילות', set(fr, 2)], ['אחר', 'כותבים, למשל "חמישי עד ראשון"', () => { S.stage = 'datesText'; S.cur = () => bot('אילו ימים? למשל <i>חמישי עד ראשון</i> או <i>רביעי עד מוצ"ש</i>'); S.cur(); }]] } }); }
 function confirmDates() { S.stage = 'confirmDates'; bot(datesText() + '.\nנכון?', { buttons: [['נכון', () => goOn(askGuests)], ['לשנות תאריך', () => ask(askDates)]] }); }
 function askNights() { S.stage = 'nights'; bot(`הגעה ב${DN[S.start.getDay()]} ${dm(S.start)}. לכמה לילות?`, { buttons: [1, 2, 3].map((n) => [n === 1 ? 'לילה אחד' : n + ' לילות', () => { S.nights = n; ask(confirmDates); }]) }); }
 /* 4. אורחים */
@@ -335,8 +336,9 @@ function askGuests() { S.stage = 'guests';
   bot('כמה אורחים תהיו?', { list: { title: 'בחירת אורחים', rows: [
     ['זוג', '', () => setGuests('זוג', 0, 0)], ['זוג + תינוק', 'תינוק בלי תוספת מחיר', () => setGuests('זוג + תינוק', 0, 1)],
     ['זוג + ילדים', 'עד 2 ילדים + תינוק', () => ask(askKids)], ['קבוצה גדולה', 'יותר מזוג + 2 ילדים', bigGroup],
+    ['אחר', 'כותבים כמה מבוגרים וכמה ילדים', () => { S.stage = 'guests'; S.cur = () => bot('כמה מבוגרים וכמה ילדים? למשל <i>2 מבוגרים וילד</i>'); S.cur(); }],
   ] } }); }
-function askKids() { S.stage = 'kids'; bot('כמה ילדים?', { buttons: [['ילד אחד', () => setGuests('זוג + ילד', 1, 0)], ['2 ילדים', () => setGuests('זוג + 2 ילדים', 2, 0)], ['2 ילדים + תינוק', () => setGuests('זוג + 2 ילדים + תינוק', 2, 1)]] }); }
+function askKids() { S.stage = 'kids'; bot('כמה ילדים?', { buttons: [['ילד אחד', () => setGuests('זוג + ילד', 1, 0)], ['2 ילדים', () => setGuests('זוג + 2 ילדים', 2, 0)], ['אחר', () => { S.stage = 'kids'; S.cur = () => bot('כמה ילדים, ויש גם תינוק? למשל <i>2 ילדים ותינוק</i>'); S.cur(); }]] }); }
 function setGuests(label, kids, baby) { S.guests = label; S.kids = kids; S.baby = baby; if (kids && S.apt !== '3') return ask(fitKids); goOn(askExtras); }
 function fitKids() { bot(`${APTS[S.apt].name} זוגית. למשפחה עם ילדים מתאימה קו המים 3, עם 2 חדרי שינה. לעבור אליה?`, { buttons: [['לעבור לקו המים 3', () => { S.apt = '3'; bot('', { pics: APTS['3'].pics }); goOn(askExtras); }], ['לבחור דירה אחרת', () => ask(pickApt)]] }); }
 function bigGroup() { S.stage = 'bigCount'; S.cur = () => bot('כמה אתם בסך הכל, מבוגרים וילדים?'); bot('הדירות שלנו מתאימות עד זוג + 2 ילדים + תינוק. אבל לדוד יש חברים עם וילות ודירות גדולות בנתניה, והוא ישמח לעזור.'); S.cur(); }
@@ -344,7 +346,11 @@ function bigGroup() { S.stage = 'bigCount'; S.cur = () => bot('כמה אתם ב�
 function askExtras() { S.stage = 'extras'; bot('רוצים להוסיף משהו לשהייה? אפשר לבחור כמה', { list: { title: 'בחירת תוספות', multi: true, rows: [
   ...EXTRAS.map((e) => [e, e.includes('ארוחת') ? 'במסעדה בלובי, כ-142 ₪ לזוג, חוץ משבת' : 'בתיאום עם דוד', null]),
   ['לכבוד אירוע מיוחד', 'יום הולדת, יום נישואין ועוד', null],
-], onDone: (picked) => { S.extras = picked.filter((p) => p !== 'לכבוד אירוע מיוחד'); if (picked.includes('לכבוד אירוע מיוחד')) return ask(askOccasion); S.occasion = ''; goOn(); } } }); }
+  ['משהו אחר', 'כותבים מה תרצו', null],
+], onDone: (picked) => { S.extras = picked.filter((p) => !['לכבוד אירוע מיוחד', 'משהו אחר'].includes(p)); const ev = picked.includes('לכבוד אירוע מיוחד'); if (!ev) S.occasion = '';
+  const next = () => (ev ? ask(askOccasion) : goOn());
+  if (picked.includes('משהו אחר')) { S.stage = 'textFor'; S.textCb = (t) => { S.note = t; next(); }; return bot('מה עוד תרצו להוסיף?'); }
+  next(); } } }); }
 function askOccasion() { S.stage = 'occasion'; const o = (x) => () => { S.occasion = x; bot('מזל טוב! דוד ידאג שיהיה מושלם.'); goOn(); };
   bot('איזה אירוע חוגגים?', { buttons: [['יום הולדת', o('יום הולדת')], ['יום נישואין', o('יום נישואין')], ['משהו אחר', () => { S.stage = 'occasionText'; S.cur = () => bot('מה חוגגים?'); S.cur(); }]] }); }
 /* 6. סיכום */
@@ -352,12 +358,12 @@ function quote() { return priceStay(DAVID_PRICES[S.apt], nightsOf(S.start, S.nig
 const nis = (n) => n.toLocaleString('he-IL') + ' ₪';
 function summaryLines() {
   const q = quote();
-  return [`<b>${APTS[S.apt].name}</b>`, datesText(), S.guests, S.extras.length ? 'תוספות: ' + S.extras.join(', ') + ' (בתיאום עם דוד)' : '', S.occasion ? 'אירוע: ' + esc(S.occasion) : '',
+  return [`<b>${APTS[S.apt].name}</b>`, datesText(), S.guests, S.extras.length ? 'תוספות: ' + S.extras.join(', ') + ' (בתיאום עם דוד)' : '', S.occasion ? 'אירוע: ' + esc(S.occasion) : '', S.note ? 'בקשה: ' + esc(S.note) : '',
     q.total != null ? `<b>מחיר: ${nis(q.total)}</b>\nמקדמה לשמירת התאריך: ${nis(Math.round(q.total / 2))} (חצי)` : '<b>מחיר: דוד יחזור אליך עם מחיר</b>',
     ...q.flags.filter((f) => FLAG_TEXT[f]).map((f) => FLAG_TEXT[f])].filter(Boolean).join('\n');
 }
 function summary() { S.stage = 'summary'; bot('<b>סיכום ההזמנה</b>\n\n' + summaryLines(), { buttons: [['להעביר לדוד', () => ask(askName)], ['לשנות פרטים', change], ['יש לי שאלה', faq]] }); }
-function change() { const c = (fn) => () => { S.after = 'summary'; ask(fn); }; bot('מה לשנות?', { list: { title: 'שינוי פרטים', rows: [['דירה', '', c(pickApt)], ['תאריך', '', c(askDates)], ['אורחים', '', c(askGuests)], ['תוספות', '', c(askExtras)]] } }); }
+function change() { const c = (fn) => () => { S.after = 'summary'; ask(fn); }; bot('מה לשנות?', { list: { title: 'שינוי פרטים', rows: [['דירה', '', c(pickApt)], ['תאריך', '', c(askDates)], ['אורחים', '', c(askGuests)], ['תוספות', '', c(askExtras)], ['משהו אחר', 'כותבים מה לשנות', () => { S.stage = 'textFor'; S.textCb = (t) => { S.note = (S.note ? S.note + ' · ' : '') + t; ask(summary); }; bot('מה תרצו לשנות או להוסיף?'); }]] } }); }
 /* 7. שם + סיום */
 function askName() { S.stage = 'name'; bot('על איזה שם לרשום?'); }
 function finish() {
@@ -381,7 +387,7 @@ function exStep(type) {
   if (type === 'cancel') return bot('חבל. אפשר להזיז לתאריך אחר במקום לבטל. מה תעדיפו?', { buttons: [['להזיז תאריך', () => exStep('date')], ['לבטל בכל זאת', () => { owner('בקשה לביטול הזמנה', [n]); doneMsg(); }]] });
   if (type === 'extras') return bot('מה להוסיף?', { list: { title: 'תוספות להזמנה', multi: true, rows: EXTRAS.map((e) => [e, '', null]), onDone: (picked) => { if (!picked.length) return menu(); owner('תוספות להזמנה קיימת', [n, picked.join(', ')]); doneMsg(); } } });
   if (type === 'arrive') return bot('את הכתובת, קוד הכספת וכל פרטי ההגעה דוד שולח ביום ההגעה, כשהדירה מוכנה. הכניסה עצמית, עם כספת מפתחות ליד הדלת.', { buttons: [['תודה', menu], ['יש לי שאלה', faq]] });
-  if (type === 'early') return bot('מה תרצו?', { buttons: [['כניסה מוקדמת', () => { owner('בקשה לכניסה מוקדמת', [n]); bot('רשמתי. ביום ההגעה דוד מעדכן אם אפשר להקדים.', { buttons: [['תפריט ראשי', menu]] }); }], ['יציאה מאוחרת', () => { owner('בקשה ליציאה מאוחרת', [n]); bot('רשמתי. דוד בודק אם יש אורחים אחריכם ומעדכן.', { buttons: [['תפריט ראשי', menu]] }); }]] });
+  if (type === 'early') return bot('מה תרצו?', { buttons: [['כניסה מוקדמת', () => { owner('בקשה לכניסה מוקדמת', [n]); bot('רשמתי. ביום ההגעה דוד מעדכן אם אפשר להקדים.', { buttons: [['תפריט ראשי', menu]] }); }], ['יציאה מאוחרת', () => { owner('בקשה ליציאה מאוחרת', [n]); bot('רשמתי. דוד בודק אם יש אורחים אחריכם ומעדכן.', { buttons: [['תפריט ראשי', menu]] }); }], ['אחר', () => exStep('other')]] });
   return askText('מה צריך?', (t) => { owner('בקשה על הזמנה קיימת', [n, '"' + esc(t) + '"']); doneMsg(); });
 }
 /* ביקורת */
