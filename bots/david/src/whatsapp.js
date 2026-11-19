@@ -2,6 +2,8 @@
 // Env: WA_TOKEN, WA_PHONE_NUMBER_ID, WA_APP_SECRET, WA_VERIFY_TOKEN,
 //      WA_NOTIFY_TEMPLATE (optional, approved template with one {{1}} body param).
 
+import { isInstagram, sendInstagramText, sendInstagramImage } from './instagram.js';
+
 const GRAPH = 'https://graph.facebook.com/v21.0';
 
 export function verifyWebhook(url, env) {
@@ -69,6 +71,7 @@ async function post(env, body) {
 export async function sendText(env, to, text) {
   if (env.OUTBOX) { env.OUTBOX.push({ to, text }); return { test: true }; } // tests
   if (env.DRY_RUN === '1') { console.log(`[DRY_RUN → ${to}]\n${text}`); return { dry: true }; }
+  if (isInstagram(to)) return sendInstagramText(env, to, text);
   // WhatsApp caps a text message at 4096 characters.
   const chunks = [];
   for (let s = String(text); s.length; s = s.slice(4000)) chunks.push(s.slice(0, 4000));
@@ -111,6 +114,7 @@ export async function downloadMedia(env, mediaId) {
 export async function sendImage(env, to, link, caption = '') {
   if (env.OUTBOX) { env.OUTBOX.push({ to, image: link, text: caption }); return { test: true }; }
   if (env.DRY_RUN === '1') { console.log(`[DRY_RUN image → ${to}] ${link} ${caption}`); return { dry: true }; }
+  if (isInstagram(to)) { await sendInstagramImage(env, to, link); return caption ? sendInstagramText(env, to, caption) : null; }
   return post(env, { to, type: 'image', image: { link, caption: caption.slice(0, 1000) } });
 }
 
@@ -118,7 +122,7 @@ export async function sendImage(env, to, link, caption = '') {
 // tpl: { name, lang } from config; params fill {{1}}, {{2}}... in the body.
 // Without a template we try plain text, which only works inside the window.
 export async function sendTemplate(env, to, tpl, params, fallbackText) {
-  if (!tpl?.name) return sendText(env, to, fallbackText);
+  if (!tpl?.name || isInstagram(to)) return sendText(env, to, fallbackText);
   if (env.OUTBOX) { env.OUTBOX.push({ to, template: tpl.name, params, text: fallbackText }); return { test: true }; }
   if (env.DRY_RUN === '1') { console.log(`[DRY_RUN template ${tpl.name} → ${to}]`, params); return { dry: true }; }
   return post(env, {

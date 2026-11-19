@@ -176,3 +176,32 @@ export function israelToday(now = Date.now()) {
 export function addDays(day, n) {
   return fmtDate(parseDate(day) + n * DAY);
 }
+
+// Phone numbers: everything we store is digits with country code (9725XXXXXXXX).
+// Accepts "+972 54-123-4567", "054-1234567", "972541234567", "00972...".
+// Returns '' for hidden/anonymous callers or anything that isn't a number.
+export function normalizePhone(raw, country = '972') {
+  const s = String(raw ?? '').trim();
+  if (!s || /anonymous|restricted|unknown|private|חסוי/i.test(s)) return '';
+  let d = s.replace(/[^\d+]/g, '');
+  if (d.startsWith('+')) d = d.slice(1);
+  else if (d.startsWith('00')) d = d.slice(2);
+  else if (d.startsWith('0')) d = country + d.slice(1);
+  d = d.replace(/\D/g, '');
+  return d.length >= 9 && d.length <= 15 ? d : '';
+}
+
+// Israeli mobile numbers (05X) are on WhatsApp; landlines (02, 03, 04, 08, 09, 07X) are not.
+export function isIsraeliMobile(phone) {
+  return /^9725\d{8}$/.test(phone);
+}
+
+export function israelHour(now = Date.now()) {
+  return Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Jerusalem', hour: '2-digit', hourCycle: 'h23' }).format(new Date(now)));
+}
+
+// True when `hour` is inside [from, to) on a clock that may wrap midnight (e.g. 22 → 8).
+export function inQuietHours(hour, quiet) {
+  if (!quiet || quiet.from == null || quiet.to == null || quiet.from === quiet.to) return false;
+  return quiet.from < quiet.to ? hour >= quiet.from && hour < quiet.to : hour >= quiet.from || hour < quiet.to;
+}

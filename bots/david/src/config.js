@@ -33,6 +33,17 @@ export const BUSINESS = {
   },
   // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
   lastMinuteDays: 7,
+  // A call to David's line that nobody answered → a WhatsApp message to the caller.
+  // Needs a phone provider (see README, "שיחה שלא נענתה"). {name} = botName.
+  missedCall: {
+    enabled: false,                // true once the provider forwards calls to /missed-call
+    cooldownHours: 24,             // at most one message per number in this window
+    quietHours: { from: 22, to: 8 }, // calls at night get the message at 08:00
+    notifyOwner: true,             // David gets "📞 שיחה שלא נענתה מ-..." for each one
+    foreignNumbers: true,          // tourists' numbers (not +972) get it too
+    text: 'היי, ראינו שהתקשרת ל{name} ולא הספקנו לענות 🙏 אפשר לכתוב לי כאן במה אפשר לעזור, ואחזור אליך מיד.',
+    voiceText: '',                 // Twilio only: what the caller hears before hanging up. Empty = busy tone (free)
+  },
   // Guests who don't fit any apartment. David asked for leads only: collect the details
   // and send them to his private number, nothing else (no partner list, no commission tracking).
   referral: {
@@ -127,6 +138,7 @@ export const TEMPLATES = {
   review:   { name: '', lang: 'he' },   // בקשת ביקורת
   comeback: { name: '', lang: 'he' },   // הזמנה לחזור
   offer:    { name: '', lang: 'he' },   // מבצע לרשימת התפוצה (Marketing)
+  missed_call: { name: '', lang: 'he' }, // שיחה שלא נענתה. {{1}} = שם העסק (Utility)
 };
 
 // Feature codes the bot can ask about. Keep in sync with features[] above.

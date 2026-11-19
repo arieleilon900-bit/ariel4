@@ -37,8 +37,17 @@ if (B.referral.mode === 'direct' && !PARTNERS.length) block.push('referral.mode 
 
 for (const [k, t] of Object.entries(TEMPLATES)) if (!t.name) warn.push(`אין תבנית WhatsApp מאושרת ל-${k}. אחרי 24 שעות בלי הודעה מהאורח זה לא יישלח.`);
 
+if (B.missedCall?.enabled) {
+  if (!TEMPLATES.missed_call?.name) block.push('missedCall פעיל אבל אין תבנית missed_call מאושרת. בלי תבנית אי אפשר לפנות ראשונים ללקוח.');
+  if (/—/.test(B.missedCall.text || '')) block.push('missedCall.text: יש בו מקף ארוך (—), אסור לפי ANTI_AI_RULES.');
+} else {
+  warn.push('שיחות שלא נענו כבויות (missedCall.enabled = false). להדליק אחרי חיבור ספק טלפוניה.');
+}
+
 const env = ['ANTHROPIC_API_KEY', 'WA_TOKEN', 'WA_PHONE_NUMBER_ID', 'WA_APP_SECRET', 'WA_VERIFY_TOKEN', 'HEALTH_TOKEN', 'WA_NOTIFY_TEMPLATE'];
+const optional = ['IG_TOKEN (אינסטגרם)', 'IG_USER_ID (אינסטגרם, לא חובה)', 'IG_APP_SECRET (אם לאפליקציית אינסטגרם יש secret אחר)', ...(B.missedCall?.enabled ? ['MISSED_CALL_TOKEN (שיחות שלא נענו)'] : [])];
 console.log(block.length ? `\n❌ חוסם עלייה לאוויר (${block.length}):\n` + block.map(x => '  • ' + x).join('\n') : '\n✅ אין חוסמים.');
 console.log(warn.length ? `\n⚠️  כדאי להשלים (${warn.length}):\n` + warn.map(x => '  • ' + x).join('\n') : '');
-console.log(`\nסודות שצריכים להיות מוגדרים ב-Cloudflare (npx wrangler secret list):\n  ${env.join(', ')}\n`);
+console.log(`\nסודות שצריכים להיות מוגדרים ב-Cloudflare (npx wrangler secret list):\n  ${env.join(', ')}`);
+console.log(`לפי הערוצים שמחוברים:\n  ${optional.join(', ')}\n`);
 process.exit(block.length ? 1 : 0);
