@@ -58,7 +58,7 @@ function toBooking(r) {
     aptId: r.apt_id, aptName: r.apt_name, phone: r.phone, name: r.name,
     checkin: r.checkin, checkout: r.checkout,
     party: { adults: r.adults, children: r.children, infants: r.infants },
-    total: r.total, arrival: r.arrival, notes: r.notes,
+    total: r.total, arrival: r.arrival, notes: r.notes, chat: r.chat || null,
   };
 }
 
@@ -74,13 +74,13 @@ export async function activeBookingsFor(env, aptId, now = Date.now()) {
 // asking for the same night at the same second can't both get it.
 export async function insertBookingIfFree(env, b, now = Date.now()) {
   const r = await db(env).prepare(`INSERT INTO bookings
-      (id, status, created_at, apt_id, apt_name, phone, name, checkin, checkout, adults, children, infants, total, arrival, notes)
-      SELECT ?1, 'pending', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14
+      (id, status, created_at, apt_id, apt_name, phone, name, checkin, checkout, adults, children, infants, total, arrival, notes, chat)
+      SELECT ?1, 'pending', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?16
       WHERE NOT EXISTS (SELECT 1 FROM bookings WHERE apt_id = ?3
         AND (status = 'confirmed' OR (status = 'pending' AND created_at > ?15))
         AND checkin < ?8 AND checkout > ?7)`)
     .bind(b.id, now, b.aptId, b.aptName, b.phone, b.name, b.checkin, b.checkout,
-      b.party.adults, b.party.children, b.party.infants, b.total, b.arrival, b.notes, now - HOLD_MS)
+      b.party.adults, b.party.children, b.party.infants, b.total, b.arrival, b.notes, now - HOLD_MS, b.chat ?? null)
     .run();
   return r.meta.changes === 1;
 }
@@ -251,4 +251,40 @@ export async function unsubscribe(env, phone) {
 export async function subscribers(env) {
   const r = await db(env).prepare('SELECT phone, name, lang FROM subscribers WHERE removed_at IS NULL').all();
   return r.results;
+}
+
+// ---------- missed calls ----------
+export async function logMissedCall(env, row) {
+  const r = await db(env).prepare(`INSERT INTO missed_calls (phone, ts, status, reason, sent_at, source)
+      VALUES (?, ?, ?, ?, ?, ?) RETURNING id`)
+    .bind(row.phone, row.ts ?? Date.now(), row.status, row.reason ?? null, row.sentAt ?? null, row.source ?? null).first();
+  return r.id;
+}
+
+export async function setMissedCall(env, id, status, reason = null) {
+  await db(env).prepare('UPDATE missed_calls SET status = ?, reason = ?, sent_at = CASE WHEN ? = \'sent\' THEN ? ELSE sent_at END WHERE id = ?')
+    .bind(status, reason, status, Date.now(), id).run();
+}
+
+// The last call from this number we answered (or will answer at night's end).
+export async function lastMissedCallMessage(env, phone, sinceTs) {
+  return db(env).prepare(`SELECT * FROM missed_calls WHERE phone = ? AND status IN ('sent', 'queued') AND ts > ?
+      ORDER BY ts DESC LIMIT 1`).bind(phone, sinceTs).first();
+}
+
+export async function queuedMissedCalls(env) {
+  const r = await db(env).prepare(`SELECT * FROM missed_calls WHERE status = 'queued' ORDER BY ts`).all();
+  return r.results;
+}
+
+// ---------- settings the bot maintains itself ----------
+export async function getSetting(env, key) {
+  const r = await db(env).prepare('SELECT value, updated_at FROM settings WHERE key = ?').bind(key).first();
+  return r ? { value: r.value, updatedAt: r.updated_at } : null;
+}
+
+export async function putSetting(env, key, value) {
+  await db(env).prepare(`INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`)
+    .bind(key, value, Date.now()).run();
 }

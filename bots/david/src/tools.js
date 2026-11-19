@@ -1,16 +1,18 @@
 // Tools the model can call, and what they do. Prices, capacity and availability are
 // always computed here in code, never by the model.
 
-import { findApartments, matchPartners, REASON_HE, quote, israelToday } from './logic.js';
+import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone } from './logic.js';
 import { busyFor } from './ical.js';
 import { FEATURES } from './config.js';
 import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe } from './store.js';
 import { reportProblem } from './monitor.js';
 import { sendNotify, sendImage } from './whatsapp.js';
+import { instagramUsername } from './instagram.js';
 
 const featureCodes = Object.keys(FEATURES);
 const date = { type: 'string', description: 'YYYY-MM-DD' };
 const int = (d) => ({ type: 'integer', description: d });
+const phoneField = { type: 'string', description: 'רק באינסטגרם: מספר הנייד שהלקוח נתן. בוואטסאפ: ריק' };
 
 export const TOOLS = [
   {
@@ -45,8 +47,9 @@ export const TOOLS = [
         adults: { type: 'integer' }, children: { type: 'integer' }, infants: { type: 'integer' },
         arrival_time: { type: 'string', description: 'שעת הגעה משוערת, או "לא ידוע"' },
         notes: { type: 'string', description: 'בקשות מיוחדות, גילאי ילדים, סיבת הנסיעה. ריק אם אין' },
+        phone: phoneField,
       },
-      required: ['apartment_id', 'full_name', 'checkin', 'checkout', 'adults', 'children', 'infants', 'arrival_time', 'notes'],
+      required: ['apartment_id', 'full_name', 'checkin', 'checkout', 'adults', 'children', 'infants', 'arrival_time', 'notes', 'phone'],
     },
   },
   {
@@ -68,13 +71,14 @@ export const TOOLS = [
         needs: { type: 'array', items: { type: 'string', enum: featureCodes } },
         requests: { type: 'string', description: 'עוד בקשות במילים של הלקוח, או ריק' },
         reason: { type: 'string', enum: ['capacity', 'dates_taken', 'missing_features', 'over_budget', 'other'], description: 'למה לא מתאים לדירות שלנו' },
+        phone: phoneField,
       },
-      required: ['customer_consented', 'full_name', 'checkin', 'checkout', 'adults', 'children', 'children_ages', 'budget', 'area', 'needs', 'requests', 'reason'],
+      required: ['customer_consented', 'full_name', 'checkin', 'checkout', 'adults', 'children', 'children_ages', 'budget', 'area', 'needs', 'requests', 'reason', 'phone'],
     },
   },
   {
     name: 'send_photos',
-    description: 'שולח ללקוח בוואטסאפ תמונות של דירה. קוראים כשהלקוח מבקש תמונות, או כשמציעים לו דירה בפעם הראשונה.',
+    description: 'שולח ללקוח תמונות של דירה (בוואטסאפ או באינסטגרם, איפה שהוא כותב). קוראים כשהלקוח מבקש תמונות, או כשמציעים לו דירה בפעם הראשונה.',
     strict: true,
     input_schema: {
       type: 'object',
@@ -93,8 +97,9 @@ export const TOOLS = [
       properties: {
         customer_consented: { type: 'boolean' },
         language: { type: 'string', enum: ['he', 'en', 'ru', 'ar', 'fr', 'other'] },
+        phone: phoneField,
       },
-      required: ['customer_consented', 'language'],
+      required: ['customer_consented', 'language', 'phone'],
     },
   },
   {
@@ -115,6 +120,23 @@ export const TOOLS = [
 
 const nis = (n) => '₪' + Number(n).toLocaleString('en-US');
 const partyText = (p) => `${p.adults} מבוגרים${p.children ? `, ${p.children} ילדים` : ''}${p.infants ? `, ${p.infants} תינוקות` : ''}`;
+
+// The guest's WhatsApp number. On WhatsApp it's who wrote; on Instagram the model
+// must have asked for it (phone field). Returns { phone } or { error }.
+function guestPhone(input, ctx) {
+  if (ctx.channel !== 'instagram') return { phone: ctx.phone };
+  const phone = normalizePhone(input.phone);
+  if (!phone) return { error: 'באינסטגרם אין לנו את הטלפון של הלקוח. בקש ממנו מספר נייד (בשביל האישור והתזכורות בוואטסאפ) ואז קרא שוב עם phone.' };
+  return { phone };
+}
+
+// How the owner reaches this guest, for alerts.
+async function contact(ctx, phone) {
+  if (ctx.channel !== 'instagram') return `+${ctx.phone}\nhttps://wa.me/${ctx.phone}`;
+  const user = await instagramUsername(ctx.env, ctx.phone);
+  const ig = `אינסטגרם${user ? ` @${user}` : ''}`;
+  return phone ? `+${phone} (פנה מ${ig})\nhttps://wa.me/${phone}` : `${ig}, בלי טלפון: עונים לו בהודעות של אינסטגרם`;
+}
 
 async function busyMap(ctx) {
   const map = {};
@@ -173,11 +195,14 @@ async function bookingTool(input, ctx) {
   const res = check.results[0];
   if (!res.fits) return { error: 'הדירה כבר לא מתאימה: ' + res.reasons.map(k => REASON_HE[k]).join(', ') + '. קרא שוב ל-find_apartments.' };
 
+  const gp = guestPhone(input, ctx);
+  if (gp.error) return gp;
   const B = ctx.business;
   const q = quote(apt, input.checkin, input.checkout, input, israelToday());
   const rec = {
     id: newId('B'), status: 'pending', createdAt: Date.now(),
-    aptId: apt.id, aptName: apt.name, phone: ctx.phone, name: input.full_name,
+    aptId: apt.id, aptName: apt.name, phone: gp.phone, name: input.full_name,
+    chat: ctx.channel === 'instagram' ? ctx.phone : null,
     checkin: input.checkin, checkout: input.checkout,
     party: { adults: input.adults, children: input.children, infants: input.infants },
     total: q.total, arrival: input.arrival_time, notes: input.notes,
@@ -193,7 +218,7 @@ async function bookingTool(input, ctx) {
     : q.discountPending ? `מחיר לפי המחירון: ${nis(q.total)}. ${q.nights} לילות, מגיעה לו הנחה נוספת: תכתוב לו את המחיר הסופי`
     : `סה"כ: ${nis(q.total)}`;
   await sendNotify(ctx.env, B.ownerPhone,
-    `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
+    `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}${rec.chat ? ' (הזמין מאינסטגרם)' : ''}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
 
   return {
     booking_id: rec.id, total: q.total, deposit, discount_pending: q.discountPending, owner_quote: q.ownerQuote,
@@ -204,10 +229,13 @@ async function bookingTool(input, ctx) {
 
 async function referTool(input, ctx) {
   if (!input.customer_consented) return { error: 'צריך אישור מפורש של הלקוח להעביר את הפרטים. שאל אותו קודם.' };
+  const gp = guestPhone(input, ctx);
+  if (gp.error) return gp;
+  const { phone: _given, ...fields } = input;
   const B = ctx.business;
   const partners = matchPartners(ctx.partners, { adults: input.adults, children: input.children, needs: input.needs });
   const rec = {
-    id: newId('R'), status: 'sent', createdAt: Date.now(), phone: ctx.phone, ...input,
+    id: newId('R'), status: 'sent', createdAt: Date.now(), ...fields, phone: gp.phone,
     candidates: partners.map(p => p.id),
   };
   await insertReferral(ctx.env, rec);
@@ -218,7 +246,7 @@ async function referTool(input, ctx) {
   const kids = input.children ? `, ${input.children} ילדים${input.children_ages ? ` (${input.children_ages})` : ''}` : '';
   const details = [
     `👤 ${input.full_name}`,
-    `📞 +${ctx.phone}`,
+    `📞 +${gp.phone}${ctx.channel === 'instagram' ? ' (מאינסטגרם)' : ''}`,
     `📅 ${input.checkin} עד ${input.checkout}`,
     `👨‍👩‍👧 ${input.adults} מבוגרים${kids}`,
     input.budget && `💰 ${input.budget}`,
@@ -229,7 +257,7 @@ async function referTool(input, ctx) {
   const reason = REASON_HE[input.reason] || input.reason;
   const match = partners.length ? `\nמתאים ל: ${partners.map(p => `${p.name}${p.area ? ` (${p.area})` : ''}`).join(', ')}` : '';
   const track = B.referral.trackCommission ? `\n\nכשנסגר שלח: נסגר ${rec.id} <עמלה>\nאם לא: לא נסגר ${rec.id}` : '';
-  const chat = `\n\nלכתוב ללקוח: https://wa.me/${ctx.phone}`;
+  const chat = `\n\nלכתוב ללקוח: https://wa.me/${gp.phone}`;
 
   if (B.referral.mode === 'direct' && partners.length) {
     const target = ctx.partners.find(p => p.id === partners[0].id);
@@ -243,7 +271,7 @@ async function referTool(input, ctx) {
 
 async function notifyTool(input, ctx) {
   const B = ctx.business;
-  await sendNotify(ctx.env, B.ownerPhone, `${input.urgent ? '🚨 *דחוף*' : '💬 *שאלה מלקוח*'}\n${input.summary}\nלקוח: ${ctx.name || ''} +${ctx.phone}\nhttps://wa.me/${ctx.phone}`);
+  await sendNotify(ctx.env, B.ownerPhone, `${input.urgent ? '🚨 *דחוף*' : '💬 *שאלה מלקוח*'}\n${input.summary}\nלקוח: ${ctx.name ? ctx.name + ' ' : ''}${await contact(ctx)}`);
   if (input.urgent) await bump(ctx.env, 'urgent');
   return { sent: true };
 }
@@ -259,6 +287,8 @@ async function photosTool(input, ctx) {
 
 async function subscribeTool(input, ctx) {
   if (!input.customer_consented) return { error: 'צריך הסכמה מפורשת של הלקוח.' };
-  await subscribe(ctx.env, ctx.phone, ctx.name, input.language);
+  const gp = guestPhone(input, ctx);
+  if (gp.error) return gp;
+  await subscribe(ctx.env, gp.phone, ctx.name, input.language);
   return { subscribed: true, note: 'אפשר להגיד ללקוח שבכל רגע אפשר לכתוב "הסר".' };
 }

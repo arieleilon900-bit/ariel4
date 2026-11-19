@@ -7,6 +7,8 @@ import {
   followUpCandidates, saveConv, usageBetween, errorsBetween, cleanup,
   addBlock, removeBlock, blocksFor,
 } from './store.js';
+import { flushQueuedMissedCalls } from './missedcall.js';
+import { refreshInstagramToken } from './instagram.js';
 import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays } from './journey.js';
 import { sendText, sendNotify } from './whatsapp.js';
 import { israelToday, weekStart, parseDate, nightsBetween } from './logic.js';
@@ -87,16 +89,26 @@ async function confirmBooking(ctx, id, price) {
   const p = apt.privateInfo || {};
   const info = [p.address && `כתובת: ${p.address}`, p.parking && `חניה: ${p.parking}`].filter(Boolean).join('\n');
   // The guest wrote recently, so this is normally inside the 24-hour window.
-  await sendNotify(ctx.env, b.phone,
+  await toGuest(ctx, b,
     `${b.name}, ההזמנה שלך אושרה ✅\n${b.aptName}\n${b.checkin} עד ${b.checkout}\nכניסה מ-${apt.checkIn || ''}, ${new Date(b.checkout + 'T00:00:00Z').getUTCDay() === 6 ? 'יציאה במוצאי שבת' : `יציאה עד ${apt.checkOut || ''}`}\nסה"כ: ${nis(b.total)}${info ? `\n${info}` : ''}\nקוד כניסה ו-Wi-Fi יישלחו יום לפני ההגעה. מחכים לכם!`);
   return sendText(ctx.env, ctx.phone, `אושר ✅ ${b.id}, הלקוח קיבל אישור.`);
+}
+
+// A guest who booked from Instagram hears back there; if Instagram refuses
+// (more than 24 hours since they wrote), the phone they gave gets it on WhatsApp.
+async function toGuest(ctx, b, text) {
+  if (b.chat) {
+    try { return await sendText(ctx.env, b.chat, text); }
+    catch (e) { console.warn('instagram reply failed, using WhatsApp', e.message); }
+  }
+  return sendNotify(ctx.env, b.phone, text);
 }
 
 async function cancelBooking(ctx, id) {
   const b = await getBooking(ctx.env, id);
   if (!b) return sendText(ctx.env, ctx.phone, `לא מצאתי הזמנה ${id}`);
   await setBookingStatus(ctx.env, id, 'cancelled');
-  await sendNotify(ctx.env, b.phone, `${b.name}, מצטערים, התאריכים האלה כבר לא פנויים ב${b.aptName}. אפשר לבדוק לך תאריכים אחרים או דירה אחרת?`);
+  await toGuest(ctx, b, `${b.name}, מצטערים, התאריכים האלה כבר לא פנויים ב${b.aptName}. אפשר לבדוק לך תאריכים אחרים או דירה אחרת?`);
   return sendText(ctx.env, ctx.phone, `בוטל ${b.id}, הלקוח קיבל הודעה.`);
 }
 
@@ -138,6 +150,7 @@ export async function weeklyText(ctx, week = weekStart(Date.now() - 86400e3)) {
       ? `\nנסגרו: ${refs.filter(r => r.status === 'closed').length}\nעמלות: ${nis(refs.reduce((x, r) => x + (r.commission || 0), 0))}` +
         (open.length ? `\nעוד לא סימנת: ${open.map(r => r.id).join(', ')}` : '')
       : '') +
+    (s.missedCalls ? `\n\n📞 שיחות שלא נענו שקיבלו וואטסאפ: ${s.missedCalls}${s.missedCallReplies ? ` (${s.missedCallReplies} ענו)` : ''}` : '') +
     (s.urgent ? `\n\n🚨 פניות דחופות: ${s.urgent}` : '');
 }
 
@@ -189,7 +202,10 @@ export async function scheduled(ctx, now = Date.now()) {
   if (hour === 10 && (dow === 0 || dow === 3)) await job('לילות פנויים', () => lastMinuteNudge(ctx, now));
   if (hour === 23) await job('בדיקת תקציב', () => budgetCheck(ctx, now));
   if (hour === 3) await job('ניקוי', () => cleanup(ctx.env, now));
+  // Instagram tokens expire after 60 days unless refreshed. A failure alerts the tech partner.
+  if (hour === 4 && dow === 1 && ctx.env.IG_TOKEN) await job('חידוש טוקן אינסטגרם', () => refreshInstagramToken(ctx.env));
   await job('הודעות מעקב', () => followUps(ctx, now));
+  await job('שיחות שלא נענו מהלילה', () => flushQueuedMissedCalls(ctx, now));
 }
 
 async function budgetCheck(ctx, now) {

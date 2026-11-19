@@ -26,6 +26,14 @@ export function costMicros(u) {
 
 let cachedPrompt = null;
 
+// Per-message facts the model needs; kept out of the cached system prompt.
+function contextLine(ctx) {
+  if (ctx.channel === 'instagram') {
+    return `[תאריך היום: ${israelToday()}. ערוץ: אינסטגרם (הודעה פרטית). אין לנו את הטלפון של הלקוח: לפני הזמנה, העברת ליד או הרשמה למבצעים מבקשים מספר נייד ומעבירים אותו בשדה phone.]`;
+  }
+  return `[תאריך היום: ${israelToday()}${ctx.name ? `, שם בוואטסאפ: ${ctx.name}` : ''}]`;
+}
+
 // Returns { text, problem } — problem is set when the guest got the fallback reply.
 export async function reply(ctx, userText, images = []) {
   const client = ctx.client || new Anthropic({ apiKey: ctx.env.ANTHROPIC_API_KEY });
@@ -43,7 +51,7 @@ export async function reply(ctx, userText, images = []) {
     ...history,
     { role: 'user', content: [
       ...images,
-      { type: 'text', text: `[תאריך היום: ${israelToday()}${ctx.name ? `, שם בוואטסאפ: ${ctx.name}` : ''}]\n${userText}` },
+      { type: 'text', text: `${contextLine(ctx)}${ctx.note ? '\n' + ctx.note : ''}\n${userText}` },
     ] },
   ];
 
