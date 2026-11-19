@@ -320,3 +320,100 @@ test('Instagram token is refreshed weekly into D1 and used from there; a failed 
     globalThis.fetch = realFetch;
   }
 });
+
+// ---------- only callers NOT saved in the owner's phone ----------
+test('saved contacts never get the missed-call message: contact cards, "שמור" command, and the provider flag', async () => {
+  const { incomingMessages } = await import('../src/whatsapp.js');
+  const env = fakeEnv();
+  const ctx = ctxOf(env);
+  const owner = { ...ctx, phone: OWNER };
+
+  // David shares two contact cards from his phone.
+  const [card] = incomingMessages({ entry: [{ changes: [{ value: { contacts: [{ wa_id: OWNER }], messages: [{
+    id: 'c1', from: OWNER, type: 'contacts',
+    contacts: [
+      { name: { formatted_name: 'יוסי אינסטלטור' }, phones: [{ phone: '+972 54-333-4444', wa_id: '972543334444' }] },
+      { name: { formatted_name: 'אמא' }, phones: [{ phone: '052-555-6666' }, { phone: '03-6001234' }] },
+    ],
+  }] } }] }] });
+  await handleMessage(env, card, { business, apartments: APARTMENTS, partners: [], agency, templates });
+  assert.match(env.OUTBOX.at(-1).text, /שמרתי 3 מספרים \(יוסי אינסטלטור, אמא\)/);
+
+  await handleOwner(owner, 'שמור 054-777-1111 דני');
+  assert.match(env.OUTBOX.at(-1).text, /שמרתי את \+972547771111/);
+  await handleOwner(owner, 'שמורים');
+  assert.match(env.OUTBOX.at(-1).text, /יש 4 מספרים שמורים/);
+  env.OUTBOX.length = 0;
+
+  for (const from of ['0543334444', '+972525556666', '0547771111']) {
+    const r = await handleMissedCall(ctx, { from }, NOON);
+    assert.equal(r.reason, 'saved_contact', from);
+  }
+  assert.equal((await handleMissedCall(ctx, { from: '0548889999', saved: true }, NOON)).reason, 'saved_contact', 'provider says saved');
+  assert.equal(env.OUTBOX.length, 0, 'no message to anyone saved');
+
+  // An unknown number does get it.
+  assert.equal((await handleMissedCall(ctx, { from: '0541010101' }, NOON)).status, 'sent');
+
+  // Removing from saved: next call gets a message.
+  await handleOwner(owner, 'לא שמור 0547771111');
+  assert.match(env.OUTBOX.at(-1).text, /מחקתי/);
+  assert.equal((await handleMissedCall(ctx, { from: '0547771111' }, NOON)).status, 'sent');
+});
+
+test('/missed-call reads saved=1 from the provider', async () => {
+  const { savedFrom } = await import('../src/missedcall.js');
+  assert.equal(savedFrom({ saved: '1' }), true);
+  assert.equal(savedFrom({ known: 'true' }), true);
+  assert.equal(savedFrom({ saved: '0' }), false);
+  assert.equal(savedFrom({}), false);
+});
+
+test('a partner calling is not messaged either', async () => {
+  const env = fakeEnv();
+  const ctx = { ...ctxOf(env), partners: [{ id: 'p1', name: 'יוסי', phone: '972501234567' }] };
+  assert.equal((await handleMissedCall(ctx, { from: '050-123-4567' }, NOON)).reason, 'staff');
+});
+
+test('contacts import: iPhone vCard and Google CSV become normalized numbers and safe SQL', async () => {
+  const { parseVcf, parseCsv, contactsToRows, toSql } = await import('../scripts/import-contacts.js');
+  const vcf = [
+    'BEGIN:VCARD', 'VERSION:3.0', 'N:כהן;דנה;;;', 'FN:דנה כהן',
+    'item1.TEL;type=CELL;type=pref:+972 54-123-4567', 'TEL;type=HOME:03-6001234', 'END:VCARD',
+    'BEGIN:VCARD', 'VERSION:3.0', "FN:O'Brien", 'TEL;TYPE=CELL:052-999-8888', 'END:VCARD',
+  ].join('\r\n');
+  const v = contactsToRows(parseVcf(vcf));
+  assert.deepEqual(v, [
+    { phone: '972541234567', name: 'דנה כהן' },
+    { phone: '97236001234', name: 'דנה כהן' },
+    { phone: '972529998888', name: "O'Brien" },
+  ]);
+  const csv = '﻿First Name,Last Name,Phone 1 - Label,Phone 1 - Value,Phone 2 - Value\n'
+    + 'משה,לוי,Mobile,054-111-2222 ::: 054-111-3333,\n'
+    + '"רות, הגננת",,Mobile,,+972 50 444 5555\n'
+    + 'בלי,טלפון,,,\n';
+  const c = contactsToRows(parseCsv(csv));
+  assert.deepEqual(c.map(r => r.phone), ['972541112222', '972541113333', '972504445555']);
+  assert.equal(c[2].name, 'רות, הגננת');
+
+  // The generated SQL runs against the real schema and quotes names safely.
+  const env = fakeEnv();
+  env.DB.raw.exec(toSql([...v, ...c, v[0]]));
+  const { isContact, contactCount } = await import('../src/store.js');
+  assert.equal(await contactCount(env), 6);
+  assert.ok(await isContact(env, '972529998888'));
+});
+
+test('Instagram: shared posts, reels, stickers and ice-breaker taps still get an answer', () => {
+  const msgs = incomingInstagram(igPayload([
+    { sender: { id: '1' }, recipient: { id: '2' }, message: { mid: 'a', attachments: [{ type: 'share', payload: { url: 'https://x' } }] } },
+    { sender: { id: '1' }, recipient: { id: '2' }, message: { mid: 'b', attachments: [{ type: 'ig_reel', payload: { reel_video_id: '9' } }] } },
+    { sender: { id: '1' }, recipient: { id: '2' }, message: { mid: 'c', attachments: [{ type: 'like_heart' }] } },
+    { sender: { id: '1' }, recipient: { id: '2' }, message: { mid: 'd', attachments: [{ type: 'video', payload: { url: 'https://v' } }] } },
+    { sender: { id: '1' }, recipient: { id: '2' }, timestamp: 5, postback: { mid: 'e', title: 'מה המחירים?', payload: 'PRICES' } },
+  ]));
+  assert.equal(msgs.length, 5);
+  for (const m of msgs) assert.ok(m.text.length > 0, `${m.type} has text for the bot`);
+  assert.match(msgs[0].text, /פוסט/);
+  assert.equal(msgs[4].text, 'מה המחירים?');
+});

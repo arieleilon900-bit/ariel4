@@ -40,6 +40,7 @@ for (const [k, t] of Object.entries(TEMPLATES)) if (!t.name) warn.push(`אין �
 if (B.missedCall?.enabled) {
   if (!TEMPLATES.missed_call?.name) block.push('missedCall פעיל אבל אין תבנית missed_call מאושרת. בלי תבנית אי אפשר לפנות ראשונים ללקוח.');
   if (/—/.test(B.missedCall.text || '')) block.push('missedCall.text: יש בו מקף ארוך (—), אסור לפי ANTI_AI_RULES.');
+  warn.push('שיחות שלא נענו: לוודא שאנשי הקשר של דוד יובאו (npm run contacts, README סעיף 6), אחרת גם מי ששמור אצלו יקבל הודעה.');
 } else {
   warn.push('שיחות שלא נענו כבויות (missedCall.enabled = false). להדליק אחרי חיבור ספק טלפוניה.');
 }

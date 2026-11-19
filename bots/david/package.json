@@ -6,7 +6,8 @@
     "test": "node --test --no-warnings test/*.test.js",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "check": "node scripts/check-config.js"
+    "check": "node scripts/check-config.js",
+    "contacts": "node scripts/import-contacts.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0"

@@ -41,6 +41,10 @@ export function incomingMessages(payload) {
           mediaId: m.audio?.id || m.image?.id || null,
           mime: m.audio?.mime_type || m.image?.mime_type || null,
           caption: m.image?.caption || '',
+          contacts: m.type === 'contacts' ? (m.contacts || []).map(c => ({
+            name: c.name?.formatted_name || [c.name?.first_name, c.name?.last_name].filter(Boolean).join(' '),
+            phones: (c.phones || []).map(p => p.wa_id || p.phone).filter(Boolean),
+          })) : null,
           text: m.type === 'text' ? m.text?.body || ''
             : m.type === 'button' ? m.button?.text || ''
             : m.type === 'interactive' ? (m.interactive?.button_reply?.title || m.interactive?.list_reply?.title || '')

@@ -36,7 +36,7 @@ export const BUSINESS = {
   // A call to David's line that nobody answered → a WhatsApp message to the caller.
   // Needs a phone provider (see README, "שיחה שלא נענתה"). {name} = botName.
   missedCall: {
-    enabled: false,                // true once the provider forwards calls to /missed-call
+    enabled: true,                 // nothing happens until a provider posts to /missed-call (README §6)
     cooldownHours: 24,             // at most one message per number in this window
     quietHours: { from: 22, to: 8 }, // calls at night get the message at 08:00
     notifyOwner: true,             // David gets "📞 שיחה שלא נענתה מ-..." for each one

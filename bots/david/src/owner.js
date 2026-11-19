@@ -5,13 +5,13 @@ import {
   getBooking, setBookingStatus, setBookingTotal, bookingsOnDay, pendingBookings,
   getReferral, closeReferralRow, referralsBetween, getStats, bump,
   followUpCandidates, saveConv, usageBetween, errorsBetween, cleanup,
-  addBlock, removeBlock, blocksFor,
+  addBlock, removeBlock, blocksFor, addContacts, removeContact, contactCount,
 } from './store.js';
 import { flushQueuedMissedCalls } from './missedcall.js';
 import { refreshInstagramToken } from './instagram.js';
 import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays } from './journey.js';
 import { sendText, sendNotify } from './whatsapp.js';
-import { israelToday, weekStart, parseDate, nightsBetween } from './logic.js';
+import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone } from './logic.js';
 import { reportProblem } from './monitor.js';
 
 const HELP = `פקודות:
@@ -26,13 +26,34 @@ const HELP = `פקודות:
 חסימות : רשימת החסימות
 שחרר 5 : מבטל חסימה מספר 5
 מבצע: הטקסט : שולח מבצע לכל מי שברשימת התפוצה
-סיכום : הסיכום השבועי עכשיו`;
+סיכום : הסיכום השבועי עכשיו
+
+שיחות שלא נענו (רק מי שלא שמור אצלך מקבל וואטסאפ):
+שלח לי איש קשר (אחד או כמה) : נשמר, לא יקבל הודעה
+שמור 0541234567 יוסי : שומר מספר
+לא שמור 0541234567 : מוחק מהשמורים
+שמורים : כמה מספרים שמורים`;
 
 const nis = (n) => '₪' + Math.round(Number(n || 0)).toLocaleString('en-US');
 
-export async function handleOwner(ctx, text) {
-  const t = text.trim();
+export async function handleOwner(ctx, text, msg = {}) {
+  if (msg.contacts?.length) return saveContactCards(ctx, msg.contacts);
+  const t = String(text || '').trim();
   let m;
+  if ((m = t.match(/^לא שמור\s+([+\d][\d\s\-+]{6,})/))) {
+    const phone = normalizePhone(m[1]);
+    return sendText(ctx.env, ctx.phone, phone && (await removeContact(ctx.env, phone)) ? `מחקתי את +${phone} מהשמורים. אם יתקשר ולא תענה, יקבל וואטסאפ.` : 'המספר הזה לא היה שמור.');
+  }
+  if ((m = t.match(/^שמור\s+([+\d][\d\s\-+]{6,}?)(?:\s+(\D.*))?$/))) {
+    const phone = normalizePhone(m[1]);
+    if (!phone) return sendText(ctx.env, ctx.phone, 'לא הבנתי את המספר. לדוגמה: שמור 0541234567 יוסי');
+    await addContacts(ctx.env, [{ phone, name: (m[2] || '').trim() }], 'command');
+    return sendText(ctx.env, ctx.phone, `שמרתי את +${phone}. אם יתקשר ולא תענה, לא נשלח לו הודעה.`);
+  }
+  if (/^שמורים/.test(t)) {
+    const n = await contactCount(ctx.env);
+    return sendText(ctx.env, ctx.phone, `יש ${n} מספרים שמורים. הם לא מקבלים וואטסאפ על שיחה שלא נענתה.\nכדי להוסיף: שלח לי אנשי קשר מהטלפון (אפשר כמה ביחד), או כתוב: שמור 0541234567 שם`);
+  }
   if ((m = t.match(/^אושר\s+(B\w+)\s*₪?\s*([\d,]+)?/i))) return confirmBooking(ctx, m[1].toUpperCase(), m[2]);
   if ((m = t.match(/^בוטל\s+(B\w+)/i))) return cancelBooking(ctx, m[1].toUpperCase());
   if ((m = t.match(/^לא נסגר\s+(R\w+)/i))) return closeReferral(ctx, m[1].toUpperCase(), false);
@@ -92,6 +113,16 @@ async function confirmBooking(ctx, id, price) {
   await toGuest(ctx, b,
     `${b.name}, ההזמנה שלך אושרה ✅\n${b.aptName}\n${b.checkin} עד ${b.checkout}\nכניסה מ-${apt.checkIn || ''}, ${new Date(b.checkout + 'T00:00:00Z').getUTCDay() === 6 ? 'יציאה במוצאי שבת' : `יציאה עד ${apt.checkOut || ''}`}\nסה"כ: ${nis(b.total)}${info ? `\n${info}` : ''}\nקוד כניסה ו-Wi-Fi יישלחו יום לפני ההגעה. מחכים לכם!`);
   return sendText(ctx.env, ctx.phone, `אושר ✅ ${b.id}, הלקוח קיבל אישור.`);
+}
+
+// David shares contact cards from his phone: those people won't get the missed-call message.
+async function saveContactCards(ctx, cards) {
+  const rows = [];
+  for (const c of cards) for (const p of c.phones) { const phone = normalizePhone(p); if (phone) rows.push({ phone, name: c.name }); }
+  if (!rows.length) return sendText(ctx.env, ctx.phone, 'לא מצאתי מספר טלפון באיש הקשר ששלחת.');
+  await addContacts(ctx.env, rows, 'card');
+  const names = [...new Set(cards.map(c => c.name).filter(Boolean))];
+  return sendText(ctx.env, ctx.phone, `שמרתי ${rows.length === 1 ? 'מספר אחד' : `${rows.length} מספרים`}${names.length ? ` (${names.slice(0, 5).join(', ')}${names.length > 5 ? '...' : ''})` : ''}. אם יתקשרו ולא תענה, לא נשלח להם הודעה.`);
 }
 
 // A guest who booked from Instagram hears back there; if Instagram refuses
