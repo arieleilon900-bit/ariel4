@@ -14,7 +14,7 @@ import { reply, FALLBACK_REPLY } from './agent.js';
 import { handleOwner, scheduled } from './owner.js';
 import { reportProblem } from './monitor.js';
 import { incomingInstagram, isInstagram } from './instagram.js';
-import { handleMissedCall, callerFrom, missedCallNote, missedCallConfig, twimlResponse } from './missedcall.js';
+import { handleMissedCall, callerFrom, savedFrom, missedCallNote, missedCallConfig, twimlResponse } from './missedcall.js';
 
 const OPT_OUT = /^\s*(הסר|הסירו|הסירו אותי|stop|unsubscribe)\s*[.!]?\s*$/i;
 const NEW_INQUIRY_GAP = 3 * 24 * 3600e3; // a guest quiet for 3 days counts as a new inquiry
@@ -26,7 +26,7 @@ function baseCtx(env) {
 export async function handleMessage(env, msg, extra = {}) {
   const channel = isInstagram(msg.from) ? 'instagram' : 'whatsapp';
   const ctx = { ...baseCtx(env), ...extra, phone: msg.from, name: msg.name, channel };
-  if (channel === 'whatsapp' && ctx.business.ownerPhone && msg.from === ctx.business.ownerPhone) return handleOwner(ctx, msg.text);
+  if (channel === 'whatsapp' && ctx.business.ownerPhone && msg.from === ctx.business.ownerPhone) return handleOwner(ctx, msg.text, msg);
 
   const conv = await getConv(env, msg.from);
   ctx.conv = conv;
@@ -92,7 +92,7 @@ async function missedCallEndpoint(req, env, url, execCtx) {
     if (DRAFT && env.ALLOW_DRAFT !== '1') return { status: 'skipped', reason: 'draft' };
     if (answered) return { status: 'skipped', reason: 'answered' };
     try {
-      return await handleMissedCall(ctx, { from: callerFrom(params), source: params.source || (isTwilio ? 'twilio' : '') });
+      return await handleMissedCall(ctx, { from: callerFrom(params), saved: savedFrom(params), source: params.source || (isTwilio ? 'twilio' : '') });
     } catch (e) {
       await reportProblem(ctx, 'תקלה בטיפול בשיחה שלא נענתה', e.stack || e.message);
       return { status: 'failed', reason: e.message };

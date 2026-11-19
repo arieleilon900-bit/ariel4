@@ -6,6 +6,7 @@
 // The business sets "forward when unanswered" on its line to the provider's number.
 //
 // Rules so this never turns into spam:
+// - only numbers NOT saved in the owner's phone (contacts table, or the provider says so)
 // - mobile numbers only (an Israeli landline has no WhatsApp), never hidden numbers
 // - at most one message per number per cooldownHours (default 24)
 // - not to the owner, the cleaner or the tech partner
@@ -14,7 +15,7 @@
 // The guest's reply lands in the normal bot conversation, with a note that they called.
 
 import { normalizePhone, isIsraeliMobile, israelHour, inQuietHours } from './logic.js';
-import { getConv, bump, logMissedCall, setMissedCall, lastMissedCallMessage, queuedMissedCalls } from './store.js';
+import { getConv, bump, logMissedCall, setMissedCall, lastMissedCallMessage, queuedMissedCalls, isContact } from './store.js';
 import { sendTemplate, sendNotify } from './whatsapp.js';
 import { reportProblem } from './monitor.js';
 
@@ -45,8 +46,14 @@ export function callerFrom(params) {
   return '';
 }
 
+// Did the provider tell us the caller is saved in the phone's contacts? (saved=1)
+export function savedFrom(params) {
+  const flag = String(params?.saved ?? params?.known ?? params?.contact ?? '').toLowerCase();
+  return ['1', 'true', 'yes', 'כן'].includes(flag);
+}
+
 // Returns { status: 'sent' | 'queued' | 'skipped' | 'failed', reason?, phone }.
-export async function handleMissedCall(ctx, { from, source = '' }, now = Date.now()) {
+export async function handleMissedCall(ctx, { from, source = '', saved = false }, now = Date.now()) {
   const env = ctx.env;
   const cfg = missedCallConfig(ctx.business);
   const phone = normalizePhone(from);
@@ -59,8 +66,10 @@ export async function handleMissedCall(ctx, { from, source = '' }, now = Date.no
   if (!phone) return { status: 'skipped', reason: 'hidden_number', phone: '' };
   if (phone.startsWith('972') && !isIsraeliMobile(phone)) return skip('landline');
   if (!phone.startsWith('972') && !cfg.foreignNumbers) return skip('foreign');
-  const staff = [ctx.business.ownerPhone, ctx.business.cleanerPhone, ctx.agency?.techPhone].filter(Boolean);
+  const staff = [ctx.business.ownerPhone, ctx.business.cleanerPhone, ctx.agency?.techPhone, ...(ctx.partners || []).map(p => p.phone)]
+    .map(p => normalizePhone(p)).filter(Boolean);
   if (staff.includes(phone)) return skip('staff');
+  if (saved || (await isContact(env, phone))) return skip('saved_contact');
 
   const conv = await getConv(env, phone);
   if (conv.optedOut) return skip('opted_out');

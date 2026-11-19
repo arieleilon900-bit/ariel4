@@ -62,17 +62,34 @@ export function incomingInstagram(payload) {
   const out = [];
   for (const entry of payload.entry || []) {
     for (const ev of entry.messaging || []) {
-      const m = ev.message;
       const sender = ev.sender?.id;
+      // Ice-breaker / button taps arrive as postbacks: treat the button title as text.
+      if (ev.postback && sender && sender !== entry.id) {
+        out.push({ id: ev.postback.mid || `pb_${sender}_${ev.timestamp}`, from: IG_PREFIX + sender, name: '', type: 'text', channel: 'instagram', text: ev.postback.title || ev.postback.payload || '', caption: '' });
+        continue;
+      }
+      const m = ev.message;
       // Skip our own replies (echo), reads, reactions, deletions, and anything we sent.
       if (!m || m.is_echo || m.is_deleted || m.is_unsupported || !sender || sender === entry.id) continue;
       const att = (m.attachments || [])[0];
       const type = m.text ? 'text' : att?.type === 'audio' ? 'audio' : att?.type === 'image' ? 'image' : att?.type || 'unsupported';
+      // Something without words (a shared post or reel, a video, a sticker, a like):
+      // a short description, so the bot still answers and asks how it can help.
+      const described = {
+        share: '[הלקוח שלח פוסט. כנראה מתעניין במה שבפוסט. שאל בחום במה אפשר לעזור, ואם זה על דירה, לאילו תאריכים ובכמה אנשים.]',
+        ig_reel: '[הלקוח שלח ריל. שאל בחום במה אפשר לעזור, ואם זה על דירה, לאילו תאריכים ובכמה אנשים.]',
+        reel: '[הלקוח שלח ריל. שאל בחום במה אפשר לעזור, ואם זה על דירה, לאילו תאריכים ובכמה אנשים.]',
+        video: '[הלקוח שלח סרטון שאי אפשר לראות. ענה בחום ובקש שיכתוב במילים במה אפשר לעזור.]',
+        file: '[הלקוח שלח קובץ שאי אפשר לפתוח. ענה בחום ובקש שיכתוב במילים במה אפשר לעזור.]',
+        like_heart: '[הלקוח שלח לב. ענה בחום ושאל במה אפשר לעזור.]',
+        sticker: '[הלקוח שלח סטיקר. ענה בחום ושאל במה אפשר לעזור.]',
+        animated_image: '[הלקוח שלח GIF. ענה בחום ושאל במה אפשר לעזור.]',
+      }[att?.type] || (m.sticker_id ? '[הלקוח שלח סטיקר. ענה בחום ושאל במה אפשר לעזור.]' : '');
       out.push({
         id: m.mid, from: IG_PREFIX + sender, name: '', type, channel: 'instagram',
         mediaUrl: (type === 'audio' || type === 'image') ? att?.payload?.url || null : null,
         caption: '',
-        text: m.text || (m.quick_reply?.payload ? m.quick_reply.payload : ''),
+        text: m.text || m.quick_reply?.payload || described,
         storyReply: !!m.reply_to?.story,
       });
     }

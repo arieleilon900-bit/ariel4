@@ -288,3 +288,26 @@ export async function putSetting(env, key, value) {
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`)
     .bind(key, value, Date.now()).run();
 }
+
+// ---------- the owner's saved contacts (no missed-call message to them) ----------
+export async function addContacts(env, rows, source) {
+  const now = Date.now();
+  const stmts = rows.map(r => db(env).prepare(`INSERT INTO contacts (phone, name, source, created_at) VALUES (?, ?, ?, ?)
+      ON CONFLICT(phone) DO UPDATE SET name = COALESCE(NULLIF(excluded.name, ''), contacts.name)`)
+    .bind(r.phone, r.name || '', source, now));
+  for (let i = 0; i < stmts.length; i += 50) await db(env).batch(stmts.slice(i, i + 50));
+  return rows.length;
+}
+
+export async function removeContact(env, phone) {
+  const r = await db(env).prepare('DELETE FROM contacts WHERE phone = ?').bind(phone).run();
+  return r.meta.changes === 1;
+}
+
+export async function isContact(env, phone) {
+  return !!(await db(env).prepare('SELECT 1 FROM contacts WHERE phone = ?').bind(phone).first());
+}
+
+export async function contactCount(env) {
+  return (await db(env).prepare('SELECT COUNT(*) AS n FROM contacts').first()).n;
+}
