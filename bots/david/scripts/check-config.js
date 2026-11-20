@@ -37,7 +37,14 @@ if (B.referral.mode === 'direct' && !PARTNERS.length) block.push('referral.mode 
 
 for (const [k, t] of Object.entries(TEMPLATES)) if (!t.name) warn.push(`אין תבנית WhatsApp מאושרת ל-${k}. אחרי 24 שעות בלי הודעה מהאורח זה לא יישלח.`);
 
-if (B.missedCall?.enabled) {
+const on = (m) => B.modules?.[m] !== false;
+const hasCal = !!(B.calendar?.googleCalendarId || Object.keys(B.calendar?.perApartment || {}).length);
+if (on('calendar') && !hasCal) warn.push('calendar: המודול פעיל אבל אין יומן גוגל מוגדר (BUSINESS.calendar). README סעיף 7.');
+if (on('calendar') && hasCal) for (const a of APARTMENTS) if (!B.calendar.perApartment?.[a.id] && !B.calendar.googleCalendarId) block.push(`calendar: אין יומן לדירה ${a.name}.`);
+const off = Object.entries(B.modules || {}).filter(([, v]) => v === false).map(([k]) => k);
+if (off.length) console.log(`\nמודולים כבויים אצל הלקוח הזה: ${off.join(', ')}`);
+
+if (on('missedCalls') && B.missedCall?.enabled !== false) {
   if (!TEMPLATES.missed_call?.name) block.push('missedCall פעיל אבל אין תבנית missed_call מאושרת. בלי תבנית אי אפשר לפנות ראשונים ללקוח.');
   if (/—/.test(B.missedCall.text || '')) block.push('missedCall.text: יש בו מקף ארוך (—), אסור לפי ANTI_AI_RULES.');
   warn.push('שיחות שלא נענו: לוודא שאנשי הקשר של דוד יובאו (npm run contacts, README סעיף 6), אחרת גם מי ששמור אצלו יקבל הודעה.');
@@ -46,7 +53,11 @@ if (B.missedCall?.enabled) {
 }
 
 const env = ['ANTHROPIC_API_KEY', 'WA_TOKEN', 'WA_PHONE_NUMBER_ID', 'WA_APP_SECRET', 'WA_VERIFY_TOKEN', 'HEALTH_TOKEN', 'WA_NOTIFY_TEMPLATE'];
-const optional = ['IG_TOKEN (אינסטגרם)', 'IG_USER_ID (אינסטגרם, לא חובה)', 'IG_APP_SECRET (אם לאפליקציית אינסטגרם יש secret אחר)', ...(B.missedCall?.enabled ? ['MISSED_CALL_TOKEN (שיחות שלא נענו)'] : [])];
+const optional = [
+  ...(on('instagram') ? ['IG_TOKEN (אינסטגרם)', 'IG_USER_ID (אינסטגרם, לא חובה)', 'IG_APP_SECRET (אם לאפליקציית אינסטגרם יש secret אחר)'] : []),
+  ...(on('missedCalls') ? ['MISSED_CALL_TOKEN (שיחות שלא נענו)'] : []),
+  ...(on('calendar') ? ['GCAL_SA_JSON (יומן גוגל)', 'CAL_FEED_TOKEN (יומן לאירביאנבי/בוקינג)'] : []),
+];
 console.log(block.length ? `\n❌ חוסם עלייה לאוויר (${block.length}):\n` + block.map(x => '  • ' + x).join('\n') : '\n✅ אין חוסמים.');
 console.log(warn.length ? `\n⚠️  כדאי להשלים (${warn.length}):\n` + warn.map(x => '  • ' + x).join('\n') : '');
 console.log(`\nסודות שצריכים להיות מוגדרים ב-Cloudflare (npx wrangler secret list):\n  ${env.join(', ')}`);

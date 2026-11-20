@@ -33,6 +33,18 @@ export const BUSINESS = {
   },
   // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
   lastMinuteDays: 7,
+  // What this client bought. Switch a module off with false; the bot then doesn't offer,
+  // say or send anything from it. Prices per module: bots/MODULES.md.
+  modules: {
+    instagram: true,       // answers Instagram DMs
+    missedCalls: true,     // missed call from an unsaved number → WhatsApp
+    calendar: true,        // Google Calendar sync + calendar feed for Airbnb/Booking
+    voiceAndPhotos: true,  // understands voice notes and photos
+    followUps: true,       // nudges a guest who got a price and went quiet
+    stayMessages: true,    // reminder, welcome, checkout, review request, come back
+    offers: true,          // offers list (with consent) + "מבצע:" + free-nights nudge
+    referrals: true,       // guests who don't fit become a lead for David
+  },
   // Google Calendar (README §7). Every booking goes in right away ("⏳ ממתין" until David
   // approves, then "✅"), and anything David adds by hand blocks those nights.
   // Best: one calendar per apartment, each shared with the service account email

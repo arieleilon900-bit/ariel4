@@ -14,6 +14,7 @@ import { transcribe, imageBlock } from './media.js';
 import { reply, FALLBACK_REPLY } from './agent.js';
 import { handleOwner, scheduled } from './owner.js';
 import { reportProblem } from './monitor.js';
+import { moduleOn } from './logic.js';
 import { incomingInstagram, isInstagram } from './instagram.js';
 import { feedResponse } from './feed.js';
 import { handleMissedCall, callerFrom, savedFrom, missedCallNote, missedCallConfig, twimlResponse } from './missedcall.js';
@@ -28,6 +29,7 @@ function baseCtx(env) {
 export async function handleMessage(env, msg, extra = {}) {
   const channel = isInstagram(msg.from) ? 'instagram' : 'whatsapp';
   const ctx = { ...baseCtx(env), ...extra, phone: msg.from, name: msg.name, channel };
+  if (channel === 'instagram' && !moduleOn(ctx.business, 'instagram')) return; // not bought: stay silent
   if (channel === 'whatsapp' && ctx.business.ownerPhone && msg.from === ctx.business.ownerPhone) return handleOwner(ctx, msg.text, msg);
 
   const conv = await getConv(env, msg.from);
@@ -51,7 +53,7 @@ export async function handleMessage(env, msg, extra = {}) {
   // Voice notes are transcribed; photos go to the model as images.
   let text = msg.text;
   const images = [];
-  const media = msg.mediaUrl ? { url: msg.mediaUrl } : msg.mediaId;
+  const media = moduleOn(ctx.business, 'voiceAndPhotos') ? (msg.mediaUrl ? { url: msg.mediaUrl } : msg.mediaId) : null;
   if (msg.type === 'audio' && media) {
     try { text = `[הודעה קולית, תמלול:] ${await transcribe(env, media)}`; }
     catch (e) {
@@ -112,6 +114,7 @@ async function health(env, url) {
     const u = await usageBetween(env, Date.now() - 86400e3, Date.now());
     return Response.json({
       ok: true, draft: DRAFT,
+      modulesOff: Object.entries(BUSINESS.modules || {}).filter(([, v]) => v === false).map(([k]) => k),
       last24h: { modelCalls: u.calls, guests: u.guests, costUsd: +(u.micros / 1e6).toFixed(3) },
       lastError: err ? { at: new Date(err.ts).toISOString(), kind: err.kind, detail: err.detail } : null,
     });
@@ -146,7 +149,8 @@ export default {
 
     // Answer Meta at once; the reply is sent in the background.
     execCtx.waitUntil((async () => {
-      for (const msg of [...incomingMessages(payload), ...incomingInstagram(payload)]) {
+      const ig = moduleOn(BUSINESS, 'instagram') ? incomingInstagram(payload) : [];
+      for (const msg of [...incomingMessages(payload), ...ig]) {
         const ctx = { ...baseCtx(env), phone: msg.from };
         try {
           if (await alreadySeen(env, msg.id)) continue;

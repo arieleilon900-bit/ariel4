@@ -12,7 +12,7 @@ import { refreshInstagramToken } from './instagram.js';
 import { syncBookingEvent, removeBookingEvent, syncBlockEvent, removeBlockEvent, calendarConfig, checkCalendars } from './gcal.js';
 import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays } from './journey.js';
 import { sendText, sendNotify } from './whatsapp.js';
-import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone } from './logic.js';
+import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone, moduleOn } from './logic.js';
 import { reportProblem } from './monitor.js';
 
 const HELP = `פקודות:
@@ -70,6 +70,7 @@ export async function handleOwner(ctx, text, msg = {}) {
   if (/^יומן/.test(t)) return sendText(ctx.env, ctx.phone, await calendarStatus(ctx));
   if (/^פנוי/.test(t)) return sendText(ctx.env, ctx.phone, await freeText(ctx));
   if ((m = t.match(/^מבצע\s*:\s*([\s\S]+)/))) {
+    if (!moduleOn(ctx.business, 'offers')) return sendText(ctx.env, ctx.phone, 'רשימת המבצעים לא פעילה אצלך.');
     const r = await broadcastOffer(ctx, m[1].trim());
     return sendText(ctx.env, ctx.phone, `המבצע נשלח ל-${r.sent} אנשים${r.failed ? `, ${r.failed} נכשלו` : ''}.`);
   }
@@ -251,13 +252,13 @@ export async function scheduled(ctx, now = Date.now()) {
       for (const to of reportRecipients(ctx)) await sendNotify(ctx.env, to, text);
     });
   }
-  await job('הודעות לאורחים', () => stayMessages(ctx, hour, now));
-  if (hour === 10 && (dow === 0 || dow === 3)) await job('לילות פנויים', () => lastMinuteNudge(ctx, now));
+  if (moduleOn(B, 'stayMessages')) await job('הודעות לאורחים', () => stayMessages(ctx, hour, now));
+  if (moduleOn(B, 'offers') && hour === 10 && (dow === 0 || dow === 3)) await job('לילות פנויים', () => lastMinuteNudge(ctx, now));
   if (hour === 23) await job('בדיקת תקציב', () => budgetCheck(ctx, now));
   if (hour === 3) await job('ניקוי', () => cleanup(ctx.env, now));
   // Instagram tokens expire after 60 days unless refreshed. A failure alerts the tech partner.
   if (hour === 4 && dow === 1 && ctx.env.IG_TOKEN) await job('חידוש טוקן אינסטגרם', () => refreshInstagramToken(ctx.env));
-  await job('הודעות מעקב', () => followUps(ctx, now));
+  if (moduleOn(B, 'followUps')) await job('הודעות מעקב', () => followUps(ctx, now));
   await job('שיחות שלא נענו מהלילה', () => flushQueuedMissedCalls(ctx, now));
   // A request nobody approved within 48h frees its dates: take it out of the calendar too.
   if (calendarConfig(B)) await job('ניקוי יומן', async () => {
