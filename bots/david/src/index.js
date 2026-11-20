@@ -4,7 +4,8 @@
 // Env (wrangler secrets / vars): ANTHROPIC_API_KEY, WA_TOKEN, WA_PHONE_NUMBER_ID,
 // WA_APP_SECRET, WA_VERIFY_TOKEN, optional WA_NOTIFY_TEMPLATE, HEALTH_TOKEN,
 // optional IG_TOKEN / IG_USER_ID / IG_APP_SECRET (Instagram DMs),
-// optional MISSED_CALL_TOKEN (missed calls), DRY_RUN=1 for testing. D1 binding: DB.
+// optional MISSED_CALL_TOKEN (missed calls), optional GCAL_SA_JSON (Google Calendar),
+// optional CAL_FEED_TOKEN (calendar feed for Airbnb/Booking), DRY_RUN=1 for testing. D1 binding: DB.
 
 import { BUSINESS, APARTMENTS, PARTNERS, AGENCY, TEMPLATES, DRAFT } from './config.js';
 import { verifyWebhook, validSignature, incomingMessages, sendText } from './whatsapp.js';
@@ -14,6 +15,7 @@ import { reply, FALLBACK_REPLY } from './agent.js';
 import { handleOwner, scheduled } from './owner.js';
 import { reportProblem } from './monitor.js';
 import { incomingInstagram, isInstagram } from './instagram.js';
+import { feedResponse } from './feed.js';
 import { handleMissedCall, callerFrom, savedFrom, missedCallNote, missedCallConfig, twimlResponse } from './missedcall.js';
 
 const OPT_OUT = /^\s*(הסר|הסירו|הסירו אותי|stop|unsubscribe)\s*[.!]?\s*$/i;
@@ -123,6 +125,8 @@ export default {
     const url = new URL(req.url);
     if (url.pathname === '/health') return health(env, url);
     if (url.pathname === '/missed-call') return missedCallEndpoint(req, env, url, execCtx);
+    const cal = url.pathname.match(/^\/cal\/([^/]+)\/([^/]+\.ics)$/);
+    if (cal && req.method === 'GET') return feedResponse(env, APARTMENTS, BUSINESS, cal[1], cal[2]);
     if (url.pathname !== '/webhook') return new Response('ok');
     if (req.method === 'GET') return verifyWebhook(url, env);
     if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });

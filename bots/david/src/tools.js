@@ -8,6 +8,7 @@ import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, bl
 import { reportProblem } from './monitor.js';
 import { sendNotify, sendImage } from './whatsapp.js';
 import { instagramUsername } from './instagram.js';
+import { syncBookingEvent } from './gcal.js';
 
 const featureCodes = Object.keys(FEATURES);
 const date = { type: 'string', description: 'YYYY-MM-DD' };
@@ -143,7 +144,7 @@ async function busyMap(ctx) {
   const onError = (kind, detail) => reportProblem(ctx, kind, detail);
   for (const apt of ctx.apartments) {
     const own = [...await activeBookingsFor(ctx.env, apt.id), ...(await blocksFor(ctx.env, apt.id)).map(b => ({ checkin: b.start, checkout: b.end }))];
-    map[apt.id] = await busyFor(apt, ctx.env, own, onError);
+    map[apt.id] = await busyFor(apt, ctx.env, own, onError, ctx);
   }
   return map;
 }
@@ -219,6 +220,10 @@ async function bookingTool(input, ctx) {
     : `סה"כ: ${nis(q.total)}`;
   await sendNotify(ctx.env, B.ownerPhone,
     `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}${rec.chat ? ' (הזמין מאינסטגרם)' : ''}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
+
+  // Into the owner's calendar right away (as "waiting for approval").
+  try { await syncBookingEvent(ctx, rec, 'pending'); }
+  catch (e) { await reportProblem(ctx, 'הזמנה לא נכנסה ליומן גוגל', `${rec.id}: ${e.message}`); }
 
   return {
     booking_id: rec.id, total: q.total, deposit, discount_pending: q.discountPending, owner_quote: q.ownerQuote,
