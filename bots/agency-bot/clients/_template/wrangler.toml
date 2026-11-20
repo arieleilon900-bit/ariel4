@@ -33,6 +33,10 @@ OWNER_PHONE = ""
 # מי מקבל התראות על תקלות (אריאל)
 ADMIN_PHONE = "972524666175"
 SHEET_ID = ""
+# יומן גוגל (רשות): המייל של היומן של בעל העסק. הוא משתף את היומן עם המייל של ה-Service Account (GOOGLE_SA_JSON), עם "ביצוע שינויים באירועים"
+CALENDAR_ID = ""
+# כמה דקות כל תור תופס ביומן
+CALENDAR_EVENT_MINUTES = "60"
 REVIEW_LINK = ""
 TEMPLATE_LANG = "he"
 

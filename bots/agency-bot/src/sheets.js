@@ -2,7 +2,8 @@
 
 import { buildLeadRow, leadContext, sheetHeaders, stamp } from './leadrow.js';
 
-let cachedToken = null; // { token, exp }
+const cachedTokens = {}; // scope → { token, exp }
+const SHEETS_SCOPE = 'https://www.googleapis.com/auth/spreadsheets';
 
 function b64url(input) {
   const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : new Uint8Array(input);
@@ -11,13 +12,15 @@ function b64url(input) {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-async function getAccessToken(env) {
+// scope: גיליון (ברירת מחדל) או יומן (gcal.js). לכל אחד טוקן משלו
+async function getAccessToken(env, scope = SHEETS_SCOPE) {
   const now = Math.floor(Date.now() / 1000);
-  if (cachedToken && cachedToken.exp - 60 > now) return cachedToken.token;
+  const cached = cachedTokens[scope];
+  if (cached && cached.exp - 60 > now) return cached.token;
   const sa = JSON.parse(env.GOOGLE_SA_JSON);
   const header = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const claim = b64url(JSON.stringify({
-    iss: sa.client_email, scope: 'https://www.googleapis.com/auth/spreadsheets',
+    iss: sa.client_email, scope,
     aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600,
   }));
   const pem = sa.private_key.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
@@ -32,8 +35,8 @@ async function getAccessToken(env) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(`google token ${res.status} ${JSON.stringify(data)}`);
-  cachedToken = { token: data.access_token, exp: now + (data.expires_in || 3600) };
-  return cachedToken.token;
+  cachedTokens[scope] = { token: data.access_token, exp: now + (data.expires_in || 3600) };
+  return data.access_token;
 }
 
 // טבלת הלקוחות: שורה אחת לכל פנייה, והסטטוס שלה מתעדכן עד הסוף (פנייה ← הועבר לחנן ← תור ← הסתיים).

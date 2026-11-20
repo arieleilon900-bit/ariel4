@@ -6,6 +6,7 @@ import { BUSINESS, FEATURES, TEMPLATE_DEFS } from './config.js';
 import { MODEL } from './ai.js';
 import { ensureHeader, getAccessToken } from './sheets.js';
 import { yeshCall, yeshConfigured } from './yesh.js';
+import { calendarConfigured, checkCalendar } from './gcal.js';
 import { DUAL, is360, isDual, isUltra } from './whatsapp.js';
 
 const D360 = 'https://waba-v2.360dialog.io';
@@ -190,6 +191,13 @@ export async function runSetup(env, { origin, checkOnly = false } = {}) {
     const token = await getAccessToken(env);
     const r = checkOnly ? 'נבדק' : await ensureHeader(env, token);
     ok(`גיליון: יש גישה${r === 'created' ? ', ונוספה שורת כותרות' : ''}`);
+  });
+
+  // ---------- יומן גוגל (רשות) ----------
+  if (env.CALENDAR_ID && !env.GOOGLE_SA_JSON) warn('יומן: יש CALENDAR_ID אבל חסר GOOGLE_SA_JSON');
+  else if (calendarConfigured(env)) await step('יומן', async () => {
+    await checkCalendar(env);
+    ok('יומן: יש גישה, תורים חדשים ייכנסו ליומן');
   });
 
   // ---------- יש חשבונית ----------

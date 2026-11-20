@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
 // ---------- D1 מדומה ----------
 function makeD1() {
   const db = new DatabaseSync(':memory:');
-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql', '0010_calendar.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
   return {
     prepare(sql) {
       let args = [];
@@ -34,6 +34,8 @@ let outSeq = 0;
 let yeshQueue = [], yeshRequests = [];
 const dualRequests = [];
 const sheet = [];        // גיליון הגוגל המדומה
+const calCalls = [];     // קריאות ליומן גוגל המדומה
+let calFail = false;
 globalThis.fetch = async (url, init = {}) => {
   url = String(url);
   if (url.includes('api.anthropic.com')) {
@@ -61,6 +63,13 @@ globalThis.fetch = async (url, init = {}) => {
   }
   if (url.startsWith('https://ultra-media.example/')) return new Response(new Uint8Array([1, 2, 3]), { status: 200, headers: { 'content-type': 'image/jpeg' } });
   if (url.startsWith('https://oauth2.googleapis.com/token')) return Response.json({ access_token: 'g', expires_in: 3600 });
+  if (url.startsWith('https://www.googleapis.com/calendar/v3/')) {
+    calCalls.push({ url, method: init.method || 'GET', body: init.body ? JSON.parse(init.body) : null });
+    if (calFail) return new Response('forbidden', { status: 403 });
+    if (init.method === 'POST') return Response.json({ id: `ev${calCalls.length}` });
+    if (init.method === 'DELETE') return new Response(null, { status: 204 });
+    return Response.json({ items: [] });
+  }
   if (url.startsWith('https://sheets.googleapis.com/')) {
     const range = decodeURIComponent(url.split('/values/')[1].split('?')[0]);
     if (!init.method) return Response.json({ values: range === 'A1:J1' ? sheet.slice(0, 1) : sheet });
@@ -1686,4 +1695,44 @@ test('sales bot: the ad experiment: only people from a trial ad get the trial of
     assert.match(mails.at(-1).text, /חודש ראשון עלינו \(עם ניסיון\): 1 פנו/);
     assert.match(mails.at(-1).text, /מקדמה 500: 1 פנו/);
   });
+});
+
+test('google calendar: appointment goes into the owner calendar, cancel removes it, failure does not block the appointment', async () => {
+  sent.length = 0; calCalls.length = 0; calFail = false;
+  const { generateKeyPairSync } = await import('node:crypto');
+  const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  const sa = JSON.stringify({ client_email: 'bot@x.iam', private_key: privateKey.export({ type: 'pkcs8', format: 'pem' }) });
+  const env = { ...makeEnv(), GOOGLE_SA_JSON: sa, CALENDAR_ID: 'neve@gmail.com', CALENDAR_EVENT_MINUTES: '45' };
+  const t0 = new Date('2026-10-14T08:00:00Z');
+  aiQueue = [ai({ reply: 'העברתי', issue: 'הסרת שיער לרגליים', address: 'הרצל 5 חולון', customer_name: 'שירן', ready_for_handoff: true, summary_for_owner: 'פעם ראשונה' })];
+  await processWebhook(env, inbound(CUSTOMER, { type: 'text', text: { body: 'כמה עולה לייזר לרגליים?' } }, 'gc1'), t0);
+
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 16/10/2026 14:30' } }, 'gc2'), t0);
+  const add = calCalls.find((c) => c.method === 'POST');
+  assert.ok(add.url.includes(encodeURIComponent('neve@gmail.com')));
+  assert.match(add.body.summary, /הסרת שיער לרגליים/);
+  assert.match(add.body.description, /054-1234567/);
+  assert.equal(add.body.start.dateTime, '2026-10-16T11:30:00.000Z');
+  assert.equal(add.body.end.dateTime, '2026-10-16T12:15:00.000Z');
+  assert.equal(add.body.start.timeZone, 'Asia/Jerusalem');
+  assert.equal(env.DB.raw.prepare("SELECT gcal_event_id g FROM jobs WHERE status='open'").get().g, 'ev1');
+  assert.ok(textsTo(OWNER).some((t) => t.includes('נכנס גם ליומן')));
+
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'ביטול 0541234567' } }, 'gc3'), t0);
+  const del = calCalls.find((c) => c.method === 'DELETE');
+  assert.ok(del.url.endsWith('/events/ev1'));
+
+  // היומן נופל: התור נשמר בכל זאת, ובעל העסק יודע להוסיף ביד
+  calFail = true; sent.length = 0;
+  await processWebhook(env, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 17/10/2026 10:00' } }, 'gc4'), t0);
+  assert.equal(env.DB.raw.prepare("SELECT COUNT(*) n FROM jobs WHERE status='open'").get().n, 1);
+  assert.ok(textsTo(OWNER).some((t) => t.includes('לא הצלחתי להכניס ליומן')));
+  calFail = false;
+
+  // בלי CALENDAR_ID: אין שום קריאה ליומן
+  calCalls.length = 0; sent.length = 0;
+  const plain = makeEnv();
+  await processWebhook(plain, inbound(OWNER, { type: 'text', text: { body: 'תור 0541234567 18/10/2026 10:00' } }, 'gc5'), t0);
+  assert.equal(calCalls.length, 0);
+  assert.ok(!textsTo(OWNER).some((t) => t.includes('יומן')));
 });

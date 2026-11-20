@@ -6,6 +6,7 @@ import { aiRespond, customerLang, forwardPhotosToOwner, refKey, isPaused, logEve
 import { weeklyReport } from './cron.js';
 import { tableLink } from './table.js';
 import { deliverReceipt } from './receipts.js';
+import { addAppointment, calendarConfigured, removeAppointment } from './gcal.js';
 import * as wa from './whatsapp.js';
 
 const HELP_TEXT = `הכי פשוט: עונים (החלקה ימינה) על ההודעה שקיבלת על הלקוח, וכותבים רק את הפקודה. בלי טלפון.
@@ -284,11 +285,25 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       if (!at) return sendToOwner(env, 'לא הבנתי את התאריך או השעה. כתוב למשל: תור 17/10 14:30', now);
       if (at.getTime() < now.getTime()) return sendToOwner(env, `התאריך והשעה כבר עברו (${whenLabel(at, now)}). כתוב שוב עם תאריך עתידי.`, now);
       const conv = await latestConv(env, c.phone);
-      await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
-        .bind(c.phone, conv?.id || null, conv?.issue || null, c.address || conv?.address || null, at.toISOString(), nowIso(now)).run();
+      const address = c.address || conv?.address || null;
+      const job = await env.DB.prepare('INSERT INTO jobs (phone, conv_id, issue, address, scheduled_at, created_at) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(c.phone, conv?.id || null, conv?.issue || null, address, at.toISOString(), nowIso(now)).run();
       if (conv) await env.DB.prepare("UPDATE conversations SET followup_sent = 1 WHERE id = ?").bind(conv.id).run();
       await upsertLead(env, c.phone, { status: `תור נקבע: ${whenLabel(at, now)}`, address: c.address }, now);
-      return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.`, now);
+      // יומן גוגל (אם מחובר). תקלה ביומן לא מבטלת את התור: התזכורות עובדות גם בלי
+      let calNote = '';
+      if (calendarConfigured(env)) {
+        try {
+          const cust = await env.DB.prepare('SELECT name FROM customers WHERE phone = ?').bind(c.phone).first();
+          const eventId = await addAppointment(env, { phone: c.phone, name: cust?.name, issue: conv?.issue, address, at });
+          await env.DB.prepare('UPDATE jobs SET gcal_event_id = ? WHERE id = ?').bind(eventId, job.meta?.last_row_id).run();
+          calNote = ' נכנס גם ליומן.';
+        } catch (e) {
+          console.error('calendar add', e);
+          calNote = ' (לא הצלחתי להכניס ליומן, צריך להוסיף ביד.)';
+        }
+      }
+      return sendToOwner(env, `✓ נקבעה עבודה ל-${displayPhone(c.phone)}: ${whenLabel(at, now)}. הלקוח יקבל תזכורת יום לפני ושעתיים לפני, ואתה תקבל תזכורת בבוקר ושעה לפני.${calNote}`, now);
     }
 
     case 'done': {
@@ -325,7 +340,9 @@ export async function handleOwnerCommand(env, text, now = new Date(), msg = null
       return sendToOwner(env, `✓ סומן שטיפלת ב-${displayPhone(c.phone)}.`, now);
 
     case 'cancel': {
+      const { results: inCal } = await env.DB.prepare("SELECT gcal_event_id FROM jobs WHERE phone = ? AND status = 'open' AND gcal_event_id IS NOT NULL").bind(c.phone).all();
       await env.DB.prepare("UPDATE jobs SET status = 'cancelled' WHERE phone = ? AND status = 'open'").bind(c.phone).run();
+      for (const j of inCal || []) await removeAppointment(env, j.gcal_event_id).catch((e) => console.error('calendar delete', e));
       await upsertLead(env, c.phone, { status: 'עבודה בוטלה' }, now);
       return sendToOwner(env, `✓ בוטלה העבודה של ${displayPhone(c.phone)}.`, now);
     }
