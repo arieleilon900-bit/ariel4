@@ -33,6 +33,27 @@ export const BUSINESS = {
   },
   // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
   lastMinuteDays: 7,
+  // What this client bought. Switch a module off with false; the bot then doesn't offer,
+  // say or send anything from it. Prices per module: bots/MODULES.md.
+  modules: {
+    instagram: true,       // answers Instagram DMs
+    missedCalls: true,     // missed call from an unsaved number → WhatsApp
+    calendar: true,        // Google Calendar sync + calendar feed for Airbnb/Booking
+    voiceAndPhotos: true,  // understands voice notes and photos
+    followUps: true,       // nudges a guest who got a price and went quiet
+    stayMessages: true,    // reminder, welcome, checkout, review request, come back
+    offers: true,          // offers list (with consent) + "מבצע:" + free-nights nudge
+    referrals: true,       // guests who don't fit become a lead for David
+  },
+  // Google Calendar (README §7). Every booking goes in right away ("⏳ ממתין" until David
+  // approves, then "✅"), and anything David adds by hand blocks those nights.
+  // Best: one calendar per apartment, each shared with the service account email
+  // ("Make changes to events"). One shared calendar works too: an event that names an
+  // apartment ("קו המים 2" / "דירה 2") blocks only it, an event that names none blocks all.
+  calendar: {
+    googleCalendarId: '',          // one calendar for all apartments (its "Calendar ID" from Google settings)
+    perApartment: {},              // or one each: { apt1: '...@group.calendar.google.com', apt2: '...', apt3: '...' }
+  },
   // A call to David's line that nobody answered → a WhatsApp message to the caller.
   // Needs a phone provider (see README, "שיחה שלא נענתה"). {name} = botName.
   missedCall: {

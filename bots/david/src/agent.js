@@ -3,7 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { buildSystemPrompt } from './prompt.js';
-import { TOOLS, runTool } from './tools.js';
+import { toolsFor, runTool } from './tools.js';
 import { israelToday } from './logic.js';
 import { logUsage } from './store.js';
 
@@ -24,7 +24,7 @@ export function costMicros(u) {
   );
 }
 
-let cachedPrompt = null;
+const promptCache = new WeakMap(); // per business config
 
 // Per-message facts the model needs; kept out of the cached system prompt.
 function contextLine(ctx) {
@@ -37,7 +37,8 @@ function contextLine(ctx) {
 // Returns { text, problem } — problem is set when the guest got the fallback reply.
 export async function reply(ctx, userText, images = []) {
   const client = ctx.client || new Anthropic({ apiKey: ctx.env.ANTHROPIC_API_KEY });
-  cachedPrompt = cachedPrompt || buildSystemPrompt(ctx.business, ctx.apartments);
+  if (!promptCache.has(ctx.business)) promptCache.set(ctx.business, { system: buildSystemPrompt(ctx.business, ctx.apartments), tools: toolsFor(ctx.business) });
+  const { system: cachedPrompt, tools } = promptCache.get(ctx.business);
 
   // Stored history is text only. Follow-ups can leave two assistant turns in a row,
   // so merge same-role neighbours.
@@ -65,7 +66,7 @@ export async function reply(ctx, userText, images = []) {
       output_config: { effort: ctx.effort || 'medium' },
       cache_control: { type: 'ephemeral' },
       system: cachedPrompt,
-      tools: TOOLS,
+      tools,
       messages,
     });
     if (res.usage) {

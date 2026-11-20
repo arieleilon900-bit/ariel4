@@ -81,7 +81,7 @@ export async function freeNights(ctx, days, now = Date.now()) {
   const out = [];
   for (const apt of ctx.apartments) {
     const own = [...await activeBookingsFor(ctx.env, apt.id), ...(await blocksFor(ctx.env, apt.id)).map(x => ({ checkin: x.start, checkout: x.end }))];
-    const busy = await busyFor(apt, ctx.env, own, (k, d) => reportProblem(ctx, k, d));
+    const busy = await busyFor(apt, ctx.env, own, (k, d) => reportProblem(ctx, k, d), ctx);
     const free = nightsBetween(today, addDays(today, days)).filter(d => isFree(busy, d, addDays(d, 1)));
     if (free.length) out.push({ apt, free });
   }

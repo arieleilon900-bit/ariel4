@@ -58,7 +58,7 @@ function toBooking(r) {
     aptId: r.apt_id, aptName: r.apt_name, phone: r.phone, name: r.name,
     checkin: r.checkin, checkout: r.checkout,
     party: { adults: r.adults, children: r.children, infants: r.infants },
-    total: r.total, arrival: r.arrival, notes: r.notes, chat: r.chat || null,
+    total: r.total, arrival: r.arrival, notes: r.notes, chat: r.chat || null, gcalEventId: r.gcal_event_id || null,
   };
 }
 
@@ -228,9 +228,34 @@ export async function addBlock(env, aptId, start, end, note) {
   return r.id;
 }
 
+// Returns the removed block ({ aptId, gcalEventId }) or null if there was none.
 export async function removeBlock(env, id) {
-  const r = await db(env).prepare('DELETE FROM blocks WHERE id = ?').bind(Number(id)).run();
-  return r.meta.changes === 1;
+  const r = await db(env).prepare('DELETE FROM blocks WHERE id = ? RETURNING apt_id, gcal_event_id').bind(Number(id)).first();
+  return r ? { aptId: r.apt_id, gcalEventId: r.gcal_event_id } : null;
+}
+
+export async function setBlockGcal(env, id, eventId) {
+  await db(env).prepare('UPDATE blocks SET gcal_event_id = ? WHERE id = ?').bind(eventId, Number(id)).run();
+}
+
+export async function setBookingGcal(env, id, eventId) {
+  await db(env).prepare('UPDATE bookings SET gcal_event_id = ? WHERE id = ?').bind(eventId, id).run();
+}
+
+export async function expiredPendingWithEvents(env, now = Date.now()) {
+  const r = await db(env).prepare(`SELECT * FROM bookings WHERE status = 'pending' AND created_at <= ? AND gcal_event_id IS NOT NULL`)
+    .bind(now - HOLD_MS).all();
+  return r.results.map(toBooking);
+}
+
+// Everything that blocks an apartment's nights, for the calendar feed Airbnb/Booking import.
+export async function feedRanges(env, aptId, fromDay, now = Date.now()) {
+  const b = await db(env).prepare(`SELECT id, checkin AS start, checkout AS end, status FROM bookings
+      WHERE apt_id = ? AND checkout >= ? AND (status = 'confirmed' OR (status = 'pending' AND created_at > ?))`)
+    .bind(aptId, fromDay, now - HOLD_MS).all();
+  const k = await db(env).prepare('SELECT id, start, end FROM blocks WHERE apt_id = ? AND end >= ?').bind(aptId, fromDay).all();
+  return [...b.results.map(r => ({ uid: `booking-${r.id}`, start: r.start, end: r.end })),
+          ...k.results.map(r => ({ uid: `block-${r.id}`, start: r.start, end: r.end }))];
 }
 
 export async function blocksFor(env, aptId) {

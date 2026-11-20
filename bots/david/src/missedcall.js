@@ -32,7 +32,11 @@ export const DEFAULT_MISSED_CALL = {
   text: 'היי, ראינו שהתקשרת ל{name} ולא הספקנו לענות 🙏 אפשר לכתוב לי כאן במה אפשר לעזור, ואחזור אליך מיד.',
 };
 
-export const missedCallConfig = (business) => ({ ...DEFAULT_MISSED_CALL, ...(business?.missedCall || {}) });
+export const missedCallConfig = (business) => {
+  const cfg = { ...DEFAULT_MISSED_CALL, ...(business?.missedCall || {}) };
+  if (business?.modules?.missedCalls === false) cfg.enabled = false;
+  return cfg;
+};
 
 function messageText(ctx) {
   return missedCallConfig(ctx.business).text.replaceAll('{name}', ctx.business.botName || 'העסק');

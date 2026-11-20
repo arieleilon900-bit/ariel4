@@ -1,13 +1,14 @@
 // Tools the model can call, and what they do. Prices, capacity and availability are
 // always computed here in code, never by the model.
 
-import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone } from './logic.js';
+import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone, moduleOn } from './logic.js';
 import { busyFor } from './ical.js';
 import { FEATURES } from './config.js';
 import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe } from './store.js';
 import { reportProblem } from './monitor.js';
 import { sendNotify, sendImage } from './whatsapp.js';
 import { instagramUsername } from './instagram.js';
+import { syncBookingEvent } from './gcal.js';
 
 const featureCodes = Object.keys(FEATURES);
 const date = { type: 'string', description: 'YYYY-MM-DD' };
@@ -118,6 +119,12 @@ export const TOOLS = [
   },
 ];
 
+// The tools this client's bot gets (modules switched off take their tools with them).
+export function toolsFor(business) {
+  return TOOLS.filter(t => !(t.name === 'refer_lead' && !moduleOn(business, 'referrals'))
+    && !(t.name === 'subscribe_offers' && !moduleOn(business, 'offers')));
+}
+
 const nis = (n) => '₪' + Number(n).toLocaleString('en-US');
 const partyText = (p) => `${p.adults} מבוגרים${p.children ? `, ${p.children} ילדים` : ''}${p.infants ? `, ${p.infants} תינוקות` : ''}`;
 
@@ -143,7 +150,7 @@ async function busyMap(ctx) {
   const onError = (kind, detail) => reportProblem(ctx, kind, detail);
   for (const apt of ctx.apartments) {
     const own = [...await activeBookingsFor(ctx.env, apt.id), ...(await blocksFor(ctx.env, apt.id)).map(b => ({ checkin: b.start, checkout: b.end }))];
-    map[apt.id] = await busyFor(apt, ctx.env, own, onError);
+    map[apt.id] = await busyFor(apt, ctx.env, own, onError, ctx);
   }
   return map;
 }
@@ -153,10 +160,10 @@ export async function runTool(name, input, ctx) {
     switch (name) {
       case 'find_apartments': return await findTool(input, ctx);
       case 'create_booking_request': return await bookingTool(input, ctx);
-      case 'refer_lead': return await referTool(input, ctx);
+      case 'refer_lead': if (!moduleOn(ctx.business, 'referrals')) return { error: 'הכלי לא פעיל' }; return await referTool(input, ctx);
       case 'notify_owner': return await notifyTool(input, ctx);
       case 'send_photos': return await photosTool(input, ctx);
-      case 'subscribe_offers': return await subscribeTool(input, ctx);
+      case 'subscribe_offers': if (!moduleOn(ctx.business, 'offers')) return { error: 'הכלי לא פעיל' }; return await subscribeTool(input, ctx);
       default: return { error: 'unknown tool ' + name };
     }
   } catch (e) {
@@ -219,6 +226,10 @@ async function bookingTool(input, ctx) {
     : `סה"כ: ${nis(q.total)}`;
   await sendNotify(ctx.env, B.ownerPhone,
     `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}${rec.chat ? ' (הזמין מאינסטגרם)' : ''}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
+
+  // Into the owner's calendar right away (as "waiting for approval").
+  try { await syncBookingEvent(ctx, rec, 'pending'); }
+  catch (e) { await reportProblem(ctx, 'הזמנה לא נכנסה ליומן גוגל', `${rec.id}: ${e.message}`); }
 
   return {
     booking_id: rec.id, total: q.total, deposit, discount_pending: q.discountPending, owner_quote: q.ownerQuote,

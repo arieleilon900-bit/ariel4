@@ -5,13 +5,14 @@ import {
   getBooking, setBookingStatus, setBookingTotal, bookingsOnDay, pendingBookings,
   getReferral, closeReferralRow, referralsBetween, getStats, bump,
   followUpCandidates, saveConv, usageBetween, errorsBetween, cleanup,
-  addBlock, removeBlock, blocksFor, addContacts, removeContact, contactCount,
+  addBlock, removeBlock, blocksFor, addContacts, removeContact, contactCount, expiredPendingWithEvents,
 } from './store.js';
 import { flushQueuedMissedCalls } from './missedcall.js';
 import { refreshInstagramToken } from './instagram.js';
+import { syncBookingEvent, removeBookingEvent, syncBlockEvent, removeBlockEvent, calendarConfig, checkCalendars } from './gcal.js';
 import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays } from './journey.js';
 import { sendText, sendNotify } from './whatsapp.js';
-import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone } from './logic.js';
+import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone, moduleOn } from './logic.js';
 import { reportProblem } from './monitor.js';
 
 const HELP = `פקודות:
@@ -25,6 +26,7 @@ const HELP = `פקודות:
 חסום 2 2027-03-01 2027-03-04 משפחה : חוסם תאריכים בדירה 2 (תאריך יציאה לא נחסם)
 חסימות : רשימת החסימות
 שחרר 5 : מבטל חסימה מספר 5
+יומן : בודק שהחיבור ליומן גוגל עובד
 מבצע: הטקסט : שולח מבצע לכל מי שברשימת התפוצה
 סיכום : הסיכום השבועי עכשיו
 
@@ -59,10 +61,16 @@ export async function handleOwner(ctx, text, msg = {}) {
   if ((m = t.match(/^לא נסגר\s+(R\w+)/i))) return closeReferral(ctx, m[1].toUpperCase(), false);
   if ((m = t.match(/^נסגר\s+(R\w+)\s*₪?\s*([\d,]+)?/i))) return closeReferral(ctx, m[1].toUpperCase(), true, m[2]);
   if ((m = t.match(/^חסום\s+(\S+)\s+(\d{4}-\d{2}-\d{2})\s+(\d{4}-\d{2}-\d{2})\s*(.*)$/))) return block(ctx, m[1], m[2], m[3], m[4]);
-  if ((m = t.match(/^שחרר\s+(\d+)/))) return sendText(ctx.env, ctx.phone, (await removeBlock(ctx.env, m[1])) ? `החסימה ${m[1]} בוטלה.` : `לא מצאתי חסימה ${m[1]}.`);
+  if ((m = t.match(/^שחרר\s+(\d+)/))) {
+    const removed = await removeBlock(ctx.env, m[1]);
+    if (removed) await calendarJob(ctx, `שחרור ${m[1]}`, () => removeBlockEvent(ctx, removed.aptId, removed.gcalEventId));
+    return sendText(ctx.env, ctx.phone, removed ? `החסימה ${m[1]} בוטלה.` : `לא מצאתי חסימה ${m[1]}.`);
+  }
   if (/^חסימות/.test(t)) return listBlocks(ctx);
+  if (/^יומן/.test(t)) return sendText(ctx.env, ctx.phone, await calendarStatus(ctx));
   if (/^פנוי/.test(t)) return sendText(ctx.env, ctx.phone, await freeText(ctx));
   if ((m = t.match(/^מבצע\s*:\s*([\s\S]+)/))) {
+    if (!moduleOn(ctx.business, 'offers')) return sendText(ctx.env, ctx.phone, 'רשימת המבצעים לא פעילה אצלך.');
     const r = await broadcastOffer(ctx, m[1].trim());
     return sendText(ctx.env, ctx.phone, `המבצע נשלח ל-${r.sent} אנשים${r.failed ? `, ${r.failed} נכשלו` : ''}.`);
   }
@@ -82,6 +90,7 @@ async function block(ctx, key, start, end, note) {
   if (!apt) return sendText(ctx.env, ctx.phone, `לא מצאתי דירה "${key}". דירות: ${ctx.apartments.map((a, i) => `${i + 1} (${a.name})`).join(', ')}`);
   if (!nightsBetween(start, end).length) return sendText(ctx.env, ctx.phone, 'תאריך היציאה צריך להיות אחרי תאריך הכניסה.');
   const id = await addBlock(ctx.env, apt.id, start, end, note);
+  await calendarJob(ctx, `חסימה ${id}`, () => syncBlockEvent(ctx, apt, { id, start, end, note }));
   return sendText(ctx.env, ctx.phone, `חסמתי את ${apt.name} מ-${start} עד ${end} (חסימה ${id}). לביטול: שחרר ${id}`);
 }
 
@@ -104,6 +113,7 @@ async function confirmBooking(ctx, id, price) {
   if (price) { b.total = Number(String(price).replace(/,/g, '')); await setBookingTotal(ctx.env, id, b.total); }
   if (b.total == null) return sendText(ctx.env, ctx.phone, `בהזמנה ${id} אין מחיר. תכתוב: אושר ${id} <מחיר>`);
   await setBookingStatus(ctx.env, id, 'confirmed');
+  await calendarJob(ctx, `אישור ${id}`, () => syncBookingEvent(ctx, b, 'confirmed'));
   await bump(ctx.env, 'bookingsConfirmed');
   await bump(ctx.env, 'revenue', b.total);
   const apt = ctx.apartments.find(a => a.id === b.aptId) || {};
@@ -113,6 +123,18 @@ async function confirmBooking(ctx, id, price) {
   await toGuest(ctx, b,
     `${b.name}, ההזמנה שלך אושרה ✅\n${b.aptName}\n${b.checkin} עד ${b.checkout}\nכניסה מ-${apt.checkIn || ''}, ${new Date(b.checkout + 'T00:00:00Z').getUTCDay() === 6 ? 'יציאה במוצאי שבת' : `יציאה עד ${apt.checkOut || ''}`}\nסה"כ: ${nis(b.total)}${info ? `\n${info}` : ''}\nקוד כניסה ו-Wi-Fi יישלחו יום לפני ההגעה. מחכים לכם!`);
   return sendText(ctx.env, ctx.phone, `אושר ✅ ${b.id}, הלקוח קיבל אישור.`);
+}
+
+async function calendarStatus(ctx) {
+  if (!calendarConfig(ctx.business)) return 'אין יומן גוגל מחובר.';
+  const rows = await checkCalendars(ctx);
+  return '📅 *יומן גוגל*\n' + rows.map(r => r.ok ? `✅ ${r.apt}: מחובר ל"${r.calendar}"` : `❌ ${r.apt}: ${r.error}`).join('\n');
+}
+
+// Calendar trouble never blocks a booking: it alerts the tech partner instead.
+async function calendarJob(ctx, what, fn) {
+  try { await fn(); }
+  catch (e) { await reportProblem(ctx, 'עדכון יומן גוגל נכשל', `${what}: ${e.message}`); }
 }
 
 // David shares contact cards from his phone: those people won't get the missed-call message.
@@ -139,6 +161,7 @@ async function cancelBooking(ctx, id) {
   const b = await getBooking(ctx.env, id);
   if (!b) return sendText(ctx.env, ctx.phone, `לא מצאתי הזמנה ${id}`);
   await setBookingStatus(ctx.env, id, 'cancelled');
+  await calendarJob(ctx, `ביטול ${id}`, () => removeBookingEvent(ctx, b));
   await toGuest(ctx, b, `${b.name}, מצטערים, התאריכים האלה כבר לא פנויים ב${b.aptName}. אפשר לבדוק לך תאריכים אחרים או דירה אחרת?`);
   return sendText(ctx.env, ctx.phone, `בוטל ${b.id}, הלקוח קיבל הודעה.`);
 }
@@ -229,14 +252,18 @@ export async function scheduled(ctx, now = Date.now()) {
       for (const to of reportRecipients(ctx)) await sendNotify(ctx.env, to, text);
     });
   }
-  await job('הודעות לאורחים', () => stayMessages(ctx, hour, now));
-  if (hour === 10 && (dow === 0 || dow === 3)) await job('לילות פנויים', () => lastMinuteNudge(ctx, now));
+  if (moduleOn(B, 'stayMessages')) await job('הודעות לאורחים', () => stayMessages(ctx, hour, now));
+  if (moduleOn(B, 'offers') && hour === 10 && (dow === 0 || dow === 3)) await job('לילות פנויים', () => lastMinuteNudge(ctx, now));
   if (hour === 23) await job('בדיקת תקציב', () => budgetCheck(ctx, now));
   if (hour === 3) await job('ניקוי', () => cleanup(ctx.env, now));
   // Instagram tokens expire after 60 days unless refreshed. A failure alerts the tech partner.
   if (hour === 4 && dow === 1 && ctx.env.IG_TOKEN) await job('חידוש טוקן אינסטגרם', () => refreshInstagramToken(ctx.env));
-  await job('הודעות מעקב', () => followUps(ctx, now));
+  if (moduleOn(B, 'followUps')) await job('הודעות מעקב', () => followUps(ctx, now));
   await job('שיחות שלא נענו מהלילה', () => flushQueuedMissedCalls(ctx, now));
+  // A request nobody approved within 48h frees its dates: take it out of the calendar too.
+  if (calendarConfig(B)) await job('ניקוי יומן', async () => {
+    for (const b of await expiredPendingWithEvents(ctx.env, now)) await removeBookingEvent(ctx, b);
+  });
 }
 
 async function budgetCheck(ctx, now) {

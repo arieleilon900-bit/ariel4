@@ -177,6 +177,10 @@ export function addDays(day, n) {
   return fmtDate(parseDate(day) + n * DAY);
 }
 
+// Modules a client can switch off (config BUSINESS.modules). Anything not listed is on.
+export const MODULE_NAMES = ['instagram', 'missedCalls', 'calendar', 'voiceAndPhotos', 'followUps', 'stayMessages', 'offers', 'referrals'];
+export const moduleOn = (business, name) => business?.modules?.[name] !== false;
+
 // Phone numbers: everything we store is digits with country code (9725XXXXXXXX).
 // Accepts "+972 54-123-4567", "054-1234567", "972541234567", "00972...".
 // Returns '' for hidden/anonymous callers or anything that isn't a number.

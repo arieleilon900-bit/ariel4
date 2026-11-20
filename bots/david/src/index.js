@@ -4,7 +4,8 @@
 // Env (wrangler secrets / vars): ANTHROPIC_API_KEY, WA_TOKEN, WA_PHONE_NUMBER_ID,
 // WA_APP_SECRET, WA_VERIFY_TOKEN, optional WA_NOTIFY_TEMPLATE, HEALTH_TOKEN,
 // optional IG_TOKEN / IG_USER_ID / IG_APP_SECRET (Instagram DMs),
-// optional MISSED_CALL_TOKEN (missed calls), DRY_RUN=1 for testing. D1 binding: DB.
+// optional MISSED_CALL_TOKEN (missed calls), optional GCAL_SA_JSON (Google Calendar),
+// optional CAL_FEED_TOKEN (calendar feed for Airbnb/Booking), DRY_RUN=1 for testing. D1 binding: DB.
 
 import { BUSINESS, APARTMENTS, PARTNERS, AGENCY, TEMPLATES, DRAFT } from './config.js';
 import { verifyWebhook, validSignature, incomingMessages, sendText } from './whatsapp.js';
@@ -13,7 +14,9 @@ import { transcribe, imageBlock } from './media.js';
 import { reply, FALLBACK_REPLY } from './agent.js';
 import { handleOwner, scheduled } from './owner.js';
 import { reportProblem } from './monitor.js';
+import { moduleOn } from './logic.js';
 import { incomingInstagram, isInstagram } from './instagram.js';
+import { feedResponse } from './feed.js';
 import { handleMissedCall, callerFrom, savedFrom, missedCallNote, missedCallConfig, twimlResponse } from './missedcall.js';
 
 const OPT_OUT = /^\s*(הסר|הסירו|הסירו אותי|stop|unsubscribe)\s*[.!]?\s*$/i;
@@ -26,6 +29,7 @@ function baseCtx(env) {
 export async function handleMessage(env, msg, extra = {}) {
   const channel = isInstagram(msg.from) ? 'instagram' : 'whatsapp';
   const ctx = { ...baseCtx(env), ...extra, phone: msg.from, name: msg.name, channel };
+  if (channel === 'instagram' && !moduleOn(ctx.business, 'instagram')) return; // not bought: stay silent
   if (channel === 'whatsapp' && ctx.business.ownerPhone && msg.from === ctx.business.ownerPhone) return handleOwner(ctx, msg.text, msg);
 
   const conv = await getConv(env, msg.from);
@@ -49,7 +53,7 @@ export async function handleMessage(env, msg, extra = {}) {
   // Voice notes are transcribed; photos go to the model as images.
   let text = msg.text;
   const images = [];
-  const media = msg.mediaUrl ? { url: msg.mediaUrl } : msg.mediaId;
+  const media = moduleOn(ctx.business, 'voiceAndPhotos') ? (msg.mediaUrl ? { url: msg.mediaUrl } : msg.mediaId) : null;
   if (msg.type === 'audio' && media) {
     try { text = `[הודעה קולית, תמלול:] ${await transcribe(env, media)}`; }
     catch (e) {
@@ -110,6 +114,7 @@ async function health(env, url) {
     const u = await usageBetween(env, Date.now() - 86400e3, Date.now());
     return Response.json({
       ok: true, draft: DRAFT,
+      modulesOff: Object.entries(BUSINESS.modules || {}).filter(([, v]) => v === false).map(([k]) => k),
       last24h: { modelCalls: u.calls, guests: u.guests, costUsd: +(u.micros / 1e6).toFixed(3) },
       lastError: err ? { at: new Date(err.ts).toISOString(), kind: err.kind, detail: err.detail } : null,
     });
@@ -123,6 +128,8 @@ export default {
     const url = new URL(req.url);
     if (url.pathname === '/health') return health(env, url);
     if (url.pathname === '/missed-call') return missedCallEndpoint(req, env, url, execCtx);
+    const cal = url.pathname.match(/^\/cal\/([^/]+)\/([^/]+\.ics)$/);
+    if (cal && req.method === 'GET') return feedResponse(env, APARTMENTS, BUSINESS, cal[1], cal[2]);
     if (url.pathname !== '/webhook') return new Response('ok');
     if (req.method === 'GET') return verifyWebhook(url, env);
     if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
@@ -142,7 +149,8 @@ export default {
 
     // Answer Meta at once; the reply is sent in the background.
     execCtx.waitUntil((async () => {
-      for (const msg of [...incomingMessages(payload), ...incomingInstagram(payload)]) {
+      const ig = moduleOn(BUSINESS, 'instagram') ? incomingInstagram(payload) : [];
+      for (const msg of [...incomingMessages(payload), ...ig]) {
         const ctx = { ...baseCtx(env), phone: msg.from };
         try {
           if (await alreadySeen(env, msg.id)) continue;
