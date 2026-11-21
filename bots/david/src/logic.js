@@ -209,3 +209,6 @@ export function inQuietHours(hour, quiet) {
   if (!quiet || quiet.from == null || quiet.to == null || quiet.from === quiet.to) return false;
   return quiet.from < quiet.to ? hour >= quiet.from && hour < quiet.to : hour >= quiet.from || hour < quiet.to;
 }
+
+// Pay-to-confirm: the guest gets a deposit link and David marks it paid. Needs a link in config.
+export const payToConfirm = (business) => business?.bookingFlow === 'pay_to_confirm' && !!business?.paymentLink;

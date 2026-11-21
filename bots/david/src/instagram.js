@@ -97,6 +97,21 @@ export function incomingInstagram(payload) {
   return out;
 }
 
+// Messages David sent from the Instagram app (echoes). The bot's own replies echo too;
+// handoff.js tells them apart by timing and text.
+export function instagramEchoes(payload) {
+  if (payload?.object !== 'instagram') return [];
+  const out = [];
+  for (const entry of payload.entry || []) {
+    for (const ev of entry.messaging || []) {
+      const m = ev.message;
+      if (!m?.is_echo || ev.sender?.id !== entry.id || !ev.recipient?.id) continue;
+      out.push({ id: m.mid, to: IG_PREFIX + ev.recipient.id, text: m.text || '', type: m.text ? 'text' : 'other' });
+    }
+  }
+  return out;
+}
+
 async function post(env, body) {
   const token = await igToken(env);
   if (!token) throw new Error('IG_TOKEN לא מוגדר, אי אפשר לענות באינסטגרם');

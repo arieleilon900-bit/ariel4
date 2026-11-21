@@ -8,14 +8,15 @@
 // optional CAL_FEED_TOKEN (calendar feed for Airbnb/Booking), DRY_RUN=1 for testing. D1 binding: DB.
 
 import { BUSINESS, APARTMENTS, PARTNERS, AGENCY, TEMPLATES, DRAFT } from './config.js';
-import { verifyWebhook, validSignature, incomingMessages, sendText } from './whatsapp.js';
+import { verifyWebhook, validSignature, incomingMessages, whatsappEchoes, sendText } from './whatsapp.js';
 import { alreadySeen, getConv, saveConv, bump, lastError, usageBetween, unsubscribe } from './store.js';
 import { transcribe, imageBlock } from './media.js';
 import { reply, FALLBACK_REPLY } from './agent.js';
 import { handleOwner, scheduled } from './owner.js';
 import { reportProblem } from './monitor.js';
 import { moduleOn } from './logic.js';
-import { incomingInstagram, isInstagram } from './instagram.js';
+import { incomingInstagram, instagramEchoes, isInstagram } from './instagram.js';
+import { handleEcho, isPaused } from './handoff.js';
 import { feedResponse } from './feed.js';
 import { handleMissedCall, callerFrom, savedFrom, missedCallNote, missedCallConfig, twimlResponse } from './missedcall.js';
 
@@ -50,6 +51,14 @@ export async function handleMessage(env, msg, extra = {}) {
     return sendText(env, msg.from, 'הוסרת, לא נשלח לך הודעות יזומות. אם תרצה שוב, פשוט תכתוב 🙂');
   }
 
+  // David is answering this guest himself: keep their message for context, stay quiet.
+  if (isPaused(conv)) {
+    conv.messages.push({ role: 'user', text: msg.text || `[${msg.type}]` });
+    await saveConv(env, conv);
+    await bump(env, 'handoffSilent');
+    return;
+  }
+
   // Voice notes are transcribed; photos go to the model as images.
   let text = msg.text;
   const images = [];
@@ -69,6 +78,7 @@ export async function handleMessage(env, msg, extra = {}) {
     text = `[הלקוח שלח ${msg.type} שאי אפשר לקרוא. בקש בנימוס לכתוב בטקסט.]`;
   }
   const out = await reply(ctx, text, images);
+  conv.botAt = Date.now();
   await saveConv(env, conv);
   await sendText(env, msg.from, out.text);
   if (out.problem) await reportProblem(ctx, 'הבוט לא ענה כמו שצריך', `${out.problem}. ההודעה של הלקוח: "${text.slice(0, 200)}"`, { guest: msg.from });
@@ -150,6 +160,12 @@ export default {
     // Answer Meta at once; the reply is sent in the background.
     execCtx.waitUntil((async () => {
       const ig = moduleOn(BUSINESS, 'instagram') ? incomingInstagram(payload) : [];
+      // David wrote to a guest himself: the bot pauses in that chat.
+      const echoes = [...whatsappEchoes(payload), ...(moduleOn(BUSINESS, 'instagram') ? instagramEchoes(payload) : [])];
+      for (const e of echoes) {
+        try { if (!(await alreadySeen(env, e.id))) await handleEcho(baseCtx(env), e); }
+        catch (err) { await reportProblem(baseCtx(env), 'תקלה בזיהוי תשובה של דוד', err.stack || err.message); }
+      }
       for (const msg of [...incomingMessages(payload), ...ig]) {
         const ctx = { ...baseCtx(env), phone: msg.from };
         try {

@@ -26,6 +26,7 @@ export async function getConv(env, phone) {
     phone: row.phone, name: row.name, messages: JSON.parse(row.messages || '[]'),
     createdAt: row.created_at, lastUserAt: row.last_user_at, quotedAt: row.quoted_at,
     bookedAt: row.booked_at, referredAt: row.referred_at, followups: row.followups, optedOut: !!row.opted_out,
+    humanUntil: row.human_until || 0, botAt: row.bot_at || 0,
   };
 }
 
@@ -33,12 +34,12 @@ export async function saveConv(env, c) {
   c.messages = c.messages.slice(-KEEP_TURNS);
   while (c.messages.length && c.messages[0].role !== 'user') c.messages.shift(); // history starts with the guest
   await db(env).prepare(`INSERT INTO conversations
-      (phone, name, messages, created_at, updated_at, last_user_at, quoted_at, booked_at, referred_at, followups, opted_out)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+      (phone, name, messages, created_at, updated_at, last_user_at, quoted_at, booked_at, referred_at, followups, opted_out, human_until, bot_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
     ON CONFLICT(phone) DO UPDATE SET name=?2, messages=?3, updated_at=?5, last_user_at=?6, quoted_at=?7,
-      booked_at=?8, referred_at=?9, followups=?10, opted_out=?11`)
+      booked_at=?8, referred_at=?9, followups=?10, opted_out=?11, human_until=?12, bot_at=?13`)
     .bind(c.phone, c.name || '', JSON.stringify(c.messages), c.createdAt || Date.now(), Date.now(),
-      c.lastUserAt ?? null, c.quotedAt ?? null, c.bookedAt ?? null, c.referredAt ?? null, c.followups || 0, c.optedOut ? 1 : 0)
+      c.lastUserAt ?? null, c.quotedAt ?? null, c.bookedAt ?? null, c.referredAt ?? null, c.followups || 0, c.optedOut ? 1 : 0, c.humanUntil || null, c.botAt || null)
     .run();
 }
 
@@ -335,4 +336,11 @@ export async function isContact(env, phone) {
 
 export async function contactCount(env) {
   return (await db(env).prepare('SELECT COUNT(*) AS n FROM contacts').first()).n;
+}
+
+// ---------- month summary ----------
+export async function bookingStatsBetween(env, from, to) {
+  const req = await db(env).prepare('SELECT COUNT(*) n FROM bookings WHERE created_at >= ? AND created_at < ?').bind(from, to).first();
+  const ok = await db(env).prepare("SELECT COUNT(*) n, COALESCE(SUM(total), 0) revenue FROM bookings WHERE status = 'confirmed' AND confirmed_at >= ? AND confirmed_at < ?").bind(from, to).first();
+  return { requests: req.n, confirmed: ok.n, revenue: ok.revenue };
 }

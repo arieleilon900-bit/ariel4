@@ -1,7 +1,7 @@
 // Tools the model can call, and what they do. Prices, capacity and availability are
 // always computed here in code, never by the model.
 
-import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone, moduleOn } from './logic.js';
+import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone, moduleOn, payToConfirm } from './logic.js';
 import { busyFor } from './ical.js';
 import { FEATURES } from './config.js';
 import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe } from './store.js';
@@ -225,7 +225,7 @@ async function bookingTool(input, ctx) {
     : q.discountPending ? `מחיר לפי המחירון: ${nis(q.total)}. ${q.nights} לילות, מגיעה לו הנחה נוספת: תכתוב לו את המחיר הסופי`
     : `סה"כ: ${nis(q.total)}`;
   await sendNotify(ctx.env, B.ownerPhone,
-    `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}${rec.chat ? ' (הזמין מאינסטגרם)' : ''}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\nלאישור שלח: אושר ${rec.id}\nלדחייה: בוטל ${rec.id}`);
+    `🏠 *בקשת הזמנה חדשה* ${rec.id}\n${apt.name}\n${rec.checkin} עד ${rec.checkout} (${q.nights} לילות${q.checkoutLate ? ', יציאה במוצ"ש' : ''})\n${rec.name}, ${partyText(rec.party)}\nטלפון: +${rec.phone}${rec.chat ? ' (הזמין מאינסטגרם)' : ''}\n${priceLine}\nהגעה: ${rec.arrival}${rec.notes ? `\nהערות: ${rec.notes}` : ''}\n\n${payToConfirm(B) ? `הלקוח קיבל קישור למקדמה${deposit == null ? '' : ' (' + nis(deposit) + ')'}. כשהתשלום נכנס שלח: שולם ${rec.id}\nלאישור בלי תשלום: אושר ${rec.id}` : `לאישור שלח: אושר ${rec.id}`}\nלדחייה: בוטל ${rec.id}`);
 
   // Into the owner's calendar right away (as "waiting for approval").
   try { await syncBookingEvent(ctx, rec, 'pending'); }
@@ -233,8 +233,8 @@ async function bookingTool(input, ctx) {
 
   return {
     booking_id: rec.id, total: q.total, deposit, discount_pending: q.discountPending, owner_quote: q.ownerQuote,
-    payment_link: B.bookingFlow === 'pay_to_confirm' ? (B.paymentLink || null) : null,
-    status: B.bookingFlow === 'pay_to_confirm' ? 'ממתין לתשלום מקדמה' : 'ממתין לאישור של ' + B.botName,
+    payment_link: payToConfirm(B) ? B.paymentLink : null,
+    status: payToConfirm(B) ? 'ממתין לתשלום מקדמה' : 'ממתין לאישור של ' + B.botName,
   };
 }
 

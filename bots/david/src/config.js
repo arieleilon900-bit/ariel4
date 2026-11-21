@@ -33,6 +33,9 @@ export const BUSINESS = {
   },
   // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
   lastMinuteDays: 7,
+  // When David answers a guest himself (from the WhatsApp/Instagram app), the bot stays quiet in that chat
+  // for this many hours. "הפעל 054..." gives the chat back sooner. Needs the echo webhook (README §8).
+  handoff: { pauseHours: 12 },
   // What this client bought. Switch a module off with false; the bot then doesn't offer,
   // say or send anything from it. Prices per module: bots/MODULES.md.
   modules: {

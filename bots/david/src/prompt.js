@@ -2,7 +2,7 @@
 // (no dates, no per-customer data) so the prompt cache keeps hitting.
 
 import { FEATURES } from './config.js';
-import { moduleOn } from './logic.js';
+import { moduleOn, payToConfirm } from './logic.js';
 
 function aptBlock(a) {
   const c = a.capacity, P = a.prices;
@@ -58,7 +58,7 @@ ${apartments.map(aptBlock).join('\n')}
 1. כשהלקוח רוצה להזמין, אוספים שם מלא, שעת הגעה משוערת ובקשות מיוחדות. בוואטסאפ הטלפון כבר ידוע. באינסטגרם מבקשים גם מספר נייד, כי האישור והתזכורות לפני ההגעה נשלחים בוואטסאפ.
 2. שולחים סיכום קצר (דירה, תאריכים, אורחים, מחיר כולל) ומבקשים אישור.
 3. אחרי שהלקוח אישר, קוראים ל-create_booking_request.
-4. ${B.bookingFlow === 'pay_to_confirm'
+4. ${payToConfirm(B)
     ? `ההזמנה נסגרת רק אחרי תשלום מקדמה של ${B.depositPercent}%. שולחים את קישור התשלום שהכלי מחזיר.`
     : `אומרים ללקוח שהבקשה נרשמה ו-${B.botName} יאשר בהקדם (בדרך כלל תוך שעה). לא אומרים "ההזמנה סגורה" לפני האישור.`}
 5. מדיניות ביטול: ${B.cancellation}
