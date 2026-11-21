@@ -30,12 +30,16 @@ export const BUSINESS = {
     reviewHour: 14,        // departure day: ask for a review
     comebackDays: 120,     // days after departure: invite back (only to guests on the offers list)
     comebackOffer: '10% הנחה בהזמנה הבאה',
+    extendHour: 18,        // module addons: evening before checkout, offer one more night if it's free
   },
   // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
   lastMinuteDays: 7,
   // When David answers a guest himself (from the WhatsApp/Instagram app), the bot stays quiet in that chat
   // for this many hours. "הפעל 054..." gives the chat back sooner. Needs the echo webhook (README §8).
   handoff: { pauseHours: 12 },
+  // Module "addons": what a guest with a confirmed booking can add. David approves each request.
+  // Example: [{ id: 'late_checkout', name: 'יציאה מאוחרת עד 14:00', price: 150 }, { id: 'gift_basket', name: 'סלסלת פינוק', price: 220 }]
+  addons: [],
   // What this client bought. Switch a module off with false; the bot then doesn't offer,
   // say or send anything from it. Prices per module: bots/MODULES.md.
   modules: {
@@ -47,6 +51,9 @@ export const BUSINESS = {
     stayMessages: true,    // reminder, welcome, checkout, review request, come back
     offers: true,          // offers list (with consent) + "מבצע:" + free-nights nudge
     referrals: true,       // guests who don't fit become a lead for David
+    // Extras, OFF until the client buys them. To switch on: set true (addons also needs the addons list below).
+    waitlist: false,       // guest whose dates were taken is told when they free up (cancellation, block released)
+    addons: false,         // paid extras before arrival (BUSINESS.addons) + offer of one more night
   },
   // Google Calendar (README §7). Every booking goes in right away ("⏳ ממתין" until David
   // approves, then "✅"), and anything David adds by hand blocks those nights.
@@ -163,6 +170,8 @@ export const TEMPLATES = {
   comeback: { name: '', lang: 'he' },   // הזמנה לחזור
   offer:    { name: '', lang: 'he' },   // מבצע לרשימת התפוצה (Marketing)
   missed_call: { name: '', lang: 'he' }, // שיחה שלא נענתה. {{1}} = שם העסק (Utility)
+  waitlist: { name: '', lang: 'he' },   // module waitlist: התפנה תאריך שביקשו
+  extend:   { name: '', lang: 'he' },   // module addons: הצעה ללילה נוסף
 };
 
 // Feature codes the bot can ask about. Keep in sync with features[] above.

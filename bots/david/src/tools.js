@@ -1,10 +1,10 @@
 // Tools the model can call, and what they do. Prices, capacity and availability are
 // always computed here in code, never by the model.
 
-import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone, moduleOn, payToConfirm } from './logic.js';
+import { findApartments, matchPartners, REASON_HE, quote, israelToday, normalizePhone, moduleOn, payToConfirm, nightsBetween } from './logic.js';
 import { busyFor } from './ical.js';
 import { FEATURES } from './config.js';
-import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe } from './store.js';
+import { newId, activeBookingsFor, insertBookingIfFree, insertReferral, bump, blocksFor, subscribe, addWaitlist, upcomingBookingFor, addAddonRequest } from './store.js';
 import { reportProblem } from './monitor.js';
 import { sendNotify, sendImage } from './whatsapp.js';
 import { instagramUsername } from './instagram.js';
@@ -117,12 +117,43 @@ export const TOOLS = [
       required: ['urgent', 'summary'],
     },
   },
+  {
+    name: 'join_waitlist',
+    description: 'רושם את הלקוח לרשימת המתנה: אם התאריכים שביקש יתפנו (ביטול, חסימה שהוסרה), הוא יקבל הודעה בוואטסאפ. קוראים רק אחרי שהתאריכים תפוסים והלקוח אמר במפורש שהוא רוצה שנעדכן אותו.',
+    strict: true,
+    input_schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        customer_consented: { type: 'boolean', description: 'true רק אם הלקוח אמר במפורש שאפשר לעדכן אותו' },
+        full_name: { type: 'string' },
+        apartment_id: { type: 'string', description: 'id של דירה מסוימת שהלקוח רוצה, או any לכל דירה שמתאימה' },
+        checkin: date, checkout: date,
+        adults: { type: 'integer' }, children: { type: 'integer' }, infants: { type: 'integer' },
+        phone: phoneField,
+      },
+      required: ['customer_consented', 'full_name', 'apartment_id', 'checkin', 'checkout', 'adults', 'children', 'infants', 'phone'],
+    },
+  },
+  {
+    name: 'request_addon',
+    description: 'אורח עם הזמנה מאושרת מבקש תוספת (למשל יציאה מאוחרת). מעביר לבעל הדירות לאישור.',
+    strict: true,
+    input_schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties: { addon_id: { type: 'string', description: 'id של התוספת מהרשימה' } },
+      required: ['addon_id'],
+    },
+  },
 ];
 
 // The tools this client's bot gets (modules switched off take their tools with them).
 export function toolsFor(business) {
   return TOOLS.filter(t => !(t.name === 'refer_lead' && !moduleOn(business, 'referrals'))
-    && !(t.name === 'subscribe_offers' && !moduleOn(business, 'offers')));
+    && !(t.name === 'subscribe_offers' && !moduleOn(business, 'offers'))
+    && !(t.name === 'join_waitlist' && !moduleOn(business, 'waitlist'))
+    && !(t.name === 'request_addon' && !(moduleOn(business, 'addons') && business.addons?.length)));
 }
 
 const nis = (n) => '₪' + Number(n).toLocaleString('en-US');
@@ -145,7 +176,7 @@ async function contact(ctx, phone) {
   return phone ? `+${phone} (פנה מ${ig})\nhttps://wa.me/${phone}` : `${ig}, בלי טלפון: עונים לו בהודעות של אינסטגרם`;
 }
 
-async function busyMap(ctx) {
+export async function busyMap(ctx) {
   const map = {};
   const onError = (kind, detail) => reportProblem(ctx, kind, detail);
   for (const apt of ctx.apartments) {
@@ -164,6 +195,8 @@ export async function runTool(name, input, ctx) {
       case 'notify_owner': return await notifyTool(input, ctx);
       case 'send_photos': return await photosTool(input, ctx);
       case 'subscribe_offers': if (!moduleOn(ctx.business, 'offers')) return { error: 'הכלי לא פעיל' }; return await subscribeTool(input, ctx);
+      case 'join_waitlist': if (!moduleOn(ctx.business, 'waitlist')) return { error: 'הכלי לא פעיל' }; return await waitlistTool(input, ctx);
+      case 'request_addon': if (!moduleOn(ctx.business, 'addons')) return { error: 'הכלי לא פעיל' }; return await addonTool(input, ctx);
       default: return { error: 'unknown tool ' + name };
     }
   } catch (e) {
@@ -302,4 +335,33 @@ async function subscribeTool(input, ctx) {
   if (gp.error) return gp;
   await subscribe(ctx.env, gp.phone, ctx.name, input.language);
   return { subscribed: true, note: 'אפשר להגיד ללקוח שבכל רגע אפשר לכתוב "הסר".' };
+}
+
+// Module "waitlist": the guest agreed to hear if the dates free up (see waitlist.js).
+async function waitlistTool(input, ctx) {
+  if (!input.customer_consented) return { error: 'צריך הסכמה מפורשת של הלקוח לעדכן אותו אם יתפנה.' };
+  const gp = guestPhone(input, ctx);
+  if (gp.error) return gp;
+  if (!nightsBetween(input.checkin, input.checkout).length) return { error: 'תאריך היציאה צריך להיות אחרי תאריך ההגעה.' };
+  const aptId = input.apartment_id === 'any' ? null : input.apartment_id;
+  if (aptId && !ctx.apartments.some(a => a.id === aptId)) return { error: 'אין דירה כזו. ids: ' + ctx.apartments.map(a => a.id).join(', ') + ', או any' };
+  const id = await addWaitlist(ctx.env, {
+    id: newId('W'), phone: gp.phone, name: input.full_name, aptId,
+    checkin: input.checkin, checkout: input.checkout, adults: input.adults, children: input.children, infants: input.infants,
+  });
+  return { waitlist_id: id, note: 'אמור ללקוח שנעדכן אותו בוואטסאפ ברגע שיתפנה. לא מבטיחים שיתפנה.' };
+}
+
+// Module "addons": a guest with a confirmed booking asks for something extra.
+async function addonTool(input, ctx) {
+  const B = ctx.business;
+  const addon = (B.addons || []).find(a => a.id === input.addon_id);
+  if (!addon) return { error: 'אין תוספת כזו. ids: ' + (B.addons || []).map(a => a.id).join(', ') };
+  const b = await upcomingBookingFor(ctx.env, ctx.phone, israelToday());
+  if (!b) return { error: 'אין לאורח הזה הזמנה מאושרת. תוספות רק לאורח עם הזמנה מאושרת. אם הוא מזמין עכשיו, קודם סוגרים הזמנה.' };
+  const id = newId('T');
+  await addAddonRequest(ctx.env, { id, bookingId: b.id, addonId: addon.id, name: addon.name, price: addon.price, phone: b.phone, chat: ctx.channel === 'instagram' ? ctx.phone : null });
+  await sendNotify(ctx.env, B.ownerPhone,
+    `🎁 *בקשת תוספת* ${id}\n${addon.name}${addon.price ? ` (${nis(addon.price)})` : ''}\n${b.name}, ${b.aptName}, ${b.checkin} עד ${b.checkout}\n\nלאישור שלח: אושר ${id}\nלדחייה: בוטל ${id}`);
+  return { request_id: id, note: `אמור לאורח שהבקשה הועברה ל${B.botName} והוא יאשר בהקדם. לא מבטיחים לפני האישור.` };
 }

@@ -14,7 +14,8 @@ import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays
 import { sendText, sendNotify } from './whatsapp.js';
 import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone, moduleOn } from './logic.js';
 import { reportProblem } from './monitor.js';
-import { bookingStatsBetween, markSent, pendingBookings as pendingNow } from './store.js';
+import { bookingStatsBetween, markSent, pendingBookings as pendingNow, getAddonRequest, setAddonStatus } from './store.js';
+import { checkWaitlist } from './waitlist.js';
 import { setPause } from './handoff.js';
 import { payToConfirm, addDays } from './logic.js';
 
@@ -35,6 +36,7 @@ const HELP = `פקודות:
 סיכום חודשי : הסיכום של החודש שעבר
 שולם B123 : התקבלה מקדמה, ההזמנה מאושרת (כשיש קישור תשלום)
 הפעל 0541234567 : מחזיר לבוט לענות ללקוח שענית לו בעצמך
+אושר T123 / בוטל T123 : תוספת שאורח ביקש (רק כשמודול התוספות פעיל)
 השתק 0541234567 : הבוט לא עונה ללקוח הזה כמה שעות
 (כשאתה עונה ללקוח בעצמך, הבוט מפסיק לענות לו לבד)
 
@@ -70,6 +72,7 @@ export async function handleOwner(ctx, text, msg = {}) {
     await setPause(ctx.env, ctx.business, phone, m[1] === 'השתק');
     return sendText(ctx.env, ctx.phone, m[1] === 'השתק' ? `הבוט לא יענה ל-+${phone} כמה שעות. להחזרה: הפעל ${m[2].trim()}` : `הבוט חזר לענות ל-+${phone}.`);
   }
+  if ((m = t.match(/^(אושר|בוטל)\s+(T\w+)/i))) return decideAddon(ctx, m[1], m[2].toUpperCase());
   if ((m = t.match(/^שולם\s+(B\w+)/i))) return confirmBooking(ctx, m[1].toUpperCase());
   if ((m = t.match(/^אושר\s+(B\w+)\s*₪?\s*([\d,]+)?/i))) return confirmBooking(ctx, m[1].toUpperCase(), m[2]);
   if ((m = t.match(/^בוטל\s+(B\w+)/i))) return cancelBooking(ctx, m[1].toUpperCase());
@@ -179,6 +182,7 @@ async function cancelBooking(ctx, id) {
   await setBookingStatus(ctx.env, id, 'cancelled');
   await calendarJob(ctx, `ביטול ${id}`, () => removeBookingEvent(ctx, b));
   await toGuest(ctx, b, `${b.name}, מצטערים, התאריכים האלה כבר לא פנויים ב${b.aptName}. אפשר לבדוק לך תאריכים אחרים או דירה אחרת?`);
+  if (moduleOn(ctx.business, 'waitlist')) await checkWaitlist(ctx).catch(e => console.warn('waitlist', e.message));
   return sendText(ctx.env, ctx.phone, `בוטל ${b.id}, הלקוח קיבל הודעה.`);
 }
 
@@ -221,6 +225,8 @@ export async function weeklyText(ctx, week = weekStart(Date.now() - 86400e3)) {
         (open.length ? `\nעוד לא סימנת: ${open.map(r => r.id).join(', ')}` : '')
       : '') +
     (s.missedCalls ? `\n\n📞 שיחות שלא נענו שקיבלו וואטסאפ: ${s.missedCalls}${s.missedCallReplies ? ` (${s.missedCallReplies} ענו)` : ''}` : '') +
+    (s.waitlistNotified ? `\n\n🔔 עדכנו ${s.waitlistNotified} לקוחות שחיכו שיתפנה תאריך` : '') +
+    (s.addonRevenue ? `\n🎁 תוספות שאושרו: ${nis(s.addonRevenue)}` : '') +
     (s.urgent ? `\n\n🚨 פניות דחופות: ${s.urgent}` : '');
 }
 
@@ -277,6 +283,7 @@ export async function scheduled(ctx, now = Date.now()) {
   // Instagram tokens expire after 60 days unless refreshed. A failure alerts the tech partner.
   if (hour === 4 && dow === 1 && ctx.env.IG_TOKEN) await job('חידוש טוקן אינסטגרם', () => refreshInstagramToken(ctx.env));
   if (moduleOn(B, 'followUps')) await job('הודעות מעקב', () => followUps(ctx, now));
+  if (moduleOn(B, 'waitlist')) await job('רשימת המתנה', () => checkWaitlist(ctx, now));
   await job('שיחות שלא נענו מהלילה', () => flushQueuedMissedCalls(ctx, now));
   // A request nobody approved within 48h frees its dates: take it out of the calendar too.
   if (calendarConfig(B)) await job('ניקוי יומן', async () => {
@@ -339,6 +346,8 @@ export async function monthlyText(ctx, now = Date.now()) {
     `הכנסה מהזמנות שאושרו: ${nis(b.revenue)}\n\n` +
     `🔁 לידים שהועברו אליך: ${refs.length}` +
     (s.missedCalls ? `\n📞 שיחות שלא נענו שקיבלו וואטסאפ: ${s.missedCalls}${s.missedCallReplies ? ` (${s.missedCallReplies} ענו)` : ''}` : '') +
+    (s.waitlistNotified ? `\n🔔 עדכנו ${s.waitlistNotified} לקוחות שחיכו שיתפנה תאריך` : '') +
+    (s.addonRevenue ? `\n🎁 תוספות שאושרו: ${nis(s.addonRevenue)}` : '') +
     (s.urgent ? `\n🚨 פניות דחופות: ${s.urgent}` : '');
 }
 
@@ -354,4 +363,19 @@ async function paymentReminders(ctx, now) {
       await toGuest(ctx, b, `${b.name}, רק מזכיר שהתאריכים ב${b.aptName} (${b.checkin} עד ${b.checkout}) שמורים לך עד שתשלם מקדמה של ${nis(deposit)}: ${B.paymentLink}`);
     } catch (e) { console.warn('payment reminder failed', b.id, e.message); }
   }
+}
+
+// Module "addons": David approves or declines an add-on a guest asked for (אושר T123 / בוטל T123).
+async function decideAddon(ctx, verb, id) {
+  if (!moduleOn(ctx.business, 'addons')) return sendText(ctx.env, ctx.phone, 'התוספות לא פעילות אצלך.');
+  const r = await getAddonRequest(ctx.env, id);
+  if (!r) return sendText(ctx.env, ctx.phone, `לא מצאתי תוספת ${id}`);
+  if (r.status !== 'pending') return sendText(ctx.env, ctx.phone, `${id} כבר טופלה.`);
+  const ok = verb === 'אושר';
+  await setAddonStatus(ctx.env, r.id, ok ? 'confirmed' : 'declined');
+  if (ok) { await bump(ctx.env, 'addonsConfirmed'); await bump(ctx.env, 'addonRevenue', r.price || 0); }
+  const text = ok ? `${r.name} אושר ✅${r.price ? ` (${nis(r.price)})` : ''}. נתראה!` : `מצטערים, לא נוכל להכין "${r.name}" הפעם. אפשר לעזור במשהו אחר?`;
+  try { await sendText(ctx.env, r.chat || r.phone, text); }
+  catch { return sendText(ctx.env, ctx.phone, `${ok ? 'אושר' : 'נדחה'} ${r.id}, אבל לא הצלחתי לשלוח לאורח. כתוב לו בעצמך: https://wa.me/${r.phone}`); }
+  return sendText(ctx.env, ctx.phone, `${ok ? 'אושר ✅' : 'נדחה'} ${r.id}, האורח קיבל הודעה.`);
 }
