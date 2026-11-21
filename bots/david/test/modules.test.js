@@ -27,7 +27,7 @@ test('referrals and offers off: their tools and their prompt sections are gone, 
   const b = withModules({ referrals: false, offers: false });
   const names = toolsFor(b).map(t => t.name);
   assert.ok(!names.includes('refer_lead') && !names.includes('subscribe_offers'));
-  assert.equal(toolsFor(BUSINESS).length, TOOLS.length);
+  assert.equal(toolsFor(BUSINESS).length, TOOLS.length - 2, 'the two opt-in tools (waitlist, addons) are off by default');
   const prompt = buildSystemPrompt(b, APARTMENTS);
   assert.doesNotMatch(prompt, /refer_lead|subscribe_offers|עמלה/);
   assert.match(prompt, /notify_owner עם הפרטים/);
