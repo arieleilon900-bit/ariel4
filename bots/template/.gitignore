@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+.dev.vars
+
+# contacts exports are personal data
+*.vcf
+contacts*.csv
+contacts-import*.sql

@@ -1,0 +1,20 @@
+{
+  "name": "ae-bot-template",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --no-warnings test/*.test.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "node scripts/check-config.js",
+    "contacts": "node scripts/import-contacts.js",
+    "forget": "node scripts/forget.js",
+    "new-client": "node scripts/new-client.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.160.0"
+  }
+}

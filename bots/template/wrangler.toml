@@ -1,0 +1,25 @@
+name = "david-booking-bot"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Hourly: the code checks Israel time for the 07:00 morning list, the Sunday 09:00
+# summary, and follow-ups.
+[triggers]
+crons = ["0 * * * *"]
+
+# npx wrangler d1 create david-bot   → paste the id here
+# npx wrangler d1 migrations apply david-bot --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "david-bot"
+database_id = "REPLACE_WITH_D1_ID"
+migrations_dir = "migrations"
+
+# Workers AI: transcribes voice notes (Whisper)
+[ai]
+binding = "AI"
+
+[vars]
+WA_TEMPLATE_LANG = "he"
+# WA_NOTIFY_TEMPLATE = "owner_alert"   # approved template with one {{1}} body param
