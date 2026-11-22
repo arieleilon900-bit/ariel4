@@ -1,0 +1,201 @@
+// Test data: the example rentals client the tests are written against (a copy of the
+// template's config.js). A real client's src/config.js can differ; the tests don't read it.
+// David's business, as the bot knows it. Everything here comes from the
+// questionnaire (bot-form/david/). Until David's answers arrive, the values are
+// examples, and DRAFT keeps the bot from going live with them.
+//
+// Question numbers in the comments point to the questionnaire section.
+
+export const DRAFT = true; // switch to false only after every value below is David's real answer
+
+export const BUSINESS = {
+  niche: 'rentals',               // 'rentals' (apartments: prices and availability in code) | 'service' (movers, locksmith...: collect details, owner quotes)
+  package: '',                    // 'mazkira' | 'pro' | 'premium' (PACKAGES.md). Empty = use modules below as written
+  businessName: 'קו המים',        // the business name customers know
+  ownerName: 'דוד',               // who answers and calls back
+  botName: 'דוד',                 // §1 in whose name the bot answers
+  voice: 'male',                   // §1 'male' | 'female'
+  style: 'חם, קצר, בגובה העיניים. פונה בשם הפרטי.', // §1
+  area: 'נתניה',                   // §2
+  shabbat: 'הבוט עונה כרגיל, ומה שצריך את דוד ממתין למוצאי שבת', // §2
+  timezone: 'Asia/Jerusalem',
+  ownerPhone: '',                  // §7 David's number for alerts, digits only with country code, e.g. 9725XXXXXXXX
+  cleanerPhone: '',                // §7 optional: gets the daily check-in/check-out list
+  bookingFlow: 'owner_confirms',   // §4 'owner_confirms': David approves each booking | 'pay_to_confirm': paid deposit confirms
+  depositPercent: 30,              // §4
+  paymentLink: '',                 // §4 link the bot sends for the deposit (Bit / PayBox / credit page)
+  cancellation: 'ביטול עד 14 יום לפני ההגעה: החזר מלא. פחות מזה: המקדמה לא מוחזרת.', // §4
+  reviewLinks: { google: '', airbnb: '', booking: '' }, // §8
+  urgent: 'תקלה בדירה בזמן שהייה (מים, חשמל, נעילה בחוץ), אורח כועס, קבוצה מעל 10 אנשים, בקשה לאירוע', // §6
+  never: 'לא נותנים הנחה בלי אישור של דוד. לא שולחים קוד כניסה או כתובת מדויקת לפני שההזמנה אושרה.', // §6
+  // §8 messages around the stay (Israel time). Set any hour to null to turn it off.
+  stay: {
+    reminderHour: 18,      // day before arrival: directions, door code, Wi-Fi
+    welcomeHour: 15,       // arrival day: welcome + recommendations
+    checkoutHour: 8,       // departure day: checkout time and what to do
+    reviewHour: 14,        // departure day: ask for a review
+    comebackDays: 120,     // days after departure: invite back (only to guests on the offers list)
+    comebackOffer: '10% הנחה בהזמנה הבאה',
+    extendHour: 18,        // module addons: evening before checkout, offer one more night if it's free
+  },
+  // §8 days before a free night that David gets a "send an offer?" nudge (Sun and Wed 10:00)
+  lastMinuteDays: 7,
+  // When David answers a guest himself (from the WhatsApp/Instagram app), the bot stays quiet in that chat
+  // for this many hours. "הפעל 054..." gives the chat back sooner. Needs the echo webhook (README §8).
+  handoff: { pauseHours: 12 },
+  // Module "addons": what a guest with a confirmed booking can add. David approves each request.
+  // Example: [{ id: 'late_checkout', name: 'יציאה מאוחרת עד 14:00', price: 150 }, { id: 'gift_basket', name: 'סלסלת פינוק', price: 220 }]
+  addons: [],
+  // ===== Service businesses only (niche: 'service') =====
+  services: [],                    // what the business does, e.g. ['הובלת דירות', 'הובלות משרדים', 'פירוק והרכבה']
+  intake: [],                      // what to find out, one line each, e.g. ['מאיפה לאן', 'תאריך', 'כמה חדרים', 'קומה ומעלית']
+  hours: null,                     // { days: [0, 1, 2, 3, 4], from: '08:00', to: '18:00' } (0 = Sunday)
+  afterHours: '',                  // when the owner calls back after hours, e.g. 'מחר בבוקר'
+  priceGuidance: '',               // what to say about prices. Empty = never give a price
+  greeting: '',                    // answer to a bare "היי"
+  about: '',                       // one or two lines about the business
+  outOfArea: '',                   // what to say to a customer outside the service area
+  faq: [],                         // fixed answers the owner gave, one line each
+  voiceLines: [],                  // how the owner talks (from real chats), one line each
+  photoUrls: [],                   // photos of past work, sent on request
+  // What this client bought. Switch a module off with false; the bot then doesn't offer,
+  // say or send anything from it. Prices per module: bots/MODULES.md.
+  modules: {
+    instagram: true,       // answers Instagram DMs
+    missedCalls: true,     // missed call from an unsaved number → WhatsApp
+    calendar: true,        // Google Calendar sync + calendar feed for Airbnb/Booking
+    voiceAndPhotos: true,  // understands voice notes and photos
+    followUps: true,       // nudges a guest who got a price and went quiet
+    stayMessages: true,    // reminder, welcome, checkout, review request, come back
+    offers: true,          // offers list (with consent) + "מבצע:" + free-nights nudge
+    referrals: true,       // guests who don't fit become a lead for David
+    // Extras, OFF until the client buys them. To switch on: set true (addons also needs the addons list below).
+    waitlist: false,       // guest whose dates were taken is told when they free up (cancellation, block released)
+    addons: false,         // paid extras before arrival (BUSINESS.addons) + offer of one more night
+    reviews: true,         // service: "בוצע L123" sends the customer a review request (needs reviewLinks.google)
+  },
+  // Google Calendar (README §7). Every booking goes in right away ("⏳ ממתין" until David
+  // approves, then "✅"), and anything David adds by hand blocks those nights.
+  // Best: one calendar per apartment, each shared with the service account email
+  // ("Make changes to events"). One shared calendar works too: an event that names an
+  // apartment ("קו המים 2" / "דירה 2") blocks only it, an event that names none blocks all.
+  calendar: {
+    googleCalendarId: '',          // one calendar for all apartments (its "Calendar ID" from Google settings)
+    perApartment: {},              // or one each: { apt1: '...@group.calendar.google.com', apt2: '...', apt3: '...' }
+  },
+  // A call to David's line that nobody answered → a WhatsApp message to the caller.
+  // Needs a phone provider (see README, "שיחה שלא נענתה"). {name} = botName.
+  missedCall: {
+    enabled: true,                 // nothing happens until a provider posts to /missed-call (README §6)
+    cooldownHours: 24,             // at most one message per number in this window
+    quietHours: { from: 22, to: 8 }, // calls at night get the message at 08:00
+    notifyOwner: true,             // David gets "📞 שיחה שלא נענתה מ-..." for each one
+    foreignNumbers: true,          // tourists' numbers (not +972) get it too
+    text: 'היי, ראינו שהתקשרת ל{name} ולא הספקנו לענות 🙏 אפשר לכתוב לי כאן במה אפשר לעזור, ואחזור אליך מיד.',
+    voiceText: '',                 // Twilio only: what the caller hears before hanging up. Empty = busy tone (free)
+  },
+  // Guests who don't fit any apartment. David asked for leads only: collect the details
+  // and send them to his private number, nothing else (no partner list, no commission tracking).
+  referral: {
+    mode: 'owner',                 // 'owner': lead goes to David | 'direct': straight to a partner, copy to David
+    tellCustomer: 'quiet',         // 'quiet': "we'll find something and get back to you" | 'partners': say these are partner apartments
+    trackCommission: false,        // true: lead message asks David to mark "נסגר R123 500", and the summary shows commissions
+  },
+};
+
+// Us, not David: who gets technical alerts and the internal cost report.
+export const AGENCY = {
+  clientName: 'דוד',
+  techPhone: '',          // the partner who handles problems, digits with country code (9725XXXXXXXX)
+  reportPhones: [],       // who gets the weekly internal report (cost, errors). techPhone is added automatically
+  dailyBudgetUsd: 2,      // alert if model spend in one day passes this (normal: ~0.2-0.4 on Haiku)
+  usdToIls: 3.7,          // for showing costs in shekels
+};
+
+// §3, one block per apartment. From David (12.11.2026): price list "קו המים - מחירון",
+// all three at גד מכנס 6, נתניה. Every apartment takes a couple + 2 children
+// (+ a baby, free). Anything bigger is a lead for David (referral).
+// Capacity: adults are 18+, children 2-17; infants (under 2) don't count.
+// Prices are for a couple; extraChildPerNight is added per child per night.
+const COMMON = {
+  capacity: { maxAdults: 2, maxGuests: 4, infantsCount: false, maxInfants: 1 },
+  minNights: 1,
+  discountFromNights: 3,           // "הנחה נוספת בהזמנת 3 לילות ומעלה": David sets the final price
+  lastMinuteDays: 1,               // "המחירים אינם כוללים הזמנות דקה 90": arrival today/tomorrow → David quotes
+  ownerQuoteDates: [],             // holidays David prices himself: { label: 'פסח', from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' }
+  minNightsRanges: [],             // e.g. { from, to, minNights: 2 }
+  checkIn: '15:00',                // TODO David
+  checkOut: '11:00',               // TODO David. Leaving on Saturday = after Shabbat (in the package)
+  checkoutNotes: '',
+  location: 'נתניה',               // what the bot may say before a booking
+  privateInfo: { address: 'גד מכנס 6, נתניה', door: '', wifi: '', parking: '' }, // sent only after confirmation
+  icalUrls: [],
+  photos: '',
+  photoUrls: [],                   // https links to the photos (we host them on GitHub Pages)
+  promo: '',
+  nearby: '',
+};
+
+export const APARTMENTS = [
+  {
+    ...COMMON,
+    id: 'apt1',
+    photos: 'https://wa.me/p/8957180464402274/276480315678929', // WhatsApp catalog item (order 1-2-3 as Ariel sent them; verify)
+    name: 'קו המים 1',
+    summary: '',                   // TODO David: rooms, beds, view
+    prices: { weekday1: 800, weekday2: 600, thu: 1000, friToSatEve: 1500, friToSun: 1700, thuToSatEve: 2200, extraChildPerNight: 100, cleaningFee: 0 },
+    features: [],                  // TODO David: e.g. 'jacuzzi', 'sea_view', 'parking', 'ac', 'wifi'
+    rules: '',                     // TODO David
+    amenities: '',                 // TODO David
+  },
+  {
+    ...COMMON,
+    id: 'apt2',
+    photos: 'https://wa.me/p/25984353924563468/276480315678929', // WhatsApp catalog item (order 1-2-3 as Ariel sent them; verify)
+    name: 'קו המים 2',
+    summary: '',
+    prices: { weekday1: 900, weekday2: 700, thu: 1200, friToSatEve: 1500, friToSun: 1700, thuToSatEve: 2200, extraChildPerNight: 100, cleaningFee: 0 },
+    features: [],
+    rules: '',
+    amenities: '',
+  },
+  {
+    ...COMMON,
+    id: 'apt3',
+    photos: 'https://wa.me/p/27769656369311035/276480315678929', // WhatsApp catalog item (order 1-2-3 as Ariel sent them; verify)
+    name: 'קו המים 3',
+    summary: '',
+    prices: { weekday1: 1200, weekday2: 1000, thu: 1400, friToSatEve: 1700, friToSun: 2000, thuToSatEve: 2600, extraChildPerNight: 100, cleaningFee: 0 },
+    features: [],
+    rules: '',
+    amenities: '',
+  },
+];
+
+// §5 partner apartment owners David refers guests to and earns a commission from.
+export const PARTNERS = [
+  // { id: 'p1', name: 'יוסי', phone: '9725XXXXXXXX', area: '...', maxGuests: 8, priceFrom: 800, priceTo: 1400, features: ['pool'], commission: '10%' },
+];
+
+// WhatsApp templates (approved in Meta) for messages that go out more than 24 hours
+// after the guest last wrote. Each body has {{1}} = guest name, {{2}} = the details.
+// Suggested texts are in README.md. Empty name = try a normal message (works only
+// inside 24 hours; failures alert the tech partner).
+export const TEMPLATES = {
+  reminder: { name: '', lang: 'he' },   // יום לפני ההגעה
+  welcome:  { name: '', lang: 'he' },   // יום ההגעה
+  checkout: { name: '', lang: 'he' },   // בוקר העזיבה
+  review:   { name: '', lang: 'he' },   // בקשת ביקורת
+  comeback: { name: '', lang: 'he' },   // הזמנה לחזור
+  offer:    { name: '', lang: 'he' },   // מבצע לרשימת התפוצה (Marketing)
+  missed_call: { name: '', lang: 'he' }, // שיחה שלא נענתה. {{1}} = שם העסק (Utility)
+  waitlist: { name: '', lang: 'he' },   // module waitlist: התפנה תאריך שביקשו
+  extend:   { name: '', lang: 'he' },   // module addons: הצעה ללילה נוסף
+};
+
+// Feature codes the bot can ask about. Keep in sync with features[] above.
+export const FEATURES = {
+  parking: 'חניה', balcony: 'מרפסת', ac: 'מזגן', wifi: 'Wi-Fi', crib: 'מיטת תינוק',
+  yard: 'חצר', pool: 'בריכה', jacuzzi: "ג'קוזי", pets: 'מותר עם חיות', accessible: 'נגיש לנכים',
+  elevator: 'מעלית', sea_view: 'נוף לים',
+};
