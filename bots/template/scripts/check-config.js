@@ -1,0 +1,72 @@
+// npm run check: lists everything still missing before David's bot can go live.
+// Exit code 1 while something blocks going live.
+import { BUSINESS as B, APARTMENTS, PARTNERS, AGENCY, TEMPLATES, DRAFT, FEATURES } from '../src/config.js';
+import { moduleOn, isService } from '../src/logic.js';
+
+const block = [], warn = [];
+const phone = (p) => /^9725\d{8}$/.test(p || '');
+
+if (DRAFT) block.push('config.js עדיין DRAFT = true. להחליף ל-false רק אחרי שכל הנתונים אמיתיים.');
+if (!phone(B.ownerPhone)) block.push('ownerPhone: המספר של בעל העסק להתראות (9725XXXXXXXX).');
+if (!phone(AGENCY.techPhone)) block.push('AGENCY.techPhone: המספר של השותף שמקבל התראות על תקלות.');
+if (B.bookingFlow === 'pay_to_confirm' && !B.paymentLink) block.push('bookingFlow הוא pay_to_confirm אבל אין paymentLink.');
+if (!B.reviewLinks?.google && !B.reviewLinks?.airbnb && !B.reviewLinks?.booking) warn.push('אין קישור לביקורת, אז בקשת ביקורת לא תישלח.');
+if (B.cleanerPhone && !phone(B.cleanerPhone)) warn.push('cleanerPhone לא בפורמט 9725XXXXXXXX.');
+if (B.area === 'לא ידוע עדיין') warn.push('BUSINESS.area לא מולא.');
+
+if (isService(B)) {
+  if (!(B.services || []).length) block.push('services: אין רשימת שירותים.');
+  if (!(B.intake || []).length) warn.push('intake: אין רשימה של מה לברר מהלקוח.');
+  if (!B.businessName) warn.push('businessName: שם העסק חסר.');
+  if (!B.hours) warn.push('hours: אין שעות עבודה, הבוט לא יודע להגיד מתי בעל העסק חוזר.');
+}
+if (!isService(B)) APARTMENTS.forEach((a, i) => {
+  const n = `דירה ${i + 1} (${a.name})`;
+  if (/דוגמה/.test(a.name)) block.push(`${n}: השם והנתונים הם דוגמה.`);
+  if (!a.capacity?.maxGuests || !a.capacity?.maxAdults) block.push(`${n}: חסרה קיבולת.`);
+  for (const k of ['weekday1', 'weekday2', 'thu', 'friToSatEve', 'friToSun', 'thuToSatEve']) if (!a.prices?.[k]) block.push(`${n}: חסר מחיר ${k}.`);
+  if (!a.summary) warn.push(`${n}: אין תיאור קצר (חדרים, מיטות, נוף).`);
+  if (!a.features?.length && !a.amenities) warn.push(`${n}: לא כתוב מה יש בדירה, אז הבוט לא יוכל לענות על "יש ג'קוזי?".`);
+  if (!a.privateInfo?.address) block.push(`${n}: חסרה כתובת (נשלחת רק אחרי אישור).`);
+  if (!a.privateInfo?.door) warn.push(`${n}: חסר קוד או הוראות כניסה לתזכורת של יום לפני.`);
+  if (!a.privateInfo?.wifi) warn.push(`${n}: חסר Wi-Fi.`);
+  if (!a.icalUrls?.length) warn.push(`${n}: אין קישור יומן (Airbnb/Booking). בלי זה הבוט לא יודע על הזמנות שנסגרו שם.`);
+  if (!a.photoUrls?.length && !a.photos) warn.push(`${n}: אין תמונות.`);
+  for (const f of a.features || []) if (!FEATURES[f]) block.push(`${n}: מאפיין לא מוכר "${f}".`);
+  for (const s of a.ownerQuoteDates || []) if (!(s.from <= s.to)) block.push(`${n}: חג "${s.label}" עם תאריכים הפוכים.`);
+});
+const ids = APARTMENTS.map(a => a.id);
+if (new Set(ids).size !== ids.length) block.push('יש שתי דירות עם אותו id.');
+
+if (!PARTNERS.length && B.referral.mode === 'direct') warn.push('אין שותפים לתיווך.');
+PARTNERS.forEach(p => { if (!phone(p.phone)) warn.push(`שותף ${p.name}: טלפון לא בפורמט 9725XXXXXXXX.`); });
+if (B.referral.mode === 'direct' && !PARTNERS.length) block.push('referral.mode הוא direct אבל אין שותפים.');
+
+for (const [k, t] of Object.entries(TEMPLATES)) if (!t.name) warn.push(`אין תבנית WhatsApp מאושרת ל-${k}. אחרי 24 שעות בלי הודעה מהאורח זה לא יישלח.`);
+
+const on = (m) => moduleOn(B, m);
+const hasCal = !!(B.calendar?.googleCalendarId || Object.keys(B.calendar?.perApartment || {}).length);
+if (on('calendar') && !hasCal) warn.push('calendar: המודול פעיל אבל אין יומן גוגל מוגדר (BUSINESS.calendar). README סעיף 7.');
+if (on('calendar') && hasCal) for (const a of APARTMENTS) if (!B.calendar.perApartment?.[a.id] && !B.calendar.googleCalendarId) block.push(`calendar: אין יומן לדירה ${a.name}.`);
+const off = Object.entries(B.modules || {}).filter(([, v]) => v === false).map(([k]) => k);
+if (off.length) console.log(`\nמודולים כבויים אצל הלקוח הזה: ${off.join(', ')}`);
+
+if (on('missedCalls') && B.missedCall?.enabled !== false) {
+  if (!TEMPLATES.missed_call?.name) block.push('missedCall פעיל אבל אין תבנית missed_call מאושרת. בלי תבנית אי אפשר לפנות ראשונים ללקוח.');
+  if (/—/.test(B.missedCall.text || '')) block.push('missedCall.text: יש בו מקף ארוך (—), אסור לפי ANTI_AI_RULES.');
+  warn.push('שיחות שלא נענו: לוודא שאנשי הקשר של בעל העסק יובאו (npm run contacts, README סעיף 6), אחרת גם מי ששמור אצלו יקבל הודעה.');
+} else {
+  warn.push('שיחות שלא נענו כבויות (missedCall.enabled = false). להדליק אחרי חיבור ספק טלפוניה.');
+}
+
+const env = ['ANTHROPIC_API_KEY', 'WA_TOKEN', 'WA_PHONE_NUMBER_ID', 'WA_APP_SECRET', 'WA_VERIFY_TOKEN', 'HEALTH_TOKEN', 'WA_NOTIFY_TEMPLATE'];
+const optional = [
+  ...(on('instagram') ? ['IG_TOKEN (אינסטגרם)', 'IG_USER_ID (אינסטגרם, לא חובה)', 'IG_APP_SECRET (אם לאפליקציית אינסטגרם יש secret אחר)'] : []),
+  ...(on('missedCalls') ? ['MISSED_CALL_TOKEN (שיחות שלא נענו)'] : []),
+  ...(on('calendar') ? ['GCAL_SA_JSON (יומן גוגל)', 'CAL_FEED_TOKEN (יומן לאירביאנבי/בוקינג)'] : []),
+];
+console.log(block.length ? `\n❌ חוסם עלייה לאוויר (${block.length}):\n` + block.map(x => '  • ' + x).join('\n') : '\n✅ אין חוסמים.');
+console.log(warn.length ? `\n⚠️  כדאי להשלים (${warn.length}):\n` + warn.map(x => '  • ' + x).join('\n') : '');
+console.log(`\nסודות שצריכים להיות מוגדרים ב-Cloudflare (npx wrangler secret list):\n  ${env.join(', ')}`);
+console.log(`לפי הערוצים שמחוברים:\n  ${optional.join(', ')}\n`);
+process.exit(block.length ? 1 : 0);

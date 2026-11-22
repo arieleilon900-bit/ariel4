@@ -1,0 +1,32 @@
+{
+  "slug": "example-zimmer",
+  "package": "premium",
+  "niche": "rentals",
+  "business": {
+    "businessName": "צימרי הגליל",
+    "ownerName": "מיכל",
+    "voice": "female",
+    "ownerPhone": "",
+    "area": "הגליל העליון",
+    "cancellation": "ביטול עד 14 יום לפני ההגעה: החזר מלא. פחות מזה: המקדמה לא מוחזרת.",
+    "reviewLinks": { "google": "" },
+    "addons": [
+      { "id": "late_checkout", "name": "יציאה מאוחרת עד 14:00", "price": 150 },
+      { "id": "gift_basket", "name": "סלסלת פינוק", "price": 220 }
+    ]
+  },
+  "apartments": [
+    {
+      "name": "צימר האלון",
+      "summary": "חדר שינה, ג'קוזי זוגי, מרפסת עם נוף להרים",
+      "capacity": { "maxAdults": 2, "maxGuests": 2, "infantsCount": false, "maxInfants": 1 },
+      "prices": { "weekday1": 900, "weekday2": 800, "thu": 1100, "friToSatEve": 1600, "friToSun": 1900, "thuToSatEve": 2400, "extraChildPerNight": 0, "cleaningFee": 0 },
+      "features": ["jacuzzi", "balcony", "ac", "wifi", "parking"],
+      "checkIn": "15:00",
+      "checkOut": "11:00",
+      "location": "ראש פינה",
+      "privateInfo": { "address": "", "door": "", "wifi": "", "parking": "" }
+    }
+  ],
+  "agency": { "techPhone": "" }
+}
