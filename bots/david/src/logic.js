@@ -178,8 +178,10 @@ export function addDays(day, n) {
 }
 
 // Modules a client can switch off (config BUSINESS.modules). Anything not listed is on.
-export const MODULE_NAMES = ['instagram', 'missedCalls', 'calendar', 'voiceAndPhotos', 'followUps', 'stayMessages', 'offers', 'referrals'];
-export const moduleOn = (business, name) => business?.modules?.[name] !== false;
+export const MODULE_NAMES = ['instagram', 'missedCalls', 'calendar', 'voiceAndPhotos', 'followUps', 'stayMessages', 'offers', 'referrals', 'waitlist', 'addons'];
+// Extras that are OFF until a client buys them: set modules.<name> = true in config to switch one on.
+export const OPT_IN_MODULES = ['waitlist', 'addons'];
+export const moduleOn = (business, name) => (OPT_IN_MODULES.includes(name) ? business?.modules?.[name] === true : business?.modules?.[name] !== false);
 
 // Phone numbers: everything we store is digits with country code (9725XXXXXXXX).
 // Accepts "+972 54-123-4567", "054-1234567", "972541234567", "00972...".
@@ -209,3 +211,6 @@ export function inQuietHours(hour, quiet) {
   if (!quiet || quiet.from == null || quiet.to == null || quiet.from === quiet.to) return false;
   return quiet.from < quiet.to ? hour >= quiet.from && hour < quiet.to : hour >= quiet.from || hour < quiet.to;
 }
+
+// Pay-to-confirm: the guest gets a deposit link and David marks it paid. Needs a link in config.
+export const payToConfirm = (business) => business?.bookingFlow === 'pay_to_confirm' && !!business?.paymentLink;

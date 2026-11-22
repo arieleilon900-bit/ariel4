@@ -26,6 +26,7 @@ export async function getConv(env, phone) {
     phone: row.phone, name: row.name, messages: JSON.parse(row.messages || '[]'),
     createdAt: row.created_at, lastUserAt: row.last_user_at, quotedAt: row.quoted_at,
     bookedAt: row.booked_at, referredAt: row.referred_at, followups: row.followups, optedOut: !!row.opted_out,
+    humanUntil: row.human_until || 0, botAt: row.bot_at || 0,
   };
 }
 
@@ -33,12 +34,12 @@ export async function saveConv(env, c) {
   c.messages = c.messages.slice(-KEEP_TURNS);
   while (c.messages.length && c.messages[0].role !== 'user') c.messages.shift(); // history starts with the guest
   await db(env).prepare(`INSERT INTO conversations
-      (phone, name, messages, created_at, updated_at, last_user_at, quoted_at, booked_at, referred_at, followups, opted_out)
-      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+      (phone, name, messages, created_at, updated_at, last_user_at, quoted_at, booked_at, referred_at, followups, opted_out, human_until, bot_at)
+      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
     ON CONFLICT(phone) DO UPDATE SET name=?2, messages=?3, updated_at=?5, last_user_at=?6, quoted_at=?7,
-      booked_at=?8, referred_at=?9, followups=?10, opted_out=?11`)
+      booked_at=?8, referred_at=?9, followups=?10, opted_out=?11, human_until=?12, bot_at=?13`)
     .bind(c.phone, c.name || '', JSON.stringify(c.messages), c.createdAt || Date.now(), Date.now(),
-      c.lastUserAt ?? null, c.quotedAt ?? null, c.bookedAt ?? null, c.referredAt ?? null, c.followups || 0, c.optedOut ? 1 : 0)
+      c.lastUserAt ?? null, c.quotedAt ?? null, c.bookedAt ?? null, c.referredAt ?? null, c.followups || 0, c.optedOut ? 1 : 0, c.humanUntil || null, c.botAt || null)
     .run();
 }
 
@@ -202,6 +203,7 @@ export async function cleanup(env, now = Date.now()) {
   await db(env).batch([
     db(env).prepare('DELETE FROM seen_messages WHERE ts < ?').bind(d(3)),
     db(env).prepare('DELETE FROM errors WHERE ts < ?').bind(d(90)),
+    db(env).prepare('DELETE FROM waitlist WHERE created_at < ?').bind(d(120)),
     db(env).prepare('DELETE FROM conversations WHERE updated_at < ?').bind(d(180)),
   ]);
 }
@@ -335,4 +337,57 @@ export async function isContact(env, phone) {
 
 export async function contactCount(env) {
   return (await db(env).prepare('SELECT COUNT(*) AS n FROM contacts').first()).n;
+}
+
+// ---------- month summary ----------
+export async function bookingStatsBetween(env, from, to) {
+  const req = await db(env).prepare('SELECT COUNT(*) n FROM bookings WHERE created_at >= ? AND created_at < ?').bind(from, to).first();
+  const ok = await db(env).prepare("SELECT COUNT(*) n, COALESCE(SUM(total), 0) revenue FROM bookings WHERE status = 'confirmed' AND confirmed_at >= ? AND confirmed_at < ?").bind(from, to).first();
+  return { requests: req.n, confirmed: ok.n, revenue: ok.revenue };
+}
+
+// ---------- waitlist (module: waitlist) ----------
+const toWait = (r) => r && { id: r.id, phone: r.phone, name: r.name, aptId: r.apt_id, checkin: r.checkin, checkout: r.checkout,
+  party: { adults: r.adults, children: r.children, infants: r.infants }, status: r.status };
+
+export async function addWaitlist(env, w) {
+  const dup = await db(env).prepare("SELECT id FROM waitlist WHERE phone = ?1 AND checkin = ?2 AND checkout = ?3 AND IFNULL(apt_id, '') = IFNULL(?4, '') AND status = 'waiting'")
+    .bind(w.phone, w.checkin, w.checkout, w.aptId ?? null).first();
+  if (dup) return dup.id;
+  await db(env).prepare('INSERT INTO waitlist (id, phone, name, apt_id, checkin, checkout, adults, children, infants, created_at, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(w.id, w.phone, w.name || '', w.aptId ?? null, w.checkin, w.checkout, w.adults, w.children, w.infants, Date.now(), 'waiting').run();
+  return w.id;
+}
+
+export async function waitingEntries(env, today) {
+  const r = await db(env).prepare("SELECT * FROM waitlist WHERE status = 'waiting' AND checkin >= ? ORDER BY created_at").bind(today).all();
+  return r.results.map(toWait);
+}
+
+export async function setWaitlistStatus(env, id, status) {
+  await db(env).prepare('UPDATE waitlist SET status = ? WHERE id = ?').bind(status, id).run();
+}
+
+export async function expireWaitlist(env, today) {
+  await db(env).prepare("UPDATE waitlist SET status = 'expired' WHERE status = 'waiting' AND checkin < ?").bind(today).run();
+}
+
+// ---------- add-ons (module: addons) ----------
+export async function upcomingBookingFor(env, who, today) {
+  const r = await db(env).prepare("SELECT * FROM bookings WHERE status = 'confirmed' AND (phone = ?1 OR chat = ?1) AND checkout >= ?2 ORDER BY checkin LIMIT 1").bind(who, today).first();
+  return toBooking(r);
+}
+
+export async function addAddonRequest(env, r) {
+  await db(env).prepare('INSERT INTO addon_requests (id, booking_id, addon_id, name, price, phone, chat, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(r.id, r.bookingId, r.addonId, r.name, r.price ?? null, r.phone, r.chat ?? null, 'pending', Date.now()).run();
+}
+
+export async function getAddonRequest(env, id) {
+  const r = await db(env).prepare('SELECT * FROM addon_requests WHERE id = ?').bind(String(id).toUpperCase()).first();
+  return r && { id: r.id, bookingId: r.booking_id, addonId: r.addon_id, name: r.name, price: r.price, phone: r.phone, chat: r.chat, status: r.status };
+}
+
+export async function setAddonStatus(env, id, status) {
+  await db(env).prepare('UPDATE addon_requests SET status = ? WHERE id = ?').bind(status, id).run();
 }

@@ -57,6 +57,20 @@ export function incomingMessages(payload) {
   return out;
 }
 
+// Messages David typed himself in the WhatsApp Business app (coexistence). Meta sends them as
+// the "smb_message_echoes" field; the bot's own API messages do not come back this way.
+export function whatsappEchoes(payload) {
+  const out = [];
+  for (const entry of payload?.entry || []) {
+    for (const change of entry.changes || []) {
+      for (const m of change.value?.message_echoes || []) {
+        if (m.to) out.push({ id: m.id, to: m.to, text: m.type === 'text' ? m.text?.body || '' : '', type: m.type });
+      }
+    }
+  }
+  return out;
+}
+
 async function post(env, body) {
   const res = await fetch(`${GRAPH}/${env.WA_PHONE_NUMBER_ID}/messages`, {
     method: 'POST',

@@ -1,9 +1,10 @@
 // Messages around a confirmed stay, the last-minute nudge to David, and offers to
 // the opt-in list. All run from the hourly cron; each message goes at most once.
 
-import { confirmedWhere, markSent, subscribers, activeBookingsFor, blocksFor } from './store.js';
+import { confirmedWhere, markSent, subscribers, activeBookingsFor, blocksFor, getConv, saveConv } from './store.js';
 import { sendTemplate, sendNotify } from './whatsapp.js';
-import { addDays, israelToday, nightsBetween, isFree } from './logic.js';
+import { addDays, israelToday, nightsBetween, isFree, findApartments, moduleOn } from './logic.js';
+import { busyMap } from './tools.js';
 import { busyFor } from './ical.js';
 import { reportProblem } from './monitor.js';
 
@@ -21,8 +22,8 @@ function privateLines(apt) {
 
 // What each stay message says. {{1}} is the name, {{2}} these details.
 const MESSAGES = {
-  reminder: (b, apt) => ({
-    details: `מחכים לך מחר ב${apt.name}. כניסה מ-${apt.checkIn}.\n${privateLines(apt)}`,
+  reminder: (b, apt, B) => ({
+    details: `מחכים לך מחר ב${apt.name}. כניסה מ-${apt.checkIn}.\n${privateLines(apt)}${addonLine(B)}`,
     text: (n, d) => `היי ${n} 🙂 ${d}\nאם משהו לא ברור, פשוט תכתוב כאן.`,
   }),
   welcome: (b, apt) => ({
@@ -66,6 +67,9 @@ export async function stayMessages(ctx, hour, now = Date.now()) {
   if (hour === S.reminderHour) for (const b of await confirmedWhere(ctx.env, 'checkin', addDays(today, 1))) await sendStay(ctx, 'reminder', b);
   if (hour === S.welcomeHour) for (const b of await confirmedWhere(ctx.env, 'checkin', today)) await sendStay(ctx, 'welcome', b);
   if (hour === S.checkoutHour) for (const b of await confirmedWhere(ctx.env, 'checkout', today)) await sendStay(ctx, 'checkout', b);
+  if (moduleOn(ctx.business, 'addons')) {
+    try { await extendOffers(ctx, hour, now); } catch (e) { await reportProblem(ctx, 'הצעת הארכה נכשלה', e.stack || e.message); }
+  }
   if (hour === S.reviewHour) for (const b of await confirmedWhere(ctx.env, 'checkout', today)) await sendStay(ctx, 'review', b);
   if (hour === 11 && S.comebackDays) {
     const subs = new Set((await subscribers(ctx.env)).map(s => s.phone));
@@ -122,4 +126,41 @@ export async function broadcastOffer(ctx, offerText) {
     }
   }
   return { sent, failed };
+}
+
+function addonLine(B) {
+  if (!moduleOn(B, 'addons') || !B.addons?.length) return '';
+  return `\nאפשר להוסיף: ${B.addons.map(a => `${a.name}${a.price ? ` (₪${a.price})` : ''}`).join(', ')}. כתבו לי מה מעניין.`;
+}
+
+// Module "addons": the evening before checkout, a guest whose apartment is free the next night
+// is offered one more night (once per booking).
+export async function extendOffers(ctx, hour, now = Date.now()) {
+  const S = ctx.business.stay || {};
+  if (hour !== (S.extendHour ?? 18)) return;
+  const today = israelToday(now);
+  const list = await confirmedWhere(ctx.env, 'checkout', addDays(today, 1));
+  if (!list.length) return;
+  const busy = await busyMap(ctx);
+  for (const b of list) {
+    const apt = ctx.apartments.find(a => a.id === b.aptId);
+    if (!apt) continue;
+    const r = findApartments([apt], busy, { checkin: b.checkout, checkout: addDays(b.checkout, 1), ...b.party, needs: [], today });
+    const hit = !r.error && r.results.find(x => x.fits);
+    if (!hit) continue;
+    if (!(await markSent(ctx.env, b.id, 'extend'))) continue;
+    const name = first(b.name);
+    // The extra night starts tomorrow, which is a last-minute stay: David sets that price, so no price here.
+    const priced = hit.quote?.total != null && !hit.quote.ownerQuote;
+    const details = `אם בא לכם להישאר עוד לילה ב${apt.name}, הוא פנוי${priced ? `: ₪${Number(hit.quote.total).toLocaleString('en-US')}` : ` (${ctx.business.botName} יחזור עם מחיר)`}`;
+    const text = `${name}, ${details}. רוצים? כתבו לי כאן.`;
+    try {
+      await sendTemplate(ctx.env, b.phone, ctx.templates?.extend, [name, details], text);
+      const conv = await getConv(ctx.env, b.phone);
+      conv.messages.push({ role: 'assistant', text });
+      await saveConv(ctx.env, conv);
+    } catch (e) {
+      await reportProblem(ctx, 'הצעת הארכה לא נשלחה', `${b.id} (${b.name}): ${e.message}`, { guest: b.phone });
+    }
+  }
 }

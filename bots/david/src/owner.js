@@ -14,6 +14,10 @@ import { stayMessages, lastMinuteNudge, broadcastOffer, freeNights, compressDays
 import { sendText, sendNotify } from './whatsapp.js';
 import { israelToday, weekStart, parseDate, nightsBetween, normalizePhone, moduleOn } from './logic.js';
 import { reportProblem } from './monitor.js';
+import { bookingStatsBetween, markSent, pendingBookings as pendingNow, getAddonRequest, setAddonStatus } from './store.js';
+import { checkWaitlist } from './waitlist.js';
+import { setPause } from './handoff.js';
+import { payToConfirm, addDays } from './logic.js';
 
 const HELP = `פקודות:
 אושר B123 : אישור הזמנה (הלקוח מקבל אישור ופרטי הגעה)
@@ -29,6 +33,12 @@ const HELP = `פקודות:
 יומן : בודק שהחיבור ליומן גוגל עובד
 מבצע: הטקסט : שולח מבצע לכל מי שברשימת התפוצה
 סיכום : הסיכום השבועי עכשיו
+סיכום חודשי : הסיכום של החודש שעבר
+שולם B123 : התקבלה מקדמה, ההזמנה מאושרת (כשיש קישור תשלום)
+הפעל 0541234567 : מחזיר לבוט לענות ללקוח שענית לו בעצמך
+אושר T123 / בוטל T123 : תוספת שאורח ביקש (רק כשמודול התוספות פעיל)
+השתק 0541234567 : הבוט לא עונה ללקוח הזה כמה שעות
+(כשאתה עונה ללקוח בעצמך, הבוט מפסיק לענות לו לבד)
 
 שיחות שלא נענו (רק מי שלא שמור אצלך מקבל וואטסאפ):
 שלח לי איש קשר (אחד או כמה) : נשמר, לא יקבל הודעה
@@ -56,6 +66,14 @@ export async function handleOwner(ctx, text, msg = {}) {
     const n = await contactCount(ctx.env);
     return sendText(ctx.env, ctx.phone, `יש ${n} מספרים שמורים. הם לא מקבלים וואטסאפ על שיחה שלא נענתה.\nכדי להוסיף: שלח לי אנשי קשר מהטלפון (אפשר כמה ביחד), או כתוב: שמור 0541234567 שם`);
   }
+  if ((m = t.match(/^(הפעל|השתק)\s+([+\d][\d\s\-+]{6,})/))) {
+    const phone = normalizePhone(m[2]);
+    if (!phone) return sendText(ctx.env, ctx.phone, 'לא הבנתי את המספר. לדוגמה: הפעל 0541234567');
+    await setPause(ctx.env, ctx.business, phone, m[1] === 'השתק');
+    return sendText(ctx.env, ctx.phone, m[1] === 'השתק' ? `הבוט לא יענה ל-+${phone} כמה שעות. להחזרה: הפעל ${m[2].trim()}` : `הבוט חזר לענות ל-+${phone}.`);
+  }
+  if ((m = t.match(/^(אושר|בוטל)\s+(T\w+)/i))) return decideAddon(ctx, m[1], m[2].toUpperCase());
+  if ((m = t.match(/^שולם\s+(B\w+)/i))) return confirmBooking(ctx, m[1].toUpperCase());
   if ((m = t.match(/^אושר\s+(B\w+)\s*₪?\s*([\d,]+)?/i))) return confirmBooking(ctx, m[1].toUpperCase(), m[2]);
   if ((m = t.match(/^בוטל\s+(B\w+)/i))) return cancelBooking(ctx, m[1].toUpperCase());
   if ((m = t.match(/^לא נסגר\s+(R\w+)/i))) return closeReferral(ctx, m[1].toUpperCase(), false);
@@ -75,6 +93,7 @@ export async function handleOwner(ctx, text, msg = {}) {
     return sendText(ctx.env, ctx.phone, `המבצע נשלח ל-${r.sent} אנשים${r.failed ? `, ${r.failed} נכשלו` : ''}.`);
   }
   if (/^היום/.test(t)) return sendText(ctx.env, ctx.phone, await dailyText(ctx));
+  if (/^סיכום חודשי/.test(t)) return sendText(ctx.env, ctx.phone, await monthlyText(ctx));
   if (/^סיכום/.test(t)) return sendText(ctx.env, ctx.phone, await weeklyText(ctx));
   return sendText(ctx.env, ctx.phone, HELP);
 }
@@ -163,6 +182,7 @@ async function cancelBooking(ctx, id) {
   await setBookingStatus(ctx.env, id, 'cancelled');
   await calendarJob(ctx, `ביטול ${id}`, () => removeBookingEvent(ctx, b));
   await toGuest(ctx, b, `${b.name}, מצטערים, התאריכים האלה כבר לא פנויים ב${b.aptName}. אפשר לבדוק לך תאריכים אחרים או דירה אחרת?`);
+  if (moduleOn(ctx.business, 'waitlist')) await checkWaitlist(ctx).catch(e => console.warn('waitlist', e.message));
   return sendText(ctx.env, ctx.phone, `בוטל ${b.id}, הלקוח קיבל הודעה.`);
 }
 
@@ -205,6 +225,8 @@ export async function weeklyText(ctx, week = weekStart(Date.now() - 86400e3)) {
         (open.length ? `\nעוד לא סימנת: ${open.map(r => r.id).join(', ')}` : '')
       : '') +
     (s.missedCalls ? `\n\n📞 שיחות שלא נענו שקיבלו וואטסאפ: ${s.missedCalls}${s.missedCallReplies ? ` (${s.missedCallReplies} ענו)` : ''}` : '') +
+    (s.waitlistNotified ? `\n\n🔔 עדכנו ${s.waitlistNotified} לקוחות שחיכו שיתפנה תאריך` : '') +
+    (s.addonRevenue ? `\n🎁 תוספות שאושרו: ${nis(s.addonRevenue)}` : '') +
     (s.urgent ? `\n\n🚨 פניות דחופות: ${s.urgent}` : '');
 }
 
@@ -254,11 +276,14 @@ export async function scheduled(ctx, now = Date.now()) {
   }
   if (moduleOn(B, 'stayMessages')) await job('הודעות לאורחים', () => stayMessages(ctx, hour, now));
   if (moduleOn(B, 'offers') && hour === 10 && (dow === 0 || dow === 3)) await job('לילות פנויים', () => lastMinuteNudge(ctx, now));
+  if (hour === 9 && israelToday(now).endsWith('-01')) await job('סיכום חודשי', async () => sendNotify(ctx.env, B.ownerPhone, await monthlyText(ctx, now)));
+  if (payToConfirm(B)) await job('תזכורת למקדמה', () => paymentReminders(ctx, now));
   if (hour === 23) await job('בדיקת תקציב', () => budgetCheck(ctx, now));
   if (hour === 3) await job('ניקוי', () => cleanup(ctx.env, now));
   // Instagram tokens expire after 60 days unless refreshed. A failure alerts the tech partner.
   if (hour === 4 && dow === 1 && ctx.env.IG_TOKEN) await job('חידוש טוקן אינסטגרם', () => refreshInstagramToken(ctx.env));
   if (moduleOn(B, 'followUps')) await job('הודעות מעקב', () => followUps(ctx, now));
+  if (moduleOn(B, 'waitlist')) await job('רשימת המתנה', () => checkWaitlist(ctx, now));
   await job('שיחות שלא נענו מהלילה', () => flushQueuedMissedCalls(ctx, now));
   // A request nobody approved within 48h frees its dates: take it out of the calendar too.
   if (calendarConfig(B)) await job('ניקוי יומן', async () => {
@@ -299,4 +324,58 @@ async function followUps(ctx, now) {
       await saveConv(ctx.env, c);
     }
   }
+}
+
+// Last month for David, sent on the 1st at 09:00. Weekly counters are summed by the weeks that start in the month.
+export async function monthlyText(ctx, now = Date.now()) {
+  const today = israelToday(now);
+  const first = today.slice(0, 8) + '01';
+  const prev = addDays(first, -1).slice(0, 8) + '01';
+  const from = parseDate(prev) - 3 * 3600e3, to = parseDate(first) - 3 * 3600e3;
+  const weeks = new Set();
+  for (let d = prev; d < first; d = addDays(d, 1)) weeks.add(weekStart(parseDate(d)));
+  const s = {};
+  for (const w of weeks) for (const [k, v] of Object.entries(await getStats(ctx.env, w))) s[k] = (s[k] || 0) + v;
+  const b = await bookingStatsBetween(ctx.env, from, to);
+  const refs = await referralsBetween(ctx.env, from, to);
+  const month = new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(parseDate(prev)));
+  return `📅 *סיכום חודשי: ${month}*\n\n` +
+    `פניות חדשות: ${s.inquiries || 0}\n` +
+    `בקשות הזמנה: ${b.requests}\n` +
+    `הזמנות שאושרו: ${b.confirmed}\n` +
+    `הכנסה מהזמנות שאושרו: ${nis(b.revenue)}\n\n` +
+    `🔁 לידים שהועברו אליך: ${refs.length}` +
+    (s.missedCalls ? `\n📞 שיחות שלא נענו שקיבלו וואטסאפ: ${s.missedCalls}${s.missedCallReplies ? ` (${s.missedCallReplies} ענו)` : ''}` : '') +
+    (s.waitlistNotified ? `\n🔔 עדכנו ${s.waitlistNotified} לקוחות שחיכו שיתפנה תאריך` : '') +
+    (s.addonRevenue ? `\n🎁 תוספות שאושרו: ${nis(s.addonRevenue)}` : '') +
+    (s.urgent ? `\n🚨 פניות דחופות: ${s.urgent}` : '');
+}
+
+// A guest who got the deposit link and didn't pay hears from us once, 5 to 20 hours later (inside the 24-hour window).
+async function paymentReminders(ctx, now) {
+  const B = ctx.business;
+  for (const b of await pendingNow(ctx.env, now)) {
+    const age = now - b.createdAt;
+    if (age < 5 * 3600e3 || age > 20 * 3600e3 || b.total == null) continue;
+    if (!(await markSent(ctx.env, b.id, 'payReminder'))) continue;
+    const deposit = Math.round(b.total * (B.depositPercent || 0) / 100);
+    try {
+      await toGuest(ctx, b, `${b.name}, רק מזכיר שהתאריכים ב${b.aptName} (${b.checkin} עד ${b.checkout}) שמורים לך עד שתשלם מקדמה של ${nis(deposit)}: ${B.paymentLink}`);
+    } catch (e) { console.warn('payment reminder failed', b.id, e.message); }
+  }
+}
+
+// Module "addons": David approves or declines an add-on a guest asked for (אושר T123 / בוטל T123).
+async function decideAddon(ctx, verb, id) {
+  if (!moduleOn(ctx.business, 'addons')) return sendText(ctx.env, ctx.phone, 'התוספות לא פעילות אצלך.');
+  const r = await getAddonRequest(ctx.env, id);
+  if (!r) return sendText(ctx.env, ctx.phone, `לא מצאתי תוספת ${id}`);
+  if (r.status !== 'pending') return sendText(ctx.env, ctx.phone, `${id} כבר טופלה.`);
+  const ok = verb === 'אושר';
+  await setAddonStatus(ctx.env, r.id, ok ? 'confirmed' : 'declined');
+  if (ok) { await bump(ctx.env, 'addonsConfirmed'); await bump(ctx.env, 'addonRevenue', r.price || 0); }
+  const text = ok ? `${r.name} אושר ✅${r.price ? ` (${nis(r.price)})` : ''}. נתראה!` : `מצטערים, לא נוכל להכין "${r.name}" הפעם. אפשר לעזור במשהו אחר?`;
+  try { await sendText(ctx.env, r.chat || r.phone, text); }
+  catch { return sendText(ctx.env, ctx.phone, `${ok ? 'אושר' : 'נדחה'} ${r.id}, אבל לא הצלחתי לשלוח לאורח. כתוב לו בעצמך: https://wa.me/${r.phone}`); }
+  return sendText(ctx.env, ctx.phone, `${ok ? 'אושר ✅' : 'נדחה'} ${r.id}, האורח קיבל הודעה.`);
 }
