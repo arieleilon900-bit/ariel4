@@ -1,0 +1,334 @@
+diff --git a/.github/workflows/agency-bot.yml b/.github/workflows/agency-bot.yml
+index 047ebc8..54c5281 100644
+--- a/.github/workflows/agency-bot.yml
++++ b/.github/workflows/agency-bot.yml
+@@ -94,11 +94,12 @@ jobs:
+           GMAIL_APP_PASSWORD: ${{ secrets[format('{0}_GMAIL_APP_PASSWORD', matrix.client.prefix)] }}
+           DUALHOOK_API_KEY: ${{ secrets[format('{0}_DUALHOOK_API_KEY', matrix.client.prefix)] }}
+           DUALHOOK_WEBHOOK_KEY: ${{ secrets[format('{0}_DUALHOOK_WEBHOOK_KEY', matrix.client.prefix)] }}
++          MISSED_CALL_KEY: ${{ secrets[format('{0}_MISSED_CALL_KEY', matrix.client.prefix)] }}
+           CLIENT_ANTHROPIC: ${{ secrets[format('{0}_ANTHROPIC_API_KEY', matrix.client.prefix)] }}
+           SHARED_ANTHROPIC: ${{ secrets.ANTHROPIC_API_KEY }}
+         run: |
+           ANTHROPIC_API_KEY="${CLIENT_ANTHROPIC:-$SHARED_ANTHROPIC}"
+-          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET ULTRAMSG_TOKEN OWNER_EMAIL GMAIL_USER GMAIL_APP_PASSWORD DUALHOOK_API_KEY DUALHOOK_WEBHOOK_KEY; do
++          for name in ANTHROPIC_API_KEY WA_TOKEN WA_VERIFY_TOKEN WA_APP_SECRET GOOGLE_SA_JSON D360_API_KEY YESH_USERKEY YESH_SECRET ULTRAMSG_TOKEN OWNER_EMAIL GMAIL_USER GMAIL_APP_PASSWORD DUALHOOK_API_KEY DUALHOOK_WEBHOOK_KEY MISSED_CALL_KEY; do
+             value="${!name}"
+             if [ -n "$value" ]; then printf '%s' "$value" | npx wrangler secret put "$name" --config "$CONFIG"
+             else echo "::notice::${{ matrix.client.prefix }}_$name not set"; fi
+diff --git a/bots/agency-bot/clients/_template/client.js b/bots/agency-bot/clients/_template/client.js
+index 1d52e82..b9d044b 100644
+--- a/bots/agency-bot/clients/_template/client.js
++++ b/bots/agency-bot/clients/_template/client.js
+@@ -33,6 +33,7 @@ export default {
+   },
+   messages: {},                       // שינוי של הודעות קבועות (אופציונלי)
+   templates: {},                      // שינוי של טקסט תבנית לפי שם (אופציונלי)
+-  features: { receipts: false },
++  // missedCalls: שיחה שלא נענתה ← הודעה בוואטסאפ (צריך ספק טלפוניה וסוד <PREFIX>_MISSED_CALL_KEY). הוראות: automation-agency/pending/missed-calls.md
++  features: { receipts: false, missedCalls: false },
+   timing: {},
+ };
+diff --git a/bots/agency-bot/migrations/0011_missed_calls.sql b/bots/agency-bot/migrations/0011_missed_calls.sql
+new file mode 100644
+index 0000000..a2dda14
+--- /dev/null
++++ b/bots/agency-bot/migrations/0011_missed_calls.sql
+@@ -0,0 +1,9 @@
++-- שיחות שלא נענו: מי התקשר, ומתי נשלחה לו הודעה בוואטסאפ (בלילה ובשבת מחכים לבוקר)
++CREATE TABLE IF NOT EXISTS missed_calls (
++  id INTEGER PRIMARY KEY AUTOINCREMENT,
++  phone TEXT NOT NULL,
++  created_at TEXT NOT NULL,
++  sent_at TEXT,
++  skipped TEXT
++);
++CREATE INDEX IF NOT EXISTS idx_missed_calls_phone ON missed_calls(phone, created_at);
+diff --git a/bots/agency-bot/src/config.js b/bots/agency-bot/src/config.js
+index b3b7264..50f4935 100644
+--- a/bots/agency-bot/src/config.js
++++ b/bots/agency-bot/src/config.js
+@@ -6,6 +6,8 @@ export const BUSINESS = {};
+ // מה פעיל בבוט (לכל לקוח אפשר לשנות ב-client.js). receipts = שליחת קבלות ללקוח מיש חשבונית, או PDF שבעל העסק מעביר
+ export const FEATURES = {
+   receipts: false,
++  missedCalls: false,           // שיחה שלא נענתה ← הודעה בוואטסאפ (צריך ספק טלפוניה ו-MISSED_CALL_KEY)
++  missedCallNotifyOwner: true,  // בעל העסק מקבל הודעה קצרה על כל שיחה שלא נענתה
+ };
+ const DEFAULT_FEATURES = { ...FEATURES };
+ // בוט מכירות (רק ללקוח שמגדיר sales ב-client.js, כמו oneh-rishon-sales): במקום קבלת פנייה של לקוח,
+@@ -29,6 +31,7 @@ export const TIMING = {
+   ownerNudgeMinutes: 30,       // חנן לא טיפל בפנייה: תזכורת אחרי 30 דקות (דחוף: 10)
+   ownerNudgeAgainMinutes: 60,  // ותזכורת שנייה ואחרונה אחרי עוד שעה (דחוף: 20)
+   doneCheckHours: 3,           // עבודה מתואמת שעברו 3 שעות מהזמן שלה ולא סומנה: שואלים את חנן מה קרה
++  missedCallCooldownHours: 12, // אותו מספר התקשר שוב: לא שולחים לו עוד הודעה בתוך 12 שעות
+ };
+ 
+ // הודעות קבועות (טקסט חופשי, נשלח רק בתוך חלון 24 שעות מההודעה האחרונה של הלקוח).
+@@ -52,6 +55,7 @@ function defaultMessages(b) {
+     optedOut: `הוסרת. לא נשלח לך יותר תזכורות או עדכונים. אם תצטרך ${b.trade}, פשוט כתוב כאן.`,
+     customerNudge: `היי, עדיין צריך עזרה? אפשר להמשיך מאיפה שעצרנו, ואני מעביר הכל ל${o}.`,
+     customerReassure: `${o} עדיין באמצע עבודה. הפנייה שלך ${f ? 'אצלה' : 'אצלו'}, ו${heWill} אליך בהקדם.`,
++    missedCall: `היי, ראינו שהתקשרת ל${b.shortName} ולא הספקנו לענות 🙏 אפשר לכתוב כאן מה צריך, ונטפל בזה מהר.`,
+   };
+ }
+ 
+@@ -125,6 +129,7 @@ export const TEMPLATES = {
+   referral: 'referral_v1',          // אין משתנים
+   invoice: 'invoice_v1',            // כותרת: מסמך PDF
+   ownerAlert: 'owner_alert_v1',     // {{1}} = טקסט הסיכום (להודעות לחנן מחוץ לחלון)
++  missedCall: 'missed_call_v1',     // אין משתנים. שיחה שלא נענתה (רק ללקוח שהפעיל FEATURES.missedCalls)
+ };
+ 
+ // הטקסטים של התבניות, כמו שהן נוצרות ב-Meta (ההגדרה האוטומטית ב-/admin/setup יוצרת אותן מכאן).
+@@ -142,6 +147,7 @@ function defaultTemplates(b) {
+     { name: 'review_request_v1', category: 'MARKETING', body: `תודה שבחרת ב${sn}! אם יצאת מרוצה, ביקורת קצרה בגוגל תעזור לנו מאוד: {{1}} תודה רבה!`, examples: ['https://g.page/r/example/review'] },
+     { name: 'referral_v1', category: 'MARKETING', body: `שמחנו לעזור! אם מישהו מהחברים או מהמשפחה צריך ${b.trade}, אפשר להעביר להם את המספר הזה.` },
+     { name: 'yearly_checkup_v1', category: 'MARKETING', body: `היי, עברה שנה מאז ש${sn} עבד אצלך. רוצה שנבדוק שהכל תקין?` },
++    { name: 'missed_call_v1', category: 'UTILITY', body: `היי, ראינו שהתקשרת ל${sn} ולא הספקנו לענות. אפשר לכתוב כאן מה צריך, ונטפל בזה מהר.`, quickReplies: ['אני רוצה לכתוב כאן'], onlyIf: 'missedCalls' },
+   ];
+ }
+ 
+@@ -183,7 +189,8 @@ export function applyClient(client = {}) {
+   Object.assign(SALES, client.sales || {});
+   // בוט מכירות: רק התבניות שלו (בלי תזכורות תור, ביקורות וכו' של בעל מקצוע)
+   const defs = client.sales ? (client.sales.templates || [])
+-    : defaultTemplates(BUSINESS).map((d) => (client.templates?.[d.name] ? { ...d, body: client.templates[d.name] } : d));
++    : defaultTemplates(BUSINESS).filter((d) => !d.onlyIf || FEATURES[d.onlyIf])
++      .map(({ onlyIf, ...d }) => (client.templates?.[d.name] ? { ...d, body: client.templates[d.name] } : d));
+   TEMPLATE_DEFS.splice(0, TEMPLATE_DEFS.length, ...defs);
+ }
+ 
+diff --git a/bots/agency-bot/src/cron.js b/bots/agency-bot/src/cron.js
+index 8ae7a0f..9d2a5da 100644
+--- a/bots/agency-bot/src/cron.js
++++ b/bots/agency-bot/src/cron.js
+@@ -20,6 +20,7 @@ async function optedOut(env, phone) {
+ 
+ // הודעות מתוזמנות ללקוחות רק בין 08:00 ל-21:00, ולא בשבת
+ const canMessageNow = customerHours;
++import { flushMissedCalls } from './missedcall.js';
+ 
+ export async function runEvery15(env, now = new Date()) {
+   setWindowAlwaysOpen(isUltra(env));
+@@ -38,6 +39,7 @@ export async function runEvery15(env, now = new Date()) {
+   await step('owner job reminders', ownerJobReminders);
+   await step('nudges', runNudges);
+   await step('invoices', invoices);
++  await step('missed calls', flushMissedCalls);
+   await step('owner retry', retryOwnerOutbox);
+   await step('cleanup', cleanup);
+   if (!canMessageNow(now)) return;
+diff --git a/bots/agency-bot/src/index.js b/bots/agency-bot/src/index.js
+index f790cf5..a81e804 100644
+--- a/bots/agency-bot/src/index.js
++++ b/bots/agency-bot/src/index.js
+@@ -14,6 +14,7 @@ import { setWindowAlwaysOpen } from './util.js';
+ import { BUSINESS, SALES } from './config.js';
+ import { markLead, salesWeeklyReport } from './sales.js';
+ import { actionPage, ownerByEmail, serveMedia } from './email.js';
++import { missedCallRequest } from './missedcall.js';
+ 
+ // בעל עסק שמקבל הכל במייל ואין לו מספר וואטסאפ נפרד: "email" במקום מספר, כדי שכל ההודעות אליו יגיעו למייל
+ const withOwner = (env) => (env.OWNER_EMAIL && !env.OWNER_PHONE ? { ...env, OWNER_PHONE: 'email' } : env);
+@@ -43,6 +44,12 @@ export default {
+       return actionPage(env, request, url, handleOwnerCommand);
+     }
+ 
++    // שיחה שלא נענתה: ספק הטלפוניה מודיע מי התקשר, והבוט שולח לו הודעה בוואטסאפ
++    if (url.pathname === '/missed-call' && (request.method === 'GET' || request.method === 'POST')) {
++      setWindowAlwaysOpen(isUltra(env));
++      return missedCallRequest(env, request, url);
++    }
++
+     // בוט המכירות: הכפתורים במייל (התקשרתי / נקבע חיבור / לא רלוונטי)
+     if (url.pathname === '/sales/mark' && request.method === 'GET') return markLead(env, url);
+ 
+diff --git a/bots/agency-bot/src/missedcall.js b/bots/agency-bot/src/missedcall.js
+new file mode 100644
+index 0000000..8d3d841
+--- /dev/null
++++ b/bots/agency-bot/src/missedcall.js
+@@ -0,0 +1,93 @@
++// שיחה שלא נענתה ← הודעה בוואטסאפ.
++// בעל העסק מגדיר בטלפון "אם לא עניתי / תפוס, תעביר" למספר וירטואלי אצל ספק טלפוניה.
++// הספק שולח לנו (GET או POST) את המספר של מי שהתקשר: /missed-call?key=MISSED_CALL_KEY&from=0541234567
++// הבוט שולח ללקוח הודעה (תבנית מאושרת missed_call_v1, או טקסט רגיל אם הלקוח כתב ב-24 השעות האחרונות),
++// ומהרגע שהלקוח עונה, השיחה ממשיכה כרגיל עם הבוט.
++import { FEATURES, MESSAGES, TEMPLATES, TIMING } from './config.js';
++import { customerHours } from './hours.js';
++import { displayPhone, nowIso, normalizePhone } from './util.js';
++import { logEvent, sendToCustomer, sendToOwner } from './handler.js';
++
++// השדות שבהם ספקי טלפוניה שונים שולחים את המספר של המתקשר
++const PHONE_FIELDS = ['from', 'caller', 'caller_id', 'callerid', 'CallerNumber', 'caller_number', 'phone', 'number', 'ani', 'From', 'CallerID', 'src', 'source'];
++
++export function pickCaller(obj = {}) {
++  for (const k of PHONE_FIELDS) {
++    const v = obj[k] ?? obj[k.toLowerCase()];
++    if (v && /\d{7,}/.test(String(v).replace(/\D/g, ''))) return normalizePhone(String(v));
++  }
++  return '';
++}
++
++async function readCaller(request, url) {
++  const q = Object.fromEntries(url.searchParams);
++  let caller = pickCaller(q);
++  if (caller || request.method !== 'POST') return caller;
++  const raw = await request.text().catch(() => '');
++  try { caller = pickCaller(JSON.parse(raw)); } catch { caller = pickCaller(Object.fromEntries(new URLSearchParams(raw))); }
++  return caller;
++}
++
++// הכניסה מהשרת (index.js)
++export async function missedCallRequest(env, request, url, now = new Date()) {
++  if (!FEATURES.missedCalls) return new Response('missed calls are off for this client', { status: 404 });
++  const key = String(env.MISSED_CALL_KEY || '').trim();
++  if (!key || (url.searchParams.get('key') || '').trim() !== key) return new Response('forbidden', { status: 403 });
++  const phone = await readCaller(request, url);
++  if (!phone) return new Response('no caller number', { status: 400 });
++  const r = await handleMissedCall(env, phone, now);
++  return new Response(r, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
++}
++
++// מחזיר מה קרה (לבדיקות וללוג): sent / queued / skipped:<סיבה>
++export async function handleMissedCall(env, phone, now = new Date()) {
++  const skip = async (why) => {
++    await env.DB.prepare('INSERT INTO missed_calls (phone, created_at, skipped) VALUES (?, ?, ?)').bind(phone, nowIso(now), why).run();
++    return `skipped:${why}`;
++  };
++  if (!/^9725\d{8}$/.test(phone)) return skip('not a mobile number'); // קווי או חו"ל: אין וואטסאפ / לא שולחים
++  if (phone === env.OWNER_PHONE || phone === env.ADMIN_PHONE) return skip('owner');
++  if (env.TEST_PHONES && !String(env.TEST_PHONES).split(',').map((p) => p.trim()).includes(phone)) return skip('test mode');
++  const c = await env.DB.prepare('SELECT known, blocked, opted_out FROM customers WHERE phone = ?').bind(phone).first();
++  if (c?.known) return skip('saved contact');
++  if (c?.blocked) return skip('blocked');
++  if (c?.opted_out) return skip('opted out');
++  // אותו מספר התקשר כמה פעמים: הודעה אחת בלבד בכל פרק זמן
++  const since = new Date(now.getTime() - TIMING.missedCallCooldownHours * 3600000).toISOString();
++  const recent = await env.DB.prepare('SELECT 1 FROM missed_calls WHERE phone = ? AND skipped IS NULL AND created_at >= ? LIMIT 1').bind(phone, since).first();
++  if (recent) return skip('already messaged');
++
++  const ins = await env.DB.prepare('INSERT INTO missed_calls (phone, created_at) VALUES (?, ?)').bind(phone, nowIso(now)).run();
++  await logEvent(env, 'missed_call', phone, now);
++  if (!customerHours(now)) return 'queued'; // לילה, שבת או חג: נשלח בבוקר (cron)
++  await sendMissedCallMessage(env, ins.meta?.last_row_id, phone, now);
++  return 'sent';
++}
++
++async function sendMissedCallMessage(env, id, phone, now) {
++  await env.DB.prepare(
++    `INSERT INTO customers (phone, first_seen) VALUES (?, ?) ON CONFLICT(phone) DO NOTHING`,
++  ).bind(phone, nowIso(now)).run();
++  await sendToCustomer(env, phone, MESSAGES.missedCall, { name: TEMPLATES.missedCall, params: [] }, now);
++  await env.DB.prepare('UPDATE missed_calls SET sent_at = ? WHERE id = ?').bind(nowIso(now), id).run();
++  if (FEATURES.missedCallNotifyOwner) {
++    await sendToOwner(env, `📞 שיחה שלא נענתה מ-${displayPhone(phone)}. שלחתי לו הודעה בוואטסאפ, ואם הוא יענה הבוט ימשיך איתו כרגיל.`, now, phone);
++  }
++}
++
++// cron: מה שהגיע בלילה או בשבת נשלח כשמותר (רק שיחות מ-12 השעות האחרונות, אחרת זה כבר לא רלוונטי)
++export async function flushMissedCalls(env, now = new Date()) {
++  if (!FEATURES.missedCalls || !customerHours(now)) return;
++  const since = new Date(now.getTime() - 12 * 3600000).toISOString();
++  const rows = (await env.DB.prepare('SELECT id, phone FROM missed_calls WHERE sent_at IS NULL AND skipped IS NULL AND created_at >= ? ORDER BY id LIMIT 20').bind(since).all()).results;
++  for (const r of rows) {
++    // בינתיים הלקוח כבר כתב בעצמו: לא צריך את ההודעה
++    const wrote = await env.DB.prepare('SELECT last_inbound_at FROM customers WHERE phone = ?').bind(r.phone).first();
++    if (wrote?.last_inbound_at && wrote.last_inbound_at >= since) {
++      await env.DB.prepare("UPDATE missed_calls SET skipped = 'customer wrote' WHERE id = ?").bind(r.id).run();
++      continue;
++    }
++    await sendMissedCallMessage(env, r.id, r.phone, now);
++  }
++}
++
+diff --git a/bots/agency-bot/test/flow.test.js b/bots/agency-bot/test/flow.test.js
+index ddc41d9..70f52e2 100644
+--- a/bots/agency-bot/test/flow.test.js
++++ b/bots/agency-bot/test/flow.test.js
+@@ -8,7 +8,7 @@ import { DatabaseSync } from 'node:sqlite';
+ // ---------- D1 מדומה ----------
+ function makeD1() {
+   const db = new DatabaseSync(':memory:');
+-  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql', '0010_calendar.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
++  for (const f of ['0001_init.sql', '0002_settings.sql', '0003_knowledge.sql', '0004_ultramsg.sql', '0005_leads.sql', '0006_outbox_retry.sql', '0007_summary_settle.sql', '0008_owner_questions.sql', '0009_sales.sql', '0010_calendar.sql', '0011_missed_calls.sql']) db.exec(readFileSync(new URL(`../migrations/${f}`, import.meta.url), 'utf8'));
+   return {
+     prepare(sql) {
+       let args = [];
+@@ -739,7 +739,8 @@ test('Hanan teaches the bot: למד / מה למדת / שכח, and it reaches the
+ test('template definitions match what the bot sends and Meta rules', async () => {
+   const { TEMPLATES, TEMPLATE_DEFS } = await import('../src/config.js');
+   const names = new Set(TEMPLATE_DEFS.map((d) => d.name));
+-  for (const n of Object.values(TEMPLATES)) assert.ok(names.has(n), `template ${n} defined`);
++  const { FEATURES: F } = await import('../src/config.js');
++  for (const [k, n] of Object.entries(TEMPLATES)) if (k !== 'missedCall' || F.missedCalls) assert.ok(names.has(n), `template ${n} defined`);
+   for (const d of TEMPLATE_DEFS) {
+     const vars = d.body.match(/\{\{\d+\}\}/g) || [];
+     assert.equal(vars.length, (d.examples || []).length, `${d.name}: one example per variable`);
+@@ -1736,3 +1737,65 @@ test('google calendar: appointment goes into the owner calendar, cancel removes
+   assert.equal(calCalls.length, 0);
+   assert.ok(!textsTo(OWNER).some((t) => t.includes('יומן')));
+ });
++
++test('missed call: WhatsApp message to the caller (template, or text inside 24h), once per 12h, not to contacts, night calls wait for the morning', async () => {
++  const { handleMissedCall, flushMissedCalls, pickCaller } = await import('../src/missedcall.js');
++  const worker = (await import('../src/index.js')).default;
++  FEATURES.missedCalls = true;
++  sent.length = 0;
++  const env = { ...makeEnv(), MISSED_CALL_KEY: 'callkey' };
++  const day = new Date('2026-11-23T08:00:00Z'); // שני 10:00
++
++  // הספק שולח את המספר בשדות שונים
++  assert.equal(pickCaller({ CallerNumber: '054-1234567' }), CUSTOMER);
++  assert.equal(pickCaller({ from: '+972541234567' }), CUSTOMER);
++  assert.equal(pickCaller({ foo: 'x' }), '');
++
++  // בלי מפתח נכון: נחסם
++  const bad = await worker.fetch(new Request('https://bot.example/missed-call?key=wrong&from=0541234567'), env, { waitUntil() {} });
++  assert.equal(bad.status, 403);
++  // עם מפתח: לקוח חדש מקבל תבנית (מחוץ לחלון 24 שעות), ובעל העסק מקבל הודעה קצרה
++  const ok = await worker.fetch(new Request('https://bot.example/missed-call?key=callkey', { method: 'POST', body: JSON.stringify({ caller_id: '0541234567' }) }), env, { waitUntil() {} });
++  assert.equal(ok.status, 200);
++  const toCustomer = sent.filter((m) => m.to === CUSTOMER);
++  assert.equal(toCustomer.length, 1);
++  assert.equal(toCustomer[0].template.name, 'missed_call_v1');
++  assert.ok(sent.some((m) => m.to === OWNER));
++  assert.ok(env.DB.raw.prepare('SELECT text FROM owner_outbox').all().some((r) => r.text.includes('שיחה שלא נענתה') && r.text.includes('054-1234567')));
++
++  // אותו מספר מתקשר שוב: לא שולחים עוד הודעה
++  assert.equal(await handleMissedCall(env, CUSTOMER, new Date(day.getTime() + 3600000)), 'skipped:already messaged');
++
++  // לקוח שכתב ב-24 השעות האחרונות: טקסט רגיל ולא תבנית
++  const B = '972521112233';
++  env.DB.raw.prepare('INSERT INTO customers (phone, first_seen, last_inbound_at) VALUES (?, ?, ?)').run(B, day.toISOString(), day.toISOString());
++  sent.length = 0;
++  assert.equal(await handleMissedCall(env, B, day), 'sent');
++  assert.match(sent.find((m) => m.to === B).text.body, /ראינו שהתקשרת/);
++
++  // איש קשר שמור, ובעל העסק עצמו: לא שולחים
++  const C = '972531112233';
++  env.DB.raw.prepare('INSERT INTO customers (phone, first_seen, known) VALUES (?, ?, 1)').run(C, day.toISOString());
++  assert.equal(await handleMissedCall(env, C, day), 'skipped:saved contact');
++  assert.equal(await handleMissedCall(env, OWNER, day), 'skipped:owner');
++  assert.equal(await handleMissedCall(env, '97239876543', day), 'skipped:not a mobile number');
++
++  // שיחה בלילה: מחכה, ונשלחת בבוקר. ואם הלקוח כתב בינתיים, לא שולחים
++  const D = '972541119999', E = '972541118888';
++  const night = new Date('2026-11-23T21:30:00Z'); // 23:30
++  sent.length = 0;
++  assert.equal(await handleMissedCall(env, D, night), 'queued');
++  assert.equal(await handleMissedCall(env, E, night), 'queued');
++  assert.equal(sent.length, 0);
++  env.DB.raw.prepare('INSERT INTO customers (phone, first_seen, last_inbound_at) VALUES (?, ?, ?)').run(E, night.toISOString(), new Date(night.getTime() + 600000).toISOString());
++  await flushMissedCalls(env, new Date('2026-11-24T00:30:00Z')); // 02:30 עוד לילה
++  assert.equal(sent.length, 0);
++  await flushMissedCalls(env, new Date('2026-11-24T06:15:00Z')); // 08:15
++  assert.equal(sent.filter((m) => m.to === D).length, 1);
++  assert.equal(sent.filter((m) => m.to === E).length, 0);
++
++  // כבוי ללקוח: הכתובת לא קיימת
++  FEATURES.missedCalls = false;
++  const off = await worker.fetch(new Request('https://bot.example/missed-call?key=callkey&from=0541234567'), env, { waitUntil() {} });
++  assert.equal(off.status, 404);
++});

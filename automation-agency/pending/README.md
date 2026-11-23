@@ -34,3 +34,6 @@
 4. `TEST_PHONES` ו-`SUMMARY_PHONE`: המספר הפרטי של דוד, בפורמט 9725XXXXXXXX.
 5. כתובת ה-webhook ב-Dualhook: `https://david-vacation-bot.eliyabuis12.workers.dev/webhook?key=<DUALHOOK_WEBHOOK_KEY>`.
 6. push. העלאה של `agency-bot.yml`, ואחריה בודקים: דוד כותב מהפרטי למספר העסקי.
+
+## missed-calls.patch: שיחה שלא נענתה ← הודעה בוואטסאפ (23/11, **לא באוויר**)
+בוט כללי בלבד. כל הפרטים וההפעלה: `missed-calls.md`. נבדק: 51/51. מעלים רק אחרי "תעלה".
