@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>שאלון לבוט של חברת ההובלות</title>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: single-column questionnaire grouped in fieldsets; one send button that composes a WhatsApp message */
+:root{--bg:#f5f4f1;--fg:#1e2326;--muted:#5d666c;--line:#d9d6cf;--accent:#1f5fa8;--card:#fff;--onaccent:#fff;--body:'Assistant',Arial,sans-serif;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15191b;--fg:#e8ebec;--muted:#a3adb2;--line:#33393c;--accent:#5cc28f;--card:#1e2427;--onaccent:#0f1513;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.6;}
+.page{direction:rtl;max-width:640px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;}
+h1{font-size:clamp(26px,6vw,34px);line-height:1.2;text-wrap:balance;}
+.lead{color:var(--muted);margin:8px 0 18px;}
+fieldset{border:1px solid var(--line);border-radius:6px;background:var(--card);padding:6px 16px 14px;margin:0 0 16px;}
+legend{font-weight:700;padding:0 6px;font-size:18px;}
+.q{display:grid;gap:4px;margin-top:12px;}
+.q span{font-weight:600;}
+input,textarea{font:16px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;resize:vertical;box-sizing:border-box;}
+input[type=tel]{direction:ltr;text-align:right;}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.note{font-size:15px;color:var(--muted);margin:4px 0 14px;}
+button{font:700 18px var(--body);background:var(--accent);color:var(--onaccent);border:0;border-radius:6px;padding:13px 18px;width:100%;cursor:pointer;}
+.alt{margin-top:10px;background:transparent;color:var(--fg);border:1px solid var(--line);font-size:16px;}
+#msg{min-height:1.4em;margin-top:8px;font-size:15px;color:var(--muted);}
+</style>
+</head><body style="margin:0"><div class="page" dir="rtl" lang="he">
+<h1>הבוט של חברת ההובלות: כמה שאלות</h1>
+<p class="lead">כדי שהבוט יענה בדיוק כמוכם ויאסוף כל מה שצריך להצעת מחיר. אפשר לענות בקצרה ולדלג על מה שלא בטוח. איפה שכתוב "מתאים?" מספיק לכתוב כן. בנוסף, שלחו לאריאל 5-10 צילומי מסך של שיחות עם לקוחות, כדי שהבוט ילמד את הסגנון שלכם.</p>
+<fieldset><legend>על החברה</legend><label class="q" for="company"><span>שם החברה, ובשם מי הבוט עונה?</span><input type="text" id="company" placeholder="למשל: כאן הובלות אבי"></label><label class="q" for="owner"><span>השם שלך ושם המשפחה, ות.ז / ח.פ (לקבלה)</span><input type="text" id="owner" placeholder=""></label><label class="q" for="address"><span>כתובת החברה</span><input type="text" id="address" placeholder=""></label><label class="q" for="email"><span>מייל של החברה</span><input type="text" id="email" placeholder=""></label></fieldset><fieldset><legend>איזה הובלות אתם עושים</legend><label class="q" for="types"><span>סוגי ההובלות</span><textarea rows="2" id="types" placeholder="דירות, הובלות קטנות, משרדים, פסנתרים וכספות, בין-עירוני..."></textarea></label><label class="q" for="extras"><span>שירותים נוספים</span><textarea rows="2" id="extras" placeholder="אריזה, חומרי אריזה, פירוק והרכבה, מנוף, אחסון..."></textarea></label><label class="q" for="areas"><span>אזורי שירות, ומה עונים למי שמחוץ לאזור</span><input type="text" id="areas" placeholder=""></label><label class="q" for="hours"><span>ימים ושעות עבודה. עובדים בשישי? שומרים שבת?</span><textarea rows="2" id="hours" placeholder=""></textarea></label></fieldset><fieldset><legend>הצעת מחיר</legend><label class="q" for="quote_q"><span>מה אתם שואלים היום כל לקוח כדי לתת הצעת מחיר?</span><textarea rows="2" id="quote_q" placeholder="מאיפה, לאן, קומות, מעלית, כמה חדרים, פריטים מיוחדים..."></textarea></label><label class="q" for="photos"><span>לבקש מהלקוח תמונות או סרטון של הדירה? מתאים?</span><textarea rows="2" id="photos" placeholder="כן / לא"></textarea></label><label class="q" for="prices"><span>הבוט נותן מחיר או טווח מחיר, או רק אוסף פרטים ומעביר אליכם?</span><textarea rows="2" id="prices" placeholder="אם נותן: מחירון או טווחים"></textarea></label><label class="q" for="deposit"><span>מקדמה וביטולים: איך זה עובד אצלכם?</span><input type="text" id="deposit" placeholder=""></label></fieldset><fieldset><legend>איך הבוט מדבר</legend><label class="q" for="style"><span>משפט או סגנון שאתם תמיד אומרים ללקוחות</span><input type="text" id="style" placeholder=""></label><label class="q" for="faq"><span>שאלות שלקוחות שואלים כל הזמן, והתשובות שלכם</span><textarea rows="2" id="faq" placeholder="ביטוח, אחסון, זמן הגעה..."></textarea></label><label class="q" for="never"><span>מה אסור לבוט להגיד או להבטיח</span><input type="text" id="never" placeholder="למשל: לא להבטיח מחיר סופי או תאריך לפני אישור"></label><label class="q" for="urgent"><span>מתי להעביר אליכם מיד, בלי שאלות?</span><input type="text" id="urgent" placeholder="למשל: הובלה למחר"></label></fieldset><fieldset><legend>הסיכומים והתזכורות</legend><label class="q" for="notify"><span>לאן לשלוח לכם את הסיכומים? מייל או וואטסאפ (איזה מספר?)</span><textarea rows="2" id="notify" placeholder=""></textarea></label><label class="q" for="remind"><span>תזכורת ללקוח יום לפני ההובלה ושעתיים לפני. מתאים?</span><textarea rows="2" id="remind" placeholder="כן / לא"></textarea></label><label class="q" for="after"><span>אחרי ההובלה: בקשת ביקורת בגוגל, והודעת "חבר מביא חבר" אחרי שבוע. מתאים?</span><textarea rows="2" id="after" placeholder="כן / לא"></textarea></label><label class="q" for="review"><span>קישור לביקורות עליכם בגוגל</span><input type="text" id="review" placeholder=""></label></fieldset><fieldset><legend>החיבור והערוצים</legend><label class="q" for="wa"><span>המספר העסקי שהלקוחות כותבים אליו (יש עליו וואטסאפ ביזנס?)</span><textarea rows="2" id="wa" placeholder=""></textarea></label><label class="q" for="auto"><span>יש לכם הודעת פתיחה או היעדרות אוטומטית בוואטסאפ?</span><textarea rows="2" id="auto" placeholder="כן / לא"></textarea></label><label class="q" for="netfree"><span>יש בטלפון נטפרי או סינון אחר?</span><input type="text" id="netfree" placeholder="כן / לא"></label><label class="q" for="social"><span>פייסבוק, אינסטגרם, טיקטוק, אתר: מה יש לכם ומי מנהל?</span><textarea rows="2" id="social" placeholder=""></textarea></label><label class="q" for="google"><span>יש כרטיס עסק בגוגל? למי יש גישה?</span><input type="text" id="google" placeholder=""></label><label class="q" for="logo"><span>יש לוגו בקובץ? (לברקוד על המשאיות)</span><input type="text" id="logo" placeholder="כן / לא"></label></fieldset><fieldset><legend>רק אם רלוונטי</legend><label class="q" for="invoice"><span>באיזו תוכנה אתם מפיקים קבלות והצעות מחיר?</span><textarea rows="2" id="invoice" placeholder="יש חשבונית / iCount / חשבונית ירוקה / אחר"></textarea></label><label class="q" for="osek"><span>עוסק פטור או מורשה / חברה בע"מ?</span><input type="text" id="osek" placeholder=""></label><label class="q" for="calendar"><span>רוצים שכל הובלה שנקבעה תיכנס ליומן גוגל?</span><input type="text" id="calendar" placeholder="כן / לא"></label><label class="q" for="calls"><span>שיחות שלא נענו: באיזו חברת סלולר? אייפון או אנדרואיד? השיחות מגיעות לאותו מספר של הוואטסאפ?</span><textarea rows="2" id="calls" placeholder=""></textarea></label></fieldset>
+<p class="note">הלחיצה פותחת וואטסאפ עם כל התשובות מוכנות לשליחה לאריאל (052-466-6175).</p>
+<button type="button" id="send">שליחת התשובות בוואטסאפ</button>
+<button type="button" class="alt" id="copy">העתקת התשובות</button>
+<p id="msg" aria-live="polite"></p>
+</div>
+<script>
+(function(){
+  var ORDER = [["company", "שם החברה, ובשם מי הבוט עונה?"], ["owner", "השם שלך ושם המשפחה, ות.ז / ח.פ (לקבלה)"], ["address", "כתובת החברה"], ["email", "מייל של החברה"], ["types", "סוגי ההובלות"], ["extras", "שירותים נוספים"], ["areas", "אזורי שירות, ומה עונים למי שמחוץ לאזור"], ["hours", "ימים ושעות עבודה. עובדים בשישי? שומרים שבת?"], ["quote_q", "מה אתם שואלים היום כל לקוח כדי לתת הצעת מחיר?"], ["photos", "לבקש מהלקוח תמונות או סרטון של הדירה? מתאים?"], ["prices", "הבוט נותן מחיר או טווח מחיר, או רק אוסף פרטים ומעביר אליכם?"], ["deposit", "מקדמה וביטולים: איך זה עובד אצלכם?"], ["style", "משפט או סגנון שאתם תמיד אומרים ללקוחות"], ["faq", "שאלות שלקוחות שואלים כל הזמן, והתשובות שלכם"], ["never", "מה אסור לבוט להגיד או להבטיח"], ["urgent", "מתי להעביר אליכם מיד, בלי שאלות?"], ["notify", "לאן לשלוח לכם את הסיכומים? מייל או וואטסאפ (איזה מספר?)"], ["remind", "תזכורת ללקוח יום לפני ההובלה ושעתיים לפני. מתאים?"], ["after", "אחרי ההובלה: בקשת ביקורת בגוגל, והודעת \"חבר מביא חבר\" אחרי שבוע. מתאים?"], ["review", "קישור לביקורות עליכם בגוגל"], ["wa", "המספר העסקי שהלקוחות כותבים אליו (יש עליו וואטסאפ ביזנס?)"], ["auto", "יש לכם הודעת פתיחה או היעדרות אוטומטית בוואטסאפ?"], ["netfree", "יש בטלפון נטפרי או סינון אחר?"], ["social", "פייסבוק, אינסטגרם, טיקטוק, אתר: מה יש לכם ומי מנהל?"], ["google", "יש כרטיס עסק בגוגל? למי יש גישה?"], ["logo", "יש לוגו בקובץ? (לברקוד על המשאיות)"], ["invoice", "באיזו תוכנה אתם מפיקים קבלות והצעות מחיר?"], ["osek", "עוסק פטור או מורשה / חברה בע\"מ?"], ["calendar", "רוצים שכל הובלה שנקבעה תיכנס ליומן גוגל?"], ["calls", "שיחות שלא נענו: באיזו חברת סלולר? אייפון או אנדרואיד? השיחות מגיעות לאותו מספר של הוואטסאפ?"]];
+  function text(){
+    var out = ['תשובות לשאלון של הבוט לחברת ההובלות:',''];
+    ORDER.forEach(function(q, i){ var v = document.getElementById(q[0]).value.trim(); out.push((i+1)+'. '+q[1]); out.push(v ? v : '(לא נענה)'); out.push(''); });
+    return out.join('\n');
+  }
+  function save(){ try { var d={}; ORDER.forEach(function(q){ d[q[0]]=document.getElementById(q[0]).value; }); localStorage.setItem('movingForm', JSON.stringify(d)); } catch(e){} }
+  try { var d = JSON.parse(localStorage.getItem('movingForm')||'{}'); ORDER.forEach(function(q){ if (d[q[0]]) document.getElementById(q[0]).value = d[q[0]]; }); } catch(e){}
+  document.querySelector('.page').addEventListener('input', save);
+  document.getElementById('send').addEventListener('click', function(){
+    window.location.href = 'https://wa.me/972524666175?text=' + encodeURIComponent(text());
+  });
+  document.getElementById('copy').addEventListener('click', function(){
+    var t = text(), m = document.getElementById('msg');
+    try { navigator.clipboard.writeText(t).then(function(){ m.textContent = 'הועתק. עכשיו אפשר להדביק בוואטסאפ.'; }, function(){ m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }); }
+    catch(e) { m.textContent = 'לא הצלחתי להעתיק. אפשר לסמן את התשובות ולהעתיק ידנית.'; }
+  });
+})();
+</script>
+</body></html>
